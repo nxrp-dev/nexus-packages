@@ -1,6 +1,6 @@
 # NexusScript structural editor
 
-`TNXScriptEditor` (`packages/gui/src/obNXScriptEditor.pas`) descends from
+`TNXScriptEditor` (`packages2/nexus-packages/gui/src/obNXScriptEditor.pas`) descends from
 `TNXVirtualTreeView`. It builds its tree and editing choices from the source
 document and its normalized NexusScript dialect. It does not use the language
 server, an LCL control, or a separate editor schema.
@@ -10,7 +10,7 @@ server, an LCL control, or a separate editor schema.
 From the repository root:
 
 ```powershell
-lazbuild packages/gui/examples/nxscript-editor/NexusScriptEditorDemo.lpi
+lazbuild packages2/nexus-packages/gui/examples/nxscript-editor/NexusScriptEditorDemo.lpi
 & output/NexusScriptEditorDemo/x86_64-win64/NexusScriptEditorDemo.exe
 ```
 
@@ -46,7 +46,7 @@ validation, including reference categories and cycles.
 
 ## Embedding
 
-Add `packages/gui/src`, `packages/gui/src/vtv`, and `packages/nxscript/src`, plus
+Add `packages2/nexus-packages/gui/src`, `packages2/nexus-packages/gui/src/vtv`, and `packages/nxscript/src`, plus
 the normal NXScript and fpGUI dependency paths shown in the demo project.
 Initialize fpGUI before constructing the control.
 
@@ -95,7 +95,7 @@ server integration are introduced.
 ## Verification
 
 ```powershell
-lazbuild packages/gui/test/NexusScriptEditorTests.lpi
+lazbuild packages2/nexus-packages/gui/test/NexusScriptEditorTests.lpi
 & output/NexusScriptEditorTests/x86_64-win64/NexusScriptEditorTests.exe
 ```
 

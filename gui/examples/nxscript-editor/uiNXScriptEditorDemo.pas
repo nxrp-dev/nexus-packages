@@ -175,7 +175,7 @@ begin
   lSmoke := ParamStr(1) = '--smoke';
   lName := ParamStr(1);
   if lSmoke then lName := ParamStr(2);
-  if lName = '' then lName := 'packages/gui/examples/nxscript-editor/Demo.nxscript';
+  if lName = '' then lName := 'packages2/nexus-packages/gui/examples/nxscript-editor/Demo.nxscript';
   lForm := TNXScriptEditorDemoForm.Create(nil);
   try
     lForm.OpenFile(lName);

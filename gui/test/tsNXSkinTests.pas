@@ -102,7 +102,7 @@ begin
   Result := ExpandFileName('fixtures\NexusDark.Skin.nxscript');
   if not FileExists(Result) then
     Result := ExpandFileName(
-      'packages\gui\test\fixtures\NexusDark.Skin.nxscript');
+      'packages2\nexus-packages\gui\test\fixtures\NexusDark.Skin.nxscript');
 end;
 
 function ValidationFailure(AValidator: TNexusScriptValidator): string;

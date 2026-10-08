@@ -84,12 +84,12 @@ AI assistance does not own NexusUI and does not replace the project author's aut
 
 ## Virtual TreeView
 
-`packages/gui/external/vtv` contains unmodified Virtual TreeView 6.0.0 source
+`packages2/nexus-packages/gui/external/vtv` contains unmodified Virtual TreeView 6.0.0 source
 and resources from Luiz Americo Pereira Camara's Lazarus fork, pinned to commit
 `a42d55f18ec293bae853a34ee05c65009b1d2b94`.
 
 Virtual TreeView was written by Mike Lischke; its original copyright identifies
-digital publishing AG. The native fpGUI component in `packages/gui/src/vtv`
+digital publishing AG. The native fpGUI component in `packages2/nexus-packages/gui/src/vtv`
 adapts its node model, lazy initialization, traversal, subtree metrics, and
 stable merge sorting. Adapted files retain the upstream MPL-1.1 /
 LGPL-2.1-or-later notices. Nexus-authored drawing and input use fpGUI, not LCL.
