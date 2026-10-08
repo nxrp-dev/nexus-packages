@@ -1,0 +1,10 @@
+CREATE TABLE Customer (
+  ID INTEGER,
+  Name VARCHAR(80)
+);
+CREATE INDEX CustomerName ON Customer (Name);
+CREATE TABLE Invoice (
+  ID INTEGER,
+  CustomerID INTEGER
+);
+ALTER TABLE Invoice ADD CONSTRAINT InvoiceCustomer FOREIGN KEY (CustomerID) REFERENCES Customer (ID);

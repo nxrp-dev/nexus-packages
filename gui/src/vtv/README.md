@@ -12,7 +12,7 @@ the inline editor use fpGUI directly.
 
 ## Using the control
 
-Add `packages2/nexus-packages/gui/src` and `packages2/nexus-packages/gui/src/vtv` to the unit search path,
+Add `packages/nexus-packages/gui/src` and `packages/nexus-packages/gui/src/vtv` to the unit search path,
 alongside the normal fpGUI paths. Use `obNXVirtualTreeView` for the Nexus class,
 `tpVTV` for node and option types, and `obVTVTree` for callback sender types.
 

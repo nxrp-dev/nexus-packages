@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General><MainUnit Value="0"/><Title Value="NexusScriptTests"/><UseAppBundle Value="False"/></General>
+    <Units Count="1"><Unit0><Filename Value="NexusScriptTests.lpr"/><IsPartOfProject Value="True"/></Unit0></Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target><Filename Value="../../../../output/NexusScript/console-tests/$(TargetCPU)-$(TargetOS)/NexusScriptTests"/></Target>
+    <SearchPaths>
+      <OtherUnitFiles Value=".;../src;../../nxtest/src;../../../../projects/nxscript/cli;../../db/sqlite/src/bindings;../../serialization/src;../../serialization/json/src;../../network/json-rpc/src;../../../../NexusLib/core/src;../../../../lib/dmustache"/>
+      <UnitOutputDirectory Value="../../../../output/NexusScript/console-tests/$(TargetCPU)-$(TargetOS)/units"/>
+    </SearchPaths>
+    <Other><CustomOptions Value="-gh -gl"/></Other>
+  </CompilerOptions>
+</CONFIG>

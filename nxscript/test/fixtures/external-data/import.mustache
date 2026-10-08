@@ -1,0 +1,5 @@
+{{#DataSource}}
+source={{_nx.Name}} type={{_nx.Type}}
+fields={{#Fields}}{{.}}{{^-last}},{{/-last}}{{/Fields}}
+{{#Records}}record={{#.}}{{{.}}}{{^-last}}|{{/-last}}{{/.}}
+{{/Records}}{{/DataSource}}

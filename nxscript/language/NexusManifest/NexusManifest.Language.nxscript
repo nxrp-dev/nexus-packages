@@ -1,0 +1,92 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../Language.nxscript";
+
+Language NexusManifest {
+    UnknownDefinitions: Reject;
+    Definitions: [
+        Definition NexusManifest {
+            Root: True;
+            UnknownProperties: Allow;
+            UnknownChildren: Reject;
+            Children: [
+                Child Models { Kinds: [Model]; Minimum: 1; },
+                Child Renderers {
+                    Kinds: [Template, SourceTemplate];
+                    Minimum: 1;
+                }
+            ];
+        },
+
+        Definition Model {
+            Parents: [NexusManifest];
+            UnknownProperties: Allow;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Source {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                }
+            ];
+        },
+
+        Definition Template {
+            Parents: [NexusManifest];
+            UnknownProperties: Allow;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Source {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                },
+                Property Output {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                }
+            ];
+        },
+
+        Definition SourceTemplate {
+            Parents: [NexusManifest];
+            UnknownProperties: Reject;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Types {
+                    Required: True;
+                    Value Value {
+                        SourceForms: [Array];
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Minimum: 1;
+                            EntryEffectiveCategories: [Text];
+                        }
+                    }
+                },
+                Property Compiler {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                },
+                Property Source {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                },
+                Property OutputDirectory {
+                    Value Value { EffectiveCategories: [Text]; }
+                },
+                Property OutputExtension {
+                    Required: True;
+                    Value Value { EffectiveCategories: [Text]; }
+                }
+            ];
+        }
+    ];
+}

@@ -1,0 +1,235 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+Language Language {
+    UnknownDefinitions: Reject;
+    Definitions: [
+        Definition Language {
+            Root: True;
+            UnknownProperties: Reject;
+            Properties: [
+                Property Definitions {
+                    Required: True;
+                    Value Value {
+                        SourceForms: [Array];
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Names: Required;
+                            EntryEffectiveCategories: [Definition];
+                            DefinitionKinds: [Definition];
+                            Mixed: False;
+                        }
+                    }
+                },
+                Property UnknownDefinitions {
+                    Value Value {
+                        Scalar: Text;
+                        AllowedValues: [Allow, Reject];
+                    }
+                }
+            ];
+            Children: [
+                Child DefinitionRules { Kinds: [Definition]; }
+            ];
+        },
+
+        Definition Definition {
+            Parents: [Language];
+            UnknownProperties: Reject;
+            Properties: [
+                Property Root { Value Value { Scalar: Boolean; } },
+                Property Parents {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array { EntryEffectiveCategories: [Text]; }
+                    }
+                },
+                Property UnknownProperties {
+                    Value Value {
+                        Scalar: Text;
+                        AllowedValues: [Allow, Reject];
+                    }
+                },
+                Property UnknownChildren {
+                    Value Value {
+                        Scalar: Text;
+                        AllowedValues: [Allow, Reject];
+                    }
+                },
+                Property Properties {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Names: Required;
+                            EntryEffectiveCategories: [Definition];
+                            DefinitionKinds: [Property];
+                        }
+                    }
+                },
+                Property Children {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Names: Required;
+                            EntryEffectiveCategories: [Definition];
+                            DefinitionKinds: [Child];
+                        }
+                    }
+                }
+            ];
+            Children: [
+                Child PropertyRules { Kinds: [Property]; },
+                Child ChildRules { Kinds: [Child]; }
+            ];
+        },
+
+        Definition Property {
+            Parents: [Definition];
+            UnknownProperties: Reject;
+            Properties: [
+                Property Required { Value Value { Scalar: Boolean; } }
+            ];
+            Children: [
+                Child ValueRule { Kinds: [Value]; Maximum: 1; }
+            ];
+        },
+
+        Definition Child {
+            Parents: [Definition];
+            UnknownProperties: Reject;
+            Properties: [
+                Property Kinds {
+                    Required: True;
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Minimum: 1;
+                            EntryEffectiveCategories: [Text];
+                        }
+                    }
+                },
+                Property Minimum { Value Value { Scalar: Integer; } },
+                Property Maximum { Value Value { Scalar: Text; } }
+            ];
+        },
+
+        Definition Value {
+            Parents: [Property];
+            UnknownProperties: Reject;
+            Properties: [
+                Property SourceForms {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            EntryEffectiveCategories: [Text];
+                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition];
+                        }
+                    }
+                },
+                Property EffectiveCategories {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            EntryEffectiveCategories: [Text];
+                            AllowedValues: [Text, Array, Definition];
+                        }
+                    }
+                },
+                Property Scalar {
+                    Value Value {
+                        Scalar: Text;
+                        AllowedValues: [Text, Integer, Boolean];
+                    }
+                },
+                Property AllowedValues {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array { EntryEffectiveCategories: [Text]; }
+                    }
+                }
+            ];
+            Children: [
+                Child ArrayRule { Kinds: [Array]; Maximum: 1; },
+                Child ReferenceRule { Kinds: [Reference]; Maximum: 1; }
+            ];
+        },
+
+        Definition Array {
+            Parents: [Value];
+            UnknownProperties: Reject;
+            Properties: [
+                Property Minimum { Value Value { Scalar: Integer; } },
+                Property Maximum { Value Value { Scalar: Text; } },
+                Property Names {
+                    Value Value {
+                        Scalar: Text;
+                        AllowedValues: [Required, Optional, Forbidden];
+                    }
+                },
+                Property EntrySourceForms {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            EntryEffectiveCategories: [Text];
+                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition];
+                        }
+                    }
+                },
+                Property EntryEffectiveCategories {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            EntryEffectiveCategories: [Text];
+                            AllowedValues: [Text, Array, Definition];
+                        }
+                    }
+                },
+                Property DefinitionKinds {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array { EntryEffectiveCategories: [Text]; }
+                    }
+                },
+                Property AllowedValues {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array { EntryEffectiveCategories: [Text]; }
+                    }
+                },
+                Property Mixed { Value Value { Scalar: Boolean; } }
+            ];
+        },
+
+        Definition Reference {
+            Parents: [Value];
+            UnknownProperties: Reject;
+            Properties: [
+                Property Targets {
+                    Required: True;
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Minimum: 1;
+                            EntryEffectiveCategories: [Text];
+                            AllowedValues: [Property, Definition];
+                        }
+                    }
+                },
+                Property DefinitionKinds {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array { EntryEffectiveCategories: [Text]; }
+                    }
+                }
+            ];
+        }
+    ];
+}

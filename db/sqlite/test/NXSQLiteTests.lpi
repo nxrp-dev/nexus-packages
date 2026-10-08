@@ -9,7 +9,7 @@
     <Version Value="11"/>
     <Target><Filename Value="../output/NXSQLiteTests"/></Target>
     <SearchPaths>
-      <OtherUnitFiles Value=".;../src;../src/bindings;../../../../nxtest/src"/>
+      <OtherUnitFiles Value=".;../src;../src/bindings;../../../nxtest/src"/>
       <UnitOutputDirectory Value="../output/test-units/$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Other><CustomOptions Value="-gh -gl -Cr -Co -Ci"/></Other>

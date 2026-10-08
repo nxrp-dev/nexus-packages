@@ -1,10 +1,10 @@
 # Nexus GUI Package Agent Instructions
 
-These rules apply to `packages2/nexus-packages/gui`.
+These rules apply to `packages/nexus-packages/gui`.
 
 ## Standards
 
-- For Object Pascal / Free Pascal code, follow `../../../../.ai/standards/pascal.md`.
+- For Object Pascal / Free Pascal code, follow `../../../.ai/standards/pascal.md`.
 - Treat this folder as the Nexus fpGUI integration package: controls and skins built on fpGUI.
 
 ## Architecture

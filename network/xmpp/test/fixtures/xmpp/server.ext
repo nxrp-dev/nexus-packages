@@ -1,0 +1,3 @@
+subjectAltName=DNS:localhost
+extendedKeyUsage=serverAuth
+keyUsage=digitalSignature,keyEncipherment

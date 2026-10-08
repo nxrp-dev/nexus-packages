@@ -28,7 +28,7 @@ uses Classes, SysUtils, obNXTestSuite, obNXTestContext,
   tpVTV, fpg_base, obNexusScriptLanguageDefinition;
 
 const
-  cSampleFile = 'packages2/nexus-packages/gui/examples/nxscript-editor/Demo.nxscript';
+  cSampleFile = 'packages/nexus-packages/gui/examples/nxscript-editor/Demo.nxscript';
 
 type
   TTestEditor = class(TNXScriptEditor)
@@ -439,7 +439,7 @@ begin
   try
     lSource := ReadBytes(cSampleFile);
     lSource := StringReplace(lSource, '"Editor.Language.nxscript"',
-      lDocument.QuoteText(ExpandFileName('packages2/nexus-packages/gui/examples/nxscript-editor/Editor.Language.nxscript')), []);
+      lDocument.QuoteText(ExpandFileName('packages/nexus-packages/gui/examples/nxscript-editor/Editor.Language.nxscript')), []);
     lPath := ExpandFileName('output/NexusScriptEditorTests/roundtrip/saved.nxscript');
     ForceDirectories(ExtractFilePath(lPath));
     lDocument.LoadSource(lPath, lSource);
@@ -459,9 +459,9 @@ end;
 function ReferenceSource(const ABody: string; AImport: Boolean = False): string;
 begin
   Result := 'dialect ' + TNexusScriptEditDocument.QuoteText(
-    ExpandFileName('packages2/nexus-packages/gui/test/fixtures/Reference.Language.nxscript')) + ';' + LineEnding;
+    ExpandFileName('packages/nexus-packages/gui/test/fixtures/Reference.Language.nxscript')) + ';' + LineEnding;
   if AImport then Result := Result + 'module Imported ' + TNexusScriptEditDocument.QuoteText(
-    ExpandFileName('packages2/nexus-packages/gui/test/fixtures/ReferenceTarget.nxscript')) + ';' + LineEnding;
+    ExpandFileName('packages/nexus-packages/gui/test/fixtures/ReferenceTarget.nxscript')) + ';' + LineEnding;
   Result := Result + ABody;
 end;
 

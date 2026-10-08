@@ -30,7 +30,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);../../external/fpgui/framework/src/main/pascal/corelib;../../external/fpgui/framework/src/main/pascal/corelib/gdi;../../external/fpgui/framework/src/main/resources"/>
-      <OtherUnitFiles Value=".;../../src;../../src/vtv;../../../../../packages/nxscript/src;../../external/fpgui/framework/src/main/pascal/corelib;../../external/fpgui/framework/src/main/pascal/corelib/render/software;../../external/fpgui/framework/src/main/pascal/corelib/gdi;../../external/fpgui/framework/src/main/pascal/gui;../../external/fpgui/framework/src/main/resources"/>
+      <OtherUnitFiles Value=".;../../src;../../src/vtv;../../../nxscript/src;../../external/fpgui/framework/src/main/pascal/corelib;../../external/fpgui/framework/src/main/pascal/corelib/render/software;../../external/fpgui/framework/src/main/pascal/corelib/gdi;../../external/fpgui/framework/src/main/pascal/gui;../../external/fpgui/framework/src/main/resources;../../../serialization/src;../../../serialization/json/src;../../../db/sqlite/src/bindings;../../../../../NexusLib/core/src;../../../../../lib/dmustache"/>
       <UnitOutputDirectory Value="../../../../../output/NexusVirtualTreeViewDemo/$(TargetCPU)-$(TargetOS)/units"/>
     </SearchPaths>
     <Other>

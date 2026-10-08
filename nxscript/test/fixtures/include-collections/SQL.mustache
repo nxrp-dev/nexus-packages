@@ -1,0 +1,19 @@
+{{#_nx.Collections.Table}}
+{{#_nx}}
+CREATE TABLE {{Name}} (
+{{#Fields}}
+  {{_nx.Name}} {{Type}}{{^-last}},{{/-last}}
+{{/Fields}}
+);
+{{#Indexes}}
+CREATE INDEX {{_nx.Name}} ON {{Name}} ({{Columns}});
+{{/Indexes}}
+{{/_nx}}
+{{/_nx.Collections.Table}}
+{{#_nx.Collections.Table}}
+{{#_nx}}
+{{#References}}
+ALTER TABLE {{Name}} ADD CONSTRAINT {{_nx.Name}} FOREIGN KEY ({{Column}}) REFERENCES {{Target._nx.Reference.Name}} ({{TargetColumn}});
+{{/References}}
+{{/_nx}}
+{{/_nx.Collections.Table}}

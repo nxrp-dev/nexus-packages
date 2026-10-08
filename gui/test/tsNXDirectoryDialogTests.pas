@@ -61,7 +61,7 @@ var
 begin
   lDialog := TChooserDialog.Create(nil);
   try
-    lDialog.SelectedDir := ExpandFileName('packages2/nexus-packages/gui');
+    lDialog.SelectedDir := ExpandFileName('packages/nexus-packages/gui');
     lSelected := lDialog.SelectedDir;
     lDialog.Realign;
     lTreeWidth := lDialog.Tree.ActualWidth;
@@ -103,7 +103,7 @@ var
 begin
   lDialog := TChooserDialog.Create(nil);
   try
-    lDialog.SelectedDir := ExpandFileName('packages2/nexus-packages/gui');
+    lDialog.SelectedDir := ExpandFileName('packages/nexus-packages/gui');
     lSelected := lDialog.SelectedDir;
     lDialog.Realign;
     lTreeWidth := lDialog.Tree.ActualWidth;

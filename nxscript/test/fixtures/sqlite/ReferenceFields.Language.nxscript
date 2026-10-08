@@ -1,0 +1,84 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../language/Language.nxscript";
+
+Language ReferenceFields {
+  UnknownDefinitions: Reject;
+  Definitions: [
+    Definition Schema {
+      Root: True;
+      UnknownProperties: Reject;
+      Properties: [
+        Property Tables {
+          Required: True;
+          Value Value {
+            EffectiveCategories: [Array];
+            Array Array {
+              Names: Required;
+              EntryEffectiveCategories: [Definition];
+              DefinitionKinds: [Table];
+              Mixed: False;
+            }
+          }
+        }
+      ];
+    },
+    Definition Table {
+      Parents: [Schema];
+      UnknownProperties: Reject;
+      Properties: [
+        Property Fields {
+          Required: True;
+          Value Value {
+            EffectiveCategories: [Array];
+            Array Array {
+              Names: Required;
+              EntryEffectiveCategories: [Definition];
+              DefinitionKinds: [Field];
+              Mixed: False;
+            }
+          }
+        }
+      ];
+    },
+    Definition Field {
+      Parents: [Table];
+      UnknownProperties: Reject;
+      Properties: [
+        Property Type {
+          Required: True;
+          Value Value { Scalar: Text; }
+        },
+        Property Reference {
+          Value Value {
+            SourceForms: [Reference];
+            EffectiveCategories: [Definition];
+            Reference Reference {
+              Targets: [Definition];
+              DefinitionKinds: [Table];
+            }
+          }
+        },
+        Property Alias {
+          Value Value {
+            SourceForms: [Reference];
+            EffectiveCategories: [Definition];
+            Reference Reference {
+              Targets: [Property, Definition];
+              DefinitionKinds: [Table];
+            }
+          }
+        }
+      ];
+    }
+  ];
+}

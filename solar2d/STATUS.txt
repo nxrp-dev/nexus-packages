@@ -1,0 +1,60 @@
+Solar2D Pascal RTTI Bridge v2 - validation status
+
+Architecture
+- Generic Lua bridge: TLuaPlugin
+- Solar2D integration: TSolarPlugin descends from TLuaPlugin
+- User plugins descend from TSolarPlugin
+
+Implemented
+- Solar2D native plugin loader through CoronaLibraryNew().
+- One static luaopen_plugin_* export per plugin module.
+- Generic Lua 5.1 userdata object proxy provided by the dependent `../lua` package.
+- Published Pascal properties exposed through __index/__newindex.
+- Read-only published Pascal method-pointer properties exposed as Lua links through one RTTI dispatch trampoline.
+- Writable published method-pointer properties remain Pascal events and are not exposed as Lua links.
+- Direct published methods are not part of the Lua bridge contract.
+- Per-instance RTTI link/property caches.
+- Link closures retain the Lua userdata, eliminating the original dangling Pascal-object pointer problem when a link is retained after the object variable is released.
+- Bound and detached link calls are supported.
+- Lua/Pascal scalar conversion for booleans, integer/ordinal types, enums, character types, floating-point types, and common Pascal strings.
+- Generic bridge extension points for Lua-state selection, object pushing/lifetime hooks, member lookup, and value conversion.
+- Solar2D-local event surface:
+    obj:addEventListener(name, listener)
+    obj:removeEventListener(name, listener)
+    obj:dispatchEvent(eventTable)
+- Function and table listeners are accepted using CoronaLuaIsListener().
+- Listener removal during dispatch is deferred safely until the active dispatch finishes.
+- Pascal descendants can receive Lua-dispatched events through HandleEvent().
+- Pascal descendants can emit local events through DispatchEvent().
+- Pascal descendants can emit global Runtime events through DispatchRuntimeEvent().
+- Event fields are TValue-backed and use the same Pascal-to-Lua conversion path as RTTI return values.
+- Sample exercises RTTI links/properties, function listeners, table listeners, removal during dispatch, Lua-to-Pascal events, Pascal-to-Runtime events, and retained link closures.
+- Standalone RTTI prerequisite test included in the dependent `../lua` package.
+
+Source contracts checked against
+- Current Solar2D CoronaLibrary.h.
+- Current Solar2D CoronaLua.h.
+- Solar2D's bundled Lua 5.1 ABI.
+- Free Pascal 3.2.2 RTTI source/API shape for TRttiContext, TRttiType, TRttiMethodType, TRttiProperty, TValue, GetMethodProp(), and Invoke().
+
+Verification limit
+The bridge and sample compile on the local FPC 3.2.2 Win64 toolchain with linking disabled. The published-link RTTI test compiles and passes. The bridge has not yet been linked and exercised inside the installed 32-bit Solar2D runtime because the matching Win32 FPC target is not installed.
+
+The remaining proof step is:
+1. compile tests/TestPublishedRTTI.pas with the Nexus FPC toolchain;
+2. build the sample plugin for a Solar2D Native target;
+3. require("plugin.sample") and run sample/main.lua;
+4. repeat on each supported target CPU/ABI, particularly where TRttiMethodType.Invoke may use a platform-specific invocation manager.
+
+Intentional current RTTI surface
+- Boolean
+- Integer / Int64 / QWord
+- Enumerations (symbolic string input/output; numeric input also accepted)
+- Char / UChar / WideChar
+- Single / Double / Extended / Currency / Comp
+- ShortString / AnsiString / LongString / UnicodeString / WideString
+- No var/out/constref link parameters yet
+- No records, arrays, interfaces, arbitrary TObject exchange, or Lua-table-to-record conversion yet
+
+Known review point
+The local event implementation keeps listener values alive through CoronaLuaRef. If a registered Lua listener closure/table itself strongly captures the plugin userdata, that can create a retention cycle until the listener is explicitly removed. This does not invalidate the event API or dispatch logic, but it is the first lifetime issue worth deciding during review before treating the bridge as production-complete.

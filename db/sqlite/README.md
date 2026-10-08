@@ -156,7 +156,7 @@ lazbuild -B sqlite\test\NXSQLiteTests.lpi
 & .\sqlite\output\NXSQLiteTests.exe
 ```
 
-Run from `packages/foundation/db`. Build output stays in ignored `sqlite/output`.
+Run from `packages/nexus-packages/db`. Build output stays in ignored `sqlite/output`.
 The Win64 tests use the packaged runtime in `runtime/win64`. The runner stops
 at the first failing test so its cause can be reviewed before changes.
 

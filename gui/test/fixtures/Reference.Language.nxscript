@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "../../../../../packages/nxscript/language/Language.nxscript";
+dialect "../../../nxscript/language/Language.nxscript";
 
 Language ReferenceTests {
     UnknownDefinitions: Reject;
