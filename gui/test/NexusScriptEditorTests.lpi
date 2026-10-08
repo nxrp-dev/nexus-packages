@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General><MainUnit Value="0"/><Title Value="NexusScriptEditorTests"/><UseAppBundle Value="False"/></General>
+    <Units Count="4">
+      <Unit0><Filename Value="NexusScriptEditorTests.lpr"/><IsPartOfProject Value="True"/></Unit0>
+      <Unit1><Filename Value="tsNXScriptEditorTests.pas"/><IsPartOfProject Value="True"/></Unit1>
+      <Unit2><Filename Value="tsNXPopupTests.pas"/><IsPartOfProject Value="True"/></Unit2>
+      <Unit3><Filename Value="tsNXDirectoryDialogTests.pas"/><IsPartOfProject Value="True"/></Unit3>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target><Filename Value="../../../output/NexusScriptEditorTests/$(TargetCPU)-$(TargetOS)/NexusScriptEditorTests"/></Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);../external/fpgui/framework/src/main/pascal/corelib;../external/fpgui/framework/src/main/pascal/corelib/gdi;../external/fpgui/framework/src/main/resources"/>
+      <OtherUnitFiles Value=".;../src;../src/vtv;../../nxscript/src;../../nxtest/src;../../foundation/serialization/src;../../foundation/serialization/json/src;../../foundation/db/sqlite/src/bindings;../../network/json-rpc/src;../../../NexusLib/core/src;../../../lib/dmustache;../external/fpgui/framework/src/main/pascal/corelib;../external/fpgui/framework/src/main/pascal/corelib/render/software;../external/fpgui/framework/src/main/pascal/corelib/gdi;../external/fpgui/framework/src/main/pascal/gui;../external/fpgui/framework/src/main/resources"/>
+      <UnitOutputDirectory Value="../../../output/NexusScriptEditorTests/$(TargetCPU)-$(TargetOS)/units"/>
+    </SearchPaths>
+    <Other><CustomOptions Value="-dGDI -gl -gh -Cr -Co -Sa -Xe"/></Other>
+  </CompilerOptions>
+</CONFIG>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <MainUnit Value="0"/>
+      <Title Value="NexusVirtualTreeViewDemo"/>
+      <UseAppBundle Value="False"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="Default" Default="True"/>
+    </BuildModes>
+    <Units Count="2">
+      <Unit0>
+        <Filename Value="NexusVirtualTreeViewDemo.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="uiNXVirtualTreeViewDemo.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="../../../../output/NexusVirtualTreeViewDemo/$(TargetCPU)-$(TargetOS)/NexusVirtualTreeViewDemo"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);../../external/fpgui/framework/src/main/pascal/corelib;../../external/fpgui/framework/src/main/pascal/corelib/gdi;../../external/fpgui/framework/src/main/resources"/>
+      <OtherUnitFiles Value=".;../../src;../../src/vtv;../../../nxscript/src;../../external/fpgui/framework/src/main/pascal/corelib;../../external/fpgui/framework/src/main/pascal/corelib/render/software;../../external/fpgui/framework/src/main/pascal/corelib/gdi;../../external/fpgui/framework/src/main/pascal/gui;../../external/fpgui/framework/src/main/resources"/>
+      <UnitOutputDirectory Value="../../../../output/NexusVirtualTreeViewDemo/$(TargetCPU)-$(TargetOS)/units"/>
+    </SearchPaths>
+    <Other>
+      <CustomOptions Value="-dGDI -WG -gl -Xe"/>
+    </Other>
+  </CompilerOptions>
+</CONFIG>

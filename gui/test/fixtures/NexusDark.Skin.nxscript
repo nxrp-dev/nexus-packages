@@ -1,0 +1,46 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../language/Skin.Language.nxscript";
+
+Skin NexusDark {
+    Version: 1;
+    WindowBackground: "#FF31363B";
+    InputBackground: "#FF232629";
+    DarkShadow: "#FF1E1E1E";
+    WidgetFrame: "#FF54575B";
+    PrimaryText: "#FFEFF0F1";
+    Selection: "#FF3DAEE9";
+    SelectionText: "#FFFFFFFF";
+    ScrollBar: "#FF3E4349";
+    GridLines: "#FF4A4E52";
+    Focus: "#FF3DAEE9";
+    ButtonTop: "#FF444A50";
+    ButtonBottom: "#FF383E44";
+    ButtonHoverTop: "#FF4F5862";
+    ButtonHoverBottom: "#FF434B55";
+    ButtonPressedTop: "#FF2A3035";
+    ButtonPressedBottom: "#FF252B30";
+    DisabledText: "#FF72767B";
+    MenuSeparator: "#FF4A4E52";
+    ButtonHighlight: "#FF505860";
+    ButtonBorder: "#FF5E6164";
+    ProgressTop: "#FF3DAEE9";
+    ProgressBottom: "#FF2A8BC4";
+    ProgressHighlight: "#FF5BBEF0";
+    ProgressBorder: "#FF1F7AAE";
+    ProgressTrack: "#FF3E4349";
+    CheckBackground: "#FF232629";
+    CheckBorder: "#FF5E6164";
+    CheckPressed: "#FF2A3035";
+    InactiveTab: "#FF272B30";
+    TabBorder: "#FF54575B";
+}

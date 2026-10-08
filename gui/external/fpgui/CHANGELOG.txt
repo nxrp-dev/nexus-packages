@@ -1,0 +1,586 @@
+
+  Release notes for fpGUI
+  =======================
+
+v2.1.0 (2026-04-27)
+
+  - Event Loop Rearchitecture
+    * Worker threads can now wake the main event loop instantly on all
+      platforms without waiting for mouse movement or timer expiry.
+    * TThread.Queue() and TThread.Synchronize() wake the event loop
+      automatically via FPC's WakeMainThread hook.
+    * Duplicate FPGM_PAINT and FPGM_RESIZE messages for the same widget
+      are coalesced, reducing redundant processing under high load.
+    * New TfpgAsyncTask class for background tasks that safely publish
+      progress updates to the GUI thread (SwingWorker-inspired).
+    * New fpgInvokeLater() schedules work on the main thread from any
+      thread.
+  - Hybrid Canvas (new) — now default on all platforms
+    * The AggPas hybrid canvas is now the default on all platforms.
+      No extra build profile is required; the 'agg' and 'freetype'
+      profiles have been removed.
+    * Cached bitmap glyph rendering for fast syntax-highlighted text.
+    * Platform buffer managers added for Windows (GDI) and macOS (Cocoa).
+    * Performance: fast-path for opaque rectangle fills, bypassing AggPas
+      blending when alpha is not needed.
+    * Fixed several Windows-specific rendering issues: upside-down text on
+      32-bit FPC 3.2.2, layout not applied on first show of modal dialogs,
+      and a compilation error on 32-bit targets.
+  - Fusion Style (new)
+    * Added Fusion Light and Fusion Dark application styles, inspired by
+      Qt5 Fusion. Fusion Light is now the default IDE style.
+    * Fusion-style page control tabs and body rendering.
+    * Checkbox, radio button, and progress bar painting delegated to
+      TfpgStyle, enabling per-style customisation.
+  - HiDPI improvements
+    * Improved HiDPI scaling for the GDI (Windows) and X11 backends.
+  - Maximus IDE
+    * PasBuild backend integration: TPasBuildProjectBackend
+      bridges the IDE with the PasBuild build system.
+    * Project tree redesign: displays modules, dependencies,
+      and build profiles as tree nodes with accent colour category headers.
+    * Multi-module UI with aggregator project support.
+    * Dependency tree visualisation added to the project tree.
+    * Build actions: clean, rebuild, and test added to IDE toolbar.
+    * INI and XML syntax highlighting added.
+    * MigLayout used throughout the IDE UI, including a TfpgMigSplitter
+      and MigLayout-managed status bar.
+    * Session persistence: open files, window layout, and file dialog
+      directories are saved and restored per project.
+    * Edit menu: Duplicate Line, Delete Line, Undo, and Redo added.
+    * Status bar shows cursor position, file path, and current git branch.
+    * Go to Declaration (Ctrl+B / Ctrl+Click) with cross-unit resolution
+      including FPC RTL and packages.
+    * Find Usages (Alt+F7) with highlighted context column.
+    * Quick Documentation popup (Ctrl+F1).
+    * Navigate to File and Navigate to Symbol dialogs with fuzzy matching.
+    * Cursor history back/forward navigation.
+    * Custom Pascal tokeniser replacing vendored fcl-passrc, used by the
+      highlighter, symbol finder, procedure list, and declaration finder.
+    * Debug session lifecycle: F9 starts a debug run, Ctrl+F2 stops it.
+    * Breakpoints panel and full breakpoint add/remove management; live
+      breakpoints routed through the ptrace owner thread.
+    * Execution line highlighted in the editor at each debugger stop.
+    * Variables panel showing Locals and Globals groups; Show Globals
+      toggle persisted across sessions.
+    * Call Stack panel.
+    * Watches panel.
+    * Evaluate Expression dialog.
+    * Exception notification bar.
+    * OPDF/PDR integration via a dedicated debugger worker thread.
+      Requires FPC 3.3.1 + OPDF debug format support.
+      Linux x86_64 only, until OPDF support more platforms.
+    * Support for building the IDE with FPC 3.2.2 via a stub debugger
+      adapter (OPDF dependencies disabled by default).
+    * Cross-module source file resolution for Ctrl+B navigation and
+      debugger stop-line lookup.
+    * 'Reopen last project on startup' preference added.
+    * Messages tab now activates automatically when a build is triggered.
+    * Quick Documentation popup signature search stops at the
+      class/record declaration header.
+    * Pascal modifiers and directives (virtual, override, stdcall, etc.)
+      now highlighted as secondary keywords.
+  - DocView
+    * Project restructured and added as a PasBuild module.
+    * Fixed rendering stopping prematurely, leaving a blank area at the
+      bottom of the document.
+    * Fixed DocView statusbar colour being reset to the wrong default.
+    * DocView navigation toolbar now uses some HVIF vector icons.
+  - UI Designer
+    * Added style preview support, showing the designer form in the
+      user-selected style.
+  - Framework Bug Fixes
+    * Fixed FreeType font metrics producing squashed line spacing.
+    * Fixed XOR selection rendering in TfpgMemo — now uses proper theme
+      colours instead of XOR pixel inversion.
+    * Fixed Open/Save dialog grid not growing correctly on resize.
+    * Fixed pagecontrol tab rendering to be font and DPI aware.
+    * Fixed Cocoa hybrid canvas rendering (drawRect instead of lockFocus).
+    * Fixed Cocoa font metrics and popup window visibility.
+    * Fixed FreeType font cache not being enabled on Windows.
+    * Fixed index out of bounds in File Open dialog under macOS.
+    * Compatibility fix for upcoming FPC 3.3.x release.
+    * Added wpMainFormCenter window position option; centralised window
+      positioning logic into fpg_form.pas.
+    * Experimental multi-monitor and per-screen DPI support.
+    * Fixed several bounds-checking issues in the text editor component.
+    * Deprecated old DrawXXX widget paint methods in TfpgCanvas.
+    * Fixed ComboBox text not clipped to exclude the dropdown button area.
+    * Fixed TfpgLabel not auto-sizing to text content when no
+      PreferredSize was set.
+    * Fixed developer-set text colour ignored by style DrawString.
+    * Fixed popup calendar generating deprecation warnings.
+  - Code Hygiene
+    * Replaced bundled SynRegExpr with FPC's standard RegExpr unit.
+    * Replaced bundled mPasLex with FPC's fcl-passrc for Procedure List.
+    * Replaced bundled sha1.pas (D5-era) with FPC's standard hash package.
+    * Removed Cairo rendering backend.
+    * Removed VLC units (now part of FPC's Free Component Library).
+    * Removed MigLayout Java reference source (porting complete).
+    * Removed unused and empty style units.
+    * Removed vendored fcl-passrc (replaced by custom Pascal tokeniser).
+    * Moved documentation and Lazarus IDE integration package out of the
+      framework source tree.
+    * Legacy Agg2D canvas moved out of the framework source to
+      extras/aggpas/.
+    * GDI & X11 native canvas classes marked "Deprecated" for future
+      removal.
+    * TfpgCanvas.DrawXXX methods for widget painting marked "deprecated"
+      for future removal.
+  - HVIF (Haiku Vector Icon File) Icon Format
+    * New HVIF binary reader with AggPas renderer and unit tests.
+    * New HVIF binary writer with unit tests.
+    * svg2hvif CLI tool converts SVG files to HVIF; --inc flag emits a
+      Pascal byte-array include file for embedding icons in source.
+    * hvif_dump inspection tool for examining HVIF binary files.
+    * Full rendering pipeline: multi-stop gradient LUT, gradient strokes,
+      transforms, arc segments, and LOD visibility scale.
+    * TfpgIconStore: DPI-aware HVIF icon registry; fpgIcons global
+      initialised automatically in TfpgApplication.
+    * HVIF icons wired into core framework widgets.
+    * New IconName and IconSize properties on TfpgBaseButton for
+      icon-store–driven button icons.
+    * imageconvert utility added to the PasBuild ecosystem.
+  - Vertex HVIF Icon Editor (new application)
+    * Full HVIF vector icon editor added to the primary build.
+    * Tools: Select, Node edit, Pan, Zoom, Rectangle, Ellipse, and Pen.
+    * Bounding box and affine transform interactions; Shift+drag for
+      uniform scale, Ctrl+drag for shear.
+    * Gradient style editing with multi-stop ramp widget and editor popup.
+    * Grid overlay with configurable snap-to-grid.
+    * Object tree with inline rename and sidecar metadata file.
+    * Bezier path outline overlay in node-edit mode.
+    * Undo support for path and shape property edits.
+    * File > New, Open, Save (.hvif), Export as .inc, and Export as PNG
+      at 16/32/48/64 px.
+    * File > Open Recent with persistent last-used directory.
+    * Window position and size restored across sessions.
+
+
+v2.0.3 (2026-02-14)
+  - Bug Fixes
+    * Fixed AggPas canvas crash when using the 'plastic dark' theme.
+      Widget canvases now correctly route pixel operations through the
+      window canvas target instead of accessing a nil image buffer.
+    * Added bounds checking in TfpgImageBase.SetColor to prevent
+      out-of-bounds memory writes when using the AggPas canvas.
+    * Fixed incorrect pixel coordinates in plastic style DrawFocusRect
+      that used Width/Height as positions instead of Left+Width and
+      Top+Height.
+    * Fixed GDI font reverting to bold stock font after device context
+      reallocation.
+    * Fixed duplicate TranslateMessage call causing double keystrokes
+      on Windows.
+    * Added Windows font paths to FreeType font cache.
+    * Fixed widget constructors using property setters for Width/Height
+      instead of direct field access, which caused issues with the
+      sizing API separation.
+  - UI Designer
+    * Fixed resizer rendering and canvas sizing.
+    * Fixed property display and source generation to use
+      ActualWidth/ActualHeight for positioning.
+    * Fixed widget placement to call UpdatePosition after positioning.
+    * Changed PasBuild module name to 'fpgui-uidesigner'.
+
+
+v2.0.1 (2026-02-11)
+  - Bug Fixes
+    * Fixed infinite recursion crash when default font fails to load on
+      distros with non-standard font paths (Arch, Void, Fedora). Raises
+      a clear EfpGUIException instead. (Fixes #143)
+    * Added /usr/share/fonts/ as a recursive font search path, covering
+      all Linux distro font directory layouts. Added ~/.local/share/fonts/
+      for XDG user fonts.
+    * Fixed ERangeError in DoDrawImagePart when the image rectangle is
+      fully clipped out of the visible area. (Fixes #121)
+    * Fixed Canvas.GetClipRect returning an empty rectangle when no
+      explicit clip rect was set. (Fixes #113)
+    * Fixed access violation in timer list when a timer destroys itself
+      during its own callback, or after Windows hibernation. (Fixes #17)
+    * Widened TfpgMsgParmUser.Param1/2/3 from Integer to PtrInt for
+      correct 64-bit window handle passing.
+    * Added missing extrafpc.cfg in hexviewer example folder.
+    * Fixed AggPas Win32 font engine compilation and rendering: added
+      proper ifdef splits for Win32 TrueType vs FreeType font engines,
+      fixed font size DPI scaling, and removed unnecessary freetype.dll
+      dependency when using the default Win32 font engine.
+  - Improvements
+    * Timer architecture redesign:
+      - X11 message loop now uses the calculated timeout instead of a
+        hardcoded 10ms poll, reducing idle CPU wakeups
+      - GDI message loop replaced blocking GetMessage with
+        MsgWaitForMultipleObjects, enabling proper timeout support
+      - Removed redundant native Windows.SetTimer mechanism; timer
+        checking is now unified through the main loop
+      - All timer arithmetic switched from wall-clock time (TDateTime/Now)
+        to monotonic time (GetTickCount64/CLOCK_MONOTONIC), making timers
+        immune to NTP sync, DST changes, and system hibernation
+    * Normalized GDI clip rect storage to widget-local coordinates,
+      matching the X11 and Cocoa backends.
+    * About fpGUI dialog now shows the canvas backend type (AggPas or
+      Native) after the version number.
+    * Added 'freetype' build profile for PasBuild, allowing Windows
+      users to toggle between the Win32 TrueType and FreeType font
+      engines via: pasbuild compile -p windows,agg,freetype
+
+
+v2.0.0 (2026-02-09)
+  - Code breaking changes
+    * TfpgScrollStyle enums have changed names to make it more clear as to
+      what they do or mean.
+      ssHorizVisible, ssVertiVisible, ssBothVisible were deleted, and new
+      ssBoth, ssAutoHorizontal, ssAutoVertical types added.
+    * Widgets with 3D borders were cleaned up and refactored. Instead of them
+      descending directly from TfpgWidget, they now descend from TfpgBorderWidget.
+      So if you have custom written widgets, they might need some adjusting.
+    * AlienWindows branch got merged. This resulted in some code changes that
+      might need to be applied to your code:
+       - UpdateWindowPosition -> UpdatePosition
+       - HasHandle -> Window.HasHandle  or use  WindowAllocated
+       - WindowToScreen() -> WidgetToScreen()
+       - WinHandle -> Window.WinHandle
+       - WindowAttributes -> Window.WindowAttributes
+    * PDF reporting classes and identifier names got translated from French to
+      English. See commits ea74bd8c & 5afa5d44 for the bulk of it.
+    * Renamed TfpgRect.IsEmpty to TfpgRect.IsUnassigned. Added TfpgRect.Clear
+    * Removed OnDragEnter, OnDragLeave and OnDragDrop from TfpgWidget. Now a
+      property DropHandler is used that expects a TfpgDropHandler descendant.
+      TfpgDropEventHandler may be used as an object that accepts drop events.
+    * The FPGM_DROPENTER message has changed. Before the message type was
+      TfpgMsgParmMouse now it is TfpgMsgParmDrop. FPGM_DROPMOVE has replaced part
+      of the functionality FPGM_DROPENTER used to fulfill.
+  - MacOS cocoa backend added
+  - MigLayout v11 port and layout manager framework (298 commits):
+    - Layout manager framework: ILayoutManager interface with
+      FlowLayout, BorderLayout, and MigLayout implementations
+    - MigLayout v11: full port from Java including constraint parsing,
+      grid engine, grow/shrink, cell spanning, docking, split cells,
+      component links, size groups, and debug visualisation
+    - Fluent constraint API: LC (layout), AC (axis), CC (component)
+      with chainable methods for concise layout definitions
+    - Widget sizing: Width/Height as preferred/intent size separated
+      from ActualWidth/ActualHeight as rendered size (WPF-inspired)
+    - MinWidth/MinHeight/MaxWidth/MaxHeight enforcement in base widget
+    - Repository restructured for PasBuild (framework + uidesigner
+      as separate build modules)
+    - Canvas hardening: dimension guards across X11, GDI, and Cocoa
+      backends preventing range errors on small/negative sizes
+    - 395 unit tests covering all MigLayout components
+    - Quick start guide and example demos for all three layout managers
+    - Updated all example extrafpc.cfg files for new directory layout
+  - PasBuild build system: multi-module reactor builds with
+    automatic test discovery and resource filtering
+  - So many bug fixes - too many to mention!
+
+
+v1.4.1 (2015-09-02)
+  This was a maintenance release. We had 71 commits made by 5 contributors.
+  Run the following command to see all the changes:
+
+    git shortlog v1.4..v1.4.1
+
+
+v1.4 (2015-04-09)
+  We had 172 commits made by 6 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.2..v1.4
+
+
+v1.2 (2014-08-20)
+  We had 375 commits made by 8 contributors. Run the following command to see
+  all the changes:
+
+    git shortlog v1.0..v1.2
+
+
+v1.0 (2013-04-09)
+  - Docview improvements: Bookmark maintenance, keyboard shortcuts,
+    image support in INF files, cross link support.
+  - Many improvements to the experimental Maximus IDE.
+  - More widget themeing improvements.
+  - Keyboard shortcut handling improvements.
+  - AggPas 2D graphics library merged into fpGUI as a new
+    cross-platform graphics backend. This is the first step in
+    adding AggPas support, and this is still work in progress, but
+    most functionality works already. Also added some 64-bit fixes
+    to the AggPas code.
+  - Many PDF report engine improvements. Also enhanced the look and
+    functionality of the Print Preview dialog.
+  - Lots more documentation added. This is an ongoing task.
+  - Big improvements to the TextEdit widget, that is used by Maximus
+    and the Nanoedit example project.
+  - Many improvements to the RichView component and it's supported
+    syntax - used by Docview. This widget is now also useable
+    in other projects, not just Docview.
+  - Improved fpGUI language translations.
+  - The UI Designer (forms designer) has also seen many improvements,
+    like new widgets added to the palette, more published properties
+    added to the Object Inspector window etc.
+  - Many, many more bug fixes and improvements. For a full list run:
+      git log v1.0...v0.8
+
+
+v0.8 (2011-12-02)
+  - New widget demos and many improvements to existing demos.
+  - New application examples
+    * Spinning Globe, show some graphics support with zooming.
+    * An experimental IDE called Maximus, which supports project
+      management, compiler settings management, macro management,
+      multi-threading enabled, fast procedure list searching,
+      syntax-highlighting enabled text editor, OS independent
+      file monitor support etc.
+  - PDF reporting engine and preview support. Thanks to
+    Jean-Marc Levecque for this awesome contribution.
+  - Huge improvements and enhancements to the Treeview widget.
+    * massive speed improvement
+    * improved painting support
+    * extended treeview and node method calls
+    * state image support (eg: having checkboxes next to nodes)
+    widget.
+  - Many Docview (fpGUI documentation viewer) improvements
+    * Bookmark support
+    * Improved annotation support
+    * Improved the text rendering and text wrapping
+    * Rewrote the font handling which gave a massive 200+% speed
+      increase in startup times (depending on the amount of fonts you
+      have installed on your system), and reduced memory usage by 50%.
+  - Added image support to RichView, the text viewer used by Docview.
+  - Two new supported platforms: OpenSolaris and MacOSX (with X11
+    support).
+  - Global keyboard shortcut support for menu items and actions.
+  - fpGUI API documentation has been extended and improved.
+  - OS independent DND (drag-n-drop) support has been implemented. This
+    supports external application-to-application and internal
+    widget-to-widget drag-n-drop.
+  - Improved the workings of implementing context sensitive help inside
+    your applications.
+  - Improved fpGUI project templates for use with Lazarus IDE or MSEide.
+  - Included the WIPFC (OpenWatcom IPF Compiler) binaries to allow you
+    to compile your own IPF help files into binary INF help files.
+  - UI Designer (the visual forms designer for fpGUI) has seen many
+    improvements:
+    * new components on the component palette.
+    * new properties accessible in the Object Inspector
+    * improved dialogs for "tab order" and "widget order" changes.
+    * code generated can now use spaces or tab characters for
+      indentation.
+    * improved File menu layout and new options.
+  - Improved themes support
+  - Experimental MDI (multi-document interface) support
+  - Extended the Unicode wrapper functions for the FPC's RTL file
+    handing
+    functions.
+  - New built-in code page conversion functions have been added.
+  - Grid widgets have improved scrolling support options.
+  - Improved fpGUI language translations.
+  - Many, many more bug fixes and improvements. For a full list run:
+      git log v0.8...v0.7
+
+
+v0.7 (2010-08-02)
+  - Quite a few more minor bug fixes since v0.7-rc2.
+  - Some memory leaks in TfpgListView
+  - Added an example Debug Server in examples/apps/debugserver
+    - This can be used with FPC's dbugintf unit so you can send
+      debug messages. Handy for debugging CGI apps on your server.
+  - A new unit fpg_imgutils was added. It contains some handy
+    utility functions for images.
+  - Implemented disabled images support for all controls that can
+    display images.
+  - Added a new TfpgMemo Mediator for use with tiOPF based
+     applications.
+  - Improved quick date selection in TfpgComboCalendar. Users can
+    now click the Year or Month to quickly select a different value
+    without the need for scrolling through every month.
+  - Many more improvements to the "prototype" text editor component
+    located in prototypes/textedit/. Soon this will become a
+    standard component in fpGUI.
+  - Minor improvements to DocView's toolbar.
+  - DocView now has a 'File | Open Special' option, which can open
+    environment variables pointing to a location where INF files are.
+  - Grids now have a smooth scrolling option for horizontal scrolling.
+  - A new Input Query dialog was added.
+  - Some demos where improved. eg: SplashScreen demo.
+  - JPEG image format support was added. Soon all image formats
+    supported by FPImage will be included. Unfortunately it did not
+    make it into this release.
+  - Added a fpGUI project template for when you use fpGUI with MSEide.
+  - A new Color Selection dialog was added to fpGUI.
+  - fpGUI's UI Designer has a few more components on the component palette.
+    eg: TfpgFilenameEdit, TfpgDirectoryEdit, TfpgFontEdit, etc...
+  - Some more minor changes to allow compiling fpGUI under MacOSX with X11.
+
+
+v0.7.rc2  (2010-04-08)
+  - Localization of Character Map dialog.
+  - Insert from Character Map added to TfpgEdit default popup menu.
+  - ModalResults is now a enum type. Improved integration with UI
+    Designer.
+  - Memo: problems with deleting selected text is now fixed.
+  - Improved WinCE support, including reading BMP files.
+  - Fixed compilation of all example projects.
+  - Extended available properties that can be edited via the Object
+    Inspector of the UI Designer.
+  - Fixed issues where dialogs are closed via the window border X
+    button and not the available buttons in the dialog. Developer
+    can define behaviour of X close button.
+  - Improved TabSheet handling in UI Designer.
+  - Various improvements to TfpgPageControl and TfpgTabSheet. This
+    includes new tab positions: Bottom, Left, Right and None.
+  - SelectDirectory dialog was not working under Windows.
+  - Setting selected directory in SelectDirectory dialog now works.
+  - New mouse cursor demo.
+  - Improved the ability to customize the HintWindow. HintWindow
+    demo was extended to show how this can be done.
+  - Improved Visible property handling especially with child
+    components. Now only the parent Visible property is changed.
+  - tiOPF: correctly disable event handlers in edit mediators.
+  - Added a script which generates a fpGUI version number based on
+    Git repository information. Later this will be converted to
+    a object pascal console application.
+
+
+v0.7.rc1  (2010-03-04)
+  - FPC 2.4.0 compatible.
+  - Fully tested on 32-bit and 64-bit platforms. Tested on Linux,
+    Windows and the *BSD family.
+  - Mobile device support is back. Tested on ARM Linux and Windows
+    Mobile devices.
+  - fpGUI UI Designer has improved a lot and extended it's component
+    palette and Object Inspector.
+  - Various bug fixes, memory leaks and other enhancements have been
+    applied.
+  - Units have a more uniform naming style.
+  - Classes have a more uniform structure/hierarchy with base classes.
+  - Help support has been added to the core framework
+  - fpGUI now has it's own help file viewer called DocView.
+    Docview includes the following features:
+     - document annotation
+     - bookmarks
+     - browse history
+     - exporting articles to plain text or IPF format.
+     - full text search (including weighting of results to see how
+       relevant the results are)
+     - Font and Color customization
+     - Concatenation of help files at run-time so a library of help
+       files can be viewed simultaneously.
+     - Easy integration via the "external tools" feature of IDE's like
+       Lazarus or MSEide. This allows for context sensitive help.
+     - History of most recently viewed help files.
+     - Help file format used is the INF format (IBM's format used it
+       OS/2), which is very compact, incredibly fast and supports full
+       text search.
+  - A lot of new components have been added, including enhancements
+    to existing components.
+  - Various new dialogs have been added, which include Color Wheel,
+    Character Map, Database Login etc.
+  - Improved integration with tiOPF project via the Model-GUI-Mediator
+    design pattern.
+  - Graphical FPCUnit unit test runner.
+  - Lots of new language translations for the core fpGUI library.
+  - A lot of new example projects demoing various GUI components.
+
+
+v0.6  (2008-02-17) revision 534
+  - Added a new INI Utils unit which introduces ReadOnly ini support
+  - Implemented the Model-GUI-Meditor design pattern so fpGUI can be
+    used with tiOPF's object persistent framework. This allows any
+    fpGUI component to become object-aware. I find this a better
+    alternative to DB-aware components.
+  - Many improvements to the GUI Designer. New property editors, new
+    components, better mouse support, MRU menu etc.
+  - 64-bit support is now added
+  - Newly supported platforms: FreeBSD and DesktopBSD
+  - Unicode text input is now supported under Windows.
+  - Started implementing Message Dialogs (with multiple buttons, icons etc).
+  - New components:
+    * Calendar combobox
+    * Gauges (pie, bar, needle, etc.)
+    * DB Label example component.
+  - Better support for newer desktop environments under Linux.
+  - Anti-aliased line drawing support.
+  - Line styles (dot, solid, dash...) are now fully supported on all platforms.
+  - Implemented the Command design pattern interface. Something like
+    Delphi's TAction component.
+  - Fixed many memory leaks in CoreLib units.
+  - New examples/demos added: Splash Screen, Command Handler, Gauges,
+    Anti-aliased line drawing etc..
+  - Started working on Message Dialogs.
+  - Better clipboard support.
+  - Including MANY more improvements and bug fixes. There are to
+    many to list. For a detailed listing of the changes use the svn command
+    line client as follows:  svn log -r 367:534
+
+
+v0.5  (2007-09-13)
+  - The first release since the rewrite of fpGUI to use a 'windowed'
+    multi-handle implementation.
+  - Available components in this release:
+    * Button with image support
+    * Label
+    * Bevel (aka Panel)
+    * Radio Buttons
+    * Check Boxes
+    * Track Bar (aka Slider)
+    * Page Control (aka Tab Control)
+    * List Box
+    * Scrollbars
+    * Memo (partially implemented)
+    * Forms (Windows). Normal, Modal and Popup.
+    * Dialogs
+          o ShowMessage()
+          o Font Selection dialog
+          o File Open...
+          o File Save As...
+    * Text Edit
+    * Combo Box (aka Choice List)
+    * Grids (aka Tables)
+          o Base Grid
+          o Custom Grid
+          o Draw Grid
+          o String Grid
+          o File Grid
+    * Progress Bar
+    * List View
+    * Main Menu bar and Popup Menus
+    * Treeview
+  - Align and Anchor support has been added.
+  - Clipboard support (application wide). Global (OS based)
+    is in the works.
+  - All painting is done via double buffering, so drawing flicker
+    is a thing of the past.
+  - Better font support. We now have support for Font Aliases. We
+    can define a font style (font name, size and attributes) and
+    give it a text name. Whenever we want to use that font style,
+    we can reference it by the text name.
+  - All colors are now defined in RGB order, no matter what platform
+    we use.
+  - Modal form support (with some minor issues under Windows that
+    should be fixed soon).
+  - Widgets and Forms now have a single consistent constructor due
+    to the base window class that descends from TComponent.
+  - Delayed resource allocation. This is very handy under Linux where
+    the X Server can be in a remote location (not on the same computer).
+    This gives a performance bonus as we need to communicate less with
+    the X Server which is inherently slow.
+  - Supports a Model-GUI-Mediator (MGM) implementation to work with
+    the tiOPF Object Persistent Framework. Business Objects can now
+    be saved in a OO fashion. The MGM implementation also makes the
+    standard fpGUI components Object-Aware. No need for DB Components.
+  - fpGUI now has a Visual Form (GUI) Designer in the example/apps
+    directory. Developers can now create forms visually at a much
+    faster rate. The designer uses the same source file that contains
+    your code - generating the ui code like you would have done
+    manually. No external ui files like Lazarus (*.lfm) or Delphi
+    (*.dfm). See the readme file in the project directory for more
+    details.
+
+
+v0.4
+  - The last version of fpGUI using a single handle (windowless)
+    design.
+
+                  --------------oOo----------------
+
+

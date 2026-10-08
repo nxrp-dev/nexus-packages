@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>fpgui-framework</name>
+  <author>Graeme Geldenhuys</author>
+  <license>BSD-3-Clause</license>
+
+  <build>
+    <projectType>library</projectType>
+
+    <unitPaths>
+      <!-- These act as inclusion rules based on conditions -->
+      <path condition="LINUX">corelib/x11</path>
+      <path condition="FREEBSD">corelib/x11</path>
+      <path condition="WINDOWS">corelib/gdi</path>
+      <path condition="DARWIN">corelib/cocoa</path>
+      <!-- There are just to clean up the FPC command - not strictly needed -->
+      <path condition="UNUSED">corelib/_template</path>
+    </unitPaths>
+
+    <resources>
+      <filtering>true</filtering>
+    </resources>
+  </build>
+
+  <test>
+    <framework>fpcunit</framework>
+    <testSource>TestRunner.pas</testSource>
+    <frameworkOptions>
+      <option>--all</option>
+      <option>--format=plain</option>
+    </frameworkOptions>
+  </test>
+
+  <!-- only because we want the tool for resource compilation -->
+  <moduleDependencies>
+    <module>../tools/svg2hvif</module>
+  </moduleDependencies>
+
+</project>

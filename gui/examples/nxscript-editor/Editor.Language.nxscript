@@ -1,0 +1,67 @@
+/*
+  Copyright (c) 2026 Kevin Collins.
+  This Source Code Form is subject to the Mozilla Public License, v. 2.0.
+  https://mozilla.org/MPL/2.0/
+  This Source Code Form is "Incompatible With Secondary Licenses".
+  SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+*/
+
+Language ScriptEditorDemo {
+  UnknownDefinitions: Reject;
+  Definitions: [
+    Definition Demo {
+      Root: True;
+      UnknownProperties: Reject;
+      UnknownChildren: Reject;
+      Properties: [
+        Property Title {
+          Required: True;
+          Value Value { SourceForms: [Text, Reference, TextComposition]; Scalar: Text; }
+        },
+        Property Enabled { Value Value { SourceForms: [Text]; Scalar: Boolean; } },
+        Property Count { Value Value { SourceForms: [Text]; Scalar: Integer; } },
+        Property Mode { Value Value { SourceForms: [Text]; AllowedValues: [Light, Dark]; } },
+        Property Link {
+          Value Value {
+            SourceForms: [Text, Reference];
+            EffectiveCategories: [Text];
+            Reference Reference { Targets: [Property]; }
+          }
+        },
+        Property Items {
+          Value Value {
+            SourceForms: [Array];
+            EffectiveCategories: [Array];
+            Array Array {
+              Minimum: 1; Maximum: 3; Names: Forbidden;
+              EntrySourceForms: [Text]; EntryEffectiveCategories: [Text];
+              AllowedValues: [red, green, blue]; Mixed: False;
+            }
+          }
+        },
+        Property Named {
+          Value Value {
+            SourceForms: [Array]; EffectiveCategories: [Array];
+            Array Array { Names: Required; EntrySourceForms: [Text]; }
+          }
+        },
+        Property Leaves {
+          Value Value {
+            SourceForms: [Array]; EffectiveCategories: [Array];
+            Array Array {
+              EntrySourceForms: [InlineDefinition];
+              EntryEffectiveCategories: [Definition];
+              DefinitionKinds: [Leaf]; Names: Required;
+              Maximum: 2; Mixed: False;
+            }
+          }
+        }
+      ];
+      Children: [Child Leaves { Kinds: [Leaf]; Minimum: 1; Maximum: 2; }];
+    },
+    Definition Leaf {
+      Root: False; Parents: [Demo]; UnknownProperties: Reject; UnknownChildren: Reject;
+      Properties: [Property Caption { Required: True; Value Value { SourceForms: [Text]; Scalar: Text; } }];
+    }
+  ];
+}

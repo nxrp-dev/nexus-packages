@@ -1,0 +1,22 @@
+/*
+  Copyright (c) 2026 Kevin Collins.
+  This Source Code Form is subject to the Mozilla Public License, v. 2.0.
+  https://mozilla.org/MPL/2.0/
+  This Source Code Form is "Incompatible With Secondary Licenses".
+  SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+*/
+
+dialect "Editor.Language.nxscript";
+
+Demo Sample {
+  // This comment and surrounding formatting survive unrelated value edits.
+  Title: "NexusScript tree editor";
+  Enabled: True;
+  Count: 3;
+  Mode: Light;
+  Link: @Sample.Title;
+  Items: ["red", "blue"];
+  Named: [first: "red", second: "blue"];
+  Leaves: [Leaf Inline { Caption: "An inline definition"; }];
+  Leaf Child { Caption: "A child definition"; }
+}

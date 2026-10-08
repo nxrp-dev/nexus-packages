@@ -1,0 +1,62 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../nxscript/language/Language.nxscript";
+
+Language ReferenceTests {
+    UnknownDefinitions: Reject;
+    Definitions: [
+        Definition Host {
+            Root: True;
+            UnknownProperties: Reject;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Links {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            Names: Optional;
+                            EntrySourceForms: [Reference];
+                            EntryEffectiveCategories: [Definition];
+                            DefinitionKinds: [Record];
+                        }
+                    }
+                },
+                Property Items {
+                    Value Value {
+                        EffectiveCategories: [Array];
+                        Array Array {
+                            EntrySourceForms: [InlineDefinition];
+                            EntryEffectiveCategories: [Definition];
+                            DefinitionKinds: [Record];
+                        }
+                    }
+                }
+            ];
+            Children: [Child Records { Kinds: [Record]; Minimum: 1; Maximum: 2; }];
+        },
+        Definition Record {
+            Root: False;
+            Parents: [Host];
+            UnknownProperties: Reject;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Link {
+                    Value Value {
+                        SourceForms: [Reference];
+                        EffectiveCategories: [Definition];
+                        Reference Reference { Targets: [Definition]; DefinitionKinds: [Record]; }
+                    }
+                }
+            ];
+        }
+    ];
+}

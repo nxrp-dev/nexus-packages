@@ -1,0 +1,149 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../nxscript/language/Language.nxscript";
+
+Language NexusSkin {
+    UnknownDefinitions: Reject;
+    Definitions: [
+        Definition Skin {
+            Root: True;
+            UnknownProperties: Reject;
+            UnknownChildren: Reject;
+            Properties: [
+                Property Version {
+                    Required: True;
+                    Value Value { Scalar: Integer; }
+                },
+                Property WindowBackground {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property InputBackground {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property DarkShadow {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property WidgetFrame {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property PrimaryText {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property Selection {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property SelectionText {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ScrollBar {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property GridLines {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property Focus {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonTop {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonBottom {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonHoverTop {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonHoverBottom {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonPressedTop {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonPressedBottom {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property DisabledText {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property MenuSeparator {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonHighlight {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ButtonBorder {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ProgressTop {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ProgressBottom {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ProgressHighlight {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ProgressBorder {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property ProgressTrack {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property CheckBackground {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property CheckBorder {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property CheckPressed {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property InactiveTab {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                },
+                Property TabBorder {
+                    Required: True;
+                    Value Value { Scalar: Text; }
+                }
+            ];
+        }
+    ];
+}
