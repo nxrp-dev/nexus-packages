@@ -1,0 +1,22 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "PackageManager.Language.nxscript";
+module NexusPackages "../Packages.PackageIndex.nxscript";
+
+// fpGUI and the upstream Virtual TreeView reference are supplied under external/.
+// Package-wide License is left unset: these upstream sources retain their own notices.
+Package GUI {
+    Id: "NXRP.GUI";
+    Author: "Kevin Collins";
+    Description: "fpGUI controls, skins, rendering and NexusScript editing.";
+    Requires: [@NexusPackages.Lua, @NexusPackages.NexusScript];
+}

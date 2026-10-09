@@ -1,0 +1,21 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "PackageManager.Language.nxscript";
+
+// Additional source prerequisite: NexusLib/core (not independently described in this catalog).
+// JSON and DelimitedText have their own descriptors; directory nesting is not a dependency.
+Package Serialization {
+    Id: "NXRP.Serialization";
+    Author: "Kevin Collins";
+    Description: "Object persistence and measured static string lookup support.";
+    License: "MPL-2.0-no-copyleft-exception";
+}

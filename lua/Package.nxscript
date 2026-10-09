@@ -1,0 +1,21 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "PackageManager.Language.nxscript";
+
+// No Lua runtime is bundled. Consumers must supply a matching Lua host/library.
+// Outside Win64 x86-64, the RTTI bridge also uses NexusFPC ffi.manager and target libffi.
+// Package-wide License is left unset: upstream reference headers retain their own notices.
+Package Lua {
+    Id: "NXRP.Lua";
+    Author: "Kevin Collins";
+    Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
+}

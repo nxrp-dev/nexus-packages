@@ -1,0 +1,87 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+// Resolve the existing entity dialect through the caller's dialect catalog.
+dialect "PackageManager.Language.nxscript";
+
+PackageIndex NexusPackages {
+    // Sister repository discovery only; no traversal or acquisition is implied.
+    TrustedRepository NexusExternal {
+        Source: "https://github.com/nxrp-dev/nexus-packages-ext.git";
+    }
+
+    // Explicit repository catalog; Descriptor is relative to this index file.
+    LocalPackage SQLite {
+        Id: "NXRP.SQLite";
+        Descriptor: "db/sqlite/Package.nxscript";
+        Description: "SQLite bindings, connections and write-through datasets.";
+    }
+    LocalPackage GUI {
+        Id: "NXRP.GUI";
+        Descriptor: "gui/Package.nxscript";
+        Description: "fpGUI controls, skins, rendering and NexusScript editing.";
+    }
+    LocalPackage LSP {
+        Id: "NXRP.LSP";
+        Descriptor: "lsp/Package.nxscript";
+        Description: "Reusable Language Server Protocol messages and transports.";
+    }
+    LocalPackage Lua {
+        Id: "NXRP.Lua";
+        Descriptor: "lua/Package.nxscript";
+        Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
+    }
+    LocalPackage JSONRPC {
+        Id: "NXRP.Network.JSONRPC";
+        Descriptor: "network/json-rpc/Package.nxscript";
+        Description: "Typed JSON-RPC messages, values and command dispatch.";
+    }
+    LocalPackage Torrent {
+        Id: "NXRP.Network.Torrent";
+        Descriptor: "network/torrent/Package.nxscript";
+        Description: "BitTorrent metadata, peers, trackers and session support.";
+    }
+    LocalPackage XMPP {
+        Id: "NXRP.Network.XMPP";
+        Descriptor: "network/xmpp/Package.nxscript";
+        Description: "XMPP client protocol, negotiation and messaging modules.";
+    }
+    LocalPackage NexusScript {
+        Id: "NXRP.NexusScript";
+        Descriptor: "nxscript/Package.nxscript";
+        Description: "NexusScript compilation, validation, editing and emitters.";
+    }
+    LocalPackage NexusTest {
+        Id: "NXRP.NexusTest";
+        Descriptor: "nxtest/Package.nxscript";
+        Description: "Test cases, suites, assertions, results and module contracts.";
+    }
+    LocalPackage Serialization {
+        Id: "NXRP.Serialization";
+        Descriptor: "serialization/Package.nxscript";
+        Description: "Object persistence and measured static string lookup support.";
+    }
+    LocalPackage JSON {
+        Id: "NXRP.Serialization.JSON";
+        Descriptor: "serialization/json/Package.nxscript";
+        Description: "RTTI-backed typed JSON values and object conversion.";
+    }
+    LocalPackage DelimitedText {
+        Id: "NXRP.Serialization.DelimitedText";
+        Descriptor: "serialization/delimited-text/Package.nxscript";
+        Description: "Delimited text parsing and conversion to JSON tabular data.";
+    }
+    LocalPackage Solar2D {
+        Id: "NXRP.Solar2D";
+        Descriptor: "solar2d/Package.nxscript";
+        Description: "Solar2D native plugin API and Pascal event bridge.";
+    }
+}

@@ -1,0 +1,23 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "PackageManager.Language.nxscript";
+module NexusPackages "../Packages.PackageIndex.nxscript";
+
+// Additional source prerequisite: NexusLib/core (not independently described in this catalog).
+// Command-line and GUI test runners remain separate projects.
+Package NexusTest {
+    Id: "NXRP.NexusTest";
+    Author: "Kevin Collins";
+    Description: "Test cases, suites, assertions, results and module contracts.";
+    License: "MPL-2.0-no-copyleft-exception";
+    Requires: [@NexusPackages.JSONRPC, @NexusPackages.JSON];
+}
