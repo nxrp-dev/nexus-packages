@@ -18,6 +18,16 @@ RepositoryIndex NexusPackages {
         Source: "https://github.com/nxrp-dev/nexus-packages-ext.git";
     }
 
+    ExternalPackage Abbrevia {
+        Id: "NXRP.Compression.Abbrevia";
+        Repository: @NexusPackages.NexusExternal;
+        Description: "Archive and compression runtime units (Abbrevia).";
+    }
+    ExternalPackage PasZLib {
+        Id: "NXRP.Compression.PasZLib";
+        Repository: @NexusPackages.NexusExternal;
+        Description: "Pascal DEFLATE, zlib, GZIP and ZIP runtime units.";
+    }
     ExternalPackage Mustache {
         Id: "NXRP.Mustache";
         Repository: @NexusPackages.NexusExternal;
