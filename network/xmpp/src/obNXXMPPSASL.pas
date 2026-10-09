@@ -19,7 +19,7 @@ unit obNXXMPPSASL;
 interface
 
 uses
-  Classes, SysUtils, synacode, obNXXMPPError, obNXXMPPOpenSSL,
+  Classes, SysUtils, synacode, obNXXMPPError, obNXOpenSSLCrypto,
   tpNXXMPPTypes, utNXXMPPASCII;
 
 type
@@ -96,7 +96,7 @@ begin
       'The SCRAM username must contain printable ASCII characters without spaces.');
   lUsername := NXXMPPASCIIToLower(AUsername);
   if ANonce = '' then
-    FNonce := EncodeBase64(TNXXMPPOpenSSL.RandomBytes(18))
+    FNonce := EncodeBase64(TNXOpenSSLCrypto.RandomBytes(18))
   else
     FNonce := ANonce;
   if Pos(',', FNonce) > 0 then
@@ -153,20 +153,20 @@ begin
     raise ENXXMPPError.Create(xesAuthentication, 'invalid-scram-password',
       'The SCRAM password must contain printable ASCII characters only.');
   lPassword := APassword;
-  lSaltedPassword := TNXXMPPOpenSSL.PBKDF2SHA256(
+  lSaltedPassword := TNXOpenSSLCrypto.PBKDF2SHA256(
     RawByteString(lPassword), lSalt, lIterations, 32);
-  lClientKey := TNXXMPPOpenSSL.HMACSHA256(lSaltedPassword, 'Client Key');
+  lClientKey := TNXOpenSSLCrypto.HMACSHA256(lSaltedPassword, 'Client Key');
   lClientFinalWithoutProof := 'c=biws,r=' + lNonce;
   lAuthMessage := FClientFirstBare + ',' + AServerFirst + ',' +
     lClientFinalWithoutProof;
-  lClientSignature := TNXXMPPOpenSSL.HMACSHA256(
-    TNXXMPPOpenSSL.SHA256(lClientKey), lAuthMessage);
+  lClientSignature := TNXOpenSSLCrypto.HMACSHA256(
+    TNXOpenSSLCrypto.SHA256(lClientKey), lAuthMessage);
   SetLength(lClientProof, Length(lClientKey));
   for lIndex := 1 to Length(lClientKey) do
     lClientProof[lIndex] := AnsiChar(Ord(lClientKey[lIndex]) xor
       Ord(lClientSignature[lIndex]));
-  lServerKey := TNXXMPPOpenSSL.HMACSHA256(lSaltedPassword, 'Server Key');
-  FExpectedServerSignature := TNXXMPPOpenSSL.HMACSHA256(lServerKey,
+  lServerKey := TNXOpenSSLCrypto.HMACSHA256(lSaltedPassword, 'Server Key');
+  FExpectedServerSignature := TNXOpenSSLCrypto.HMACSHA256(lServerKey,
     lAuthMessage);
   FillChar(Pointer(lSaltedPassword)^, Length(lSaltedPassword), 0);
   FillChar(Pointer(lClientKey)^, Length(lClientKey), 0);
@@ -195,7 +195,7 @@ begin
     raise ENXXMPPError.Create(xesAuthentication, 'invalid-scram-signature',
       'The SCRAM server verifier is not valid Base64.');
   end;
-  if not TNXXMPPOpenSSL.ConstantTimeEquals(lSignature,
+  if not TNXOpenSSLCrypto.ConstantTimeEquals(lSignature,
     FExpectedServerSignature) then
     raise ENXXMPPError.Create(xesAuthentication, 'scram-signature-mismatch',
       'The SCRAM server signature does not match.');

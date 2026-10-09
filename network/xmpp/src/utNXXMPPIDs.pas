@@ -19,7 +19,7 @@ unit utNXXMPPIDs;
 interface
 
 uses
-  SysUtils, obNXXMPPOpenSSL;
+  SysUtils, obNXOpenSSLCrypto;
 
 function NXXMPPCreateID: UTF8String;
 
@@ -37,7 +37,7 @@ var
   lBytes: RawByteString;
   lIndex: Integer;
 begin
-  lBytes := TNXXMPPOpenSSL.RandomBytes(16);
+  lBytes := TNXOpenSSLCrypto.RandomBytes(16);
   Byte(lBytes[7]) := (Byte(lBytes[7]) and $0F) or $40;
   Byte(lBytes[9]) := (Byte(lBytes[9]) and $3F) or $80;
   Result := '';

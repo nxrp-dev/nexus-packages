@@ -40,7 +40,7 @@ implementation
 
 function NextRandom(var ASeed: Cardinal; AMaximum: Cardinal): Cardinal;
 begin
-  ASeed := (ASeed * 1664525) + 1013904223;
+  ASeed := Cardinal(((QWord(ASeed) * 1664525) + 1013904223) and $FFFFFFFF);
   if AMaximum = 0 then
     Result := 0
   else

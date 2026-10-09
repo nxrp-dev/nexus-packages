@@ -20,7 +20,7 @@ interface
 
 uses
   Classes, SysUtils, obNXXMPPCommand, obNXXMPPConfig, obNXXMPPDispatcher, obNXXMPPMessage,
-  obNXXMPPModule, obNXXMPPOpenSSL, obNXXMPPStanza,
+  obNXXMPPModule, obNXOpenSSLCrypto, obNXXMPPStanza,
   tpNXXMPPMessageTypes, tpNXXMPPTypes,
   utNXXMPPIDs, utNXXMPPXML;
 

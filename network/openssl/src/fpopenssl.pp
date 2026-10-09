@@ -955,7 +955,7 @@ var
   lIPv4: in_addr;
   lIPv6: in6_addr;
 begin
-  if hostname = '' then Exit(0);
+  if (hostname = '') or (Pos(#0, hostname) > 0) then Exit(0);
   if TryStrToHostAddr(hostname, lIPv4) or TryStrToHostAddr6(hostname, lIPv6) then
     Result := X509VerifyParamSet1IP(SSLGet0Param(FSSL), hostname)
   else

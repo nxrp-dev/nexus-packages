@@ -26,6 +26,9 @@ begin
       P.OSes := P.OSes - [java,android];
 
     T:=P.Targets.AddUnit('openssl.pas');
+    T:=P.Targets.AddUnit('obNXOpenSSLCrypto.pas');
+      T.Dependencies.AddUnit('openssl');
+      T.Dependencies.AddUnit('fpopenssl');
     T:=P.Targets.AddUnit('fpopenssl.pp');
       T.ResourceStrings:=true;
     T:=P.Targets.AddUnit('opensslsockets.pp');

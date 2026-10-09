@@ -11,8 +11,8 @@ procedure RegisterNXOpenSSLTests(ARegistry: TNXTestRegistry);
 
 implementation
 
-uses Classes, SysUtils, ctypes, Dynlibs, openssl, fpopenssl, opensslsockets,
-  sslbase, sockets, ssockets, obNXTestContext, obNXTestSuite;
+uses Classes, SysUtils, SyncObjs, blcksock, synsock, ctypes, Dynlibs, openssl, fpopenssl, opensslsockets,
+  obNXOpenSSLCrypto, obNXSynapseOpenSSL, sslbase, sockets, ssockets, obNXTestContext, obNXTestSuite;
 
 type
   TTestBIOPair = function(var ABIO: PBIO; ASize: csize_t;
@@ -33,8 +33,25 @@ type
     function TakeSocket: Integer;
   end;
 
+type
+  // Independent loopback peer: its blocking accept/handshake must progress
+  // while the test's client performs its own blocking handshake and reads.
+  TSynapsePeer = class(TThread)
+  private
+    FSocket: TTCPBlockSocket;
+    FReady, FRelease: TEvent;
+    FError: string;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create(ASocket: TTCPBlockSocket);
+    destructor Destroy; override;
+    function WaitReady: Boolean;
+    property Error: string read FError;
+  end;
+
 var
-  lFixtureDirectory: string;
+  lFixtureDirectory, lSSLPath, lCryptoPath: string;
   lSSLHandle, lCryptoHandle: TLibHandle;
   lBIOPair: TTestBIOPair;
   lSSLSetBIO: TTestSSLSetBIO;
@@ -95,6 +112,8 @@ begin
     lSSLName := IncludeTrailingPathDelimiter(ARuntimeDirectory) + lSSLName;
     lCryptoName := IncludeTrailingPathDelimiter(ARuntimeDirectory) + lCryptoName;
   end;
+  lSSLPath := lSSLName;
+  lCryptoPath := lCryptoName;
   RequireNative(InitSSLInterface(lSSLName, lCryptoName), 'OpenSSL 3 runtime unavailable');
   lSSLHandle := LoadLibrary(lSSLName);
   lCryptoHandle := LoadLibrary(lCryptoName);
@@ -505,11 +524,254 @@ begin
   end;
 end;
 
+function HexDigest(const AValue: RawByteString): string;
+var
+  lIndex: Integer;
+begin
+  Result := '';
+  for lIndex := 1 to Length(AValue) do
+    Result := Result + LowerCase(IntToHex(Byte(AValue[lIndex]), 2));
+end;
+
+procedure TestSharedCrypto(AContext: TNXTestContext);
+var
+  lStream: TMemoryStream;
+  lValue, lDigest: RawByteString;
+  lRejected: Boolean;
+begin
+  AContext.AssertEquals('a9993e364706816aba3e25717850c26c9cd0d89d',
+    HexDigest(TNXOpenSSLCrypto.SHA1('abc')));
+  AContext.AssertEquals('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    HexDigest(TNXOpenSSLCrypto.SHA256('abc')));
+  AContext.AssertEquals('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    HexDigest(TNXOpenSSLCrypto.SHA256('')));
+  // RFC 4231 test case 1: caller-owned output, no shared native digest buffer.
+  AContext.AssertEquals('b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7',
+    HexDigest(TNXOpenSSLCrypto.HMACSHA256(StringOfChar(#$0b, 20), 'Hi There')));
+  AContext.AssertEquals('120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b',
+    HexDigest(TNXOpenSSLCrypto.PBKDF2SHA256('password', 'salt', 1, 32)));
+  lValue := StringOfChar('a', 70000) + #0 + 'end';
+  lStream := TMemoryStream.Create;
+  try
+    lStream.WriteBuffer(lValue[1], Length(lValue));
+    lStream.Position := 0;
+    lDigest := TNXOpenSSLCrypto.SHA256Stream(lStream);
+    AContext.AssertTrue(TNXOpenSSLCrypto.ConstantTimeEquals(lDigest,
+      TNXOpenSSLCrypto.SHA256(lValue)), 'Stream digest differs across the 64 KiB boundary');
+  finally
+    lStream.Free;
+  end;
+  AContext.AssertTrue(TNXOpenSSLCrypto.ConstantTimeEquals('', ''));
+  AContext.AssertFalse(TNXOpenSSLCrypto.ConstantTimeEquals('a', ''));
+  AContext.AssertFalse(TNXOpenSSLCrypto.ConstantTimeEquals('abc', 'abd'));
+  AContext.AssertEquals(32, Length(TNXOpenSSLCrypto.RandomBytes(32)));
+  lRejected := False;
+  try
+    TNXOpenSSLCrypto.PBKDF2SHA256('password', 'salt', 0, 32);
+  except
+    on ESSL do lRejected := True;
+  end;
+  AContext.AssertTrue(lRejected, 'Invalid PBKDF2 iterations were accepted');
+end;
+
+constructor TSynapsePeer.Create(ASocket: TTCPBlockSocket);
+begin
+  inherited Create(True);
+  FSocket := ASocket;
+  FReady := TEvent.Create(nil, True, False, '');
+  FRelease := TEvent.Create(nil, True, False, '');
+end;
+
+destructor TSynapsePeer.Destroy;
+begin
+  FRelease.SetEvent;
+  WaitFor;
+  FSocket.Free;
+  FReady.Free;
+  FRelease.Free;
+  inherited Destroy;
+end;
+
+procedure TSynapsePeer.Execute;
+const
+  cPartialRecord: array[0..4] of Byte = (23, 3, 3, 0, 10);
+var
+  lMarker: AnsiChar;
+begin
+  try
+    RequireNative(FSocket.SSL.Accept, 'Peer TLS handshake failed: ' + FSocket.SSL.LastErrorDesc);
+    lMarker := 'K';
+    RequireNative(FSocket.SSL.SendBuffer(@lMarker, 1) = 1, 'Peer TLS write failed');
+    // Deliberately stall a TLS record after its header. Readiness alone must
+    // not turn the adapter's next SSL_read into an unbounded blocking call.
+    RequireNative(fpSend(FSocket.Socket, @cPartialRecord[0], SizeOf(cPartialRecord), 0) = SizeOf(cPartialRecord),
+      'Could not send partial TLS record');
+    FReady.SetEvent;
+    FRelease.WaitFor(5000);
+    FSocket.SSL.Shutdown;
+  except
+    on lError: Exception do FError := lError.Message;
+  end;
+  FReady.SetEvent;
+end;
+
+function TSynapsePeer.WaitReady: Boolean;
+begin
+  Result := FReady.WaitFor(3000) = wrSignaled;
+end;
+
+procedure CheckSynapseTLS(AContext: TNXTestContext; APFX, ADER: Boolean;
+  const AIdentity: string; AExpected: Boolean);
+var
+  lListener: TTestServer;
+  lClient, lSocket: TTCPBlockSocket;
+  lPeer: TSynapsePeer;
+  lAddress: TInetSockAddr;
+  lAddressLength: TSockLen;
+  lMarker: AnsiChar;
+  lStart, lElapsed: QWord;
+  lAdapter: TNXSynapseOpenSSL;
+begin
+  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lClient := TTCPBlockSocket.Create;
+  lSocket := nil;
+  lPeer := nil;
+  try
+    lListener.Listen;
+    lAddressLength := SizeOf(lAddress);
+    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0, 'Could not read test port');
+    lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
+    RequireNative(lClient.LastError = 0, 'Client TCP connection failed');
+    lSocket := TTCPBlockSocket.Create;
+    lSocket.Socket := lListener.TakeSocket;
+    lSocket.ConnectionTimeout := 2000;
+    if APFX then
+    begin
+      lSocket.SSL.PFXFile := Fixture('first.pfx');
+      lSocket.SSL.KeyPassword := 'nexus-test';
+    end
+    else
+    begin
+      lSocket.SSL.CertificateFile := Fixture('first-chain.pem');
+      if ADER then lSocket.SSL.PrivateKeyFile := Fixture('first.der')
+      else lSocket.SSL.PrivateKeyFile := Fixture('first.key');
+    end;
+    lPeer := TSynapsePeer.Create(lSocket);
+    lSocket := nil; // Peer takes exclusive ownership of the server socket.
+    lPeer.Start;
+    AContext.AssertTrue(lClient.SSL is TNXSynapseOpenSSL, 'Nexus adapter was not registered');
+    lAdapter := TNXSynapseOpenSSL(lClient.SSL);
+    lClient.ConnectionTimeout := 2000;
+    lAdapter.ReceiveTimeout := 150;
+    lAdapter.CertCAFile := Fixture('root.pem');
+    lAdapter.VerifyCert := True;
+    lAdapter.SNIHost := AIdentity;
+    AContext.AssertTrue(lAdapter.Connect = AExpected, 'Unexpected identity verification result: ' + lAdapter.LastErrorDesc);
+    AContext.AssertFalse(lClient.NonBlockMode, 'Handshake changed socket mode');
+    if AExpected then
+    begin
+      AContext.AssertTrue(lPeer.WaitReady, 'Peer did not finish handshake');
+      AContext.AssertEquals('', lPeer.Error);
+      AContext.AssertEquals('TLSv1.3', lAdapter.GetSSLVersion);
+      AContext.AssertEquals(0, lAdapter.GetVerifyCert);
+      AContext.AssertEquals(1, lAdapter.RecvBuffer(@lMarker, 1));
+      AContext.AssertTrue(lMarker = 'K', 'Encrypted application data was corrupted');
+      lStart := GetTickCount64;
+      AContext.AssertEquals(-1, lAdapter.RecvBuffer(@lMarker, 1), 'Partial record read timed out as EOF');
+      lElapsed := GetTickCount64 - lStart;
+      AContext.AssertTrue((lElapsed >= 100) and (lElapsed < 1500), 'TLS read exceeded its retry deadline');
+      AContext.AssertEquals(WSAETIMEDOUT, lAdapter.LastError);
+      AContext.AssertTrue(lAdapter.SSLEnabled, 'Timeout disabled the session');
+      AContext.AssertFalse(lClient.NonBlockMode, 'Read changed socket mode');
+      AContext.AssertTrue(lAdapter.Shutdown, 'One-way close_notify failed');
+      AContext.AssertFalse(lAdapter.SSLEnabled);
+    end
+    else AContext.AssertFalse(lAdapter.SSLEnabled);
+  finally
+    lClient.Free;
+    lPeer.Free;
+    lSocket.Free;
+    lListener.Free;
+  end;
+end;
+
+procedure TestSynapseTLS(AContext: TNXTestContext);
+begin
+  CheckSynapseTLS(AContext, False, False, 'localhost', True);
+  CheckSynapseTLS(AContext, False, True, '127.0.0.1', True);
+  CheckSynapseTLS(AContext, True, False, 'first.test', True);
+  CheckSynapseTLS(AContext, False, False, 'wrong.test', False);
+  CheckSynapseTLS(AContext, False, False, '127.0.0.2', False);
+end;
+
+procedure TestSynapseHandshakeDeadline(AContext: TNXTestContext);
+var
+  lListener: TTestServer;
+  lClient: TTCPBlockSocket;
+  lPeer: TSocketStream;
+  lAddress: TInetSockAddr;
+  lAddressLength: TSockLen;
+  lStart: QWord;
+begin
+  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lClient := TTCPBlockSocket.Create;
+  lPeer := nil;
+  try
+    lListener.Listen;
+    lAddressLength := SizeOf(lAddress);
+    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0, 'Could not read test port');
+    lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
+    lPeer := TSocketStream.Create(lListener.TakeSocket);
+    lClient.ConnectionTimeout := 150;
+    lClient.SSL.Ciphers := 'not-a-cipher';
+    AContext.AssertFalse(lClient.SSL.Connect, 'Invalid cipher configuration was accepted');
+    AContext.AssertTrue(Pos('cipher', lClient.SSL.LastErrorDesc) > 0);
+    lClient.SSL.Ciphers := 'DEFAULT';
+    lClient.SSL.PFXFile := Fixture('first.pfx');
+    lClient.SSL.KeyPassword := 'wrong-password';
+    AContext.AssertFalse(lClient.SSL.Connect, 'Invalid PFX password was accepted');
+    AContext.AssertFalse(lClient.SSL.SSLEnabled);
+    lClient.SSL.PFXFile := '';
+    lClient.SSL.SNIHost := 'localhost' + #0 + '.untrusted.test';
+    AContext.AssertFalse(lClient.SSL.Connect, 'Null-truncated TLS identity was accepted');
+    lClient.SSL.SNIHost := '';
+    lStart := GetTickCount64;
+    AContext.AssertFalse(lClient.SSL.Connect, 'Handshake with a silent peer succeeded');
+    AContext.AssertTrue((GetTickCount64 - lStart >= 100) and
+      (GetTickCount64 - lStart < 1500), 'Handshake ignored its deadline');
+    AContext.AssertEquals(WSAETIMEDOUT, lClient.SSL.LastError);
+    AContext.AssertFalse(lClient.NonBlockMode, 'Failed handshake changed socket mode');
+    AContext.AssertFalse(lClient.SSL.SSLEnabled);
+  finally
+    lPeer.Free;
+    lClient.Free;
+    lListener.Free;
+  end;
+end;
+
+procedure TestLoaderRecovery(AContext: TNXTestContext);
+begin
+  {$IFDEF WINDOWS}
+  DestroySSLInterface;
+  AContext.AssertFalse(InitSSLInterface('kernel32.dll', 'kernel32.dll'),
+    'Libraries without required OpenSSL exports were accepted');
+  AContext.AssertFalse(IsSSLLoaded, 'A rejected runtime was published as loaded');
+  AContext.AssertTrue(InitSSLInterface(lSSLPath, lCryptoPath),
+    'An incomplete library load prevented a valid retry');
+  AContext.AssertEquals('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    HexDigest(TNXOpenSSLCrypto.SHA256('abc')));
+  {$ENDIF}
+end;
+
 procedure RegisterNXOpenSSLTests(ARegistry: TNXTestRegistry);
 var
   lSuite: TNXTestSuite;
 begin
   lSuite := ARegistry.AddSuite('OpenSSL');
+  lSuite.AddTest('LoaderRecovery', @TestLoaderRecovery);
+  lSuite.AddTest('SynapseTLS', @TestSynapseTLS);
+  lSuite.AddTest('SynapseHandshakeDeadline', @TestSynapseHandshakeDeadline);
+  lSuite.AddTest('SharedCrypto', @TestSharedCrypto);
   lSuite.AddTest('ECKeysAndModernSymbols', @TestECKeysAndModernSymbols);
   lSuite.AddTest('PFXChain', @TestPFXChain);
   lSuite.AddTest('PFXVerifiedHandshake', @TestPFXVerifiedHandshake);

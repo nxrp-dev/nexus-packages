@@ -11,7 +11,8 @@
 
 dialect "nxpackage.Language.nxscript";
 
-// Additional source prerequisite: network/external/synapse; TLS uses a matching OpenSSL runtime.
+// Source prerequisites: network/external/synapse, network/openssl/src and network/openssl/synapse.
+// TLS and crypto share the Nexus OpenSSL 3 runtime loader.
 // These external components are not independently described in this catalog.
 Package XMPP {
     Id: "NXRP.Network.XMPP";

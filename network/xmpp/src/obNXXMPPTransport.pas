@@ -19,7 +19,7 @@ unit obNXXMPPTransport;
 interface
 
 uses
-  Classes, SysUtils, blcksock, synsock, ssl_openssl3, obNXXMPPError,
+  Classes, SysUtils, blcksock, synsock, obNXSynapseOpenSSL, obNXXMPPError,
   tpNXXMPPTypes;
 
 type
@@ -68,7 +68,7 @@ begin
   if (ACAFile = '') or not FileExists(ACAFile) then
     raise ENXXMPPError.Create(xesTLS, 'missing-ca-file',
       'A readable CA bundle is required before TLS starts.');
-  if not (FSocket.SSL is TSSLOpenSSL3) then
+  if not (FSocket.SSL is TNXSynapseOpenSSL) then
     raise ENXXMPPError.Create(xesTLS, 'openssl-provider-not-selected',
       'Synapse did not select the OpenSSL 3 TLS provider.');
   FSocket.SSL.VerifyCert := True;
@@ -91,10 +91,14 @@ end;
 
 function TNXXMPPTransport.Receive(ATimeoutMS: Integer): RawByteString;
 begin
+  if FSocket.SSL is TNXSynapseOpenSSL then
+    TNXSynapseOpenSSL(FSocket.SSL).ReceiveTimeout := ATimeoutMS;
   Result := RawByteString(FSocket.RecvPacket(ATimeoutMS));
   if (Result = '') and (FSocket.LastError <> 0) and
     (FSocket.LastError <> WSAETIMEDOUT) and
-    (FSocket.LastError <> WSAEWOULDBLOCK) then
+    (FSocket.LastError <> WSAEWOULDBLOCK) and
+    not ((FSocket.LastError = WSASYSNOTREADY) and
+      (FSocket.SSL.LastError = WSAETIMEDOUT)) then
     raise ENXXMPPError.Create(xesConnection, 'receive-failed',
       'The XMPP socket read failed: ' + FSocket.LastErrorDesc, True);
 end;

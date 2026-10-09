@@ -3,6 +3,17 @@
 This is the retained verification record for the deterministic Win64
 NexusXMPP test target and the explicitly identified live-server checks below.
 
+## Verified 2026-10-08 after OpenSSL consolidation
+
+The complete deterministic suite passes with NexusFPC 3.3.1, matching RTL/package
+units, OpenSSL 3.4.7, and range/overflow/I/O checks. Build products and logs were
+placed under TEMP. Run `test/Invoke-NXXMPPTests.ps1` with LLVM on PATH to
+reproduce this check. Add `network/openssl/src` and `network/openssl/synapse` to the
+existing XMPP/Synapse source paths. TLS uses `TNXSynapseOpenSSL`, and crypto uses
+`TNXOpenSSLCrypto`; the XMPP-specific OpenSSL unit is removed. Assertions are
+unchanged. The endpoint-order generator now explicitly wraps its seed modulo
+2^32, preserving its sequence under range and overflow checks.
+
 ## Verified 2026-09-07
 
 The test executable was rebuilt from source with FPC 3.2.2 using `-B` and all units/binaries directed under `output/`:

@@ -1,35 +1,34 @@
 # OpenSSL binding review
 
-Reviewed the standalone Nexus package and Synapse's OpenSSL 3 and 1.1 bindings.
-These are independent loaders and declarations. Fixes in the standalone package
-do not repair or change Synapse. This is a focused source review of loading,
-ABI declarations, identity verification, key/certificate handling, chain
-ownership and TLS I/O, not an exhaustive audit of every inherited declaration.
+Reviewed the three implementations that mattered to the active consumers:
+the Nexus OpenSSL package, Synapse's OpenSSL 3 binding/adapter, and XMPP's
+cryptography-only binding. The shared package now supplies all three use cases.
+This review covers the migrated API paths, not every inherited declaration.
 
-| Implementation | Current role | Findings and recommendation |
+| Implementation | Completeness | Verified defects and disposition |
 | --- | --- | --- |
-| [Nexus OpenSSL](src/openssl.pas), [object wrappers](src/fpopenssl.pp), [FCL adapter](src/opensslsockets.pp) | Independent binding and FCL socket integration | Retain the repaired package. Ten Win64 regression tests pass with OpenSSL 3.4.7. The tested paths cover identity verification, SNI, ALPN, keys, PFX chains, certificate generation and retry deadlines. Historical declarations and fallback library names remain; runtime loading is not a complete per-symbol capability check. |
-| [Synapse OpenSSL 3 binding](../external/synapse/ssl_openssl3_lib.pas) and [adapter](../external/synapse/ssl_openssl3.pas) | Used by Nexus BotHost and XMPP transports | Requires a separate repair. `InitSSLInterface` maps generic private-key loading to RSA-only loading, so PEM EC keys are rejected. It looks up `X509_NAME_hash`, which is a macro in OpenSSL 3 rather than the required exported `X509_NAME_hash_ex`. It loads `X509_STORE_add_cert` from libssl rather than libcrypto. Its PFX path adds intermediates to a verification store rather than configuring the transmitted chain, and its stack cleanup depends on the nonexistent `SK_X509_POP_FREE` export. |
-| [Synapse OpenSSL 1.1 binding](../external/synapse/ssl_openssl11_lib.pas) and [adapter](../external/synapse/ssl_openssl11.pas) | Available legacy provider; no active Nexus project consumer found in the inspected Pascal sources | Retire after confirming consumers. It repeats the RSA-only private-key loading and macro-based stack cleanup problems. Its PFX store insertion is not transmitted-chain configuration. OpenSSL 1.1.1 has ended public support; this provider is not a current runtime target. |
+| [Nexus OpenSSL](src/openssl.pas) and [wrappers](src/fpopenssl.pp) | Broadest API: TLS, X.509/certificates, keys/signatures, ciphers, BIO, random generation and crypto primitives. Includes ALPN and SNI routing. It is not a complete binding of every OpenSSL 3 API. | Retained and repaired. Fourteen Win64 regression tests pass. The shared loader validates required exports and version before success, releases incomplete loads, and permits retries. |
+| [Synapse OpenSSL 3 binding](../external/synapse/ssl_openssl3_lib.pas) and [adapter](../external/synapse/ssl_openssl3.pas) | Smaller, primarily the Synapse TLS contract; less general crypto/certificate coverage. | Known defects include RSA-only generic-key loading, macro names treated as exports, wrong-library lookup for X509_STORE_add_cert, PFX intermediates added to the trust store instead of the transmitted chain, missing native stack cleanup, unchecked identity configuration, and unbounded/busy TLS retries. Active consumers now use [our adapter](synapse/obNXSynapseOpenSSL.pas) over the shared binding. Vendored adapters remain unchanged. |
+| Former XMPP OpenSSL binding | Twelve native declarations for hashes, HMAC/PBKDF2, random bytes and comparison; no TLS adapter or certificate support. | Its independent loader published readiness before loading/symbol validation, so a failed first load could leave nil function pointers on later calls. Loading was not synchronized, and its platform names were incomplete. Removed after moving generic behavior into [shared crypto helpers](src/obNXOpenSSLCrypto.pas). XMPP keeps SCRAM and other protocol behavior. |
 
-Both Synapse adapters call `SslSet1Host` only when `SNIHost` is nonempty and ignore
-its return value. They do not configure IP identity checking through
-`X509_VERIFY_PARAM_set1_ip_asc`. A verified IP connection therefore needs explicit
-attention; chain verification alone does not establish the intended IP identity.
-The standalone wrapper now distinguishes DNS names from IP addresses and the
-socket adapter rejects an identity-configuration failure before connecting.
+The Nexus package is the most complete and is the implementation whose migrated
+paths now have passing regression coverage. Its known defects in those paths
+were repaired. Synapse's vendored adapter still contains the defects above but
+is inactive in BotHost/XMPP. The former XMPP implementation was too narrow to
+serve as the shared binding. A total bug-count comparison is not established
+by this focused review; the choice rests on API breadth, concrete defects and
+exercised behavior.
 
-The inspected Synapse ABI declarations also use Pascal `Integer` for C `long`
-control arguments/results and `BIO_ctrl_pending`'s `size_t`. C `long` is 64-bit
-on common 64-bit Unix platforms, whereas Windows C `long` is 32-bit; `size_t` is
-pointer-sized. This is a source-level portability defect, not a demonstrated
-Win64 test failure. The standalone pending-size declaration now uses `csize_t`
-and explicitly bounds conversion to the native `BIO_read` int-length interface.
+The owned Synapse adapter derives directly from `TCustomSSL`. It reuses the
+shared certificate/key/PFX ownership rules, checks configuration results,
+verifies DNS/IP identities and bounds retries with operation deadlines. The
+binding alone does not supply socket policy; FCL and Synapse keep separate
+transport adapters over the same native API owner.
 
-A fourth older Synapse provider, `ssl_openssl.pas`/`ssl_openssl_lib.pas`, is also
-present. It retains SHA-1 self-signed certificate generation and several of the
-same legacy loading/cleanup choices. It was inspected for these shared issues,
-but no runtime certification or changes were made to any Synapse provider.
+Synapse's legacy 1.1 and older providers are still present as upstream source,
+with no active consumer found in the inspected Nexus projects. They are not
+selected or runtime-certified by this change. The only vendored Synapse edit is
+the approved guard around JEDI's Delphi-only IFOPT G test, needed by NexusFPC.
 
 ## Native API evidence
 
@@ -40,12 +39,34 @@ but no runtime certification or changes were made to any Synapse provider.
 - [TLS options](https://docs.openssl.org/3.5/man3/SSL_CTX_set_options/) use `uint64_t` in OpenSSL 3.
 - [OpenSSL release policy](https://openssl-library.org/policies/releasestrat/) gives the supported release lines. Prefer the supported 3.5 LTS series for a new deployment. The locally tested 3.4.7 runtime was not upgraded by this package repair.
 
+## Crypto ABI evidence
+
+- [EVP digest APIs](https://docs.openssl.org/3.4/man3/EVP_DigestInit/) distinguish size_t input lengths and unsigned-int digest lengths; EVP_sha256 returns an EVP_MD pointer, not an EVP_CIPHER pointer.
+- [HMAC](https://docs.openssl.org/3.4/man3/HMAC/) uses int key length, size_t data length and caller-owned output. The one-shot HMAC API remains available in OpenSSL 3.
+- [PBKDF2](https://docs.openssl.org/3.4/man3/PKCS5_PBKDF2_HMAC/) has explicit int-sized password/salt/output lengths and requires positive iterations.
+- [CRYPTO_memcmp](https://docs.openssl.org/3.4/man3/CRYPTO_memcmp/) compares contents in time independent of those contents; length is not hidden by the helper.
+
 ## Scope of the conclusion
 
-The regression results establish the listed behavior for the standalone package
-on Win64. They do not establish full declaration coverage, native-library leak
-freedom, or correct operation across the supported OS/CPU matrix. Synapse review
-findings are source findings; its providers were neither substituted nor repaired.
-Keep the transport APIs separate while deciding which low-level binding should
-ultimately own the common OpenSSL declarations. Sharing that binding does not
-require replacing either the FCL or Synapse transport architecture.
+Verified with NexusFPC 3.3.1 and OpenSSL 3.4.7 on Win64. The complete deterministic
+XMPP suite also passes, including SCRAM vectors, trusted/mismatched/untrusted
+TLS peers and connection lifecycle checks. BotHost builds successfully, and its
+registered FileExchange and OpenAI suites each pass all 13 tests. These runs
+exercise the owned adapter, not the vendored Synapse OpenSSL adapter. Other OS/CPU combinations and native
+C-heap leak freedom remain unverified. The inherited FCL adapter remains
+available; shared binding ownership does not require merging transport APIs.
+
+
+BotHost verification deliberately selects NexusFPC 3.3.1 and its matching RTL,
+whereas the prior working BotHost outputs and Lazarus default used FPC 3.2.2.
+The owner-approved prerequisites are a JEDI guard for a Delphi-only directive,
+a Mustache assembly operand-width correction, and enabling Mustache's existing
+FPC 3.3 AttributeTable adjustment. The HTTPS test fixture path was updated after
+the XMPP package relocation. Existing test assertions were preserved.
+
+Reproduce the registered BotHost suites from the Nexus checkout with
+`projects/bothost/test/Invoke-NXBotTLSIntegrationTests.ps1`; it rebuilds the
+existing test module and NexusTest host, checks every returned test status, and
+keeps build products and logs under a unique temporary directory. Reproduce the
+deterministic XMPP suite with `network/xmpp/test/Invoke-NXXMPPTests.ps1`. These
+runs use local fixtures and loopback peers; no live-service result is claimed.

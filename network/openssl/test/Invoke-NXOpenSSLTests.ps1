@@ -67,6 +67,8 @@ foreach ($directory in (Get-ChildItem -Directory (Join-Path $NexusFPCRoot 'packa
 }
 $compilerArguments += @(
   ('-Fu' + (Join-Path $packageRoot 'src')),
+  ('-Fu' + (Join-Path $packageRoot 'synapse')),
+  ('-Fu' + (Join-Path $packagePool 'network\external\synapse')),
   ('-Fu' + (Join-Path $packagePool 'nxtest\src')),
   ('-FU' + $units), ('-FE' + $runRoot),
   (Join-Path $PSScriptRoot 'NXOpenSSLTests.lpr'))

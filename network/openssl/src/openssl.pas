@@ -866,6 +866,10 @@ const
 
   SSL_VERIFY_NONE = $00;
   SSL_VERIFY_PEER = $01;
+  SSL_VERIFY_FAIL_IF_NO_PEER_CERT = $02;
+  TLS1_2_VERSION = $0303;
+  TLS1_3_VERSION = $0304;
+  SSL_CTRL_SET_MAX_PROTO_VERSION = 124;
 
   SSL_CERT_FLAG_TLS_STRICT                      = $00000001;
 
@@ -1345,7 +1349,17 @@ var
   Function EVP_camellia_128_cbc : PEVP_CIPHER;
   Function EVP_camellia_192_cbc : PEVP_CIPHER;
   Function EVP_camellia_256_cbc : PEVP_CIPHER;
-  function EVP_sha256: PEVP_CIPHER;
+  function EVP_sha1: PEVP_MD;
+  function EVP_Digest(AData: Pointer; ACount: csize_t; ADigest: PByte; ALength: pcuint; AType: PEVP_MD; AEngine: PENGINE): cint;
+  function EVP_DigestInit_ex(AContext: PEVP_MD_CTX; AType: PEVP_MD; AEngine: PENGINE): cint;
+  function EVP_DigestFinal_ex(AContext: PEVP_MD_CTX; ADigest: PByte; ALength: pcuint): cint;
+  function HMAC(AType: PEVP_MD; AKey: Pointer; AKeyLength: cint; AData: PByte; ADataLength: csize_t; ADigest: PByte; ALength: pcuint): PByte;
+  function PKCS5_PBKDF2_HMAC(APassword: PAnsiChar; APasswordLength: cint; ASalt: PByte; ASaltLength, AIterations: cint; AType: PEVP_MD; ALength: cint; AKey: PByte): cint;
+  function CRYPTO_memcmp(ALeft, ARight: Pointer; ALength: csize_t): cint;
+  function SSL_CTX_set_default_verify_paths(AContext: PSSL_CTX): cint;
+  function SSL_CTX_get_cert_store(AContext: PSSL_CTX): Pointer;
+  function X509_STORE_add_cert(AStore: Pointer; ACertificate: PX509): cint;
+  function EVP_sha256: PEVP_MD;
 
   procedure OpenSSL_add_all_algorithms;
   procedure OpenSSL_add_all_ciphers;
@@ -1911,6 +1925,17 @@ type
   TEVP_VerifyFinal = function(ctx: pEVP_MD_CTX; sigbuf: pointer;
     siglen: cardinal; pkey: pEVP_PKEY): integer;  cdecl;
   //
+  TEVP_MDSource = function: PEVP_MD; cdecl;
+  TNX_EVP_sha1 = function: PEVP_MD; cdecl;
+  TNX_EVP_Digest = function(AData: Pointer; ACount: csize_t; ADigest: PByte; ALength: pcuint; AType: PEVP_MD; AEngine: PENGINE): cint; cdecl;
+  TNX_EVP_DigestInit_ex = function(AContext: PEVP_MD_CTX; AType: PEVP_MD; AEngine: PENGINE): cint; cdecl;
+  TNX_EVP_DigestFinal_ex = function(AContext: PEVP_MD_CTX; ADigest: PByte; ALength: pcuint): cint; cdecl;
+  TNX_HMAC = function(AType: PEVP_MD; AKey: Pointer; AKeyLength: cint; AData: PByte; ADataLength: csize_t; ADigest: PByte; ALength: pcuint): PByte; cdecl;
+  TNX_PKCS5_PBKDF2_HMAC = function(APassword: PAnsiChar; APasswordLength: cint; ASalt: PByte; ASaltLength, AIterations: cint; AType: PEVP_MD; ALength: cint; AKey: PByte): cint; cdecl;
+  TNX_CRYPTO_memcmp = function(ALeft, ARight: Pointer; ALength: csize_t): cint; cdecl;
+  TNX_SSL_CTX_set_default_verify_paths = function(AContext: PSSL_CTX): cint; cdecl;
+  TNX_SSL_CTX_get_cert_store = function(AContext: PSSL_CTX): Pointer; cdecl;
+  TNX_X509_STORE_add_cert = function(AStore: Pointer; ACertificate: PX509): cint; cdecl;
   TEVP_CIPHERFunction = function() : PEVP_CIPHER; cdecl;
   TEVP_get_cipherbyname = function(const name: PAnsiChar): PEVP_CIPHER; cdecl;
   TEVP_get_digestbyname = function(const name: PAnsiChar): PEVP_MD; cdecl;
@@ -2122,7 +2147,17 @@ var
   _EVP_camellia_128_cbc : TEVP_CIPHERFunction = nil;
   _EVP_camellia_192_cbc : TEVP_CIPHERFunction = nil;
   _EVP_camellia_256_cbc : TEVP_CIPHERFunction = nil;
-  _EVP_sha256 : TEVP_CIPHERFunction = nil;
+  _NX_EVP_sha1: TNX_EVP_sha1 = nil;
+  _NX_EVP_Digest: TNX_EVP_Digest = nil;
+  _NX_EVP_DigestInit_ex: TNX_EVP_DigestInit_ex = nil;
+  _NX_EVP_DigestFinal_ex: TNX_EVP_DigestFinal_ex = nil;
+  _NX_HMAC: TNX_HMAC = nil;
+  _NX_PKCS5_PBKDF2_HMAC: TNX_PKCS5_PBKDF2_HMAC = nil;
+  _NX_CRYPTO_memcmp: TNX_CRYPTO_memcmp = nil;
+  _NX_SSL_CTX_set_default_verify_paths: TNX_SSL_CTX_set_default_verify_paths = nil;
+  _NX_SSL_CTX_get_cert_store: TNX_SSL_CTX_get_cert_store = nil;
+  _NX_X509_STORE_add_cert: TNX_X509_STORE_add_cert = nil;
+  _EVP_sha256 : TEVP_MDSource = nil;
 
   // 3DES functions
   _DESsetoddparity: TDESsetoddparity = nil;
@@ -3940,7 +3975,87 @@ begin
     Result := Nil;
 end;
 
-function EVP_sha256: PEVP_CIPHER;
+function EVP_sha1: PEVP_MD;
+begin
+  if InitSSLInterface and Assigned(_NX_EVP_sha1) then
+    Result := _NX_EVP_sha1()
+  else
+    Result := nil;
+end;
+
+function EVP_Digest(AData: Pointer; ACount: csize_t; ADigest: PByte; ALength: pcuint; AType: PEVP_MD; AEngine: PENGINE): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_EVP_Digest) then
+    Result := _NX_EVP_Digest(AData, ACount, ADigest, ALength, AType, AEngine)
+  else
+    Result := 0;
+end;
+
+function EVP_DigestInit_ex(AContext: PEVP_MD_CTX; AType: PEVP_MD; AEngine: PENGINE): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_EVP_DigestInit_ex) then
+    Result := _NX_EVP_DigestInit_ex(AContext, AType, AEngine)
+  else
+    Result := 0;
+end;
+
+function EVP_DigestFinal_ex(AContext: PEVP_MD_CTX; ADigest: PByte; ALength: pcuint): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_EVP_DigestFinal_ex) then
+    Result := _NX_EVP_DigestFinal_ex(AContext, ADigest, ALength)
+  else
+    Result := 0;
+end;
+
+function HMAC(AType: PEVP_MD; AKey: Pointer; AKeyLength: cint; AData: PByte; ADataLength: csize_t; ADigest: PByte; ALength: pcuint): PByte;
+begin
+  if InitSSLInterface and Assigned(_NX_HMAC) then
+    Result := _NX_HMAC(AType, AKey, AKeyLength, AData, ADataLength, ADigest, ALength)
+  else
+    Result := nil;
+end;
+
+function PKCS5_PBKDF2_HMAC(APassword: PAnsiChar; APasswordLength: cint; ASalt: PByte; ASaltLength, AIterations: cint; AType: PEVP_MD; ALength: cint; AKey: PByte): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_PKCS5_PBKDF2_HMAC) then
+    Result := _NX_PKCS5_PBKDF2_HMAC(APassword, APasswordLength, ASalt, ASaltLength, AIterations, AType, ALength, AKey)
+  else
+    Result := 0;
+end;
+
+function CRYPTO_memcmp(ALeft, ARight: Pointer; ALength: csize_t): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_CRYPTO_memcmp) then
+    Result := _NX_CRYPTO_memcmp(ALeft, ARight, ALength)
+  else
+    Result := -1;
+end;
+
+function SSL_CTX_set_default_verify_paths(AContext: PSSL_CTX): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_SSL_CTX_set_default_verify_paths) then
+    Result := _NX_SSL_CTX_set_default_verify_paths(AContext)
+  else
+    Result := 0;
+end;
+
+function SSL_CTX_get_cert_store(AContext: PSSL_CTX): Pointer;
+begin
+  if InitSSLInterface and Assigned(_NX_SSL_CTX_get_cert_store) then
+    Result := _NX_SSL_CTX_get_cert_store(AContext)
+  else
+    Result := nil;
+end;
+
+function X509_STORE_add_cert(AStore: Pointer; ACertificate: PX509): cint;
+begin
+  if InitSSLInterface and Assigned(_NX_X509_STORE_add_cert) then
+    Result := _NX_X509_STORE_add_cert(AStore, ACertificate)
+  else
+    Result := 0;
+end;
+
+function EVP_sha256: PEVP_MD;
 begin
   if InitSSLInterface and Assigned(_EVP_sha256) then
     Result := _EVP_sha256()
@@ -5680,6 +5795,16 @@ begin
   _EVP_camellia_128_cbc := GetProcAddr(SSLUtilHandle, 'EVP_camellia_128_cbc');
   _EVP_camellia_192_cbc := GetProcAddr(SSLUtilHandle, 'EVP_camellia_192_cbc');
   _EVP_camellia_256_cbc := GetProcAddr(SSLUtilHandle, 'EVP_camellia_256_cbc');
+  _NX_EVP_sha1 := GetProcAddr(SSLUtilHandle, 'EVP_sha1');
+  _NX_EVP_Digest := GetProcAddr(SSLUtilHandle, 'EVP_Digest');
+  _NX_EVP_DigestInit_ex := GetProcAddr(SSLUtilHandle, 'EVP_DigestInit_ex');
+  _NX_EVP_DigestFinal_ex := GetProcAddr(SSLUtilHandle, 'EVP_DigestFinal_ex');
+  _NX_HMAC := GetProcAddr(SSLUtilHandle, 'HMAC');
+  _NX_PKCS5_PBKDF2_HMAC := GetProcAddr(SSLUtilHandle, 'PKCS5_PBKDF2_HMAC');
+  _NX_CRYPTO_memcmp := GetProcAddr(SSLUtilHandle, 'CRYPTO_memcmp');
+  _NX_SSL_CTX_set_default_verify_paths := GetProcAddr(SSLLibHandle, 'SSL_CTX_set_default_verify_paths');
+  _NX_SSL_CTX_get_cert_store := GetProcAddr(SSLLibHandle, 'SSL_CTX_get_cert_store');
+  _NX_X509_STORE_add_cert := GetProcAddr(SSLUtilHandle, 'X509_STORE_add_cert');
   _EVP_sha256 := GetProcAddr(SSLUtilHandle, 'EVP_sha256');
 
   _EVP_MD_CTX_new := GetProcAddr(SSLUtilHandle, 'EVP_MD_CTX_new');
@@ -6269,6 +6394,16 @@ begin
   _EVP_DecryptUpdate := nil;
   _EVP_DecryptFinal := nil;
   //
+  _NX_EVP_sha1 := nil;
+  _NX_EVP_Digest := nil;
+  _NX_EVP_DigestInit_ex := nil;
+  _NX_EVP_DigestFinal_ex := nil;
+  _NX_HMAC := nil;
+  _NX_PKCS5_PBKDF2_HMAC := nil;
+  _NX_CRYPTO_memcmp := nil;
+  _NX_SSL_CTX_set_default_verify_paths := nil;
+  _NX_SSL_CTX_get_cert_store := nil;
+  _NX_X509_STORE_add_cert := nil;
   _EVP_sha256 := nil;
 
   _EVP_MD_CTX_new := nil;
@@ -6349,6 +6484,95 @@ begin
   end;
 end;
 
+function SupportedEntryPointsAvailable: Boolean;
+const
+  cSSL: array[0..36] of PAnsiChar = (
+    'TLS_method',
+    'SSL_CTX_new',
+    'SSL_CTX_free',
+    'SSL_new',
+    'SSL_free',
+    'SSL_set_fd',
+    'SSL_connect',
+    'SSL_accept',
+    'SSL_shutdown',
+    'SSL_read',
+    'SSL_write',
+    'SSL_get_error',
+    'SSL_pending',
+    'SSL_get_version',
+    'SSL_ctrl',
+    'SSL_CTX_ctrl',
+    'SSL_CTX_set_verify',
+    'SSL_CTX_set_cipher_list',
+    'SSL_set1_host',
+    'SSL_get0_param',
+    'SSL_CTX_load_verify_locations',
+    'SSL_CTX_use_PrivateKey_file',
+    'SSL_CTX_use_PrivateKey',
+    'SSL_CTX_use_certificate',
+    'SSL_CTX_use_certificate_file',
+    'SSL_CTX_use_certificate_chain_file',
+    'SSL_CTX_use_certificate_ASN1',
+    'SSL_CTX_check_private_key',
+    'SSL_CTX_set_default_passwd_cb',
+    'SSL_CTX_set_default_passwd_cb_userdata',
+    'SSL_CTX_set_default_verify_paths',
+    'SSL_CTX_get_cert_store',
+    'SSL_get_verify_result',
+    'SSL_get1_peer_certificate',
+    'SSL_get_current_cipher',
+    'SSL_CIPHER_get_name',
+    'SSL_CIPHER_get_bits');
+  cCrypto: array[0..33] of PAnsiChar = (
+    'OpenSSL_version',
+    'EVP_sha1',
+    'EVP_sha256',
+    'EVP_Digest',
+    'EVP_MD_CTX_new',
+    'EVP_MD_CTX_free',
+    'EVP_DigestInit_ex',
+    'EVP_DigestUpdate',
+    'EVP_DigestFinal_ex',
+    'HMAC',
+    'PKCS5_PBKDF2_HMAC',
+    'RAND_bytes',
+    'CRYPTO_memcmp',
+    'X509_VERIFY_PARAM_set1_ip_asc',
+    'X509_STORE_add_cert',
+    'BIO_new',
+    'BIO_s_mem',
+    'BIO_new_mem_buf',
+    'BIO_read',
+    'BIO_write',
+    'BIO_free_all',
+    'd2i_AutoPrivateKey',
+    'd2i_X509_bio',
+    'd2i_PKCS12_bio',
+    'PKCS12_parse',
+    'PKCS12_free',
+    'X509_free',
+    'EVP_PKEY_free',
+    'OPENSSL_sk_num',
+    'OPENSSL_sk_value',
+    'OPENSSL_sk_free',
+    'ERR_clear_error',
+    'ERR_get_error',
+    'ERR_error_string_n');
+var
+  lIndex: Integer;
+  lVersion: TOpenSSLVersion;
+begin
+  Result := False;
+  for lIndex := Low(cSSL) to High(cSSL) do
+    if GetProcAddress(SSLLibHandle, cSSL[lIndex]) = nil then Exit;
+  for lIndex := Low(cCrypto) to High(cCrypto) do
+    if GetProcAddress(SSLUtilHandle, cCrypto[lIndex]) = nil then Exit;
+  lVersion := GetProcAddr(SSLUtilHandle, 'OpenSSL_version');
+  if not Assigned(lVersion) then Exit;
+  Result := Pos('OpenSSL 3.', AnsiString(lVersion(0))) = 1;
+end;
+
 function TryLoadLibPair(const SSL_DLL_Name, Crypto_DLL_Name: AnsiString):boolean;
 begin
   Assert((SSLUtilHandle = 0) and (SSLLibHandle = 0),
@@ -6359,6 +6583,7 @@ begin
     SSLLibHandle := LoadLibrary(SSL_DLL_Name);
 
   Result := (SSLUtilHandle <> 0) and (SSLLibHandle <> 0);
+  if Result then Result := SupportedEntryPointsAvailable;
   if not Result then UnloadLibraries;
 end;
 
@@ -6460,6 +6685,13 @@ begin
       end;
     LoadSSLEntryPoints;
     LoadUtilEntryPoints;
+    if not SupportedEntryPointsAvailable then
+    begin
+      ClearUtilEntryPoints;
+      ClearSSLEntryPoints;
+      UnloadLibraries;
+      Exit(False);
+    end;
     //init library
     if assigned(_SslLibraryInit) then
       _SslLibraryInit;

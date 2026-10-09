@@ -21,7 +21,7 @@ uses
   cthreads,
   cwstring,
   {$ENDIF}
-  Classes, SysUtils, Contnrs, DOM, blcksock, ssl_openssl3, synsock,
+  Classes, SysUtils, Contnrs, DOM, blcksock, obNXSynapseOpenSSL, synsock,
   tpNXXMPPTypes, tpNXXMPPMessageTypes, tpNXXMPPFileTypes,
   obNXXMPPError,
   obNXXMPPJID,
@@ -33,7 +33,7 @@ uses
   obNXXMPPDispatcher,
   obNXXMPPRequestManager,
   obNXXMPPEndpointResolver,
-  obNXXMPPOpenSSL,
+  obNXOpenSSLCrypto,
   obNXXMPPSASL,
   obNXXMPPQueue,
   obNXXMPPConfig,
@@ -1011,11 +1011,11 @@ begin
   AssertTrue((lCombined[0].Host = 'starttls.example') and
     (lCombined[0].Security = xtsStartTLS),
     'Direct TLS and STARTTLS endpoints should share one priority order.');
-  TNXXMPPOpenSSL.RequireAvailable;
+  TNXOpenSSLCrypto.RequireAvailable;
   AssertEquals('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
-    HexValue(TNXXMPPOpenSSL.SHA256('abc')),
+    HexValue(TNXOpenSSLCrypto.SHA256('abc')),
     'OpenSSL should provide SHA-256.');
-  AssertTrue(Length(TNXXMPPOpenSSL.RandomBytes(32)) = 32,
+  AssertTrue(Length(TNXOpenSSLCrypto.RandomBytes(32)) = 32,
     'OpenSSL should provide secure random bytes.');
 end;
 

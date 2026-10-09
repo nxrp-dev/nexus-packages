@@ -5,5 +5,5 @@ dialect "nxpackage.Language.nxscript";
 Package OpenSSL {
     Id: "NXRP.Network.OpenSSL";
     Author: "Nexus contributors and upstream authors";
-    Description: "OpenSSL bindings, certificate wrappers and FCL TLS socket adapter.";
+    Description: "Shared OpenSSL 3 bindings, crypto and certificate wrappers, FCL and Nexus Synapse TLS adapters.";
 }

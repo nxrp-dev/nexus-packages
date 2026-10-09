@@ -20,7 +20,7 @@ interface
 
 uses
   Classes, SysUtils, Contnrs, DOM, SyncObjs, obNXXMPPConfig, obNXXMPPDispatcher, obNXXMPPModule,
-  obNXXMPPOpenSSL, obNXXMPPStanza, synacode, tpNXXMPPTypes,
+  obNXOpenSSLCrypto, obNXXMPPStanza, synacode, tpNXXMPPTypes,
   utNXXMPPDOM, utNXXMPPXML;
 
 type
@@ -821,7 +821,7 @@ begin
       lCanonical := lCanonical + RawByteString(AInfo.Features[lIndex]) + '<';
     for lIndex := 0 to AInfo.Forms.Count - 1 do
       lCanonical := lCanonical + RawByteString(AInfo.Forms[lIndex]);
-    Result := UTF8String(EncodeBase64(TNXXMPPOpenSSL.SHA1(lCanonical)));
+    Result := UTF8String(EncodeBase64(TNXOpenSSLCrypto.SHA1(lCanonical)));
   finally
     lIdentities.Free;
   end;
