@@ -1179,7 +1179,7 @@ var
   function SSLGetVerifyResult(ssl: PSSL):cLong;
   function SSLGetServername(ssl: PSSL; _type: cInt = TLSEXT_NAMETYPE_host_name): AnsiString;
   procedure SslCtxCallbackCtrl(ssl: PSSL; _type: cInt; cb: PCallbackCb);
-  function SslSetSslCtx(ssl: PSSL; ctx: PSSL_CTX): PSSL;
+  function SslSetSslCtx(ssl: PSSL; ctx: PSSL_CTX): PSSL_CTX;
   function SslSet1Host(ssl: PSSL; hostname: string): cInt;
 
 // libeay.dll
@@ -1214,6 +1214,23 @@ var
   function EvpPkeyAssign(pkey: PEVP_PKEY; _type: cInt; key: Prsa): cInt;
   function EvpGetDigestByName(Name: AnsiString): PEVP_MD;
   procedure EVPcleanup;
+  function SSLGet0Param(ASSL: PSSL): Pointer;
+  function X509VerifyParamSet1IP(AParam: Pointer; const AIP: AnsiString): cint;
+  function OpenSSLStackNum(AStack: Pointer): cint;
+  function OpenSSLStackValue(AStack: Pointer; AIndex: cint): Pointer;
+  procedure OpenSSLStackFree(AStack: Pointer);
+  function EVPPKeyKeygenInit(AContext: PEVP_PKEY_CTX): cint;
+  function EVPPKeySetRSAKeygenBits(AContext: PEVP_PKEY_CTX; ABits: cint): cint;
+  function EVPPKeyGenerate(AContext: PEVP_PKEY_CTX; var AKey: PEVP_PKEY): cint;
+  function X509V3ExtNConf(AConf, AContext: Pointer; const AName, AValue: AnsiString): Pointer;
+  function X509AddExt(ACertificate: PX509; AExtension: Pointer; ALocation: cint): cint;
+  procedure X509ExtensionFree(AExtension: Pointer);
+  function ASN1TimeNew: PASN1_TIME;
+  procedure ASN1TimeFree(ATime: PASN1_TIME);
+  function ASN1TimeSetString(ATime: PASN1_TIME; const AValue: AnsiString): cint;
+  function OpenSSLX509NameHashEx(AName: PX509_NAME; ALibCtx: POSSL_LIB_CTX; AProperties: PAnsiChar; AOK: PcInt): culong;
+  function SSLCTXSetOptions(AContext: PSSL_CTX; AOptions: QWord): QWord;
+
   function SSLeayversion(t: cInt): AnsiString;  deprecated 'For 1.1+ use OpenSSLGetVersion';
   procedure ErrErrorString(e: cInt; var buf: AnsiString; len: cInt);
   function ErrGetError: cInt;
@@ -1233,7 +1250,7 @@ var
   function Asn1IntegerGet(a: PASN1_INTEGER): integer;
   function i2dX509bio(b: PBIO; x: PX509): cInt;
   function i2dPrivateKeyBio(b: PBIO; pkey: PEVP_PKEY): cInt;
-  function d2iX509bio(b:PBIO; x:PX509):  PX509;
+  function d2iX509bio(ABIO: PBIO; ACertificate: PPX509): PX509;
   function PEMReadBioX509(b:PBIO; x:PSslPtr; callback:PFunction; cb_arg: SslPtr): PX509;
   procedure SkX509PopFree(st: SslPtr);
 
@@ -1420,7 +1437,7 @@ var
   function BioNew(b: PBIO_METHOD): PBIO;
   procedure BioFreeAll(b: PBIO);
   function BioSMem: PBIO_METHOD;
-  function BioCtrlPending(b: PBIO): cInt;
+  function BioCtrlPending(b: PBIO): csize_t;
   function BioRead(b: PBIO; var Buf: AnsiString; Len: cInt): cInt;
   function BioRead(b: PBIO; Buf: TBytes; Len: cInt): cInt;
   function BioWrite(b: PBIO; Buf: AnsiString; Len: cInt): cInt; overload;
@@ -1655,6 +1672,23 @@ begin
 end;
 
 type
+  TSSLGet0Param = function(ASSL: PSSL): Pointer; cdecl;
+  TX509VerifyParamSet1IP = function(AParam: Pointer; AIP: PAnsiChar): cint; cdecl;
+  TOpenSSLStackNum = function(AStack: Pointer): cint; cdecl;
+  TOpenSSLStackValue = function(AStack: Pointer; AIndex: cint): Pointer; cdecl;
+  TOpenSSLStackFree = procedure(AStack: Pointer); cdecl;
+  TEVPPKeyKeygenInit = function(AContext: PEVP_PKEY_CTX): cint; cdecl;
+  TEVPPKeySetRSAKeygenBits = function(AContext: PEVP_PKEY_CTX; ABits: cint): cint; cdecl;
+  TEVPPKeyGenerate = function(AContext: PEVP_PKEY_CTX; var AKey: PEVP_PKEY): cint; cdecl;
+  TX509V3ExtNConf = function(AConf, AContext: Pointer; AName, AValue: PAnsiChar): Pointer; cdecl;
+  TX509AddExt = function(ACertificate: PX509; AExtension: Pointer; ALocation: cint): cint; cdecl;
+  TX509ExtensionFree = procedure(AExtension: Pointer); cdecl;
+  TASN1TimeNew = function: PASN1_TIME; cdecl;
+  TASN1TimeFree = procedure(ATime: PASN1_TIME); cdecl;
+  TASN1TimeSetString = function(ATime: PASN1_TIME; AValue: PAnsiChar): cint; cdecl;
+  TOpenSSLX509NameHashEx = function(AName: PX509_NAME; ALibCtx: POSSL_LIB_CTX; AProperties: PAnsiChar; AOK: PcInt): culong; cdecl;
+  TSSLCTXSetOptions = function(AContext: PSSL_CTX; AOptions: QWord): QWord; cdecl;
+
 // libssl.dll
   TSslGetError = function(s: PSSL; ret_code: cInt):cInt; cdecl;
   TSslLibraryInit = function:cInt; cdecl;
@@ -1717,8 +1751,8 @@ type
   TSSLGetVerifyResult = function(ssl: PSSL):cInt; cdecl;
   TSSLGetServername = function(ssl: PSSL; _type: cInt = TLSEXT_NAMETYPE_host_name): PAnsiChar; cdecl;
   TSSLCtxCallbackCtrl = procedure(ctx: PSSL_CTX; _type: cInt; cb: PCallbackCb); cdecl;
-  TSSLSetSslCtx = function(ssl: PSSL; ctx: PSSL_CTX): PSSL; cdecl;
-  TSslSet1Host = function(ssl: PSSL; hostname: string): cInt; cdecl;
+  TSSLSetSslCtx = function(ssl: PSSL; ctx: PSSL_CTX): PSSL_CTX; cdecl;
+  TSslSet1Host = function(ssl: PSSL; hostname: PAnsiChar): cInt; cdecl;
 
 // libeay.dll
   TERR_load_crypto_strings = procedure; cdecl;
@@ -1757,7 +1791,7 @@ type
   TBioNew = function(b: PBIO_METHOD): PBIO; cdecl;
   TBioFreeAll = procedure(b: PBIO); cdecl;
   TBioSMem = function: PBIO_METHOD; cdecl;
-  TBioCtrlPending = function(b: PBIO): cInt; cdecl;
+  TBioCtrlPending = function(b: PBIO): csize_t; cdecl;
   TBioRead = function(b: PBIO; Buf: PAnsiChar; Len: cInt): cInt; cdecl;
   TBioWrite = function(b: PBIO; Buf: PAnsiChar; Len: cInt): cInt; cdecl;
   Td2iPKCS12bio = function(b:PBIO; Pkcs12: SslPtr): SslPtr; cdecl;
@@ -1770,7 +1804,7 @@ type
   TAsn1IntegerSet = function(a: PASN1_INTEGER; v: integer): integer; cdecl;
   TAsn1IntegerGet = function(a: PASN1_INTEGER): integer; cdecl;
   Ti2dX509bio = function(b: PBIO; x: PX509): cInt; cdecl;
-  Td2iX509bio = function(b:PBIO;  x:PX509):   PX509; cdecl;
+  Td2iX509bio = function(ABIO: PBIO; ACertificate: PPX509): PX509; cdecl;
   TPEMReadBioX509 = function(b:PBIO; x:PSslPtr; callback:PFunction; cb_arg:SslPtr): PX509; cdecl;
   TSkX509PopFree = procedure(st: PSslPtr; func: TX509Free); cdecl;
   Ti2dPrivateKeyBio= function(b: PBIO; pkey: PEVP_PKEY): cInt; cdecl;
@@ -1943,6 +1977,23 @@ type
 
 var
 // libssl.dll
+  _SSLGet0Param: TSSLGet0Param = nil;
+  _X509VerifyParamSet1IP: TX509VerifyParamSet1IP = nil;
+  _OpenSSLStackNum: TOpenSSLStackNum = nil;
+  _OpenSSLStackValue: TOpenSSLStackValue = nil;
+  _OpenSSLStackFree: TOpenSSLStackFree = nil;
+  _EVPPKeyKeygenInit: TEVPPKeyKeygenInit = nil;
+  _EVPPKeySetRSAKeygenBits: TEVPPKeySetRSAKeygenBits = nil;
+  _EVPPKeyGenerate: TEVPPKeyGenerate = nil;
+  _X509V3ExtNConf: TX509V3ExtNConf = nil;
+  _X509AddExt: TX509AddExt = nil;
+  _X509ExtensionFree: TX509ExtensionFree = nil;
+  _ASN1TimeNew: TASN1TimeNew = nil;
+  _ASN1TimeFree: TASN1TimeFree = nil;
+  _ASN1TimeSetString: TASN1TimeSetString = nil;
+  _OpenSSLX509NameHashEx: TOpenSSLX509NameHashEx = nil;
+  _SSLCTXSetOptions: TSSLCTXSetOptions = nil;
+
   _SslGetError: TSslGetError = nil;
   _SslLibraryInit: TSslLibraryInit = nil;
   _OPENSSL_init_ssl : TOPENSSL_init_ssl = Nil;
@@ -2795,7 +2846,7 @@ begin
     _SslCtxCallbackCtrl(ssl, _type, cb);
 end;
 
-function SslSetSslCtx(ssl: PSSL; ctx: PSSL_CTX): PSSL;
+function SslSetSslCtx(ssl: PSSL; ctx: PSSL_CTX): PSSL_CTX;
 begin
   if InitSSLInterface and Assigned(_SslSetSslCtx) then
     result := _SslSetSslCtx(ssl, ctx)
@@ -2806,12 +2857,134 @@ end;
 function SslSet1Host(ssl: PSSL; hostname: string): cInt;
 begin
   if InitSSLInterface and Assigned(_SslSet1Host) then
-    result := _SslSet1Host(ssl, hostname)
+    result := _SslSet1Host(ssl, PAnsiChar(hostname))
   else
     result := 0;
 end;
 
 // libeay.dll
+function SSLGet0Param(ASSL: PSSL): Pointer;
+begin
+  if InitSSLInterface and Assigned(_SSLGet0Param) then
+    Result := _SSLGet0Param(ASSL)
+  else
+    Result := nil;
+end;
+
+function X509VerifyParamSet1IP(AParam: Pointer; const AIP: AnsiString): cint;
+begin
+  if InitSSLInterface and Assigned(_X509VerifyParamSet1IP) then
+    Result := _X509VerifyParamSet1IP(AParam, PAnsiChar(AIP))
+  else
+    Result := 0;
+end;
+
+function OpenSSLStackNum(AStack: Pointer): cint;
+begin
+  if InitSSLInterface and Assigned(_OpenSSLStackNum) then
+    Result := _OpenSSLStackNum(AStack)
+  else
+    Result := -1;
+end;
+
+function OpenSSLStackValue(AStack: Pointer; AIndex: cint): Pointer;
+begin
+  if InitSSLInterface and Assigned(_OpenSSLStackValue) then
+    Result := _OpenSSLStackValue(AStack, AIndex)
+  else
+    Result := nil;
+end;
+
+procedure OpenSSLStackFree(AStack: Pointer);
+begin
+  if InitSSLInterface and Assigned(_OpenSSLStackFree) then
+    _OpenSSLStackFree(AStack);
+end;
+
+function EVPPKeyKeygenInit(AContext: PEVP_PKEY_CTX): cint;
+begin
+  if InitSSLInterface and Assigned(_EVPPKeyKeygenInit) then
+    Result := _EVPPKeyKeygenInit(AContext)
+  else
+    Result := 0;
+end;
+
+function EVPPKeySetRSAKeygenBits(AContext: PEVP_PKEY_CTX; ABits: cint): cint;
+begin
+  if InitSSLInterface and Assigned(_EVPPKeySetRSAKeygenBits) then
+    Result := _EVPPKeySetRSAKeygenBits(AContext, ABits)
+  else
+    Result := 0;
+end;
+
+function EVPPKeyGenerate(AContext: PEVP_PKEY_CTX; var AKey: PEVP_PKEY): cint;
+begin
+  if InitSSLInterface and Assigned(_EVPPKeyGenerate) then
+    Result := _EVPPKeyGenerate(AContext, AKey)
+  else
+    Result := 0;
+end;
+
+function X509V3ExtNConf(AConf, AContext: Pointer; const AName, AValue: AnsiString): Pointer;
+begin
+  if InitSSLInterface and Assigned(_X509V3ExtNConf) then
+    Result := _X509V3ExtNConf(AConf, AContext, PAnsiChar(AName), PAnsiChar(AValue))
+  else
+    Result := nil;
+end;
+
+function X509AddExt(ACertificate: PX509; AExtension: Pointer; ALocation: cint): cint;
+begin
+  if InitSSLInterface and Assigned(_X509AddExt) then
+    Result := _X509AddExt(ACertificate, AExtension, ALocation)
+  else
+    Result := 0;
+end;
+
+procedure X509ExtensionFree(AExtension: Pointer);
+begin
+  if InitSSLInterface and Assigned(_X509ExtensionFree) then
+    _X509ExtensionFree(AExtension);
+end;
+
+function ASN1TimeNew: PASN1_TIME;
+begin
+  if InitSSLInterface and Assigned(_ASN1TimeNew) then
+    Result := _ASN1TimeNew()
+  else
+    Result := nil;
+end;
+
+procedure ASN1TimeFree(ATime: PASN1_TIME);
+begin
+  if InitSSLInterface and Assigned(_ASN1TimeFree) then
+    _ASN1TimeFree(ATime);
+end;
+
+function ASN1TimeSetString(ATime: PASN1_TIME; const AValue: AnsiString): cint;
+begin
+  if InitSSLInterface and Assigned(_ASN1TimeSetString) then
+    Result := _ASN1TimeSetString(ATime, PAnsiChar(AValue))
+  else
+    Result := 0;
+end;
+
+function OpenSSLX509NameHashEx(AName: PX509_NAME; ALibCtx: POSSL_LIB_CTX; AProperties: PAnsiChar; AOK: PcInt): culong;
+begin
+  if InitSSLInterface and Assigned(_OpenSSLX509NameHashEx) then
+    Result := _OpenSSLX509NameHashEx(AName, ALibCtx, AProperties, AOK)
+  else
+    Result := 0;
+end;
+
+function SSLCTXSetOptions(AContext: PSSL_CTX; AOptions: QWord): QWord;
+begin
+  if InitSSLInterface and Assigned(_SSLCTXSetOptions) then
+    Result := _SSLCTXSetOptions(AContext, AOptions)
+  else
+    Result := 0;
+end;
+
 function SSLeayversion(t: cInt): AnsiString;
 begin
   if InitSSLInterface and Assigned(_SSLeayversion) then
@@ -2908,11 +3081,19 @@ begin
 end;
 
 function X509NameHash(x: PX509_NAME):cuLong;
+var
+  lOK: cint;
 begin
-  if InitSSLInterface and Assigned(_X509NameHash) then
+  Result := 0;
+  if not InitSSLInterface then Exit;
+  if Assigned(_X509NameHash) then
     Result := _X509NameHash(x)
-  else
-    Result := 0;
+  else if Assigned(_OpenSSLX509NameHashEx) then
+  begin
+    lOK := 0;
+    Result := _OpenSSLX509NameHashEx(x, nil, nil, @lOK);
+    if lOK <> 1 then Result := 0;
+  end;
 end;
 
 function X509Digest(data: PX509; _type: PEVP_MD; md: AnsiString; var len: cInt):cInt;
@@ -3007,7 +3188,7 @@ begin
 end;
 
 
-function BioCtrlPending(b: PBIO): cInt;
+function BioCtrlPending(b: PBIO): csize_t;
 begin
   if InitSSLInterface and Assigned(_BioCtrlPending) then
     Result := _BioCtrlPending(b)
@@ -3230,10 +3411,10 @@ begin
     Result := 0;
 end;
 
-function d2iX509bio(b:PBIO; x:PX509):  PX509;
+function d2iX509bio(ABIO: PBIO; ACertificate: PPX509): PX509;
 begin
   if InitSSLInterface and Assigned(_d2iX509bio) then
-    Result := _d2iX509bio(x,b)
+    Result := _d2iX509bio(ABIO, ACertificate)
   else
     Result := nil;
 end;
@@ -5339,6 +5520,8 @@ end;
 Procedure LoadSSLEntryPoints;
 
 begin
+  _SSLGet0Param := GetProcAddr(SSLLibHandle, 'SSL_get0_param');
+  _SSLCTXSetOptions := GetProcAddr(SSLLibHandle, 'SSL_CTX_set_options');
   _SslGetError := GetProcAddr(SSLLibHandle, 'SSL_get_error');
   _SslLibraryInit := GetProcAddr(SSLLibHandle, 'SSL_library_init');
   _OPENSSL_init_ssl := GetProcAddr(SSLLibHandle, 'OPENSSL_init_ssl');
@@ -5358,9 +5541,7 @@ begin
   _SslTLSMethod := GetProcAddr(SSLLibHandle, 'TLS_method');
   _SslCtxUsePrivateKey := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_PrivateKey');
   _SslCtxUsePrivateKeyASN1 := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_PrivateKey_ASN1');
-  //use SSL_CTX_use_RSAPrivateKey_file instead SSL_CTX_use_PrivateKey_file,
-  //because SSL_CTX_use_PrivateKey_file not support DER format. :-O
-  _SslCtxUsePrivateKeyFile := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_RSAPrivateKey_file');
+  _SslCtxUsePrivateKeyFile := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_PrivateKey_file');
   _SslCtxUseCertificate := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_certificate');
   _SslCtxUseCertificateASN1 := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_certificate_ASN1');
   _SslCtxUseCertificateFile := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_certificate_file');
@@ -5416,6 +5597,20 @@ begin
   _X509NameOneline := GetProcAddr(SSLUtilHandle, 'X509_NAME_oneline');
   _X509GetSubjectName := GetProcAddr(SSLUtilHandle, 'X509_get_subject_name');
   _X509GetIssuerName := GetProcAddr(SSLUtilHandle, 'X509_get_issuer_name');
+  _X509VerifyParamSet1IP := GetProcAddr(SSLUtilHandle, 'X509_VERIFY_PARAM_set1_ip_asc');
+  _OpenSSLStackNum := GetProcAddr(SSLUtilHandle, 'OPENSSL_sk_num');
+  _OpenSSLStackValue := GetProcAddr(SSLUtilHandle, 'OPENSSL_sk_value');
+  _OpenSSLStackFree := GetProcAddr(SSLUtilHandle, 'OPENSSL_sk_free');
+  _EVPPKeyKeygenInit := GetProcAddr(SSLUtilHandle, 'EVP_PKEY_keygen_init');
+  _EVPPKeySetRSAKeygenBits := GetProcAddr(SSLUtilHandle, 'EVP_PKEY_CTX_set_rsa_keygen_bits');
+  _EVPPKeyGenerate := GetProcAddr(SSLUtilHandle, 'EVP_PKEY_generate');
+  _X509V3ExtNConf := GetProcAddr(SSLUtilHandle, 'X509V3_EXT_nconf');
+  _X509AddExt := GetProcAddr(SSLUtilHandle, 'X509_add_ext');
+  _X509ExtensionFree := GetProcAddr(SSLUtilHandle, 'X509_EXTENSION_free');
+  _ASN1TimeNew := GetProcAddr(SSLUtilHandle, 'ASN1_TIME_new');
+  _ASN1TimeFree := GetProcAddr(SSLUtilHandle, 'ASN1_TIME_free');
+  _ASN1TimeSetString := GetProcAddr(SSLUtilHandle, 'ASN1_TIME_set_string');
+  _OpenSSLX509NameHashEx := GetProcAddr(SSLUtilHandle, 'X509_NAME_hash_ex');
   _X509NameHash := GetProcAddr(SSLUtilHandle, 'X509_NAME_hash');
   _X509Digest := GetProcAddr(SSLUtilHandle, 'X509_digest');
   _X509print := GetProcAddr(SSLUtilHandle, 'X509_print');
@@ -5571,7 +5766,9 @@ begin
   _EVP_DigestUpdate := GetProcAddr(SSLUtilHandle, 'EVP_DigestUpdate');
   _EVP_DigestFinal := GetProcAddr(SSLUtilHandle, 'EVP_DigestFinal');
   _EVP_SignFinal := GetProcAddr(SSLUtilHandle, 'EVP_SignFinal');
-  _EVP_PKEY_size := GetProcAddr(SSLUtilHandle,'EVP_PKEY_size');
+  _EVP_PKEY_size := GetProcAddr(SSLUtilHandle, 'EVP_PKEY_get_size');
+  if not Assigned(_EVP_PKEY_size) then
+    _EVP_PKEY_size := GetProcAddr(SSLUtilHandle, 'EVP_PKEY_size');
   _EVP_PKEY_free := GetProcAddr(SSLUtilHandle,'EVP_PKEY_free');
   _EVP_PKEY_encrypt_init_ex := GetProcAddr(SSLUtilHandle,'EVP_PKEY_encrypt_init_ex');
   _EVP_PKEY_encrypt := GetProcAddr(SSLUtilHandle,'EVP_PKEY_encrypt');
@@ -5730,6 +5927,22 @@ end;
 Procedure ClearSSLEntryPoints;
 
 begin
+  _SSLGet0Param := nil;
+  _X509VerifyParamSet1IP := nil;
+  _OpenSSLStackNum := nil;
+  _OpenSSLStackValue := nil;
+  _OpenSSLStackFree := nil;
+  _EVPPKeyKeygenInit := nil;
+  _EVPPKeySetRSAKeygenBits := nil;
+  _EVPPKeyGenerate := nil;
+  _X509V3ExtNConf := nil;
+  _X509AddExt := nil;
+  _X509ExtensionFree := nil;
+  _ASN1TimeNew := nil;
+  _ASN1TimeFree := nil;
+  _ASN1TimeSetString := nil;
+  _OpenSSLX509NameHashEx := nil;
+  _SSLCTXSetOptions := nil;
   _SslGetError := nil;
   _SslLibraryInit := nil;
   _OPENSSL_init_ssl:=Nil;

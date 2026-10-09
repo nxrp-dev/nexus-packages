@@ -27,6 +27,7 @@ Type
   Protected
     procedure SetSSLLastErrorString(AValue: string);
     Function FetchErrorInfo: Boolean;
+    function WaitForSSLRetry(AError: Integer; AStarted: QWord): Boolean;
     function CheckSSL(SSLResult: Integer): Boolean;
     function CheckSSL(SSLResult: Pointer): Boolean;
     function CreateSSLContext(AType: TSSLType): TSSLContext; virtual;
@@ -236,9 +237,13 @@ begin
        SNIHostName:=NormalizeHostNameForSNI(AnsiString((Socket as TInetSocket).NetworkAddress.Address));
        FSSL.Ctrl(SSL_CTRL_SET_TLSEXT_HOSTNAME,TLSEXT_NAMETYPE_host_name,PAnsiChar(SNIHostName));
        end;
-     if VerifyPeerCert and (Socket is TInetSocket) then
-       FSSL.Set1Host(NormalizeHostNameForSNI(AnsiString((Socket as TInetSocket).Host)));
-     Result:=CheckSSL(FSSL.Connect);
+     if VerifyPeerCert then
+     begin
+       if not (Socket is TInetSocket) then
+         raise ESSL.Create('Peer verification requires an internet socket host identity');
+       Result := CheckSSL(FSSL.Set1Host(NormalizeHostNameForSNI(AnsiString((Socket as TInetSocket).NetworkAddress.Address))));
+     end;
+     if Result then Result := CheckSSL(FSSL.Connect);
      //if Result and VerifyPeerCert then
      //  Result:=(FSSL.VerifyResult<>0) or (not DoVerifyCert);
      if Result then
@@ -356,8 +361,8 @@ end;
 
 destructor TOpenSSLSocketHandler.destroy;
 begin
-  FreeAndNil(FCTX);
   FreeAndNil(FSSL);
+  FreeAndNil(FCTX);
   inherited destroy;
 end;
 
@@ -380,7 +385,8 @@ begin
     raise;
   end;
   S:=CertificateData.CipherList;
-  FCTX.SetCipherList(S);
+  if not CheckSSL(FCTX.SetCipherList(S)) then
+    raise ESSL.Create('Could not configure TLS cipher list');
   FCTX.SetVerify(VO[VerifypeerCert],Nil);
   FCTX.SetDefaultPasswdCb(@HandleSSLPwd);
   FCTX.SetDefaultPasswdCbUserdata(self);
@@ -400,13 +406,15 @@ begin
    // (Story 4.4). Inert when empty, so existing TLS users are byte-for-byte unchanged (NFR1).
    // Must happen after FCTX config and before FSSL exists.
    if CertificateData.ALPNProtocols <> '' then
-     FCTX.SetALPNProtocols(CertificateData.ALPNProtocols);
+     if FCTX.SetALPNProtocols(CertificateData.ALPNProtocols) <> 0 then
+       raise ESSL.Create('Could not configure TLS ALPN protocols');
    // RFC 9113 §9.2 TLS floor (Story 4.5): when h2 is offered, require TLS >= 1.2,
    // so a peer that can only do TLS < 1.2 simply fails the handshake. Gated on the
    // h2 offer so non-h2 TLS users are byte-for-byte unchanged (NFR1). No max-version
    // cap -> TLS 1.3 stays available.
    if ALPNListOffersH2(CertificateData.ALPNProtocols) then
-     FCTX.SetMinProtoVersion(TLS1_2_VERSION);
+     if not CheckSSL(FCTX.SetMinProtoVersion(TLS1_2_VERSION)) then
+       raise ESSL.Create('Could not enforce the HTTP/2 TLS minimum version');
    try
      FSSL:=TSSL.Create(FCTX);
      Result:=True;
@@ -454,7 +462,11 @@ begin
   Result:=assigned(FSsl);
   if Result then
     If Not BiDirectional then
-      Result:=CheckSSL(FSSL.Shutdown)
+    begin
+      r := FSSL.Shutdown;
+      Result := r >= 0; // Zero means close_notify was sent; no peer reply is required.
+      if not Result then CheckSSL(r);
+    end
     else
       begin
       r:=FSSL.Shutdown;
@@ -471,49 +483,89 @@ begin
     Result:=DoneContext;
 end;
 
+function TOpenSSLSocketHandler.WaitForSSLRetry(AError: Integer; AStarted: QWord): Boolean;
+var
+  lState: TSocketState;
+  lTimeout: Integer;
+  lElapsed: QWord;
+begin
+  if AError = SSL_ERROR_WANT_READ then lState := sosCanRead
+  else lState := sosCanWrite;
+  lTimeout := Socket.IOTimeout;
+  if lTimeout > 0 then
+  begin
+    lElapsed := GetTickCount64 - AStarted;
+    if lElapsed >= QWord(lTimeout) then
+      Result := False
+    else
+    begin
+      lTimeout := lTimeout - Integer(lElapsed);
+      Result := lState in Socket.Select([lState], lTimeout);
+    end;
+  end
+  else
+  begin
+    // FCL's Windows Select path does not honor a nil timeout. Use positive
+    // blocking windows and continue until readiness or a socket error.
+    repeat
+      Result := lState in Socket.Select([lState], High(Integer));
+    until Result or (Socket.LastError <> 0);
+  end;
+  if not Result then
+  begin
+    FSSLLastError := AError;
+    FSSLLastErrorString := 'TLS I/O timed out waiting for socket readiness';
+  end;
+end;
+
 function TOpenSSLSocketHandler.Send(Const Buffer; Count: Integer): Integer;
 var
-  e: integer;
+  lError: Integer;
+  lStarted: QWord;
 begin
-  FLastError:=0;
+  FLastError := 0;
   FSSLLastError := 0;
-  FSSLLastErrorString:='';
+  FSSLLastErrorString := '';
+  if Count <= 0 then Exit(0);
+  lStarted := GetTickCount64;
   repeat
-    Result:=FSsl.Write(@Buffer,Count);
-    e:=FSsl.GetError(Result);
-  until Not (e in [SSL_ERROR_WANT_READ,SSL_ERROR_WANT_WRITE]);
-  if (E=SSL_ERROR_ZERO_RETURN) then
-    Result:=0
-  else if (e<>0) then
-    begin
-    FSSLLastError:=e;
-    if e=SSL_ERROR_SYSCALL then
-      FLastError:=socketerror;
-    end;
+    ErrClearError;
+    Result := FSSL.Write(@Buffer, Count);
+    lError := FSSL.GetError(Result);
+    if not (lError in [SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE]) then Break;
+    if not WaitForSSLRetry(lError, lStarted) then Exit(-1);
+  until False;
+  if lError = SSL_ERROR_ZERO_RETURN then Result := 0
+  else if lError <> SSL_ERROR_NONE then
+  begin
+    FSSLLastError := lError;
+    if lError = SSL_ERROR_SYSCALL then FLastError := SocketError;
+  end;
 end;
 
 function TOpenSSLSocketHandler.Recv(Const Buffer; Count: Integer): Integer;
-
 var
-  e: integer;
+  lError: Integer;
+  lStarted: QWord;
 begin
-  FLastError:=0;
-  FSSLLastError:=0;
-  FSSLLastErrorString:= '';
+  FLastError := 0;
+  FSSLLastError := 0;
+  FSSLLastErrorString := '';
+  if Count <= 0 then Exit(0);
+  lStarted := GetTickCount64;
   repeat
-    Result:=FSSL.Read(@Buffer ,Count);
-    e:=FSSL.GetError(Result);
-    if (e=SSL_ERROR_WANT_READ) and (Socket.IOTimeout>0) then
-      e:=SSL_ERROR_ZERO_RETURN;
-  until Not (e in [SSL_ERROR_WANT_READ,SSL_ERROR_WANT_WRITE]);
-  if (E=SSL_ERROR_ZERO_RETURN) then
-    Result:=0
-  else if (e<>0) then
-    begin
-    FSSLLastError:=e;
-    if e=SSL_ERROR_SYSCALL then
-      FLastError:=socketerror;
-    end;
+    ErrClearError;
+    Result := FSSL.Read(@Buffer, Count);
+    lError := FSSL.GetError(Result);
+    if not (lError in [SSL_ERROR_WANT_READ, SSL_ERROR_WANT_WRITE]) then Break;
+    if not WaitForSSLRetry(lError, lStarted) then Exit(-1);
+  until False;
+  if lError = SSL_ERROR_ZERO_RETURN then Result := 0
+  else if lError <> SSL_ERROR_NONE then
+  begin
+    FSSLLastError := lError;
+    if lError = SSL_ERROR_SYSCALL then FLastError := SocketError;
+  end;
 end;
 
 function TOpenSSLSocketHandler.BytesAvailable: Integer;

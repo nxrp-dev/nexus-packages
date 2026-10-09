@@ -48,6 +48,7 @@ Type
   TSSLContext = Class(TObject)
   private
     FCTX: PSSL_CTX;
+    FSNIContexts: TTlsExtCtx;
     FALPNWire : TBytes;   // ALPN preference list, [len][bytes]… wire form (RFC 7301); read by the unit-level ALPN select callback
     function UsePrivateKey(pkey: SslPtr): cInt;
     function UsePrivateKeyASN1(pk: cInt; d: String; len: cLong): cInt;
@@ -78,7 +79,7 @@ Type
     function LoadPFX(Const S,APassword : AnsiString) : cint; deprecated 'use TBytes overload';
     function LoadPFX(Const Buf : TBytes;APassword : AnsiString) : cint;
     function LoadPFX(Data : TSSLData; Const APAssword : Ansistring) : cint;
-    function SetOptions(AOptions: cLong): cLong;
+    function SetOptions(AOptions: QWord): QWord;
     // Set the minimum negotiated TLS protocol version (e.g. TLS1_2_VERSION).
     // Returns the SslCTXCtrl result (1 == success). Used to enforce the RFC 9113
     // §9.2 floor (TLS >= 1.2) when h2 is offered (Story 4.5).
@@ -144,9 +145,9 @@ Function BioToString(B : PBIO; FreeBIO : Boolean = False) : AnsiString;
 implementation
 
 {$IFDEF FPC_DOTTEDUNITS}
-uses System.DateUtils;
+uses System.DateUtils, System.Net.Sockets;
 {$ELSE FPC_DOTTEDUNITS}
-uses dateutils;
+uses dateutils, sockets;
 {$ENDIF FPC_DOTTEDUNITS}
 
 Resourcestring
@@ -154,171 +155,198 @@ Resourcestring
   SErrFailedToCreateSSL = 'Failed to create SSL';
 
 
-Function BioToString(B : PBIO; FreeBIO : Boolean = False) : AnsiString;
-
-Var
-  L,RL : Integer;
-begin
-  l:=bioctrlpending(B);
-  Result:=StringOfChar(#0,l);
-  RL:=BioRead(B,Result,L);
-  if (RL>0) then
-    SetLength(Result,RL)
-  else
-    SetLength(Result,0);
-  if FreeBio then
-    BioFreeAll(B);
-end;
-
-Function BioToTBytes(B : PBIO; FreeBIO : Boolean = False) : TBytes;
-
-Var
-  L,RL : Integer;
-begin
-  l:=bioctrlpending(B);
-  SetLength(Result,l);
-  FillChar(Result[0],L,0);
-  RL:=BioRead(B,Result,L);
-  if (RL>0) then
-    SetLength(Result,RL)
-  else
-    SetLength(Result,0);
-  if FreeBio then
-    BioFreeAll(B);
-end;
-
-function SelectSNIContextCallback(ASSL: TSSL; ad: integer; arg: TTlsExtCtx): integer; cdecl;
+Function BioToString(B: PBIO; FreeBIO: Boolean = False): AnsiString;
 var
-  sHostName: string;
-  o, i, f: integer;
+  lPending: csize_t;
+  lLength, lRead: Integer;
 begin
-  sHostName := SSLGetServername(ASSL, TLSEXT_NAMETYPE_host_name);
-  if (sHostName <> '') and (length(arg) > 0) then
-  begin
-    f := -1;
-    for o:=0 to length(arg)-1 do
-    begin
-      for i:=0 to length(arg[o].domains)-1 do
-        if sHostName = arg[o].domains[i] then
-        begin
-          f := o;
-          break;
-        end;
-      if f <> -1 then break
-    end;
-    if f = -1 then
-      result := SSL_TLSEXT_ERR_NOACK
-    else if f > 1 then // first one should be the main certificate
-      SslSetSslCtx(ASSL, arg[f].CTX);
+  Result := '';
+  try
+    lPending := BioCtrlPending(B);
+    if lPending > csize_t(High(cint)) then
+      raise ESSL.Create('BIO output exceeds the supported read length');
+    lLength := lPending;
+    if lLength = 0 then Exit;
+    SetLength(Result, lLength);
+    lRead := BioRead(B, Result, lLength);
+    if lRead > 0 then SetLength(Result, lRead)
+    else Result := '';
+  finally
+    if FreeBIO then BioFreeAll(B);
   end;
-  result := SSL_TLSEXT_ERR_OK;
+end;
+
+Function BioToTBytes(B: PBIO; FreeBIO: Boolean = False): TBytes;
+var
+  lPending: csize_t;
+  lLength, lRead: Integer;
+begin
+  Result := nil;
+  try
+    lPending := BioCtrlPending(B);
+    if lPending > csize_t(High(cint)) then
+      raise ESSL.Create('BIO output exceeds the supported read length');
+    lLength := lPending;
+    if lLength = 0 then Exit;
+    SetLength(Result, lLength);
+    lRead := BioRead(B, Result, lLength);
+    if lRead > 0 then SetLength(Result, lRead)
+    else Result := nil;
+  finally
+    if FreeBIO then BioFreeAll(B);
+  end;
+end;
+
+function SelectSNIContextCallback(ASSL: PSSL; AAlert: PcInt;
+  AUserData: Pointer): cint; cdecl;
+var
+  lContext: TSSLContext;
+  lHostName: string;
+  lIndex, lDomain: Integer;
+begin
+  Result := SSL_TLSEXT_ERR_NOACK;
+  lContext := TSSLContext(AUserData);
+  if lContext = nil then Exit;
+  lHostName := LowerCase(SSLGetServername(ASSL, TLSEXT_NAMETYPE_host_name));
+  if lHostName = '' then Exit;
+  for lIndex := 0 to High(lContext.FSNIContexts) do
+    for lDomain := 0 to High(lContext.FSNIContexts[lIndex].domains) do
+      if SameText(lHostName, lContext.FSNIContexts[lIndex].domains[lDomain]) then
+      begin
+        if (lContext.FSNIContexts[lIndex].CTX = nil) or
+          (SslSetSslCtx(ASSL, lContext.FSNIContexts[lIndex].CTX.CTX) = nil) then
+          Exit(SSL_TLSEXT_ERR_ALERT_FATAL);
+        Exit(SSL_TLSEXT_ERR_OK);
+      end;
 end;
 
 { TOpenSSLX509Certificate }
 
 
+procedure RequireSSLSuccess(AResult: cint; const AOperation: string);
+begin
+  if AResult <> 1 then
+    raise ESSL.Create('OpenSSL failed to ' + AOperation);
+end;
+
 procedure TOpenSSLX509Certificate.SetNameData(x: PX509);
-
-Var
-  ND : PX509_NAME;
-  S : AnsiString;
-
-  Procedure SetEntry(aCode,aValue : AnsiString);
-
-  begin
-    if (AValue<>'') then
-      X509NameAddEntryByTxt(ND, aCode, $1001, aValue, -1, -1, 0);
-  end;
-
-begin
-  ND:=X509GetSubjectName(x);
-  S:=Country;
-  if S='' then
-    S:='BE';
-  SetEntry('C',S);
-  S:=HostName;
-  if S='' then
-    S:='localhost';
-  SetEntry('CN',S);
-  SetEntry('O',Organization);
-  x509SetIssuerName(x,ND);
-end;
-
-Procedure TOpenSSLX509Certificate.SetTimes(x : PX509);
-
 var
-  Utc : PASN1_UTCTIME;
-
+  lName: PX509_NAME;
+  lHostName, lCountry: AnsiString;
 begin
-  Utc:=Asn1UtctimeNew;
+  lName := X509GetSubjectName(x);
+  if lName = nil then raise ESSL.Create('OpenSSL certificate subject is unavailable');
+  lCountry := Country;
+  if lCountry = '' then lCountry := 'BE';
+  lHostName := HostName;
+  if lHostName = '' then lHostName := 'localhost';
+  RequireSSLSuccess(X509NameAddEntryByTxt(lName, 'C', $1001, lCountry, -1, -1, 0), 'set certificate country');
+  RequireSSLSuccess(X509NameAddEntryByTxt(lName, 'CN', $1001, lHostName, -1, -1, 0), 'set certificate common name');
+  if Organization <> '' then
+    RequireSSLSuccess(X509NameAddEntryByTxt(lName, 'O', $1001, Organization, -1, -1, 0), 'set certificate organization');
+  RequireSSLSuccess(X509SetIssuerName(x, lName), 'set certificate issuer');
+end;
+
+Procedure TOpenSSLX509Certificate.SetTimes(x: PX509);
+var
+  lTime: PASN1_TIME;
+begin
+  if ValidTo <= ValidFrom then raise ESSL.Create('Certificate validity interval is empty');
+  lTime := ASN1TimeNew;
+  if lTime = nil then raise ESSL.Create('Could not allocate certificate validity time');
   try
-    ASN1UtcTimeSetString(Utc,PAnsiChar(FormatDateTime('YYMMDDHHNNSS"Z"',ValidFrom)));
-    X509SetNotBefore(x, Utc);
-    ASN1UtcTimeSetString(Utc,PAnsiChar(FormatDateTime('YYMMDDHHNNSS"Z"',ValidTo)));
-    X509SetNotAfter(x,Utc);
+    RequireSSLSuccess(ASN1TimeSetString(lTime, FormatDateTime('YYYYMMDDHHNNSS"Z"', ValidFrom)), 'encode certificate start time');
+    RequireSSLSuccess(X509SetNotBefore(x, lTime), 'set certificate start time');
+    RequireSSLSuccess(ASN1TimeSetString(lTime, FormatDateTime('YYYYMMDDHHNNSS"Z"', ValidTo)), 'encode certificate end time');
+    RequireSSLSuccess(X509SetNotAfter(x, lTime), 'set certificate end time');
   finally
-    Asn1UtctimeFree(Utc);
+    ASN1TimeFree(lTime);
   end;
 end;
 
-
-function TOpenSSLX509Certificate.CreateKey : PEVP_PKEY;
-
-Var
-  rsa: PRSA;
-
+function TOpenSSLX509Certificate.CreateKey: PEVP_PKEY;
+var
+  lContext: PEVP_PKEY_CTX;
 begin
-  Result:=EvpPkeynew;
-  rsa:=RsaGenerateKey(KeySize,$10001,nil,nil);
-  EvpPkeyAssign(Result,EVP_PKEY_RSA,rsa);
+  Result := nil;
+  if KeySize < 2048 then raise ESSL.Create('RSA certificate keys must have at least 2048 bits');
+  lContext := EVP_PKEY_CTX_new_from_name(nil, 'RSA', nil);
+  if lContext = nil then raise ESSL.Create('Could not create RSA generation context');
+  try
+    RequireSSLSuccess(EVPPKeyKeygenInit(lContext), 'initialize RSA key generation');
+    RequireSSLSuccess(EVPPKeySetRSAKeygenBits(lContext, KeySize), 'set RSA key size');
+    RequireSSLSuccess(EVPPKeyGenerate(lContext, Result), 'generate RSA key');
+  finally
+    EVP_PKEY_CTX_free(lContext);
+  end;
 end;
 
 function TOpenSSLX509Certificate.CreateCertificateAndKey: TCertAndKey;
-
 var
-  pk: PEVP_PKEY;
-  x: PX509;
-  b: PBIO;
-{$IFDEF DUMPCERT}
-  s : string;
-{$ENDIF}
-
+  lKey: PEVP_PKEY;
+  lCertificate: PX509;
+  lBIO: PBIO;
+  lExtension: Pointer;
+  lHostName, lSAN: AnsiString;
+  lIPv4: in_addr;
+  lIPv6: in6_addr;
+  lSerial: Integer;
 begin
-  SetLength(Result.Certificate,0);
-  SetLength(Result.PrivateKey,0);
-  pk := nil;
-  x := X509New;
+  Result.Certificate := nil;
+  Result.PrivateKey := nil;
+  lKey := nil;
+  lCertificate := X509New;
+  if lCertificate = nil then raise ESSL.Create('Could not allocate certificate');
   try
-    X509SetVersion(x, Version);
-    Asn1IntegerSet(X509getSerialNumber(x), GetRealSerial);
-    SetTimes(X);
-    pk:=CreateKey;
-    X509SetPubkey(x, pk);
-    SetNameData(x);
-    x509Sign(x,pk,EvpGetDigestByName('SHA1'));
-    // Certificate
-    b := BioNew(BioSMem);
-    i2dX509Bio(b, x);
-    Result.Certificate:=BioToTbytes(B,True);
-    // Private key
-    b := BioNew(BioSMem);
-    i2dPrivatekeyBio(b, pk);
-    Result.PrivateKey:=BioToTbytes(B,True);
-{$IFDEF DUMPCERT}
-    b := BioNew(BioSMem);
-    PEM_write_bio_X509(b,x);
-    S:=BioToString(B,True);
-    With TStringList.Create do
-      try
-        Add(S);
-        SaveToFile(IncludeTrailingPathDelimiter(GetTempDir)+DumpCertFile);
-      finally
-        Free;
-      end;
-{$ENDIF}
+    RequireSSLSuccess(X509SetVersion(lCertificate, 2), 'set X.509 v3 certificate version');
+    lSerial := Serial;
+    if lSerial = 0 then
+    begin
+      RequireSSLSuccess(RAND_bytes(@lSerial, SizeOf(lSerial)), 'generate certificate serial');
+      lSerial := lSerial and $7FFFFFFF;
+      if lSerial = 0 then lSerial := 1;
+    end;
+    RequireSSLSuccess(Asn1IntegerSet(X509GetSerialNumber(lCertificate), lSerial), 'set certificate serial');
+    SetTimes(lCertificate);
+    lKey := CreateKey;
+    RequireSSLSuccess(X509SetPubkey(lCertificate, lKey), 'set certificate public key');
+    SetNameData(lCertificate);
+    lHostName := HostName;
+    if lHostName = '' then lHostName := 'localhost';
+    if (Pos(',', lHostName) > 0) or (Pos(#0, lHostName) > 0) then
+      raise ESSL.Create('Certificate host name must identify one host');
+    if TryStrToHostAddr(lHostName, lIPv4) or TryStrToHostAddr6(lHostName, lIPv6) then
+      lSAN := 'IP:' + lHostName
+    else
+      lSAN := 'DNS:' + lHostName;
+    lExtension := X509V3ExtNConf(nil, nil, 'subjectAltName', lSAN);
+    if lExtension = nil then raise ESSL.Create('Could not encode certificate alternative name');
+    try
+      RequireSSLSuccess(X509AddExt(lCertificate, lExtension, -1), 'add certificate alternative name');
+    finally
+      X509ExtensionFree(lExtension);
+    end;
+    if X509Sign(lCertificate, lKey, EvpGetDigestByName('SHA256')) <= 0 then
+      raise ESSL.Create('Could not sign certificate with SHA-256');
+    lBIO := BioNew(BioSMem);
+    if lBIO = nil then raise ESSL.Create('Could not allocate certificate BIO');
+    try
+      RequireSSLSuccess(i2dX509Bio(lBIO, lCertificate), 'encode certificate');
+      Result.Certificate := BioToTBytes(lBIO);
+    finally
+      BioFreeAll(lBIO);
+    end;
+    lBIO := BioNew(BioSMem);
+    if lBIO = nil then raise ESSL.Create('Could not allocate private key BIO');
+    try
+      RequireSSLSuccess(i2dPrivateKeyBio(lBIO, lKey), 'encode private key');
+      Result.PrivateKey := BioToTBytes(lBIO);
+    finally
+      BioFreeAll(lBIO);
+    end;
   finally
-    X509free(x);
-    EvpPkeyFree(pk);
+    X509Free(lCertificate);
+    EvpPkeyFree(lKey);
   end;
 end;
 
@@ -472,23 +500,28 @@ end;
 
 
 Function TSSLContext.UsePrivateKey(Data: TSSLData): cint;
-
-Var
-  FN : String;
-  l : integer;
-
+var
+  lKey: PEVP_PKEY;
+  lBytes: PByte;
 begin
-  Result:=-1;
-  L:=Length(Data.Value);
-  If (l<>0) then
-    Result:=UsePrivateKeyASN1(EVP_PKEY_RSA,Data.Value,L)
-  else if (Data.FileName<>'') then
-    begin
-    FN:=Data.FileName;
-    Result:=UsePrivateKeyFile(FN,SSL_FILETYPE_PEM);
-    if (Result<>1) then
-      Result:=UsePrivateKeyFile(FN,SSL_FILETYPE_ASN1);
+  Result := -1;
+  if Length(Data.Value) <> 0 then
+  begin
+    lBytes := @Data.Value[0];
+    lKey := d2i_AutoPrivateKey(nil, @lBytes, Length(Data.Value));
+    if lKey = nil then Exit;
+    try
+      Result := UsePrivateKey(lKey);
+    finally
+      EvpPkeyFree(lKey);
     end;
+  end
+  else if Data.FileName <> '' then
+  begin
+    Result := UsePrivateKeyFile(Data.FileName, SSL_FILETYPE_PEM);
+    if Result <> 1 then
+      Result := UsePrivateKeyFile(Data.FileName, SSL_FILETYPE_ASN1);
+  end;
 end;
 
 Function TSSLContext.UseCertificate(Data: TSSLData): cint;
@@ -557,68 +590,68 @@ begin
 end;
 
 function TSSLContext.LoadPFX(const Buf: TBytes; APassword: AnsiString): cint;
-
+const
+  cSSLControlChain = 88; // SSL_CTX_set1_chain: copies stack and retains certificate references.
 var
-  b: PBIO;
-  p12,c,pk,ca: SslPtr;
-
+  lBIO: PBIO;
+  lPKCS12, lCertificate, lKey, lChain: SslPtr;
+  lIndex: Integer;
 begin
-  Result:=-1;
-  c:=nil;
-  pk:=nil;
-  ca:=nil;
-  p12:=Nil;
-  b:=BioNew(BioSMem);
+  Result := -1;
+  if Length(Buf) = 0 then Exit;
+  lCertificate := nil;
+  lKey := nil;
+  lChain := nil;
+  lPKCS12 := nil;
+  lBIO := BioNew(BioSMem);
+  if lBIO = nil then Exit;
   try
-    BioWrite(b,Buf,Length(Buf));
-    p12:=d2iPKCS12bio(b,nil);
-    if Assigned(p12) then
-      if PKCS12parse(p12,APassword,pk,c,ca)>0 then
-        begin
-        Result:=UseCertificate(c);
-        if (Result>0) then
-          Result:=UsePrivateKey(pk);
-        end;
+    if BioWrite(lBIO, Buf, Length(Buf)) <> Length(Buf) then Exit;
+    lPKCS12 := d2iPKCS12bio(lBIO, nil);
+    if lPKCS12 = nil then Exit;
+    if PKCS12parse(lPKCS12, APassword, lKey, lCertificate, lChain) <> 1 then Exit;
+    Result := UseCertificate(lCertificate);
+    if Result = 1 then Result := UsePrivateKey(lKey);
+    if Result = 1 then
+      Result := SslCtxCtrl(FCTX, cSSLControlChain, 1, lChain);
+    if Result = 1 then Result := SslCtxCheckPrivateKeyFile(FCTX);
   finally
-    if pk<>Nil then
-      EvpPkeyFree(pk);
-    if c<>nil then
-      X509free(c);
-//  SkX509PopFree(ca,_X509Free);
-    if p12<>Nil then
-      PKCS12free(p12);
-    BioFreeAll(b);
+    if lChain <> nil then
+    begin
+      for lIndex := 0 to OpenSSLStackNum(lChain) - 1 do
+        X509Free(OpenSSLStackValue(lChain, lIndex));
+      OpenSSLStackFree(lChain);
+    end;
+    if lKey <> nil then EvpPkeyFree(lKey);
+    if lCertificate <> nil then X509Free(lCertificate);
+    if lPKCS12 <> nil then PKCS12Free(lPKCS12);
+    BioFreeAll(lBIO);
   end;
 end;
 
-function TSSLContext.LoadPFX(Data: TSSLData; Const APAssword : Ansistring): cint;
-
-Var
-  B : TBytes;
-
+function TSSLContext.LoadPFX(Data: TSSLData; Const APAssword: Ansistring): cint;
+var
+  lBytes: TBytes;
+  lStream: TFileStream;
 begin
-  Result:=-1;
-  try
-    if (Length(Data.Value)<>0) then
-      B:=Data.Value
-    else
-      With TFileStream.Create(Data.FileName,fmOpenRead or fmShareDenyNone) do
-        Try
-          SetLength(B,Size);
-          ReadBuffer(B[0],Size);
-        finally
-          Free;
-        end;
-    Result:=LoadPFX(B,APassword);
-  except
-    // Silently ignore
-    Exit;
+  if Length(Data.Value) <> 0 then
+    lBytes := Data.Value
+  else
+  begin
+    lStream := TFileStream.Create(Data.FileName, fmOpenRead or fmShareDenyNone);
+    try
+      SetLength(lBytes, lStream.Size);
+      if Length(lBytes) <> 0 then lStream.ReadBuffer(lBytes[0], Length(lBytes));
+    finally
+      lStream.Free;
+    end;
   end;
+  Result := LoadPFX(lBytes, APassword);
 end;
 
-function TSSLContext.SetOptions(AOptions: cLong): cLong;
+function TSSLContext.SetOptions(AOptions: QWord): QWord;
 begin
-  result := SslCtxCtrl(FCTX, SSL_CTRL_OPTIONS, AOptions, nil);
+  Result := SSLCTXSetOptions(FCTX, AOptions);
 end;
 
 Const
@@ -645,9 +678,14 @@ begin
 end;
 
 procedure TSSLContext.ActivateServerSNI(ATlsextcbp: TTlsExtCtx);
+var
+  lIndex: Integer;
 begin
+  FSNIContexts := Copy(ATlsextcbp);
+  for lIndex := 0 to High(FSNIContexts) do
+    FSNIContexts[lIndex].domains := Copy(ATlsextcbp[lIndex].domains);
   SetTlsextServernameCallback(@SelectSNIContextCallback);
-  SetTlsextServernameArg(Pointer(ATlsextcbp));
+  SetTlsextServernameArg(Self);
 end;
 
 procedure TSSLContext.SetEcdhAuto(const onoff: boolean);
@@ -913,8 +951,15 @@ begin
 end;
 
 function TSSL.Set1Host(const hostname: string): Integer;
+var
+  lIPv4: in_addr;
+  lIPv6: in6_addr;
 begin
-  Result := SslSet1Host(FSsl, hostname);
+  if hostname = '' then Exit(0);
+  if TryStrToHostAddr(hostname, lIPv4) or TryStrToHostAddr6(hostname, lIPv6) then
+    Result := X509VerifyParamSet1IP(SSLGet0Param(FSSL), hostname)
+  else
+    Result := SslSet1Host(FSSL, hostname);
 end;
 
 function TSSL.GetSelectedALPNProtocol: AnsiString;
