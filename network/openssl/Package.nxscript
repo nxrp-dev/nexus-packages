@@ -1,0 +1,9 @@
+dialect "PackageManager.Language.nxscript";
+
+// Requires matching FPC fcl-net units and a target-compatible OpenSSL runtime.
+// Inherited binding and wrapper sources retain their original license notices.
+Package OpenSSL {
+    Id: "NXRP.Network.OpenSSL";
+    Author: "Nexus contributors and upstream authors";
+    Description: "OpenSSL bindings, certificate wrappers and FCL TLS socket adapter.";
+}

@@ -39,6 +39,11 @@ PackageIndex NexusPackages {
         Descriptor: "lua/Package.nxscript";
         Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
     }
+    LocalPackage OpenSSL {
+        Id: "NXRP.Network.OpenSSL";
+        Descriptor: "network/openssl/Package.nxscript";
+        Description: "OpenSSL bindings, certificate wrappers and FCL TLS socket adapter.";
+    }
     LocalPackage JSONRPC {
         Id: "NXRP.Network.JSONRPC";
         Descriptor: "network/json-rpc/Package.nxscript";

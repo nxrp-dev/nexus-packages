@@ -1,0 +1,7 @@
+/output/
+*.o
+*.ppu
+*.rsj
+*.exe
+*.dll
+*.compiled
