@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
 // No Lua runtime is bundled. Consumers must supply a matching Lua host/library.
 // Outside Win64 x86-64, the RTTI bridge also uses NexusFPC ffi.manager and target libffi.

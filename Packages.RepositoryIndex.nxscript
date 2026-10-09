@@ -10,15 +10,31 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 // Resolve the existing entity dialect through the caller's dialect catalog.
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
-PackageIndex NexusPackages {
+RepositoryIndex NexusPackages {
     // Sister repository discovery only; no traversal or acquisition is implied.
     TrustedRepository NexusExternal {
         Source: "https://github.com/nxrp-dev/nexus-packages-ext.git";
     }
 
+    ExternalPackage Mustache {
+        Id: "NXRP.Mustache";
+        Repository: @NexusPackages.NexusExternal;
+        Description: "Mustache template parsing and rendering (DMustache).";
+    }
+
     // Explicit repository catalog; Descriptor is relative to this index file.
+    LocalPackage Core {
+        Id: "NXRP.Core";
+        Descriptor: "core/Package.nxscript";
+        Description: "Shared class registration and command-line parsing.";
+    }
+    LocalPackage Binding {
+        Id: "NXRP.Binding";
+        Descriptor: "binding/Package.nxscript";
+        Description: "Source-independent value binding, navigation and edit coordination.";
+    }
     LocalPackage SQLite {
         Id: "NXRP.SQLite";
         Descriptor: "db/sqlite/Package.nxscript";
@@ -72,7 +88,7 @@ PackageIndex NexusPackages {
     LocalPackage Serialization {
         Id: "NXRP.Serialization";
         Descriptor: "serialization/Package.nxscript";
-        Description: "Object persistence and measured static string lookup support.";
+        Description: "Object persistence and static string lookup support.";
     }
     LocalPackage JSON {
         Id: "NXRP.Serialization.JSON";

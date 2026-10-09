@@ -34,7 +34,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value=".;..\src;..\src\protocol;..\..\..\..\NexusLib\core\src;..\..\serialization\json\src;..\..\network\json-rpc\src;..\..\nxtest\src;..\..\network\external\synapse;$(LazarusDir)\components\lazutils;..\..\serialization\src"/>
+      <OtherUnitFiles Value=".;..\src;..\src\protocol;..\..\core\src;..\..\serialization\json\src;..\..\network\json-rpc\src;..\..\nxtest\src;..\..\network\external\synapse;$(LazarusDir)\components\lazutils;..\..\serialization\src"/>
       <UnitOutputDirectory Value="..\..\..\..\output\NexusLSP\tests\$(TargetCPU)-$(TargetOS)\units"/>
     </SearchPaths>
     <Linking>

@@ -9,15 +9,15 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
-module NexusPackages "../Packages.PackageIndex.nxscript";
+dialect "nxpackage.Language.nxscript";
+module NexusPackages "../Packages.RepositoryIndex.nxscript";
 
-// Additional source prerequisites: NexusLib/core and network/external/synapse.
-// Those components do not yet have independent descriptors in this catalog.
+// Additional source prerequisite: network/external/synapse.
+// Synapse does not yet have an independent descriptor in this catalog.
 Package LSP {
     Id: "NXRP.LSP";
     Author: "Kevin Collins";
     Description: "Reusable Language Server Protocol messages and transports.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.JSONRPC, @NexusPackages.JSON];
+    Requires: [@NexusPackages.Core, @NexusPackages.JSONRPC, @NexusPackages.JSON];
 }

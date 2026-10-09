@@ -102,6 +102,6 @@ lazbuild packages/nexus-packages/gui/test/NexusScriptEditorTests.lpi
 The 12 checked Win64 tests cover projection/choices, byte-preserving edits and
 save, atomic rejection, required properties and child rules, array bounds and
 names, inline definitions, references/compositions, undo/redo, reload lifetime,
-and native choice-to-text editing. Existing VTV, NXScript, and PackageManager
+and native choice-to-text editing. Existing VTV, NXScript, and nxpackage
 suites also pass. The demonstration's startup/paint/close smoke check passes;
 interactive visual acceptance remains a user check.

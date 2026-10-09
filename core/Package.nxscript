@@ -11,10 +11,9 @@
 
 dialect "nxpackage.Language.nxscript";
 
-// Requires a target-compatible SQLite runtime; Win64 runtime files are supplied in runtime/win64.
-// Package-wide License is left unset: upstream reference/runtime files retain their own notices.
-Package SQLite {
-    Id: "NXRP.SQLite";
+Package Core {
+    Id: "NXRP.Core";
     Author: "Kevin Collins";
-    Description: "SQLite bindings, connections and write-through datasets.";
+    Description: "Shared class registration and command-line parsing.";
+    License: "MPL-2.0-no-copyleft-exception";
 }

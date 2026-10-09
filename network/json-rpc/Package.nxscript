@@ -9,14 +9,13 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
-module NexusPackages "../../Packages.PackageIndex.nxscript";
+dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
-// Additional source prerequisite: NexusLib/core (not independently described in this catalog).
 Package JSONRPC {
     Id: "NXRP.Network.JSONRPC";
     Author: "Kevin Collins";
     Description: "Typed JSON-RPC messages, values and command dispatch.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.JSON];
+    Requires: [@NexusPackages.Core, @NexusPackages.JSON];
 }

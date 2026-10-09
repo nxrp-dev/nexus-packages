@@ -9,12 +9,13 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
-// Additional source prerequisite: NexusLib/core (not independently described in this catalog).
 Package JSON {
     Id: "NXRP.Serialization.JSON";
     Author: "Kevin Collins";
     Description: "RTTI-backed typed JSON values and object conversion.";
     License: "MPL-2.0-no-copyleft-exception";
+    Requires: [@NexusPackages.Core];
 }

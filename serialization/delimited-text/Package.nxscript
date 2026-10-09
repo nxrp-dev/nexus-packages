@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
 // Uses Free Pascal's fpjson support; no other package in this catalog is required.
 Package DelimitedText {

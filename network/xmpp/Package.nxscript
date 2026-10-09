@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
 // Additional source prerequisite: network/external/synapse; TLS uses a matching OpenSSL runtime.
 // These external components are not independently described in this catalog.

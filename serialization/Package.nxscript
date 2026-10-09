@@ -9,13 +9,12 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
-// Additional source prerequisite: NexusLib/core (not independently described in this catalog).
 // JSON and DelimitedText have their own descriptors; directory nesting is not a dependency.
 Package Serialization {
     Id: "NXRP.Serialization";
     Author: "Kevin Collins";
-    Description: "Object persistence and measured static string lookup support.";
+    Description: "Object persistence and static string lookup support.";
     License: "MPL-2.0-no-copyleft-exception";
 }

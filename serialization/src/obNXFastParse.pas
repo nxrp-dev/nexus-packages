@@ -29,40 +29,9 @@ unit obNXFastParse;
 interface
 
 uses
-  SysUtils,
-  obNXMeasuredStructure;
+  SysUtils;
 
 type
-  TNXFastStringSetMetrics = class(TNXStructureMetrics)
-  private
-    FMaxLength: QWord;
-    FDistinctLengthCount: QWord;
-    FBucketCount: QWord;
-    FUsedBucketCount: QWord;
-    FEmptyBucketCount: QWord;
-    FMinBucketDepth: QWord;
-    FMaxBucketDepth: QWord;
-    FTotalBucketDepth: QWord;
-    FIndexBytes: QWord;
-    FEntryBytes: QWord;
-    FStringBytes: QWord;
-    FObjectBytes: QWord;
-
-  published
-    property MaxLength: QWord read FMaxLength write FMaxLength;
-    property DistinctLengthCount: QWord read FDistinctLengthCount write FDistinctLengthCount;
-    property BucketCount: QWord read FBucketCount write FBucketCount;
-    property UsedBucketCount: QWord read FUsedBucketCount write FUsedBucketCount;
-    property EmptyBucketCount: QWord read FEmptyBucketCount write FEmptyBucketCount;
-    property MinBucketDepth: QWord read FMinBucketDepth write FMinBucketDepth;
-    property MaxBucketDepth: QWord read FMaxBucketDepth write FMaxBucketDepth;
-    property TotalBucketDepth: QWord read FTotalBucketDepth write FTotalBucketDepth;
-    property IndexBytes: QWord read FIndexBytes write FIndexBytes;
-    property EntryBytes: QWord read FEntryBytes write FEntryBytes;
-    property StringBytes: QWord read FStringBytes write FStringBytes;
-    property ObjectBytes: QWord read FObjectBytes write FObjectBytes;
-  end;
-
   TNXFastStringSet = class
   private type
     TNXFastStringEntry = record
@@ -80,18 +49,13 @@ type
     FEntries: array of TNXFastStringEntry;
     FBuckets: array of TNXFastStringBucket;
     FLengthIndex: array of LongInt;
-    FMetrics: TNXFastStringSetMetrics;
 
     class function BucketKey(const AFirst: Byte; const ALast: Byte): SizeInt; static; inline;
 
-    procedure UpdateMetrics(const AStringBytes: QWord; const ADistinctLengthCount: QWord; const AMaxLength: QWord; const AInitMilliseconds: QWord);
     function GetBucketIndex(const ALength: SizeInt; const AFirst: Byte; const ALast: Byte): SizeInt; inline;
 
   public
     constructor Create(const AWords: array of string);
-    destructor Destroy; override;
-
-    property Metrics: TNXFastStringSetMetrics read FMetrics;
 
     function Contains(const AText: string): Boolean; inline;
     function TryIndexOf(const AText: string; out AIndex: Integer): Boolean; inline;
@@ -116,59 +80,6 @@ begin
     Result := (SizeInt(lLengthSlot) shl 16) or BucketKey(AFirst, ALast);
 end;
 
-procedure TNXFastStringSet.UpdateMetrics(const AStringBytes: QWord; const ADistinctLengthCount: QWord; const AMaxLength: QWord; const AInitMilliseconds: QWord);
-var
-  lIndex: LongInt;
-  lCount: NativeUInt;
-begin
-  FMetrics.StructureName := 'TNXFastStringSet';
-  FMetrics.ItemCount := QWord(System.Length(FEntries));
-  FMetrics.BucketCount := QWord(System.Length(FBuckets));
-  FMetrics.DistinctLengthCount := ADistinctLengthCount;
-  FMetrics.MaxLength := AMaxLength;
-
-  FMetrics.IndexBytes :=
-    (QWord(System.Length(FBuckets)) * SizeOf(TNXFastStringBucket)) +
-    (QWord(System.Length(FLengthIndex)) * SizeOf(LongInt));
-
-  FMetrics.EntryBytes := QWord(System.Length(FEntries)) * SizeOf(TNXFastStringEntry);
-  FMetrics.StringBytes := AStringBytes;
-  FMetrics.ObjectBytes := QWord(Self.InstanceSize);
-  FMetrics.TemporaryBuildBytes := QWord(System.Length(FBuckets)) * SizeOf(LongInt);
-
-  FMetrics.EmptyBucketCount := 0;
-  FMetrics.UsedBucketCount := 0;
-  FMetrics.MinBucketDepth := 0;
-  FMetrics.MaxBucketDepth := 0;
-  FMetrics.TotalBucketDepth := 0;
-
-  for lIndex := Low(FBuckets) to High(FBuckets) do
-  begin
-    lCount := FBuckets[lIndex].Count;
-
-    if lCount = 0 then
-      Inc(FMetrics.FEmptyBucketCount)
-    else
-    begin
-      Inc(FMetrics.FUsedBucketCount);
-      Inc(FMetrics.FTotalBucketDepth, lCount);
-
-      if (FMetrics.MinBucketDepth = 0) or (lCount < FMetrics.MinBucketDepth) then
-        FMetrics.MinBucketDepth := lCount;
-
-      if lCount > FMetrics.MaxBucketDepth then
-        FMetrics.MaxBucketDepth := lCount;
-    end;
-  end;
-
-  FMetrics.InitMilliseconds := AInitMilliseconds;
-  FMetrics.OperationalBytes :=
-    FMetrics.IndexBytes +
-    FMetrics.EntryBytes +
-    FMetrics.StringBytes +
-    FMetrics.ObjectBytes;
-end;
-
 constructor TNXFastStringSet.Create(const AWords: array of string);
 var
   lIndex: LongInt;
@@ -182,17 +93,10 @@ var
   lStart: LongInt;
   lCount: LongInt;
   lPositions: array of LongInt;
-  lStringBytes: QWord;
-  lInitStart: QWord;
 begin
-  lInitStart := GetTickCount64;
-
   inherited Create;
 
-  FMetrics := TNXFastStringSetMetrics.Create;
-
   lMaxLength := 0;
-  lStringBytes := 0;
 
   for lIndex := Low(AWords) to High(AWords) do
   begin
@@ -200,8 +104,6 @@ begin
 
     if lWordLength > lMaxLength then
       lMaxLength := lWordLength;
-
-    Inc(lStringBytes, QWord(lWordLength));
   end;
 
   SetLength(FLengthIndex, lMaxLength + 1);
@@ -282,13 +184,6 @@ begin
     FEntries[lEntryIndex].Index := lIndex;
   end;
 
-  UpdateMetrics(lStringBytes, QWord(lDistinctLengthCount), QWord(lMaxLength), GetTickCount64 - lInitStart);
-end;
-
-destructor TNXFastStringSet.Destroy;
-begin
-  FreeAndNil(FMetrics);
-  inherited Destroy;
 end;
 
 function TNXFastStringSet.Contains(const AText: string): Boolean;

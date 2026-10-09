@@ -28,7 +28,7 @@
     <Version Value="11"/><PathDelim Value="\"/>
     <Target><Filename Value="..\..\..\..\output\NexusScript\tests\$(TargetCPU)-$(TargetOS)\NexusScriptTestModule"/></Target>
     <Parsing><SyntaxOptions><SyntaxMode Value="Delphi"/></SyntaxOptions></Parsing>
-    <SearchPaths><OtherUnitFiles Value=".;..\src;..\..\..\..\projects\nxscript\cli;..\..\nxtest\src;..\..\db\sqlite\src\bindings;..\..\serialization\src;..\..\serialization\json\src;..\..\network\json-rpc\src;..\..\..\..\NexusLib\core\src;..\..\..\..\lib\dmustache"/><UnitOutputDirectory Value="..\..\..\..\output\NexusScript\tests\$(TargetCPU)-$(TargetOS)\units"/></SearchPaths>
+    <SearchPaths><OtherUnitFiles Value=".;..\src;..\..\..\..\projects\nxscript\cli;..\..\nxtest\src;..\..\db\sqlite\src\bindings;..\..\serialization\src;..\..\serialization\json\src;..\..\network\json-rpc\src;..\..\core\src;..\..\..\..\packages\nexus-packages-ext\mustache\external\dmustache"/><UnitOutputDirectory Value="..\..\..\..\output\NexusScript\tests\$(TargetCPU)-$(TargetOS)\units"/></SearchPaths>
     <Linking><Options><ExecutableType Value="Library"/></Options></Linking>
   </CompilerOptions>
 </CONFIG>

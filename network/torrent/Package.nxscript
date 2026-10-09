@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
-dialect "PackageManager.Language.nxscript";
+dialect "nxpackage.Language.nxscript";
 
 // Additional source prerequisite: network/external/synapse (the preserved upstream submodule).
 // Synapse does not yet have an independent descriptor in this catalog.

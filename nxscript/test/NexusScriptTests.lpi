@@ -9,7 +9,7 @@
     <Version Value="11"/>
     <Target><Filename Value="../../../../output/NexusScript/console-tests/$(TargetCPU)-$(TargetOS)/NexusScriptTests"/></Target>
     <SearchPaths>
-      <OtherUnitFiles Value=".;../src;../../nxtest/src;../../../../projects/nxscript/cli;../../db/sqlite/src/bindings;../../serialization/src;../../serialization/json/src;../../network/json-rpc/src;../../../../NexusLib/core/src;../../../../lib/dmustache"/>
+      <OtherUnitFiles Value=".;../src;../../nxtest/src;../../../../projects/nxscript/cli;../../db/sqlite/src/bindings;../../serialization/src;../../serialization/json/src;../../network/json-rpc/src;../../core/src;../../../../packages/nexus-packages-ext/mustache/external/dmustache"/>
       <UnitOutputDirectory Value="../../../../output/NexusScript/console-tests/$(TargetCPU)-$(TargetOS)/units"/>
     </SearchPaths>
     <Other><CustomOptions Value="-gh -gl"/></Other>
