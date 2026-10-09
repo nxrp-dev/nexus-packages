@@ -1,0 +1,54 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+
+Project NexusUITestModule {
+    BuildTool: FPC;
+    ProjectKind: Library;
+    BuildFile: "NexusUITestModule.lpr";
+    OutputRoot: "../../../../output/NexusUITestModule/x86_64-win64";
+
+    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
+    Toolchain NexusFPC {
+        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+    }
+    FPCBuildOptions Compiler {
+        OutputFile: "$(OutputRoot)/NexusUITestModule.dll";
+        RawOptions: ["-Sh-"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Files Paths {
+            ExecutableOutputPath: "$(OutputRoot)";
+            UnitOutputPath: "../../../../output/NexusUITestModule/x86_64-win64/units";
+            IncludePaths: ["../../../../output/NexusUITestModule/x86_64-win64/units", "../external/fpgui/framework/src/main/pascal/corelib", "../external/fpgui/framework/src/main/pascal/corelib/gdi", "../external/fpgui/framework/src/main/resources"];
+            UnitPaths: [
+                ".",
+                "../src",
+                "../../core/src",
+                "../../serialization/src",
+                "../../serialization/json/src",
+                "../../network/json-rpc/src",
+                "../../nxtest/src",
+                "../../nxscript/src",
+                "../../db/sqlite/src/bindings",
+                "../../../../packages/nexus-packages-ext/mustache/external/dmustache",
+                "../../../../packages/nexus-packages-ext/regexpr/external/tregexpr/src",
+                "../external/fpgui/framework/src/main/pascal/corelib",
+                "../external/fpgui/framework/src/main/pascal/corelib/render/software",
+                "../external/fpgui/framework/src/main/pascal/corelib/gdi",
+                "../external/fpgui/framework/src/main/pascal/gui",
+                "../external/fpgui/framework/src/main/resources",
+                "../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
+                "../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+            ];
+        }
+    }
+}

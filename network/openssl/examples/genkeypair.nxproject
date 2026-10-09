@@ -1,0 +1,39 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+
+Project genkeypair {
+    BuildTool: FPC;
+    ProjectKind: Program;
+    BuildFile: "genkeypair.lpr";
+    OutputRoot: "../../../../../output/genkeypair/x86_64-win64";
+
+    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
+    Toolchain NexusFPC {
+        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+    }
+    FPCBuildOptions Compiler {
+        OutputFile: "$(OutputRoot)/genkeypair.exe";
+        RawOptions: ["-Sh-"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Files Paths {
+            ExecutableOutputPath: "$(OutputRoot)";
+            UnitOutputPath: "../../../../../output/genkeypair/x86_64-win64/units";
+            IncludePaths: ["../../../../../output/genkeypair/x86_64-win64/units"];
+            UnitPaths: [
+                "../src",
+                "../../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
+                "../../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+            ];
+        }
+    }
+}

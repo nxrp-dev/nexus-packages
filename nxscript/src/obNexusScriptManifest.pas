@@ -53,7 +53,7 @@ uses
   obNexusScriptJSON,
   obNexusScriptExternalSource,
   obNexusScriptValidator,
-  obMustacheRenderer;
+  SynMustache;
 
 type
   TNexusScriptSourceTemplateRule = class
@@ -140,7 +140,7 @@ begin
     SetLength(lBytes, lStream.Size);
     if Length(lBytes) > 0 then
       lStream.ReadBuffer(Pointer(lBytes)^, Length(lBytes));
-    Result := string(lBytes);
+    Result := UTF8Decode(lBytes);
   finally
     lStream.Free;
   end;
@@ -187,21 +187,11 @@ end;
 class function TNexusScriptManifest.RenderTemplate(const AJSON,
   ATemplateFile: string): string;
 var
-  lJSONFile: string;
-  lOutputFile: string;
+  lTemplate: UTF8String;
 begin
-  if not FileExists(ATemplateFile) then
-    raise ENexusScriptCommand.CreateFmt('File not found: %s', [ATemplateFile]);
-  lJSONFile := GetTempFileName(GetTempDir, 'nsj');
-  lOutputFile := GetTempFileName(GetTempDir, 'nso');
-  try
-    WriteOutput(lJSONFile, AJSON, nil);
-    RenderMustacheFile(lJSONFile, ATemplateFile, lOutputFile);
-    Result := LoadTextFile(lOutputFile);
-  finally
-    DeleteFile(lOutputFile);
-    DeleteFile(lJSONFile);
-  end;
+  lTemplate := UTF8Encode(LoadTextFile(ATemplateFile));
+  Result := UTF8Decode(TSynMustache.Parse(lTemplate).
+    RenderJSON(UTF8Encode(AJSON)));
 end;
 
 class procedure TNexusScriptManifest.ValidateDocument(

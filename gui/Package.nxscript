@@ -18,5 +18,5 @@ Package GUI {
     Id: "NXRP.GUI";
     Author: "Kevin Collins";
     Description: "fpGUI controls, skins, rendering and NexusScript editing.";
-    Requires: [@NexusPackages.Lua, @NexusPackages.NexusScript];
+    Requires: [@NexusPackages.Lua, @NexusPackages.NexusScript, @NexusPackages.RegExpr];
 }

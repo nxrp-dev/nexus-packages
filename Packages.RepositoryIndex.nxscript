@@ -33,6 +33,11 @@ RepositoryIndex NexusPackages {
         Repository: @NexusPackages.NexusExternal;
         Description: "Mustache template parsing and rendering (DMustache).";
     }
+    ExternalPackage RegExpr {
+        Id: "NXRP.RegExpr";
+        Repository: @NexusPackages.NexusExternal;
+        Description: "Pure Object Pascal regular expression engine (TRegExpr).";
+    }
 
     // Explicit repository catalog; Descriptor is relative to this index file.
     LocalPackage Core {
