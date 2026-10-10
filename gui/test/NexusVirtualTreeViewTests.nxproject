@@ -19,14 +19,14 @@ Project NexusVirtualTreeViewTests {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusVirtualTreeViewTests.exe";
+        OutputFile: @NexusVirtualTreeViewTests.OutputRoot + "/NexusVirtualTreeViewTests.exe";
         RawOptions: ["-dGDI", "-gl", "-gh", "-Cr", "-Co", "-Sa", "-Xe"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusVirtualTreeViewTests.OutputRoot;
             UnitOutputPath: "../../../../output/NexusVirtualTreeViewTests/x86_64-win64/units";
             IncludePaths: ["../../../../output/NexusVirtualTreeViewTests/x86_64-win64/units", "../external/fpgui/framework/src/main/pascal/corelib", "../external/fpgui/framework/src/main/pascal/corelib/gdi", "../external/fpgui/framework/src/main/resources"];
             UnitPaths: [

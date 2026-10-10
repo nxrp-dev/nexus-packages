@@ -19,14 +19,14 @@ Project NexusLSPTestModule {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
         LazarusRoot: "C:/lazarus";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusLSPTestModule.dll";
+        OutputFile: @NexusLSPTestModule.OutputRoot + "/NexusLSPTestModule.dll";
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusLSPTestModule.OutputRoot;
             UnitOutputPath: "../../../../output/NexusLSP/tests/x86_64-win64/units";
             IncludePaths: ["../../../../output/NexusLSP/tests/x86_64-win64/units"];
             UnitPaths: [
@@ -38,7 +38,7 @@ Project NexusLSPTestModule {
                 "../../network/json-rpc/src",
                 "../../nxtest/src",
                 "../../network/external/synapse",
-                "$(LazarusRoot)/components/lazutils",
+                @NexusLSPTestModule.NexusFPC.LazarusRoot + "/components/lazutils",
                 "../../serialization/src",
                 "../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
                 "../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"

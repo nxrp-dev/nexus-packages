@@ -19,14 +19,14 @@ Project NexusBindingTests {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusBindingTests.exe";
+        OutputFile: @NexusBindingTests.OutputRoot + "/NexusBindingTests.exe";
         RawOptions: ["-gh", "-gl", "-Cr", "-Co", "-Sa"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusBindingTests.OutputRoot;
             UnitOutputPath: "../../../../output/NexusBindingTests/x86_64-win64/units";
             UnitPaths: [
                 ".",

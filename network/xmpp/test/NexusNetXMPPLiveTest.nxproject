@@ -19,14 +19,14 @@ Project NexusNetXMPPLiveTest {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusNetXMPPLiveTest.exe";
+        OutputFile: @NexusNetXMPPLiveTest.OutputRoot + "/NexusNetXMPPLiveTest.exe";
         RawOptions: ["-O1", "-gl", "-Cr", "-Co", "-Ci"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusNetXMPPLiveTest.OutputRoot;
             UnitOutputPath: "../../../../../output/NexusNetXMPPLiveTest/x86_64-win64/units";
             UnitPaths: [
                 ".",

@@ -19,14 +19,14 @@ Project NXSQLiteTests {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NXSQLiteTests.exe";
+        OutputFile: @NXSQLiteTests.OutputRoot + "/NXSQLiteTests.exe";
         RawOptions: ["-gh", "-gl", "-Cr", "-Co", "-Ci"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NXSQLiteTests.OutputRoot;
             UnitOutputPath: "../output/test-units/x86_64-win64";
             UnitPaths: [
                 ".",

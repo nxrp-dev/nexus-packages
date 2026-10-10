@@ -19,14 +19,14 @@ Project NexusNetXMPPTests {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusNetXMPPTests.exe";
+        OutputFile: @NexusNetXMPPTests.OutputRoot + "/NexusNetXMPPTests.exe";
         RawOptions: ["-O1", "-gl", "-Cr", "-Co", "-Ci"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusNetXMPPTests.OutputRoot;
             UnitOutputPath: "../../../../../output/NexusNetXMPPTests/x86_64-win64/units";
             UnitPaths: [
                 ".",

@@ -19,14 +19,14 @@ Project plugin_sample {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/plugin_sample.dll";
+        OutputFile: @plugin_sample.OutputRoot + "/plugin_sample.dll";
         RawOptions: ["-Xe", "-k/defaultlib:CoronaLabs.Corona.Native.lib"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @plugin_sample.OutputRoot;
             UnitOutputPath: "../../../../output/plugin_sample/x86_64-win64/units";
             LibraryPaths: ["../../../../../Nexus2D/platform/windows/Corona.Native.Library.Win32/Release.Simulator/x64/Corona.Native.Library.Win32"];
             UnitPaths: [

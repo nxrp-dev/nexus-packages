@@ -19,13 +19,13 @@ Project test1 {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/test1.exe";
+        OutputFile: @test1.OutputRoot + "/test1.exe";
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @test1.OutputRoot;
             UnitOutputPath: "../../../../../output/test1/x86_64-win64/units";
             UnitPaths: [
                 ".",

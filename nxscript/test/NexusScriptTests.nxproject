@@ -19,14 +19,14 @@ Project NexusScriptTests {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusScriptTests.exe";
+        OutputFile: @NexusScriptTests.OutputRoot + "/NexusScriptTests.exe";
         RawOptions: ["-gh", "-gl"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusScriptTests.OutputRoot;
             UnitOutputPath: "../../../../output/NexusScript/console-tests/x86_64-win64/units";
             UnitPaths: [
                 ".",

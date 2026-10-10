@@ -19,14 +19,14 @@ Project NexusXMPPConsole {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusXMPPConsole.exe";
+        OutputFile: @NexusXMPPConsole.OutputRoot + "/NexusXMPPConsole.exe";
         RawOptions: ["-O1", "-gl"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusXMPPConsole.OutputRoot;
             UnitOutputPath: "../../../../../output/NexusXMPPConsole/x86_64-win64/units";
             UnitPaths: [
                 ".",

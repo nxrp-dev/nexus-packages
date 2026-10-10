@@ -19,14 +19,14 @@ Project NexusScriptEditorDemo {
 
     TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
     Toolchain NexusFPC {
-        CompilerPath: "$(ProjectRoot)/../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
+        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
     }
     FPCBuildOptions Compiler {
-        OutputFile: "$(OutputRoot)/NexusScriptEditorDemo.exe";
+        OutputFile: @NexusScriptEditorDemo.OutputRoot + "/NexusScriptEditorDemo.exe";
         RawOptions: ["-dGDI", "-WG", "-gl", "-Xe"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: "$(OutputRoot)";
+            ExecutableOutputPath: @NexusScriptEditorDemo.OutputRoot;
             UnitOutputPath: "../../../../../output/NexusScriptEditorDemo/x86_64-win64/units";
             IncludePaths: ["../../../../../output/NexusScriptEditorDemo/x86_64-win64/units", "../../external/fpgui/framework/src/main/pascal/corelib", "../../external/fpgui/framework/src/main/pascal/corelib/gdi", "../../external/fpgui/framework/src/main/resources"];
             UnitPaths: [
