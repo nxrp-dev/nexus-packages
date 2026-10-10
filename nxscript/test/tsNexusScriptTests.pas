@@ -4133,10 +4133,11 @@ begin
   end;
   lText := ExecuteCLI(['/input=' + CollectionFixturePath('CustomerInventory.nxscript'),
     '/template=' + CollectionFixturePath('Tables.mustache')]);
-  AContext.AssertEquals('Product:ID' + LineEnding + 'Stock:ID' + LineEnding +
-    'Warehouse:ID' + LineEnding + 'Movement:ID' + LineEnding + 'Supplier:ID' +
-    LineEnding + 'Account:ID' + LineEnding + 'Contact:ID' + LineEnding +
-    'Address:ID' + LineEnding + 'Invoice:ID', Trim(lText),
+  lText := StringReplace(lText, #13#10, #10, [rfReplaceAll]);
+  AContext.AssertEquals('Product:ID' + #10 + 'Stock:ID' + #10 +
+    'Warehouse:ID' + #10 + 'Movement:ID' + #10 + 'Supplier:ID' +
+    #10 + 'Account:ID' + #10 + 'Contact:ID' + #10 +
+    'Address:ID' + #10 + 'Invoice:ID', Trim(lText),
     'One template iteration emits the nine tables in include order.');
 end;
 
