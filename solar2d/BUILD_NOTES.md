@@ -26,4 +26,6 @@ For Windows, the FPC link needs the Solar2D Native import library or equivalent 
 
 ## Verification status
 
-The bridge and sample compile on the local FPC 3.2.2 Win64 toolchain with linking disabled. The published-link RTTI test compiles and passes. A native Solar2D runtime test still requires the matching target compiler and link inputs.
+The published-link RTTI prerequisite test compiles and passes. On October 2, 2026, the Win64 Nexus2D simulator successfully loaded the Pascal sample plugin in StarExplorer, created its object, and called its Add and Greeting links. The tested plugin imports Lua 5.1 and the existing CoronaLabs.Corona.Native.dll proxy; it requires no simulator changes.
+
+The [StarExplorer proof in nexus-lab](sample/STAR_EXPLORER.md) preserves the integration, import definitions, successful screenshot and reconstructed build script. On October 10 the script rebuilt and staged the plugin from current package source using FPC 3.2.2, and checked its AMD64 image, imports and export. The recovery rebuild was not rerun in the GUI. Broader property/event/lifetime tests and other CPU/ABI targets remain to be validated.

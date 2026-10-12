@@ -7,6 +7,12 @@ These rules apply to `packages/nexus-packages/gui`.
 - For Object Pascal / Free Pascal code, follow `../../../.ai/standards/pascal.md`.
 - Treat this folder as the Nexus fpGUI integration package: controls and skins built on fpGUI.
 
+## Attributions
+
+Maintain upstream attribution, import evidence, and SPDX indicators in Nexus root
+`ATTRIBUTIONS.md`; link there instead of creating a separate GUI attribution page.
+Preserve original source and license notices.
+
 ## Architecture
 
 - `obNXControls` provides the small Nexus-named fpGUI control wrappers.

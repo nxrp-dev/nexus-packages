@@ -6,7 +6,8 @@ existing application is migrated by adding this control.
 
 The native component adapts Virtual TreeView 6.0.0 node records, linked-list
 operations, lazy initialization, aggregate subtree metrics, and stable merge
-sorting from the Lazarus fork pinned in `../../external/vtv/NEXUS-UPSTREAM.md`.
+sorting from the Lazarus fork recorded in the
+[central attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#virtual-treeview).
 The LCL widget itself is not compiled. Painting, input, focus, scrollbars, and
 the inline editor use fpGUI directly.
 
@@ -83,8 +84,8 @@ For an interactive TNXSkin demonstration, build and run
 100,000 lazy root branches, five children per expanded branch, checkboxes,
 multi-selection, column resizing, sorting, and F2 text editing.
 
-## License
+## Attribution
 
-Adapted files retain Virtual TreeView's MPL-1.1 / LGPL-2.1-or-later notice.
-Independent Nexus files carry the repository's MPL-2.0 header. The vendored
-upstream source and resources are unchanged.
+Upstream revision, import date, authors, and SPDX license expression are maintained
+in the [central attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#virtual-treeview).
+Original notices remain in the source files.

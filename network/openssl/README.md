@@ -3,10 +3,11 @@
 This package owns the dynamic OpenSSL binding (`src/openssl.pas`), certificate
 and TLS object wrappers (`src/fpopenssl.pp`), shared cryptography helpers
 (`src/obNXOpenSSLCrypto.pas`), FCL socket adapter (`src/opensslsockets.pp`),
-and the Nexus-owned Synapse adapter (`synapse/obNXSynapseOpenSSL.pas`). The
-original sources were imported from NexusFPC
-commit af042760; the repair checkpoint builds on that import. Original license
-notices remain in the inherited sources.
+and the Nexus-owned Synapse adapter (`synapse/obNXSynapseOpenSSL.pas`). Upstream
+origins, import evidence, authors, and separate native-library/binding license
+indicators are maintained in the
+[central attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#openssl-and-fpc-bindings).
+Original notices remain in the inherited sources.
 
 Add `src` to the compiler unit search path. The wrappers require matching
 NexusFPC `fcl-net` units. Native OpenSSL libraries are loaded dynamically and
