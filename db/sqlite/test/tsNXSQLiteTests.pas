@@ -62,7 +62,10 @@ end;
 
 function LibraryPath: string;
 begin
-  Result := ExpandFileName(ExtractFilePath(ParamStr(0)) + '../runtime/win64/sqlite3.dll');
+  if ParamCount > 0 then
+    Result := ExpandFileName(ParamStr(1))
+  else
+    Result := cSQLite3DefaultLibrary;
 end;
 
 function UTF8Text(const AValue: UnicodeString): string;

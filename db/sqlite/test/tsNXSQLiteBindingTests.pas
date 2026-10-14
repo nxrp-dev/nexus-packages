@@ -50,8 +50,8 @@ function OpenConnection: TNXSQLiteConnection;
 begin
   Result := TNXSQLiteConnection.Create(nil);
   try
-    Result.LibraryName := ExpandFileName(ExtractFilePath(ParamStr(0)) +
-      '../runtime/win64/sqlite3.dll');
+    if ParamCount > 0 then
+      Result.LibraryName := ExpandFileName(ParamStr(1));
     Result.DatabaseName := ':memory:';
     Result.Open;
   except

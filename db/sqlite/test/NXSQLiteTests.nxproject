@@ -10,32 +10,41 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NXSQLiteTests {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "NXSQLiteTests.lpr";
-    OutputRoot: "../output";
+    RootDirectory: "../../../../..";
+    SourceRoot: "packages/nexus-packages/db/sqlite";
+    OutputRoot: "output/nxbuild-sqlite/" + @Tools.Native.Name;
 
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @NXSQLiteTests.OutputRoot + "/NXSQLiteTests.exe";
-        RawOptions: ["-gh", "-gl", "-Cr", "-Co", "-Ci"];
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [@NXSQLiteTests.SourceRoot + "/test/NXSQLiteTests.lpr"];
+        OutputPath: @NXSQLiteTests.OutputRoot;
+        PackageSDKIdentity: @Tools.Native.PackageSDKIdentity;
+        RequiredPackages: [nxrtl, SQLite];
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
         Config Options { DisableDefaultConfigFiles: True; }
-        Files Paths {
-            ExecutableOutputPath: @NXSQLiteTests.OutputRoot;
-            UnitOutputPath: "../output/test-units/x86_64-win64";
-            UnitPaths: [
-                ".",
-                "../src",
-                "../src/bindings",
-                "../../../nxtest/src",
-                "../../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
-            ];
+        Language Pascal { Mode: ObjFPC; }
+        BuildControl Rebuild { BuildAllModules: Enabled; }
+        // Keep the SDK shared allocator; executable-local heaptrc replaces it after package initialization.
+        Debug Diagnostics { LineInfo: Enabled; }
+        CodeGeneration Checks {
+            RangeChecking: Enabled;
+            OverflowChecking: Enabled;
+            IOChecking: Enabled;
         }
+        Files Paths {
+            UnitPaths: [
+                @NXSQLiteTests.SourceRoot + "/test",
+                "packages/nexus-packages/nxtest/src",
+                @Tools.Native.PackageSDKPath + "/units",
+                @Tools.Native.RTLPath
+            ];
+            PackagePaths: [@Tools.Native.PackageSDKPath + "/packages", @NXSQLiteTests.OutputRoot];
+            LibraryPaths: @Tools.Native.PackageLibraryPaths;
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+        }
+        Linking RuntimeLibraries { LinkerOptions: @Tools.Native.LinkerOptions; }
     }
 }

@@ -147,22 +147,82 @@ character-pointer depth. Calling conventions, variadic declarations, argument
 and result types, record field order, and packing are unchanged. The constants,
 exported variable declarations, loader, and implementation are unchanged.
 
-## Verification
+## Building the package
 
-The NexusTest suite lives in `test`:
+`SQLite.nxpackage` is the nxbuild description. It runs two ordered builds:
+
+1. LLVM compiles `native/sqlite3.c` into `sqlite3.dll` on Windows or
+   `libsqlite3.so.0` on Linux.
+2. NexusFPC compiles `SQLite.nxpk`, containing all six Pascal runtime units
+   and requiring `nxrtl`, into `SQLite.nxpl` with embedded development metadata.
+
+The package imports the same installation settings as Abbrevia from
+`projects/nxbuild/nxbuild.environment.nxscript`. Configure that module for the
+installed toolchain and matching runtime-package SDK. The package description
+has no target-specific branches; the environment selects the tools and the
+platform Clang configuration in `native` supplies the shared-library filename.
+
+Run from the Nexus repository root on Windows:
 
 ```powershell
-lazbuild -B sqlite\test\NXSQLiteTests.lpi
-& .\sqlite\output\NXSQLiteTests.exe
+& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=plan /project=packages/nexus-packages/db/sqlite/SQLite.nxpackage
+& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=build /project=packages/nexus-packages/db/sqlite/SQLite.nxpackage
 ```
 
-Run from `packages/nexus-packages/db`. Build output stays in ignored `sqlite/output`.
-The Win64 tests use the packaged runtime in `runtime/win64`. The runner stops
-at the first failing test so its cause can be reviewed before changes.
+Both libraries and the compiled Pascal units go to
+`output/nxbuild-sqlite/x86_64-win64`; no compiler output is written into source
+folders. This builds the C dependency from source and does not consume the older
+DLL retained in `runtime/win64` for existing deployments.
 
-The final Win64 run with FPC 3.2.2 passed all 28 tests with range, overflow,
-I/O and heap checks enabled, and zero unfreed memory blocks. Other platforms
-have not been run.
+`native/sqlite3.c` is the unmodified SQLite 3.53.4 amalgamation from
+[the official source archive](https://www.sqlite.org/2026/sqlite-amalgamation-3530400.zip).
+The former package location contained that archive, but it was absent from the
+relocated tree. It was recovered on 2026-10-14; its `sqlite3.h` and `sqlite3ext.h`
+match the existing `reference` headers byte for byte. The source SHA-256 is
+`B1DD5D74EC7F29055A6684FA06FB3C2F6821C87DD38F9A458DFD2E8A1DB28189`.
+Original upstream notices remain in the C source.
+
+The LLVM definitions preserve the feature set reported by the previous Win64
+runtime, including FTS3/FTS5, R-tree/geopoly, session/preupdate, column metadata,
+math/percentile, carray, RBU and diagnostic virtual tables. SQLite's existing
+thread-safety setting remains enabled. Recursive-trigger and auto-vacuum defaults
+are left at their upstream values. The Windows linker uses the existing
+`reference/sqlite3.def` export list. Linux uses PIC and its system libraries.
+
+## Verification
+
+The existing nxtest suite lives in `test`; its project consumes `SQLite.nxpl`
+and `nxrtl.nxpl`. SQLite Pascal source directories are deliberately absent from
+the test project's unit paths.
+
+```powershell
+& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=build /project=packages/nexus-packages/db/sqlite/test/NXSQLiteTests.nxproject
+Copy-Item ../tools/nexus-fpc/build/forge-bootstrap/package-sdk/packages/nxrtl.nxpl ./output/nxbuild-sqlite/x86_64-win64/
+& ./output/nxbuild-sqlite/x86_64-win64/NXSQLiteTests.exe ./output/nxbuild-sqlite/x86_64-win64/sqlite3.dll
+```
+
+The copy places the SDK's matching shared RTL beside the executable for local
+verification. Deploy `SQLite.nxpl`, the native SQLite library, and matching
+`nxrtl.nxpl` with consumers. Supply `LibraryName` when the C library is outside
+the operating system's library search path. The test runner accepts an explicit
+C library path as its first argument; omission uses the binding's platform default.
+
+On Linux, use the corresponding native nxbuild executable and paths under
+`output/nxbuild-sqlite/x86_64-linux`, with `libsqlite3.so.0`. First configure the
+native Linux package SDK and SDK identity in the shared environment module.
+
+Verified on Win64 on 2026-10-14: **28 passed; 0 failures/errors/skips**, using the
+newly LLVM-built C runtime through the compiled Pascal package. The executable's
+import table confirms both package dependencies. The C library exports the same
+378 symbols as the previous runtime. Range, overflow and I/O checks remain
+enabled in the test executable. Linux and Win32 package execution were not run.
+
+Executable-local heap tracing is not enabled in this shared-RTL test recipe:
+`-gh` installs a replacement memory manager after package startup has already
+allocated memory, and this SDK then reports an invalid memory block before the
+suite starts. The successful run is not a heap-leak verification. The earlier
+static FPC 3.2.2 run passed all 28 tests with heap checks and zero unfreed blocks;
+that remains historical evidence, not a result of this package run.
 
 `tsNXSQLiteBindingTests.pas` adds four NexusTest cases exercising SQLite's calls
 into result-row, scalar, aggregate, window, commit, rollback, update, progress,

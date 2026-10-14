@@ -1,0 +1,79 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package SQLite {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/db/sqlite";
+    OutputRoot: "output/nxbuild-sqlite/" + @Tools.Native.Name;
+
+    LLVM Native {
+        CompilerPath: @Tools.Native.LLVMCompiler;
+        BuildKind: SharedLibrary;
+        PositionIndependentCode: @Tools.Native.PositionIndependentCode;
+        Target: @Tools.Native.Triple;
+        SourceFiles: [@SQLite.SourceRoot + "/native/sqlite3.c"];
+        ConfigFiles: [@SQLite.SourceRoot + "/native/sqlite3-" + @Tools.Native.OS + ".cfg"];
+        // Preserve the feature set supplied by the previous Win64 runtime.
+        Defines: [
+            "SQLITE_THREADSAFE=1",
+            "SQLITE_MAX_TRIGGER_DEPTH=100",
+            "SQLITE_ENABLE_BYTECODE_VTAB",
+            "SQLITE_ENABLE_CARRAY",
+            "SQLITE_ENABLE_COLUMN_METADATA",
+            "SQLITE_ENABLE_DBPAGE_VTAB",
+            "SQLITE_ENABLE_DBSTAT_VTAB",
+            "SQLITE_ENABLE_FTS3",
+            "SQLITE_ENABLE_FTS5",
+            "SQLITE_ENABLE_GEOPOLY",
+            "SQLITE_ENABLE_MATH_FUNCTIONS",
+            "SQLITE_ENABLE_PERCENTILE",
+            "SQLITE_ENABLE_PREUPDATE_HOOK",
+            "SQLITE_ENABLE_RBU",
+            "SQLITE_ENABLE_RTREE",
+            "SQLITE_ENABLE_SESSION",
+            "SQLITE_ENABLE_STMTVTAB"
+        ];
+        SystemIncludePaths: @Tools.Native.SystemIncludePaths;
+        LibraryPaths: @Tools.Native.LibraryPaths;
+        OutputPath: @SQLite.OutputRoot;
+    }
+    FPC Runtime {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [@SQLite.SourceRoot + "/SQLite.nxpk"];
+        OutputPath: @SQLite.Native.OutputPath;
+        PackageSDKIdentity: @Tools.Native.PackageSDKIdentity;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Files Paths {
+            UnitPaths: [
+                @Tools.Native.PackageSDKPath + "/units",
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-db/src/base",
+                @SQLite.SourceRoot + "/src",
+                @SQLite.SourceRoot + "/src/bindings"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+            PackagePaths: [@Tools.Native.PackageSDKPath + "/packages"];
+            LibraryPaths: @Tools.Native.PackageLibraryPaths;
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+        }
+        Linking RuntimeLibraries { LinkerOptions: @Tools.Native.LinkerOptions; }
+    }
+}
