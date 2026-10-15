@@ -18,6 +18,7 @@
 unit fpg_base;
 
 {$I fpg_defines.inc}
+{$COPERATORS ON}
 
 interface
 
