@@ -1,4 +1,0 @@
-[submodule "network/external/synapse"]
-	path = network/external/synapse
-	url = https://github.com/geby/synapse
-	branch = master
