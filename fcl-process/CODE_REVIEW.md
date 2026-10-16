@@ -253,3 +253,10 @@ after approximately 100 ms.
 
 Suggested correction: normalize the deadline or use a monotonic elapsed-time
 calculation. Verify timeouts beginning near a second boundary.
+
+## 2026-10-16 native retained-test conversion
+
+Useful retained behavior tests now use nxtest directly. The former FPCUnit
+helpers and runners were removed, with their originals preserved in hashed
+archives. The [retirement report](../../../projects/nxtest/retained/README.md) records conversions,
+corrected invalid expectations, before/after results and verification limits.

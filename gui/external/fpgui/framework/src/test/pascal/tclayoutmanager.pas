@@ -21,29 +21,26 @@ type
   end;
 
   TTestLayoutManager = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestAssignLayoutManager;
   end;
-
-procedure RegisterTests;
 
 procedure RegistertclayoutmanagerTests(ARegistry: TNXTestRegistry);
 
 implementation
 
-procedure RegisterTests;
-begin
-  
-end;
-
 { TDummyLayoutManager }
 
 procedure TDummyLayoutManager.DoLayout(AContainer: TfpgWidgetBase);
 begin
-  // Do nothing
 end;
 
 function TDummyLayoutManager.DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize;
@@ -62,20 +59,25 @@ begin
   try
     lm := TDummyLayoutManager.Create as ILayoutManager;
     widget.LayoutManager := lm;
-    FContext.AssertTrue(Assigned(widget.LayoutManager), 'LayoutManager should be assigned');
-    FContext.AssertTrue(widget.LayoutManager = lm, 'Assigned LayoutManager should be the same instance');
+    TestContext.AssertTrue(Assigned(widget.LayoutManager), 'LayoutManager should be assigned');
+    TestContext.AssertTrue(widget.LayoutManager = lm, 'Assigned LayoutManager should be the same instance');
   finally
     widget.Free;
   end;
 end;
 
+constructor TTestLayoutManager.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestLayoutManagerTestAssignLayoutManager(AContext: TNXTestContext);
 var lFixture: TTestLayoutManager;
 begin
-  lFixture:=TTestLayoutManager.Create;
+  lFixture:=TTestLayoutManager.Create(AContext, 'TestAssignLayoutManager');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAssignLayoutManager';
     lFixture.TestAssignLayoutManager;
   finally lFixture.Free; end;
 end;
@@ -87,8 +89,5 @@ begin
   lSuite.AddTest('TestAssignLayoutManager', @RunTTestLayoutManagerTestAssignLayoutManager);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

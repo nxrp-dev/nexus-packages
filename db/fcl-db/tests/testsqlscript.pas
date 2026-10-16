@@ -60,9 +60,14 @@ type
   { TTestSQLScript }
 
   TTestSQLScript = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     Script : TMyScript;
     exceptionstatement,
@@ -128,9 +133,14 @@ type
   { TTestEventSQLScript }
 
   TTestEventSQLScript = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     Script : TEventSQLScript;
     StopToSend : boolean;
@@ -238,8 +248,8 @@ end;
 
 procedure TTestSQLScript.AssertStatDir(Statements, Directives: string);
 begin
-  FContext.AssertTrue((Statements)=(script.StatementsExecuted), 'Executed Statements');
-  FContext.AssertTrue((Directives)=(script.DirectivesExecuted), 'Executed Directives');
+  TestContext.AssertTrue((Statements)=(script.StatementsExecuted), 'Executed Statements');
+  TestContext.AssertTrue((Directives)=(script.DirectivesExecuted), 'Executed Directives');
 end;
 
 procedure TTestSQLScript.DoExecution;
@@ -277,28 +287,28 @@ procedure TTestSQLScript.TestCreateDefaults;
 begin
   with Script do
     begin
-    FContext.AssertTrue((';')=(Terminator), 'Terminator');
-    FContext.AssertTrue(UseCommit, 'UseCommit');
-    FContext.AssertTrue(UseSetTerm, 'UseSetTerm');
-    FContext.AssertTrue(UseDefines, 'UseDefines');
-    FContext.AssertTrue(CommentsInSQL, 'CommentsInSQL');
-    FContext.AssertTrue(not (Aborted), 'Aborted');
-    FContext.AssertTrue((0)=(Line), 'Line');
-    FContext.AssertTrue((0)=(Defines.count), 'Defines');
-    FContext.AssertTrue((12)=(Directives.count), 'Directives');
-    FContext.AssertTrue(Directives.IndexOf('SET TERM')<>-1, 'Have SET TERM');
-    FContext.AssertTrue(Directives.IndexOf('COMMIT WORK')<>-1, 'Have COMMIT WORK');
-    FContext.AssertTrue(Directives.IndexOf('COMMIT RETAIN')<>-1, 'Have COMMIT RETAIN');
-    FContext.AssertTrue(Directives.IndexOf('COMMIT')<>-1, 'Have COMMIT');
-    FContext.AssertTrue(Directives.IndexOf('#IFDEF')<>-1, 'Have #IFDEF');
-    FContext.AssertTrue(Directives.IndexOf('#IFNDEF')<>-1, 'Have #IFNDEF');
-    FContext.AssertTrue(Directives.IndexOf('#ELSE')<>-1, 'Have #ELSE');
-    FContext.AssertTrue(Directives.IndexOf('#ENDIF')<>-1, 'Have #ENDIF');
-    FContext.AssertTrue(Directives.IndexOf('#DEFINE')<>-1, 'Have #DEFINE');
-    FContext.AssertTrue(Directives.IndexOf('#UNDEF')<>-1, 'Have #UNDEF');
-    FContext.AssertTrue(Directives.IndexOf('#UNDEFINE')<>-1, 'Have #UNDEFINE');
+    TestContext.AssertTrue((';')=(Terminator), 'Terminator');
+    TestContext.AssertTrue(UseCommit, 'UseCommit');
+    TestContext.AssertTrue(UseSetTerm, 'UseSetTerm');
+    TestContext.AssertTrue(UseDefines, 'UseDefines');
+    TestContext.AssertTrue(CommentsInSQL, 'CommentsInSQL');
+    TestContext.AssertTrue(not (Aborted), 'Aborted');
+    TestContext.AssertTrue((0)=(Line), 'Line');
+    TestContext.AssertTrue((0)=(Defines.count), 'Defines');
+    TestContext.AssertTrue((12)=(Directives.count), 'Directives');
+    TestContext.AssertTrue(Directives.IndexOf('SET TERM')<>-1, 'Have SET TERM');
+    TestContext.AssertTrue(Directives.IndexOf('COMMIT WORK')<>-1, 'Have COMMIT WORK');
+    TestContext.AssertTrue(Directives.IndexOf('COMMIT RETAIN')<>-1, 'Have COMMIT RETAIN');
+    TestContext.AssertTrue(Directives.IndexOf('COMMIT')<>-1, 'Have COMMIT');
+    TestContext.AssertTrue(Directives.IndexOf('#IFDEF')<>-1, 'Have #IFDEF');
+    TestContext.AssertTrue(Directives.IndexOf('#IFNDEF')<>-1, 'Have #IFNDEF');
+    TestContext.AssertTrue(Directives.IndexOf('#ELSE')<>-1, 'Have #ELSE');
+    TestContext.AssertTrue(Directives.IndexOf('#ENDIF')<>-1, 'Have #ENDIF');
+    TestContext.AssertTrue(Directives.IndexOf('#DEFINE')<>-1, 'Have #DEFINE');
+    TestContext.AssertTrue(Directives.IndexOf('#UNDEF')<>-1, 'Have #UNDEF');
+    TestContext.AssertTrue(Directives.IndexOf('#UNDEFINE')<>-1, 'Have #UNDEFINE');
     // This is defined in our test class.
-    FContext.AssertTrue(Directives.IndexOf('STOP')<>-1, 'Have STOP');
+    TestContext.AssertTrue(Directives.IndexOf('STOP')<>-1, 'Have STOP');
     end;
 end;
 
@@ -325,7 +335,7 @@ begin
   script.UseSetTerm:=true;
   Add('SET TERM !;');
   script.execute;
-  FContext.AssertTrue(('!')=(script.terminator), 'terminator');
+  TestContext.AssertTrue(('!')=(script.terminator), 'terminator');
   AssertStatDir('', '');
 end;
 
@@ -335,7 +345,7 @@ begin
   Script.Directives.Add ('SET TERM');
   Add('SET TERM !;');
   script.execute;
-  FContext.AssertTrue((';')=(script.terminator), 'terminator');
+  TestContext.AssertTrue((';')=(script.terminator), 'terminator');
   AssertStatDir('', '"SET TERM(!)"');
 end;
 
@@ -362,7 +372,7 @@ begin
   script.UseCommit := true;
   Add('commit;');
   script.execute;
-  FContext.AssertTrue((1)=(script.FCommits), 'Commits');
+  TestContext.AssertTrue((1)=(script.FCommits), 'Commits');
   AssertStatDir ('', '');
 end;
 
@@ -373,7 +383,7 @@ begin
     Delete(IndexOf('COMMIT'));
   Add('commit;');
   script.execute;
-  FContext.AssertTrue((0)=(script.FCommits), 'Commits');
+  TestContext.AssertTrue((0)=(script.FCommits), 'Commits');
   AssertStatDir ('commit', '');
 end;
 
@@ -383,8 +393,8 @@ begin
   Add ('#define iets;');
   script.execute;
   AssertStatDir ('', '');
-  FContext.AssertTrue((1)=(script.defines.count), 'Aantal defines');
-  FContext.AssertTrue(('iets')=(script.Defines[0]), 'Juiste define');
+  TestContext.AssertTrue((1)=(script.defines.count), 'Aantal defines');
+  TestContext.AssertTrue(('iets')=(script.Defines[0]), 'Juiste define');
 end;
 
 procedure TTestSQLScript.TestUndefine;
@@ -394,7 +404,7 @@ begin
   Add ('#undefine iets;');
   script.execute;
   AssertStatDir ('', '');
-  FContext.AssertTrue((0)=(script.defines.count), 'Aantal defines');
+  TestContext.AssertTrue((0)=(script.defines.count), 'Aantal defines');
 end;
 
 procedure TTestSQLScript.TestUndef;
@@ -404,7 +414,7 @@ begin
   Add ('#Undef iets;');
   script.execute;
   AssertStatDir ('', '');
-  FContext.AssertTrue((0)=(script.defines.count), 'Aantal defines');
+  TestContext.AssertTrue((0)=(script.defines.count), 'Aantal defines');
 end;
 
 procedure TTestSQLScript.TestIfdef1;
@@ -612,7 +622,7 @@ procedure TTestSQLScript.TestStatementExeception;
 begin
   Add('iets;');
   script.DoException:='FOUT';
-  FContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertRaises(exception, @DoExecution, '');
   AssertStatDir('iets', '');
 end;
 
@@ -621,7 +631,7 @@ begin
   Add('iets;');
   script.Directives.Add('IETS');
   script.DoException := 'FOUT';
-  FContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertRaises(exception, @DoExecution, '');
   AssertStatDir('', 'IETS');
 end;
 
@@ -629,9 +639,9 @@ procedure TTestSQLScript.TestCommitException;
 begin
   Add ('commit;');
   script.DoException := 'FOUT';
-  FContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertRaises(exception, @DoExecution, '');
   AssertStatDir('', '');
-  FContext.AssertTrue((1)=(Script.FCommits), 'Commit count');
+  TestContext.AssertTrue((1)=(Script.FCommits), 'Commit count');
 end;
 
 procedure TTestSQLScript.TestStatementOnExeception1;
@@ -641,8 +651,8 @@ begin
   Add ('foutief;');
   script.OnException:=@ExceptionHandler;
   Script.Execute;
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('foutief')=(exceptionstatement), 'exception statement');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('foutief')=(exceptionstatement), 'exception statement');
 end;
 
 procedure TTestSQLScript.TestStatementOnExeception2;
@@ -651,9 +661,9 @@ begin
   script.DoException := 'Fout';
   Add ('foutief;');
   script.OnException:=@ExceptionHandler;
-  FContext.AssertRaises(exception, @DoExecution, '');
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('foutief')=(exceptionstatement), 'exception statement');
+  TestContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('foutief')=(exceptionstatement), 'exception statement');
 end;
 
 procedure TTestSQLScript.TestDirectiveOnException1;
@@ -664,8 +674,8 @@ begin
   Script.Directives.Add ('FOUTIEF');
   script.OnException:=@ExceptionHandler;
   Script.Execute;
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('FOUTIEF')=(exceptionstatement), 'exception statement');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('FOUTIEF')=(exceptionstatement), 'exception statement');
 end;
 
 procedure TTestSQLScript.TestDirectiveOnException2;
@@ -675,9 +685,9 @@ begin
   Add ('foutief;');
   Script.Directives.Add ('FOUTIEF');
   script.OnException:=@ExceptionHandler;
-  FContext.AssertRaises(exception, @DoExecution, '');
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('FOUTIEF')=(exceptionstatement), 'exception statement');
+  TestContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('FOUTIEF')=(exceptionstatement), 'exception statement');
 end;
 
 procedure TTestSQLScript.TestDirectiveOnException3;
@@ -688,8 +698,8 @@ begin
   Script.Directives.Add ('FOUTIEF');
   script.OnException:=@ExceptionHandler;
   Script.Execute;
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('FOUTIEF,probleem')=(exceptionstatement), 'exception statement');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('FOUTIEF,probleem')=(exceptionstatement), 'exception statement');
 end;
 
 procedure TTestSQLScript.TestCommitOnException1;
@@ -699,9 +709,9 @@ begin
   Add ('Commit;');
   script.OnException:=@ExceptionHandler;
   Script.Execute;
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('COMMIT')=(exceptionstatement), 'exception statement');
-  FContext.AssertTrue((1)=(Script.FCommits), 'commit count');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('COMMIT')=(exceptionstatement), 'exception statement');
+  TestContext.AssertTrue((1)=(Script.FCommits), 'commit count');
 end;
 
 procedure TTestSQLScript.TestCommitOnException2;
@@ -710,10 +720,10 @@ begin
   script.DoException := 'Fout';
   Add ('Commit;');
   script.OnException:=@ExceptionHandler;
-  FContext.AssertRaises(exception, @DoExecution, '');
-  FContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
-  FContext.AssertTrue(('COMMIT')=(exceptionstatement), 'exception statement');
-  FContext.AssertTrue((1)=(Script.FCommits), 'commit count');
+  TestContext.AssertRaises(exception, @DoExecution, '');
+  TestContext.AssertTrue(('Fout')=(exceptionmessage), 'exception message');
+  TestContext.AssertTrue(('COMMIT')=(exceptionstatement), 'exception statement');
+  TestContext.AssertTrue((1)=(Script.FCommits), 'commit count');
 end;
 
 
@@ -855,8 +865,8 @@ begin
   Script.OnSQLStatement := @NotifyStatement;
   Script.Script.Text := 'stat1;stat2;';
   script.execute;
-  FContext.AssertTrue(('stat1;stat2')=(received), 'Received');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue(('stat1;stat2')=(received), 'Received');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestStatementStop;
@@ -865,8 +875,8 @@ begin
   Script.OnSQLStatement := @NotifyStatement;
   Script.Script.Text := 'stat1;stat2;';
   script.execute;
-  FContext.AssertTrue(('stat1')=(received), 'Received');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue(('stat1')=(received), 'Received');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestDirective;
@@ -877,8 +887,8 @@ begin
   script.Directives.Add ('STAT1');
   Script.Script.Text := 'stat1 ik;stat2;';
   script.execute;
-  FContext.AssertTrue(('STAT1(ik);stat2')=(received), 'Received');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue(('STAT1(ik);stat2')=(received), 'Received');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestDirectiveStop;
@@ -889,8 +899,8 @@ begin
   script.Directives.Add ('STAT1');
   Script.Script.Text := 'stat1 ik;stat2;';
   script.execute;
-  FContext.AssertTrue(('STAT1(ik)')=(received), 'Received');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue(('STAT1(ik)')=(received), 'Received');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestCommit;
@@ -898,8 +908,8 @@ begin
   Script.OnCommit := @Notify;
   Script.Script.Text := 'iets; commit; anders;';
   script.execute;
-  FContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestBeforeExec;
@@ -907,8 +917,8 @@ begin
   Script.BeforeExecute := @Notify;
   Script.Script.Text := 'update iets; anders iets;';
   script.execute;
-  FContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
 procedure TTestEventSQLScript.TestAfterExec;
@@ -916,18 +926,30 @@ begin
   Script.AfterExecute := @Notify;
   Script.Script.Text := 'update iets; anders iets; en meer;';
   script.execute;
-  FContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
-  FContext.AssertTrue((script)=(LastSender), 'Sender');
+  TestContext.AssertTrue((1)=(NotifyCount), 'NotifyCount');
+  TestContext.AssertTrue((script)=(LastSender), 'Sender');
 end;
 
+
+constructor TTestSQLScript.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestEventSQLScript.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
 
 procedure RunTTestSQLScriptTestCreateDefaults(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCreateDefaults');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateDefaults';
     lFixture.SetUp;
     try lFixture.TestCreateDefaults; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -936,10 +958,8 @@ end;
 procedure RunTTestSQLScriptTestTerminator(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestTerminator');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTerminator';
     lFixture.SetUp;
     try lFixture.TestTerminator; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -948,10 +968,8 @@ end;
 procedure RunTTestSQLScriptTestTerminatorNoFinal(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestTerminatorNoFinal');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTerminatorNoFinal';
     lFixture.SetUp;
     try lFixture.TestTerminatorNoFinal; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -960,10 +978,8 @@ end;
 procedure RunTTestSQLScriptTestSetTerm(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestSetTerm');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetTerm';
     lFixture.SetUp;
     try lFixture.TestSetTerm; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -972,10 +988,8 @@ end;
 procedure RunTTestSQLScriptTestUseSetTerm(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseSetTerm');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseSetTerm';
     lFixture.SetUp;
     try lFixture.TestUseSetTerm; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -984,10 +998,8 @@ end;
 procedure RunTTestSQLScriptTestComments(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestComments');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComments';
     lFixture.SetUp;
     try lFixture.TestComments; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -996,10 +1008,8 @@ end;
 procedure RunTTestSQLScriptTestUseComments(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseComments');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseComments';
     lFixture.SetUp;
     try lFixture.TestUseComments; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1008,10 +1018,8 @@ end;
 procedure RunTTestSQLScriptTestCommit(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommit';
     lFixture.SetUp;
     try lFixture.TestCommit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1020,10 +1028,8 @@ end;
 procedure RunTTestSQLScriptTestUseCommit(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseCommit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseCommit';
     lFixture.SetUp;
     try lFixture.TestUseCommit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1032,10 +1038,8 @@ end;
 procedure RunTTestSQLScriptTestDefine(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDefine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefine';
     lFixture.SetUp;
     try lFixture.TestDefine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1044,10 +1048,8 @@ end;
 procedure RunTTestSQLScriptTestUndefine(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUndefine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUndefine';
     lFixture.SetUp;
     try lFixture.TestUndefine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1056,10 +1058,8 @@ end;
 procedure RunTTestSQLScriptTestUndef(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUndef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUndef';
     lFixture.SetUp;
     try lFixture.TestUndef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1068,10 +1068,8 @@ end;
 procedure RunTTestSQLScriptTestIfdef1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestIfdef1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfdef1';
     lFixture.SetUp;
     try lFixture.TestIfdef1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1080,10 +1078,8 @@ end;
 procedure RunTTestSQLScriptTestIfdef2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestIfdef2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfdef2';
     lFixture.SetUp;
     try lFixture.TestIfdef2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1092,10 +1088,8 @@ end;
 procedure RunTTestSQLScriptTestIfndef1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestIfndef1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfndef1';
     lFixture.SetUp;
     try lFixture.TestIfndef1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1104,10 +1098,8 @@ end;
 procedure RunTTestSQLScriptTestIfndef2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestIfndef2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfndef2';
     lFixture.SetUp;
     try lFixture.TestIfndef2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1116,10 +1108,8 @@ end;
 procedure RunTTestSQLScriptTestElse1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestElse1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestElse1';
     lFixture.SetUp;
     try lFixture.TestElse1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1128,10 +1118,8 @@ end;
 procedure RunTTestSQLScriptTestElse2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestElse2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestElse2';
     lFixture.SetUp;
     try lFixture.TestElse2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1140,10 +1128,8 @@ end;
 procedure RunTTestSQLScriptTestEndif1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestEndif1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndif1';
     lFixture.SetUp;
     try lFixture.TestEndif1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1152,10 +1138,8 @@ end;
 procedure RunTTestSQLScriptTestEndif2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestEndif2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndif2';
     lFixture.SetUp;
     try lFixture.TestEndif2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1164,10 +1148,8 @@ end;
 procedure RunTTestSQLScriptTestUseDefines(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseDefines');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseDefines';
     lFixture.SetUp;
     try lFixture.TestUseDefines; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1176,10 +1158,8 @@ end;
 procedure RunTTestSQLScriptTestTermInComment(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestTermInComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTermInComment';
     lFixture.SetUp;
     try lFixture.TestTermInComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1188,10 +1168,8 @@ end;
 procedure RunTTestSQLScriptTestTermInQuotes1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestTermInQuotes1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTermInQuotes1';
     lFixture.SetUp;
     try lFixture.TestTermInQuotes1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1200,10 +1178,8 @@ end;
 procedure RunTTestSQLScriptTestTermInQuotes2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestTermInQuotes2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTermInQuotes2';
     lFixture.SetUp;
     try lFixture.TestTermInQuotes2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1212,10 +1188,8 @@ end;
 procedure RunTTestSQLScriptTestCommentInComment(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommentInComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommentInComment';
     lFixture.SetUp;
     try lFixture.TestCommentInComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1224,10 +1198,8 @@ end;
 procedure RunTTestSQLScriptTestCommentInQuotes1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommentInQuotes1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommentInQuotes1';
     lFixture.SetUp;
     try lFixture.TestCommentInQuotes1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1236,10 +1208,8 @@ end;
 procedure RunTTestSQLScriptTestCommentInQuotes2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommentInQuotes2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommentInQuotes2';
     lFixture.SetUp;
     try lFixture.TestCommentInQuotes2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1248,10 +1218,8 @@ end;
 procedure RunTTestSQLScriptTestDashDashComment(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDashDashComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDashDashComment';
     lFixture.SetUp;
     try lFixture.TestDashDashComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1260,10 +1228,8 @@ end;
 procedure RunTTestSQLScriptTestQuote1InComment(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestQuote1InComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuote1InComment';
     lFixture.SetUp;
     try lFixture.TestQuote1InComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1272,10 +1238,8 @@ end;
 procedure RunTTestSQLScriptTestQuote2InComment(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestQuote2InComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuote2InComment';
     lFixture.SetUp;
     try lFixture.TestQuote2InComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1284,10 +1248,8 @@ end;
 procedure RunTTestSQLScriptTestQuoteInQuotes1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestQuoteInQuotes1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuoteInQuotes1';
     lFixture.SetUp;
     try lFixture.TestQuoteInQuotes1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1296,10 +1258,8 @@ end;
 procedure RunTTestSQLScriptTestQuoteInQuotes2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestQuoteInQuotes2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuoteInQuotes2';
     lFixture.SetUp;
     try lFixture.TestQuoteInQuotes2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1308,10 +1268,8 @@ end;
 procedure RunTTestSQLScriptTestStatementStop(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestStatementStop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatementStop';
     lFixture.SetUp;
     try lFixture.TestStatementStop; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1320,10 +1278,8 @@ end;
 procedure RunTTestSQLScriptTestDirectiveStop(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDirectiveStop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirectiveStop';
     lFixture.SetUp;
     try lFixture.TestDirectiveStop; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1332,10 +1288,8 @@ end;
 procedure RunTTestSQLScriptTestStatementExeception(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestStatementExeception');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatementExeception';
     lFixture.SetUp;
     try lFixture.TestStatementExeception; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1344,10 +1298,8 @@ end;
 procedure RunTTestSQLScriptTestDirectiveException(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDirectiveException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirectiveException';
     lFixture.SetUp;
     try lFixture.TestDirectiveException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1356,10 +1308,8 @@ end;
 procedure RunTTestSQLScriptTestCommitException(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommitException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommitException';
     lFixture.SetUp;
     try lFixture.TestCommitException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1368,10 +1318,8 @@ end;
 procedure RunTTestSQLScriptTestStatementOnExeception1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestStatementOnExeception1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatementOnExeception1';
     lFixture.SetUp;
     try lFixture.TestStatementOnExeception1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1380,10 +1328,8 @@ end;
 procedure RunTTestSQLScriptTestStatementOnExeception2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestStatementOnExeception2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatementOnExeception2';
     lFixture.SetUp;
     try lFixture.TestStatementOnExeception2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1392,10 +1338,8 @@ end;
 procedure RunTTestSQLScriptTestDirectiveOnException1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDirectiveOnException1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirectiveOnException1';
     lFixture.SetUp;
     try lFixture.TestDirectiveOnException1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1404,10 +1348,8 @@ end;
 procedure RunTTestSQLScriptTestDirectiveOnException2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestDirectiveOnException2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirectiveOnException2';
     lFixture.SetUp;
     try lFixture.TestDirectiveOnException2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1416,10 +1358,8 @@ end;
 procedure RunTTestSQLScriptTestCommitOnException1(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommitOnException1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommitOnException1';
     lFixture.SetUp;
     try lFixture.TestCommitOnException1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1428,10 +1368,8 @@ end;
 procedure RunTTestSQLScriptTestCommitOnException2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestCommitOnException2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommitOnException2';
     lFixture.SetUp;
     try lFixture.TestCommitOnException2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1440,10 +1378,8 @@ end;
 procedure RunTTestSQLScriptTestUseDollarSign(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseDollarSign');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseDollarSign';
     lFixture.SetUp;
     try lFixture.TestUseDollarSign; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1452,10 +1388,8 @@ end;
 procedure RunTTestSQLScriptTestUseDollarSign2(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseDollarSign2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseDollarSign2';
     lFixture.SetUp;
     try lFixture.TestUseDollarSign2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1464,10 +1398,8 @@ end;
 procedure RunTTestSQLScriptTestUseDollarSign3(AContext: TNXTestContext);
 var lFixture: TTestSQLScript;
 begin
-  lFixture:=TTestSQLScript.Create;
+  lFixture:=TTestSQLScript.Create(AContext, 'TestUseDollarSign3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUseDollarSign3';
     lFixture.SetUp;
     try lFixture.TestUseDollarSign3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1476,10 +1408,8 @@ end;
 procedure RunTTestEventSQLScriptTestStatement(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestStatement');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatement';
     lFixture.SetUp;
     try lFixture.TestStatement; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1488,10 +1418,8 @@ end;
 procedure RunTTestEventSQLScriptTestStatementStop(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestStatementStop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStatementStop';
     lFixture.SetUp;
     try lFixture.TestStatementStop; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1500,10 +1428,8 @@ end;
 procedure RunTTestEventSQLScriptTestDirective(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestDirective');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirective';
     lFixture.SetUp;
     try lFixture.TestDirective; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1512,10 +1438,8 @@ end;
 procedure RunTTestEventSQLScriptTestDirectiveStop(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestDirectiveStop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDirectiveStop';
     lFixture.SetUp;
     try lFixture.TestDirectiveStop; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1524,10 +1448,8 @@ end;
 procedure RunTTestEventSQLScriptTestCommit(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestCommit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommit';
     lFixture.SetUp;
     try lFixture.TestCommit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1536,10 +1458,8 @@ end;
 procedure RunTTestEventSQLScriptTestBeforeExec(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestBeforeExec');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBeforeExec';
     lFixture.SetUp;
     try lFixture.TestBeforeExec; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1548,10 +1468,8 @@ end;
 procedure RunTTestEventSQLScriptTestAfterExec(AContext: TNXTestContext);
 var lFixture: TTestEventSQLScript;
 begin
-  lFixture:=TTestEventSQLScript.Create;
+  lFixture:=TTestEventSQLScript.Create(AContext, 'TestAfterExec');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAfterExec';
     lFixture.SetUp;
     try lFixture.TestAfterExec; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

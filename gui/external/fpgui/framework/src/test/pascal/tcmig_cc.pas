@@ -10,9 +10,14 @@ uses
 type
   { Test cases for TfpgMigCC }
   TTestMigCC = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Basic creation and initialization }
     procedure TestCreate;
@@ -130,7 +135,7 @@ var
 begin
   cc := TfpgMigCC.Create;
   try
-    FContext.AssertTrue((cc)<>nil, 'CC should be created');
+    TestContext.AssertTrue((cc)<>nil, 'CC should be created');
   finally
     cc.Free;
   end;
@@ -142,23 +147,23 @@ var
 begin
   cc := TfpgMigCC.Create;
   try
-    FContext.AssertTrue((-1)=(cc.Dock), 'Dock should be -1');
-    FContext.AssertTrue((0)=(cc.IsFlowX), 'FlowX should be 0 (nil)');
-    FContext.AssertTrue((0)=(cc.SkipCells), 'Skip should be 0');
-    FContext.AssertTrue((1)=(cc.SplitParts), 'Split should be 1');
-    FContext.AssertTrue((1)=(cc.CellSpanX), 'SpanX should be 1');
-    FContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
-    FContext.AssertTrue((-1)=(cc.CellX), 'CellX should be -1');
-    FContext.AssertTrue((0)=(cc.CellY), 'CellY should be 0');
-    FContext.AssertTrue(('')=(cc.TagValue), 'Tag should be empty');
-    FContext.AssertTrue(('')=(cc.IdValue), 'Id should be empty');
-    FContext.AssertTrue((-1)=(cc.HideModeValue), 'HideMode should be -1');
-    FContext.AssertTrue(cc.IsBoundsInGrid, 'BoundsInGrid should be true');
-    FContext.AssertTrue(not (cc.IsExternal), 'External should be false');
-    FContext.AssertTrue(IsNaN(cc.PushWeightX), 'PushX should be NaN (null)');
-    FContext.AssertTrue(IsNaN(cc.PushWeightY), 'PushY should be NaN (null)');
-    FContext.AssertTrue((cc.Horizontal)<>nil, 'Horizontal should be initialized');
-    FContext.AssertTrue((cc.Vertical)<>nil, 'Vertical should be initialized');
+    TestContext.AssertTrue((-1)=(cc.Dock), 'Dock should be -1');
+    TestContext.AssertTrue((0)=(cc.IsFlowX), 'FlowX should be 0 (nil)');
+    TestContext.AssertTrue((0)=(cc.SkipCells), 'Skip should be 0');
+    TestContext.AssertTrue((1)=(cc.SplitParts), 'Split should be 1');
+    TestContext.AssertTrue((1)=(cc.CellSpanX), 'SpanX should be 1');
+    TestContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
+    TestContext.AssertTrue((-1)=(cc.CellX), 'CellX should be -1');
+    TestContext.AssertTrue((0)=(cc.CellY), 'CellY should be 0');
+    TestContext.AssertTrue(('')=(cc.TagValue), 'Tag should be empty');
+    TestContext.AssertTrue(('')=(cc.IdValue), 'Id should be empty');
+    TestContext.AssertTrue((-1)=(cc.HideModeValue), 'HideMode should be -1');
+    TestContext.AssertTrue(cc.IsBoundsInGrid, 'BoundsInGrid should be true');
+    TestContext.AssertTrue(not (cc.IsExternal), 'External should be false');
+    TestContext.AssertTrue(IsNaN(cc.PushWeightX), 'PushX should be NaN (null)');
+    TestContext.AssertTrue(IsNaN(cc.PushWeightY), 'PushY should be NaN (null)');
+    TestContext.AssertTrue((cc.Horizontal)<>nil, 'Horizontal should be initialized');
+    TestContext.AssertTrue((cc.Vertical)<>nil, 'Vertical should be initialized');
   finally
     cc.Free;
   end;
@@ -173,7 +178,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SizeGroupX('group1');
-    FContext.AssertTrue(('group1')=(cc.Horizontal.GetSizeGroup), 'SizeGroup should be set');
+    TestContext.AssertTrue(('group1')=(cc.Horizontal.GetSizeGroup), 'SizeGroup should be set');
   finally
     cc.Free;
   end;
@@ -186,7 +191,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.EndGroupX('group2');
-    FContext.AssertTrue(('group2')=(cc.Horizontal.GetEndGroup), 'EndGroup should be set');
+    TestContext.AssertTrue(('group2')=(cc.Horizontal.GetEndGroup), 'EndGroup should be set');
   finally
     cc.Free;
   end;
@@ -199,7 +204,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.MinWidth('100px');
-    FContext.AssertTrue((cc.Horizontal.GetSize)<>nil, 'Size should be set');
+    TestContext.AssertTrue((cc.Horizontal.GetSize)<>nil, 'Size should be set');
   finally
     cc.Free;
   end;
@@ -213,7 +218,7 @@ begin
   try
     try
       cc.Width('100px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -230,7 +235,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.MaxWidth('200px');
-    FContext.AssertTrue((cc.Horizontal.GetSize)<>nil, 'Size should be set');
+    TestContext.AssertTrue((cc.Horizontal.GetSize)<>nil, 'Size should be set');
   finally
     cc.Free;
   end;
@@ -244,7 +249,7 @@ begin
   try
     try
       cc.GapX('10px', '20px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -261,7 +266,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.AlignX('center');
-    FContext.AssertTrue((cc.Horizontal.GetAlign)<>nil, 'AlignX should be set');
+    TestContext.AssertTrue((cc.Horizontal.GetAlign)<>nil, 'AlignX should be set');
   finally
     cc.Free;
   end;
@@ -274,7 +279,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowPrioX(50);
-    FContext.AssertTrue((50)=(cc.Horizontal.GetGrowPriority), 'GrowPriority should be 50');
+    TestContext.AssertTrue((50)=(cc.Horizontal.GetGrowPriority), 'GrowPriority should be 50');
   finally
     cc.Free;
   end;
@@ -287,7 +292,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowX;
-    FContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'GrowPriority should be 100');
+    TestContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'GrowPriority should be 100');
   finally
     cc.Free;
   end;
@@ -300,7 +305,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowX(0.5);
-    FContext.AssertTrue(Abs((0.5)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Grow weight should be 0.5');
+    TestContext.AssertTrue(Abs((0.5)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Grow weight should be 0.5');
   finally
     cc.Free;
   end;
@@ -313,7 +318,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.ShrinkPrioX(75);
-    FContext.AssertTrue((75)=(cc.Horizontal.GetShrinkPriority), 'ShrinkPriority should be 75');
+    TestContext.AssertTrue((75)=(cc.Horizontal.GetShrinkPriority), 'ShrinkPriority should be 75');
   finally
     cc.Free;
   end;
@@ -326,7 +331,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.ShrinkX(0.3);
-    FContext.AssertTrue(Abs((0.3)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.3');
+    TestContext.AssertTrue(Abs((0.3)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.3');
   finally
     cc.Free;
   end;
@@ -341,7 +346,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SizeGroupY('group3');
-    FContext.AssertTrue(('group3')=(cc.Vertical.GetSizeGroup), 'SizeGroup should be set');
+    TestContext.AssertTrue(('group3')=(cc.Vertical.GetSizeGroup), 'SizeGroup should be set');
   finally
     cc.Free;
   end;
@@ -354,7 +359,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.EndGroupY('group4');
-    FContext.AssertTrue(('group4')=(cc.Vertical.GetEndGroup), 'EndGroup should be set');
+    TestContext.AssertTrue(('group4')=(cc.Vertical.GetEndGroup), 'EndGroup should be set');
   finally
     cc.Free;
   end;
@@ -367,7 +372,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.MinHeight('50px');
-    FContext.AssertTrue((cc.Vertical.GetSize)<>nil, 'Size should be set');
+    TestContext.AssertTrue((cc.Vertical.GetSize)<>nil, 'Size should be set');
   finally
     cc.Free;
   end;
@@ -381,7 +386,7 @@ begin
   try
     try
       cc.Height('100px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -398,7 +403,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.MaxHeight('150px');
-    FContext.AssertTrue((cc.Vertical.GetSize)<>nil, 'Size should be set');
+    TestContext.AssertTrue((cc.Vertical.GetSize)<>nil, 'Size should be set');
   finally
     cc.Free;
   end;
@@ -412,7 +417,7 @@ begin
   try
     try
       cc.GapY('5px', '10px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -429,7 +434,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.AlignY('top');
-    FContext.AssertTrue((cc.Vertical.GetAlign)<>nil, 'AlignY should be set');
+    TestContext.AssertTrue((cc.Vertical.GetAlign)<>nil, 'AlignY should be set');
   finally
     cc.Free;
   end;
@@ -442,7 +447,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowPrioY(60);
-    FContext.AssertTrue((60)=(cc.Vertical.GetGrowPriority), 'GrowPriority should be 60');
+    TestContext.AssertTrue((60)=(cc.Vertical.GetGrowPriority), 'GrowPriority should be 60');
   finally
     cc.Free;
   end;
@@ -455,7 +460,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowY;
-    FContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'GrowPriority should be 100');
+    TestContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'GrowPriority should be 100');
   finally
     cc.Free;
   end;
@@ -468,7 +473,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowY(0.7);
-    FContext.AssertTrue(Abs((0.7)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Grow weight should be 0.7');
+    TestContext.AssertTrue(Abs((0.7)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Grow weight should be 0.7');
   finally
     cc.Free;
   end;
@@ -481,7 +486,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.ShrinkPrioY(80);
-    FContext.AssertTrue((80)=(cc.Vertical.GetShrinkPriority), 'ShrinkPriority should be 80');
+    TestContext.AssertTrue((80)=(cc.Vertical.GetShrinkPriority), 'ShrinkPriority should be 80');
   finally
     cc.Free;
   end;
@@ -494,7 +499,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.ShrinkY(0.4);
-    FContext.AssertTrue(Abs((0.4)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.4');
+    TestContext.AssertTrue(Abs((0.4)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.4');
   finally
     cc.Free;
   end;
@@ -509,8 +514,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SizeGroup('groupX', 'groupY');
-    FContext.AssertTrue(('groupX')=(cc.Horizontal.GetSizeGroup), 'SizeGroupX should be set');
-    FContext.AssertTrue(('groupY')=(cc.Vertical.GetSizeGroup), 'SizeGroupY should be set');
+    TestContext.AssertTrue(('groupX')=(cc.Horizontal.GetSizeGroup), 'SizeGroupX should be set');
+    TestContext.AssertTrue(('groupY')=(cc.Vertical.GetSizeGroup), 'SizeGroupY should be set');
   finally
     cc.Free;
   end;
@@ -523,8 +528,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.EndGroup('endX', 'endY');
-    FContext.AssertTrue(('endX')=(cc.Horizontal.GetEndGroup), 'EndGroupX should be set');
-    FContext.AssertTrue(('endY')=(cc.Vertical.GetEndGroup), 'EndGroupY should be set');
+    TestContext.AssertTrue(('endX')=(cc.Horizontal.GetEndGroup), 'EndGroupX should be set');
+    TestContext.AssertTrue(('endY')=(cc.Vertical.GetEndGroup), 'EndGroupY should be set');
   finally
     cc.Free;
   end;
@@ -537,8 +542,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Grow(0.6, 0.8);
-    FContext.AssertTrue(Abs((0.6)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 0.6');
-    FContext.AssertTrue(Abs((0.8)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 0.8');
+    TestContext.AssertTrue(Abs((0.6)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 0.6');
+    TestContext.AssertTrue(Abs((0.8)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 0.8');
   finally
     cc.Free;
   end;
@@ -551,11 +556,11 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Grow;
-    FContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 100');
-    FContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 100');
+    TestContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 100');
+    TestContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 100');
     { .Grow must also set default grow weights, matching the behaviour of .GrowX and .GrowY }
-    FContext.AssertTrue(Abs((100.0)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 100.0');
-    FContext.AssertTrue(Abs((100.0)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 100.0');
   finally
     cc.Free;
   end;
@@ -568,8 +573,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.GrowPrio(40, 60);
-    FContext.AssertTrue((40)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 40');
-    FContext.AssertTrue((60)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 60');
+    TestContext.AssertTrue((40)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 40');
+    TestContext.AssertTrue((60)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 60');
   finally
     cc.Free;
   end;
@@ -582,8 +587,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Shrink(0.2, 0.3);
-    FContext.AssertTrue(Abs((0.2)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Horizontal shrink weight should be 0.2');
-    FContext.AssertTrue(Abs((0.3)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Vertical shrink weight should be 0.3');
+    TestContext.AssertTrue(Abs((0.2)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Horizontal shrink weight should be 0.2');
+    TestContext.AssertTrue(Abs((0.3)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Vertical shrink weight should be 0.3');
   finally
     cc.Free;
   end;
@@ -596,8 +601,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Shrink;
-    FContext.AssertTrue((100)=(cc.Horizontal.GetShrinkPriority), 'Horizontal shrink priority should be 100');
-    FContext.AssertTrue((100)=(cc.Vertical.GetShrinkPriority), 'Vertical shrink priority should be 100');
+    TestContext.AssertTrue((100)=(cc.Horizontal.GetShrinkPriority), 'Horizontal shrink priority should be 100');
+    TestContext.AssertTrue((100)=(cc.Vertical.GetShrinkPriority), 'Vertical shrink priority should be 100');
   finally
     cc.Free;
   end;
@@ -610,8 +615,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.ShrinkPrio(30, 50);
-    FContext.AssertTrue((30)=(cc.Horizontal.GetShrinkPriority), 'Horizontal shrink priority should be 30');
-    FContext.AssertTrue((50)=(cc.Vertical.GetShrinkPriority), 'Vertical shrink priority should be 50');
+    TestContext.AssertTrue((30)=(cc.Horizontal.GetShrinkPriority), 'Horizontal shrink priority should be 30');
+    TestContext.AssertTrue((50)=(cc.Vertical.GetShrinkPriority), 'Vertical shrink priority should be 50');
   finally
     cc.Free;
   end;
@@ -627,7 +632,7 @@ begin
   try
     try
       cc.GapBefore('10px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -645,7 +650,7 @@ begin
   try
     try
       cc.GapAfter('15px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -663,7 +668,7 @@ begin
   try
     try
       cc.GapTop('5px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -681,7 +686,7 @@ begin
   try
     try
       cc.GapBottom('8px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -699,7 +704,7 @@ begin
   try
     try
       cc.GapLeft('12px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -717,7 +722,7 @@ begin
   try
     try
       cc.GapRight('18px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -735,7 +740,7 @@ begin
   try
     try
       cc.Gap('10px', '15px', '5px', '8px');
-      FContext.Fail('Should raise exception - parser not implemented');
+      TestContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -754,8 +759,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Cell(2, 3);
-    FContext.AssertTrue((2)=(cc.CellX), 'CellX should be 2');
-    FContext.AssertTrue((3)=(cc.CellY), 'CellY should be 3');
+    TestContext.AssertTrue((2)=(cc.CellX), 'CellX should be 2');
+    TestContext.AssertTrue((3)=(cc.CellY), 'CellY should be 3');
   finally
     cc.Free;
   end;
@@ -768,10 +773,10 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Cell(1, 2, 3, 4);
-    FContext.AssertTrue((1)=(cc.CellX), 'CellX should be 1');
-    FContext.AssertTrue((2)=(cc.CellY), 'CellY should be 2');
-    FContext.AssertTrue((3)=(cc.CellSpanX), 'SpanX should be 3');
-    FContext.AssertTrue((4)=(cc.CellSpanY), 'SpanY should be 4');
+    TestContext.AssertTrue((1)=(cc.CellX), 'CellX should be 1');
+    TestContext.AssertTrue((2)=(cc.CellY), 'CellY should be 2');
+    TestContext.AssertTrue((3)=(cc.CellSpanX), 'SpanX should be 3');
+    TestContext.AssertTrue((4)=(cc.CellSpanY), 'SpanY should be 4');
   finally
     cc.Free;
   end;
@@ -784,8 +789,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Span(2, 3);
-    FContext.AssertTrue((2)=(cc.CellSpanX), 'SpanX should be 2');
-    FContext.AssertTrue((3)=(cc.CellSpanY), 'SpanY should be 3');
+    TestContext.AssertTrue((2)=(cc.CellSpanX), 'SpanX should be 2');
+    TestContext.AssertTrue((3)=(cc.CellSpanY), 'SpanY should be 3');
   finally
     cc.Free;
   end;
@@ -798,8 +803,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Span;
-    FContext.AssertTrue((2147471302)=(cc.CellSpanX), 'SpanX should be INF_SIZE');
-    FContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
+    TestContext.AssertTrue((2147471302)=(cc.CellSpanX), 'SpanX should be INF_SIZE');
+    TestContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
   finally
     cc.Free;
   end;
@@ -812,7 +817,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SpanX(5);
-    FContext.AssertTrue((5)=(cc.CellSpanX), 'SpanX should be 5');
+    TestContext.AssertTrue((5)=(cc.CellSpanX), 'SpanX should be 5');
   finally
     cc.Free;
   end;
@@ -825,7 +830,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SpanX;
-    FContext.AssertTrue((2147471302)=(cc.CellSpanX), 'SpanX should be INF_SIZE');
+    TestContext.AssertTrue((2147471302)=(cc.CellSpanX), 'SpanX should be INF_SIZE');
   finally
     cc.Free;
   end;
@@ -838,7 +843,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SpanY(4);
-    FContext.AssertTrue((4)=(cc.CellSpanY), 'SpanY should be 4');
+    TestContext.AssertTrue((4)=(cc.CellSpanY), 'SpanY should be 4');
   finally
     cc.Free;
   end;
@@ -851,7 +856,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.SpanY;
-    FContext.AssertTrue((2147471302)=(cc.CellSpanY), 'SpanY should be INF_SIZE');
+    TestContext.AssertTrue((2147471302)=(cc.CellSpanY), 'SpanY should be INF_SIZE');
   finally
     cc.Free;
   end;
@@ -866,7 +871,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.FlowX;
-    FContext.AssertTrue((2)=(cc.IsFlowX), 'FlowX should be 2 (true)');
+    TestContext.AssertTrue((2)=(cc.IsFlowX), 'FlowX should be 2 (true)');
   finally
     cc.Free;
   end;
@@ -879,7 +884,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.FlowY;
-    FContext.AssertTrue((1)=(cc.IsFlowX), 'FlowX should be 1 (false)');
+    TestContext.AssertTrue((1)=(cc.IsFlowX), 'FlowX should be 1 (false)');
   finally
     cc.Free;
   end;
@@ -892,7 +897,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Skip(3);
-    FContext.AssertTrue((3)=(cc.SkipCells), 'Skip should be 3');
+    TestContext.AssertTrue((3)=(cc.SkipCells), 'Skip should be 3');
   finally
     cc.Free;
   end;
@@ -905,7 +910,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Skip;
-    FContext.AssertTrue((1)=(cc.SkipCells), 'Skip should be 1');
+    TestContext.AssertTrue((1)=(cc.SkipCells), 'Skip should be 1');
   finally
     cc.Free;
   end;
@@ -918,7 +923,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Split(4);
-    FContext.AssertTrue((4)=(cc.SplitParts), 'Split should be 4');
+    TestContext.AssertTrue((4)=(cc.SplitParts), 'Split should be 4');
   finally
     cc.Free;
   end;
@@ -931,7 +936,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Split;
-    FContext.AssertTrue((2147471302)=(cc.SplitParts), 'Split should be INF_SIZE');
+    TestContext.AssertTrue((2147471302)=(cc.SplitParts), 'Split should be INF_SIZE');
   finally
     cc.Free;
   end;
@@ -944,7 +949,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Wrap;
-    FContext.AssertTrue((cc.WrapGap)<>nil, 'Wrap should be set');
+    TestContext.AssertTrue((cc.WrapGap)<>nil, 'Wrap should be set');
   finally
     cc.Free;
   end;
@@ -957,7 +962,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Newline;
-    FContext.AssertTrue((cc.NewlineGap)<>nil, 'Newline should be set');
+    TestContext.AssertTrue((cc.NewlineGap)<>nil, 'Newline should be set');
   finally
     cc.Free;
   end;
@@ -972,7 +977,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.DockNorth;
-    FContext.AssertTrue((0)=(cc.Dock), 'Dock should be 0 (north)');
+    TestContext.AssertTrue((0)=(cc.Dock), 'Dock should be 0 (north)');
   finally
     cc.Free;
   end;
@@ -985,7 +990,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.DockWest;
-    FContext.AssertTrue((1)=(cc.Dock), 'Dock should be 1 (west)');
+    TestContext.AssertTrue((1)=(cc.Dock), 'Dock should be 1 (west)');
   finally
     cc.Free;
   end;
@@ -998,7 +1003,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.DockSouth;
-    FContext.AssertTrue((2)=(cc.Dock), 'Dock should be 2 (south)');
+    TestContext.AssertTrue((2)=(cc.Dock), 'Dock should be 2 (south)');
   finally
     cc.Free;
   end;
@@ -1011,7 +1016,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.DockEast;
-    FContext.AssertTrue((3)=(cc.Dock), 'Dock should be 3 (east)');
+    TestContext.AssertTrue((3)=(cc.Dock), 'Dock should be 3 (east)');
   finally
     cc.Free;
   end;
@@ -1080,7 +1085,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.HideMode(2);
-    FContext.AssertTrue((2)=(cc.HideModeValue), 'HideMode should be 2');
+    TestContext.AssertTrue((2)=(cc.HideModeValue), 'HideMode should be 2');
   finally
     cc.Free;
   end;
@@ -1093,7 +1098,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Id('button1');
-    FContext.AssertTrue(('button1')=(cc.IdValue), 'Id should be "button1"');
+    TestContext.AssertTrue(('button1')=(cc.IdValue), 'Id should be "button1"');
   finally
     cc.Free;
   end;
@@ -1106,7 +1111,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Tag('group1');
-    FContext.AssertTrue(('group1')=(cc.TagValue), 'Tag should be "group1"');
+    TestContext.AssertTrue(('group1')=(cc.TagValue), 'Tag should be "group1"');
   finally
     cc.Free;
   end;
@@ -1119,7 +1124,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.External;
-    FContext.AssertTrue(cc.IsExternal, 'External should be true');
+    TestContext.AssertTrue(cc.IsExternal, 'External should be true');
   finally
     cc.Free;
   end;
@@ -1132,7 +1137,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.External(False);
-    FContext.AssertTrue(not (cc.IsExternal), 'External should be false');
+    TestContext.AssertTrue(not (cc.IsExternal), 'External should be false');
   finally
     cc.Free;
   end;
@@ -1145,8 +1150,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Push;
-    FContext.AssertTrue(Abs((100.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 100.0');
-    FContext.AssertTrue(Abs((100.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 100.0');
   finally
     cc.Free;
   end;
@@ -1159,8 +1164,8 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.Push(50.0, 75.0);
-    FContext.AssertTrue(Abs((50.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 50.0');
-    FContext.AssertTrue(Abs((75.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 75.0');
+    TestContext.AssertTrue(Abs((50.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 50.0');
+    TestContext.AssertTrue(Abs((75.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 75.0');
   finally
     cc.Free;
   end;
@@ -1173,7 +1178,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.PushX;
-    FContext.AssertTrue(Abs((100.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 100.0');
   finally
     cc.Free;
   end;
@@ -1186,7 +1191,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.PushX(60.0);
-    FContext.AssertTrue(Abs((60.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 60.0');
+    TestContext.AssertTrue(Abs((60.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 60.0');
   finally
     cc.Free;
   end;
@@ -1199,7 +1204,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.PushY;
-    FContext.AssertTrue(Abs((100.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 100.0');
+    TestContext.AssertTrue(Abs((100.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 100.0');
   finally
     cc.Free;
   end;
@@ -1212,7 +1217,7 @@ begin
   cc := TfpgMigCC.Create;
   try
     cc.PushY(80.0);
-    FContext.AssertTrue(Abs((80.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 80.0');
+    TestContext.AssertTrue(Abs((80.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 80.0');
   finally
     cc.Free;
   end;
@@ -1228,10 +1233,10 @@ begin
   try
     cc.GrowX(0.5).GrowY(0.7).ShrinkX(0.3).ShrinkY(0.4);
 
-    FContext.AssertTrue(Abs((0.5)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 0.5');
-    FContext.AssertTrue(Abs((0.7)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 0.7');
-    FContext.AssertTrue(Abs((0.3)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Horizontal shrink weight should be 0.3');
-    FContext.AssertTrue(Abs((0.4)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Vertical shrink weight should be 0.4');
+    TestContext.AssertTrue(Abs((0.5)-(cc.Horizontal.GetGrowWeight))<=(0.001), 'Horizontal grow weight should be 0.5');
+    TestContext.AssertTrue(Abs((0.7)-(cc.Vertical.GetGrowWeight))<=(0.001), 'Vertical grow weight should be 0.7');
+    TestContext.AssertTrue(Abs((0.3)-(cc.Horizontal.GetShrinkWeight))<=(0.001), 'Horizontal shrink weight should be 0.3');
+    TestContext.AssertTrue(Abs((0.4)-(cc.Vertical.GetShrinkWeight))<=(0.001), 'Vertical shrink weight should be 0.4');
   finally
     cc.Free;
   end;
@@ -1245,29 +1250,34 @@ begin
   try
     cc.Cell(2, 3).Span(2, 1).Grow.Push(50.0, 75.0).Tag('test').Id('widget1');
 
-    FContext.AssertTrue((2)=(cc.CellX), 'CellX should be 2');
-    FContext.AssertTrue((3)=(cc.CellY), 'CellY should be 3');
-    FContext.AssertTrue((2)=(cc.CellSpanX), 'SpanX should be 2');
-    FContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
-    FContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 100');
-    FContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 100');
-    FContext.AssertTrue(Abs((50.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 50.0');
-    FContext.AssertTrue(Abs((75.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 75.0');
-    FContext.AssertTrue(('test')=(cc.TagValue), 'Tag should be "test"');
-    FContext.AssertTrue(('widget1')=(cc.IdValue), 'Id should be "widget1"');
+    TestContext.AssertTrue((2)=(cc.CellX), 'CellX should be 2');
+    TestContext.AssertTrue((3)=(cc.CellY), 'CellY should be 3');
+    TestContext.AssertTrue((2)=(cc.CellSpanX), 'SpanX should be 2');
+    TestContext.AssertTrue((1)=(cc.CellSpanY), 'SpanY should be 1');
+    TestContext.AssertTrue((100)=(cc.Horizontal.GetGrowPriority), 'Horizontal grow priority should be 100');
+    TestContext.AssertTrue((100)=(cc.Vertical.GetGrowPriority), 'Vertical grow priority should be 100');
+    TestContext.AssertTrue(Abs((50.0)-(cc.PushWeightX))<=(0.001), 'PushX should be 50.0');
+    TestContext.AssertTrue(Abs((75.0)-(cc.PushWeightY))<=(0.001), 'PushY should be 75.0');
+    TestContext.AssertTrue(('test')=(cc.TagValue), 'Tag should be "test"');
+    TestContext.AssertTrue(('widget1')=(cc.IdValue), 'Id should be "widget1"');
   finally
     cc.Free;
   end;
 end;
 
 
+constructor TTestMigCC.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigCCTestCreate(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.TestCreate;
   finally lFixture.Free; end;
 end;
@@ -1275,10 +1285,8 @@ end;
 procedure RunTTestMigCCTestDefaultValues(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestDefaultValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultValues';
     lFixture.TestDefaultValues;
   finally lFixture.Free; end;
 end;
@@ -1286,10 +1294,8 @@ end;
 procedure RunTTestMigCCTestSizeGroupX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSizeGroupX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroupX';
     lFixture.TestSizeGroupX;
   finally lFixture.Free; end;
 end;
@@ -1297,10 +1303,8 @@ end;
 procedure RunTTestMigCCTestEndGroupX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestEndGroupX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndGroupX';
     lFixture.TestEndGroupX;
   finally lFixture.Free; end;
 end;
@@ -1308,10 +1312,8 @@ end;
 procedure RunTTestMigCCTestMinWidth(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestMinWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMinWidth';
     lFixture.TestMinWidth;
   finally lFixture.Free; end;
 end;
@@ -1319,10 +1321,8 @@ end;
 procedure RunTTestMigCCTestWidth(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWidth';
     lFixture.TestWidth;
   finally lFixture.Free; end;
 end;
@@ -1330,10 +1330,8 @@ end;
 procedure RunTTestMigCCTestMaxWidth(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestMaxWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMaxWidth';
     lFixture.TestMaxWidth;
   finally lFixture.Free; end;
 end;
@@ -1341,10 +1339,8 @@ end;
 procedure RunTTestMigCCTestGapX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapX';
     lFixture.TestGapX;
   finally lFixture.Free; end;
 end;
@@ -1352,10 +1348,8 @@ end;
 procedure RunTTestMigCCTestAlignX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestAlignX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlignX';
     lFixture.TestAlignX;
   finally lFixture.Free; end;
 end;
@@ -1363,10 +1357,8 @@ end;
 procedure RunTTestMigCCTestGrowPrioX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowPrioX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPrioX';
     lFixture.TestGrowPrioX;
   finally lFixture.Free; end;
 end;
@@ -1374,10 +1366,8 @@ end;
 procedure RunTTestMigCCTestGrowX_Default(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowX_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowX_Default';
     lFixture.TestGrowX_Default;
   finally lFixture.Free; end;
 end;
@@ -1385,10 +1375,8 @@ end;
 procedure RunTTestMigCCTestGrowX_Weight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowX_Weight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowX_Weight';
     lFixture.TestGrowX_Weight;
   finally lFixture.Free; end;
 end;
@@ -1396,10 +1384,8 @@ end;
 procedure RunTTestMigCCTestShrinkPrioX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrinkPrioX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPrioX';
     lFixture.TestShrinkPrioX;
   finally lFixture.Free; end;
 end;
@@ -1407,10 +1393,8 @@ end;
 procedure RunTTestMigCCTestShrinkX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrinkX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkX';
     lFixture.TestShrinkX;
   finally lFixture.Free; end;
 end;
@@ -1418,10 +1402,8 @@ end;
 procedure RunTTestMigCCTestSizeGroupY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSizeGroupY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroupY';
     lFixture.TestSizeGroupY;
   finally lFixture.Free; end;
 end;
@@ -1429,10 +1411,8 @@ end;
 procedure RunTTestMigCCTestEndGroupY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestEndGroupY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndGroupY';
     lFixture.TestEndGroupY;
   finally lFixture.Free; end;
 end;
@@ -1440,10 +1420,8 @@ end;
 procedure RunTTestMigCCTestMinHeight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestMinHeight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMinHeight';
     lFixture.TestMinHeight;
   finally lFixture.Free; end;
 end;
@@ -1451,10 +1429,8 @@ end;
 procedure RunTTestMigCCTestHeight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestHeight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHeight';
     lFixture.TestHeight;
   finally lFixture.Free; end;
 end;
@@ -1462,10 +1438,8 @@ end;
 procedure RunTTestMigCCTestMaxHeight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestMaxHeight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMaxHeight';
     lFixture.TestMaxHeight;
   finally lFixture.Free; end;
 end;
@@ -1473,10 +1447,8 @@ end;
 procedure RunTTestMigCCTestGapY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapY';
     lFixture.TestGapY;
   finally lFixture.Free; end;
 end;
@@ -1484,10 +1456,8 @@ end;
 procedure RunTTestMigCCTestAlignY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestAlignY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlignY';
     lFixture.TestAlignY;
   finally lFixture.Free; end;
 end;
@@ -1495,10 +1465,8 @@ end;
 procedure RunTTestMigCCTestGrowPrioY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowPrioY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPrioY';
     lFixture.TestGrowPrioY;
   finally lFixture.Free; end;
 end;
@@ -1506,10 +1474,8 @@ end;
 procedure RunTTestMigCCTestGrowY_Default(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowY_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowY_Default';
     lFixture.TestGrowY_Default;
   finally lFixture.Free; end;
 end;
@@ -1517,10 +1483,8 @@ end;
 procedure RunTTestMigCCTestGrowY_Weight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowY_Weight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowY_Weight';
     lFixture.TestGrowY_Weight;
   finally lFixture.Free; end;
 end;
@@ -1528,10 +1492,8 @@ end;
 procedure RunTTestMigCCTestShrinkPrioY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrinkPrioY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPrioY';
     lFixture.TestShrinkPrioY;
   finally lFixture.Free; end;
 end;
@@ -1539,10 +1501,8 @@ end;
 procedure RunTTestMigCCTestShrinkY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrinkY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkY';
     lFixture.TestShrinkY;
   finally lFixture.Free; end;
 end;
@@ -1550,10 +1510,8 @@ end;
 procedure RunTTestMigCCTestSizeGroup_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSizeGroup_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroup_Both';
     lFixture.TestSizeGroup_Both;
   finally lFixture.Free; end;
 end;
@@ -1561,10 +1519,8 @@ end;
 procedure RunTTestMigCCTestEndGroup_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestEndGroup_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndGroup_Both';
     lFixture.TestEndGroup_Both;
   finally lFixture.Free; end;
 end;
@@ -1572,10 +1528,8 @@ end;
 procedure RunTTestMigCCTestGrow_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrow_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrow_Both';
     lFixture.TestGrow_Both;
   finally lFixture.Free; end;
 end;
@@ -1583,10 +1537,8 @@ end;
 procedure RunTTestMigCCTestGrow_BothDefault(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrow_BothDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrow_BothDefault';
     lFixture.TestGrow_BothDefault;
   finally lFixture.Free; end;
 end;
@@ -1594,10 +1546,8 @@ end;
 procedure RunTTestMigCCTestGrowPrio_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGrowPrio_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPrio_Both';
     lFixture.TestGrowPrio_Both;
   finally lFixture.Free; end;
 end;
@@ -1605,10 +1555,8 @@ end;
 procedure RunTTestMigCCTestShrink_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrink_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrink_Both';
     lFixture.TestShrink_Both;
   finally lFixture.Free; end;
 end;
@@ -1616,10 +1564,8 @@ end;
 procedure RunTTestMigCCTestShrink_BothDefault(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrink_BothDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrink_BothDefault';
     lFixture.TestShrink_BothDefault;
   finally lFixture.Free; end;
 end;
@@ -1627,10 +1573,8 @@ end;
 procedure RunTTestMigCCTestShrinkPrio_Both(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestShrinkPrio_Both');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPrio_Both';
     lFixture.TestShrinkPrio_Both;
   finally lFixture.Free; end;
 end;
@@ -1638,10 +1582,8 @@ end;
 procedure RunTTestMigCCTestGapBefore(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapBefore');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapBefore';
     lFixture.TestGapBefore;
   finally lFixture.Free; end;
 end;
@@ -1649,10 +1591,8 @@ end;
 procedure RunTTestMigCCTestGapAfter(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapAfter');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapAfter';
     lFixture.TestGapAfter;
   finally lFixture.Free; end;
 end;
@@ -1660,10 +1600,8 @@ end;
 procedure RunTTestMigCCTestGapTop(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapTop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapTop';
     lFixture.TestGapTop;
   finally lFixture.Free; end;
 end;
@@ -1671,10 +1609,8 @@ end;
 procedure RunTTestMigCCTestGapBottom(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapBottom');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapBottom';
     lFixture.TestGapBottom;
   finally lFixture.Free; end;
 end;
@@ -1682,10 +1618,8 @@ end;
 procedure RunTTestMigCCTestGapLeft(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapLeft');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapLeft';
     lFixture.TestGapLeft;
   finally lFixture.Free; end;
 end;
@@ -1693,10 +1627,8 @@ end;
 procedure RunTTestMigCCTestGapRight(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGapRight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapRight';
     lFixture.TestGapRight;
   finally lFixture.Free; end;
 end;
@@ -1704,10 +1636,8 @@ end;
 procedure RunTTestMigCCTestGap_FourSides(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestGap_FourSides');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGap_FourSides';
     lFixture.TestGap_FourSides;
   finally lFixture.Free; end;
 end;
@@ -1715,10 +1645,8 @@ end;
 procedure RunTTestMigCCTestCell_TwoArgs(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestCell_TwoArgs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCell_TwoArgs';
     lFixture.TestCell_TwoArgs;
   finally lFixture.Free; end;
 end;
@@ -1726,10 +1654,8 @@ end;
 procedure RunTTestMigCCTestCell_FourArgs(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestCell_FourArgs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCell_FourArgs';
     lFixture.TestCell_FourArgs;
   finally lFixture.Free; end;
 end;
@@ -1737,10 +1663,8 @@ end;
 procedure RunTTestMigCCTestSpan_TwoArgs(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpan_TwoArgs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpan_TwoArgs';
     lFixture.TestSpan_TwoArgs;
   finally lFixture.Free; end;
 end;
@@ -1748,10 +1672,8 @@ end;
 procedure RunTTestMigCCTestSpan_NoArgs(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpan_NoArgs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpan_NoArgs';
     lFixture.TestSpan_NoArgs;
   finally lFixture.Free; end;
 end;
@@ -1759,10 +1681,8 @@ end;
 procedure RunTTestMigCCTestSpanX_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpanX_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpanX_WithArg';
     lFixture.TestSpanX_WithArg;
   finally lFixture.Free; end;
 end;
@@ -1770,10 +1690,8 @@ end;
 procedure RunTTestMigCCTestSpanX_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpanX_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpanX_NoArg';
     lFixture.TestSpanX_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1781,10 +1699,8 @@ end;
 procedure RunTTestMigCCTestSpanY_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpanY_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpanY_WithArg';
     lFixture.TestSpanY_WithArg;
   finally lFixture.Free; end;
 end;
@@ -1792,10 +1708,8 @@ end;
 procedure RunTTestMigCCTestSpanY_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSpanY_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSpanY_NoArg';
     lFixture.TestSpanY_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1803,10 +1717,8 @@ end;
 procedure RunTTestMigCCTestFlowX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestFlowX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFlowX';
     lFixture.TestFlowX;
   finally lFixture.Free; end;
 end;
@@ -1814,10 +1726,8 @@ end;
 procedure RunTTestMigCCTestFlowY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestFlowY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFlowY';
     lFixture.TestFlowY;
   finally lFixture.Free; end;
 end;
@@ -1825,10 +1735,8 @@ end;
 procedure RunTTestMigCCTestSkip_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSkip_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSkip_WithArg';
     lFixture.TestSkip_WithArg;
   finally lFixture.Free; end;
 end;
@@ -1836,10 +1744,8 @@ end;
 procedure RunTTestMigCCTestSkip_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSkip_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSkip_NoArg';
     lFixture.TestSkip_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1847,10 +1753,8 @@ end;
 procedure RunTTestMigCCTestSplit_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSplit_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSplit_WithArg';
     lFixture.TestSplit_WithArg;
   finally lFixture.Free; end;
 end;
@@ -1858,10 +1762,8 @@ end;
 procedure RunTTestMigCCTestSplit_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestSplit_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSplit_NoArg';
     lFixture.TestSplit_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1869,10 +1771,8 @@ end;
 procedure RunTTestMigCCTestWrap_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestWrap_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWrap_NoArg';
     lFixture.TestWrap_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1880,10 +1780,8 @@ end;
 procedure RunTTestMigCCTestNewline_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestNewline_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNewline_NoArg';
     lFixture.TestNewline_NoArg;
   finally lFixture.Free; end;
 end;
@@ -1891,10 +1789,8 @@ end;
 procedure RunTTestMigCCTestDockNorth(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestDockNorth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDockNorth';
     lFixture.TestDockNorth;
   finally lFixture.Free; end;
 end;
@@ -1902,10 +1798,8 @@ end;
 procedure RunTTestMigCCTestDockWest(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestDockWest');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDockWest';
     lFixture.TestDockWest;
   finally lFixture.Free; end;
 end;
@@ -1913,10 +1807,8 @@ end;
 procedure RunTTestMigCCTestDockSouth(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestDockSouth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDockSouth';
     lFixture.TestDockSouth;
   finally lFixture.Free; end;
 end;
@@ -1924,10 +1816,8 @@ end;
 procedure RunTTestMigCCTestDockEast(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestDockEast');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDockEast';
     lFixture.TestDockEast;
   finally lFixture.Free; end;
 end;
@@ -1935,10 +1825,8 @@ end;
 procedure RunTTestMigCCTestX(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestX';
     lFixture.TestX;
   finally lFixture.Free; end;
 end;
@@ -1946,10 +1834,8 @@ end;
 procedure RunTTestMigCCTestY(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestY');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestY';
     lFixture.TestY;
   finally lFixture.Free; end;
 end;
@@ -1957,10 +1843,8 @@ end;
 procedure RunTTestMigCCTestX2(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestX2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestX2';
     lFixture.TestX2;
   finally lFixture.Free; end;
 end;
@@ -1968,10 +1852,8 @@ end;
 procedure RunTTestMigCCTestY2(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestY2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestY2';
     lFixture.TestY2;
   finally lFixture.Free; end;
 end;
@@ -1979,10 +1861,8 @@ end;
 procedure RunTTestMigCCTestHideMode(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestHideMode');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHideMode';
     lFixture.TestHideMode;
   finally lFixture.Free; end;
 end;
@@ -1990,10 +1870,8 @@ end;
 procedure RunTTestMigCCTestId(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestId');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestId';
     lFixture.TestId;
   finally lFixture.Free; end;
 end;
@@ -2001,10 +1879,8 @@ end;
 procedure RunTTestMigCCTestTag(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestTag');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTag';
     lFixture.TestTag;
   finally lFixture.Free; end;
 end;
@@ -2012,10 +1888,8 @@ end;
 procedure RunTTestMigCCTestExternal_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestExternal_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExternal_NoArg';
     lFixture.TestExternal_NoArg;
   finally lFixture.Free; end;
 end;
@@ -2023,10 +1897,8 @@ end;
 procedure RunTTestMigCCTestExternal_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestExternal_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExternal_WithArg';
     lFixture.TestExternal_WithArg;
   finally lFixture.Free; end;
 end;
@@ -2034,10 +1906,8 @@ end;
 procedure RunTTestMigCCTestPush_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPush_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPush_NoArg';
     lFixture.TestPush_NoArg;
   finally lFixture.Free; end;
 end;
@@ -2045,10 +1915,8 @@ end;
 procedure RunTTestMigCCTestPush_WithArgs(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPush_WithArgs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPush_WithArgs';
     lFixture.TestPush_WithArgs;
   finally lFixture.Free; end;
 end;
@@ -2056,10 +1924,8 @@ end;
 procedure RunTTestMigCCTestPushX_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPushX_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPushX_NoArg';
     lFixture.TestPushX_NoArg;
   finally lFixture.Free; end;
 end;
@@ -2067,10 +1933,8 @@ end;
 procedure RunTTestMigCCTestPushX_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPushX_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPushX_WithArg';
     lFixture.TestPushX_WithArg;
   finally lFixture.Free; end;
 end;
@@ -2078,10 +1942,8 @@ end;
 procedure RunTTestMigCCTestPushY_NoArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPushY_NoArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPushY_NoArg';
     lFixture.TestPushY_NoArg;
   finally lFixture.Free; end;
 end;
@@ -2089,10 +1951,8 @@ end;
 procedure RunTTestMigCCTestPushY_WithArg(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestPushY_WithArg');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPushY_WithArg';
     lFixture.TestPushY_WithArg;
   finally lFixture.Free; end;
 end;
@@ -2100,10 +1960,8 @@ end;
 procedure RunTTestMigCCTestFluentChaining_Dimensions(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestFluentChaining_Dimensions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFluentChaining_Dimensions';
     lFixture.TestFluentChaining_Dimensions;
   finally lFixture.Free; end;
 end;
@@ -2111,10 +1969,8 @@ end;
 procedure RunTTestMigCCTestFluentChaining_Mixed(AContext: TNXTestContext);
 var lFixture: TTestMigCC;
 begin
-  lFixture:=TTestMigCC.Create;
+  lFixture:=TTestMigCC.Create(AContext, 'TestFluentChaining_Mixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFluentChaining_Mixed';
     lFixture.TestFluentChaining_Mixed;
   finally lFixture.Free; end;
 end;

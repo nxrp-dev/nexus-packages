@@ -36,9 +36,14 @@ type
   { TTestJSONString }
 
   TTestJSONString = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   Private
     Procedure TestTo(Const Src,Dest : String; Strict : Boolean = False);
     Procedure TestFrom(Const Src,Dest : String);
@@ -50,9 +55,14 @@ type
   { TTestJSON }
 
   TTestJSON = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
   Protected
     procedure SetDefaultInstanceTypes;
@@ -224,7 +234,7 @@ type
     procedure AppendA;
   protected
     Procedure Setup; override;
-    Procedure TearDown; override;
+    Procedure TearDown; virtual;
     procedure TestAddBoolean(B : Boolean);
     Procedure TestAccessError;
     Property J : TJSONObject Read FJ;
@@ -285,7 +295,7 @@ type
   private
     FData: TJSONData;
   Protected
-    Procedure TearDown; override;
+    Procedure TearDown; virtual;
     Property Data : TJSONData read FData Write FData;
   public
     Procedure TestNullEmpty;
@@ -329,7 +339,7 @@ type
     FData: TJSONData;
   Protected
     Procedure DoSet;
-    Procedure TearDown; override;
+    Procedure TearDown; virtual;
     Procedure AssertElement0(AClass : TJSONDataClass);
     Procedure AssertElementA(AClass : TJSONDataClass);
     Property Data : TJSONData read FData Write FData;
@@ -376,7 +386,7 @@ type
   private
     FData: TJSONData;
   Protected
-    Procedure TearDown; override;
+    Procedure TearDown; virtual;
     Procedure TestSingle;
     Procedure TestLoop(ACount : Integer);
     Property Data : TJSONData Read FData Write FData;
@@ -401,7 +411,7 @@ implementation
 procedure TTestIterator.TearDown;
 begin
   FreeAndNil(FData);
-  inherited TearDown;
+
 end;
 
 procedure TTestIterator.TestSingle;
@@ -416,13 +426,13 @@ begin
    begin
    Inc(C);
    If C>1 then
-     FContext.Fail(Data.ClassName+' loops more than once');
-   FContext.AssertTrue(('')=(F.Key), Data.ClassName+' has empty key');
-   FContext.AssertTrue((0)=(F.KeyNum), Data.ClassName+' has empty numerical key');
-   FContext.AssertTrue((Data)=(F.Value), Data.ClassName+' returns data');
+     TestContext.Fail(Data.ClassName+' loops more than once');
+   TestContext.AssertTrue(('')=(F.Key), Data.ClassName+' has empty key');
+   TestContext.AssertTrue((0)=(F.KeyNum), Data.ClassName+' has empty numerical key');
+   TestContext.AssertTrue((Data)=(F.Value), Data.ClassName+' returns data');
    end;
   If C<1 then
-    FContext.Fail(Data.ClassName+' Loops not even once');
+    TestContext.Fail(Data.ClassName+' Loops not even once');
 end;
 
 procedure TTestIterator.TestLoop(ACount: Integer);
@@ -434,12 +444,12 @@ begin
   C:=0;
   For F in Data do
    begin
-   FContext.AssertTrue((IntToStr(C))=(F.Key), Data.ClassName+' has correct string key');
-   FContext.AssertTrue((C)=(F.KeyNum), Data.ClassName+' has correct numerical key');
-   FContext.AssertTrue((Data.Items[C])=(F.Value), Data.ClassName+' returns correct data');
+   TestContext.AssertTrue((IntToStr(C))=(F.Key), Data.ClassName+' has correct string key');
+   TestContext.AssertTrue((C)=(F.KeyNum), Data.ClassName+' has correct numerical key');
+   TestContext.AssertTrue((Data.Items[C])=(F.Value), Data.ClassName+' returns correct data');
    Inc(C);
    end;
-  FContext.AssertTrue((ACount)=(C), Data.ClassName+' correct loop count');
+  TestContext.AssertTrue((ACount)=(C), Data.ClassName+' correct loop count');
 end;
 
 procedure TTestIterator.TestNull;
@@ -500,35 +510,35 @@ end;
 procedure TTestFactory.TearDown;
 begin
   FreeAndNil(FData);
-  inherited TearDown;
+
 end;
 
 procedure TTestFactory.AssertElement0(AClass: TJSONDataClass);
 begin
-  FContext.AssertTrue((TMyArray)=(Data.ClassType), 'Correct class');
-  FContext.AssertTrue((1)=(Data.Count), 'Have 1 element');
-  FContext.AssertTrue((AClass)=((Data as TJSONArray)[0].ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyArray)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((1)=(Data.Count), 'Have 1 element');
+  TestContext.AssertTrue((AClass)=((Data as TJSONArray)[0].ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.AssertElementA(AClass: TJSONDataClass);
 begin
-  FContext.AssertTrue((TMyObject)=(Data.ClassType), 'Correct class');
-  FContext.AssertTrue((0)=(TMyObject(Data).IndexOfName('a')), 'Have element a');
-  FContext.AssertTrue((AClass)=((Data as TJSONObject).Elements['a'].ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyObject)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((0)=(TMyObject(Data).IndexOfName('a')), 'Have element a');
+  TestContext.AssertTrue((AClass)=((Data as TJSONObject).Elements['a'].ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.TestSet;
 begin
   SetMyInstanceTypes;
-  FContext.AssertTrue((TJSONData)=(GetJSONInstanceType(jitUnknown)), 'Correct type for unknown');
-  FContext.AssertTrue((TMyInteger)=(GetJSONInstanceType(jitNumberInteger)), 'Correct type for integer');
-  FContext.AssertTrue((TMyInt64)=(GetJSONInstanceType(jitNumberInt64)), 'Correct type for int64');
-  FContext.AssertTrue((TMyFloat)=(GetJSONInstanceType(jitNumberFloat)), 'Correct type for float');
-  FContext.AssertTrue((TMyBoolean)=(GetJSONInstanceType(jitBoolean)), 'Correct type for boolean');
-  FContext.AssertTrue((TMyNull)=(GetJSONInstanceType(jitNUll)), 'Correct type for null');
-  FContext.AssertTrue((TMyString)=(GetJSONInstanceType(jitString)), 'Correct type for String');
-  FContext.AssertTrue((TMyArray)=(GetJSONInstanceType(jitArray)), 'Correct type for Array');
-  FContext.AssertTrue((TMyObject)=(GetJSONInstanceType(jitObject)), 'Correct type for Object');
+  TestContext.AssertTrue((TJSONData)=(GetJSONInstanceType(jitUnknown)), 'Correct type for unknown');
+  TestContext.AssertTrue((TMyInteger)=(GetJSONInstanceType(jitNumberInteger)), 'Correct type for integer');
+  TestContext.AssertTrue((TMyInt64)=(GetJSONInstanceType(jitNumberInt64)), 'Correct type for int64');
+  TestContext.AssertTrue((TMyFloat)=(GetJSONInstanceType(jitNumberFloat)), 'Correct type for float');
+  TestContext.AssertTrue((TMyBoolean)=(GetJSONInstanceType(jitBoolean)), 'Correct type for boolean');
+  TestContext.AssertTrue((TMyNull)=(GetJSONInstanceType(jitNUll)), 'Correct type for null');
+  TestContext.AssertTrue((TMyString)=(GetJSONInstanceType(jitString)), 'Correct type for String');
+  TestContext.AssertTrue((TMyArray)=(GetJSONInstanceType(jitArray)), 'Correct type for Array');
+  TestContext.AssertTrue((TMyObject)=(GetJSONInstanceType(jitObject)), 'Correct type for Object');
 end;
 
 procedure TTestFactory.TestSetInvalid;
@@ -547,67 +557,67 @@ begin
     begin
     FType:=Ti;
     FClass:=MyJSONInstanceTypes[Pred(ti)];
-    FContext.AssertRaises(EJSON, @DoSet, 'Set '+FClass.ClassName);
+    TestContext.AssertRaises(EJSON, @DoSet, 'Set '+FClass.ClassName);
     end;
   FType:=jitString;
   FClass:=Nil;
-  FContext.AssertRaises(EJSON, @DoSet, 'Set Nil');
+  TestContext.AssertRaises(EJSON, @DoSet, 'Set Nil');
 end;
 
 procedure TTestFactory.CreateNull;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON;
-  FContext.AssertTrue((TMyNull)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyNull)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateInteger;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON(1);
-  FContext.AssertTrue((TMyInteger)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyInteger)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateInt64;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON(Int64(1));
-  FContext.AssertTrue((TMyInt64)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyInt64)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateFloat;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON(1.2);
-  FContext.AssertTrue((TMyFloat)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyFloat)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateBoolean;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON(True);
-  FContext.AssertTrue((TMyBoolean)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyBoolean)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateString;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSON('True');
-  FContext.AssertTrue((TMyString)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyString)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateArray;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSONArray(['True']);
-  FContext.AssertTrue((TMyArray)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyArray)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.CreateObject;
 begin
   SetMyInstanceTypes;
   Data:=CreateJSONObject(['a','True']);
-  FContext.AssertTrue((TMyObject)=(Data.ClassType), 'Correct class');
+  TestContext.AssertTrue((TMyObject)=(Data.ClassType), 'Correct class');
 end;
 
 procedure TTestFactory.ArrayAddNull;
@@ -795,19 +805,19 @@ end;
 procedure TTestJSONPath.TearDown;
 begin
   FreeAndNil(FData);
-  inherited TearDown;
+
 end;
 
 procedure TTestJSONPath.TestNullEmpty;
 begin
   Data:=TJSONNull.Create;
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on NULL returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on NULL returns object itself');
 end;
 
 procedure TTestJSONPath.TestNullGet;
 begin
   Data:=TJSONNull.Create;
-  FContext.AssertTrue((Data)=(Data.GetPath('')), 'Empty get on NULL returns object itself');
+  TestContext.AssertTrue((Data)=(Data.GetPath('')), 'Empty get on NULL returns object itself');
 end;
 
 procedure TTestJSONPath.TestNullNonExisting;
@@ -831,113 +841,113 @@ begin
       end;
   end;
   If (Msg<>'') then
-    FContext.Fail(Msg);
+    TestContext.Fail(Msg);
 end;
 
 procedure TTestJSONPath.TestNullNotEmpty;
 begin
   Data:=TJSONNull.Create;
-  FContext.AssertTrue((Data.FindPath('a'))=nil, 'Not empty on NULL returns nil');
+  TestContext.AssertTrue((Data.FindPath('a'))=nil, 'Not empty on NULL returns nil');
 end;
 
 procedure TTestJSONPath.TestBooleanEmpty;
 begin
   Data:=TJSONBoolean.Create(true);
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Boolean returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Boolean returns object itself');
 end;
 
 procedure TTestJSONPath.TestBooleanNotEmpty;
 begin
   Data:=TJSONBoolean.Create(True);
-  FContext.AssertTrue((Data.FindPath('a'))=nil, 'Not empty on Boolean returns nil');
+  TestContext.AssertTrue((Data.FindPath('a'))=nil, 'Not empty on Boolean returns nil');
 end;
 
 procedure TTestJSONPath.TestIntegerEmpty;
 begin
   Data:=TJSONIntegerNumber.Create(1);
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on integer returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on integer returns object itself');
 end;
 
 procedure TTestJSONPath.TestIntegerNotEmpty;
 begin
   Data:=TJSONIntegerNumber.Create(1);
-  FContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on integer returns object itself');
+  TestContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on integer returns object itself');
 end;
 
 procedure TTestJSONPath.TestInt64Empty;
 begin
   Data:=TJSONInt64Number.Create(1);
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Int64 returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Int64 returns object itself');
 end;
 
 procedure TTestJSONPath.TestInt64NotEmpty;
 begin
   Data:=TJSONInt64Number.Create(1);
-  FContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on Int64 returns object itself');
+  TestContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on Int64 returns object itself');
 end;
 
 procedure TTestJSONPath.TestFloatEmpty;
 begin
   Data:=TJSONFloatNumber.Create(1);
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Float returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on Float returns object itself');
 end;
 
 procedure TTestJSONPath.TestFloatNotEmpty;
 begin
   Data:=TJSONFloatNumber.Create(1);
-  FContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on Float returns object itself');
+  TestContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on Float returns object itself');
 end;
 
 procedure TTestJSONPath.TestStringEmpty;
 begin
   Data:=TJSONString.Create('1');
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on String returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on String returns object itself');
 end;
 
 procedure TTestJSONPath.TestStringNotEmpty;
 begin
   Data:=TJSONString.Create('1');
-  FContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on String returns object itself');
+  TestContext.AssertTrue((Data.FIndPath('a'))=nil, 'Not Empty on String returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayEmpty;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on array returns object itself');
+  TestContext.AssertTrue((Data)=(Data.FIndPath('')), 'Empty on array returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayNotIndex;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data.FindPath('oo'))=nil, 'Not index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('oo'))=nil, 'Not index indication on array returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayIncompleteIndex;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data.FindPath('[1'))=nil, 'Not complete index indication on array returns object itself');
-  FContext.AssertTrue((Data.FindPath('['))=nil, 'Not complete index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('[1'))=nil, 'Not complete index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('['))=nil, 'Not complete index indication on array returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayNonNumericalIndex;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data.FindPath('[a]'))=nil, 'Not complete index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('[a]'))=nil, 'Not complete index indication on array returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayOutOfRangeIndex;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data.FindPath('[-1]'))=nil, 'Not complete index indication on array returns object itself');
-  FContext.AssertTrue((Data.FindPath('[3]'))=nil, 'Not complete index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('[-1]'))=nil, 'Not complete index indication on array returns object itself');
+  TestContext.AssertTrue((Data.FindPath('[3]'))=nil, 'Not complete index indication on array returns object itself');
 end;
 
 procedure TTestJSONPath.TestArrayCorrectIndex;
 begin
   Data:=TJSONArray.Create([1,2,3]);
-  FContext.AssertTrue((Data.Items[0])=(Data.FindPath('[0]')), 'Index 0 on array returns item 0');
-  FContext.AssertTrue((Data.Items[1])=(Data.FindPath('[1]')), 'Index 1 on array returns item 1');
-  FContext.AssertTrue((Data.Items[2])=(Data.FindPath('[2]')), 'Index 2 on array returns item 2');
+  TestContext.AssertTrue((Data.Items[0])=(Data.FindPath('[0]')), 'Index 0 on array returns item 0');
+  TestContext.AssertTrue((Data.Items[1])=(Data.FindPath('[1]')), 'Index 1 on array returns item 1');
+  TestContext.AssertTrue((Data.Items[2])=(Data.FindPath('[2]')), 'Index 2 on array returns item 2');
 end;
 
 procedure TTestJSONPath.TestArrayRecursiveArray;
@@ -948,9 +958,9 @@ Var
 begin
   A:=TJSONArray.Create([1,2,3]);
   Data:=TJSONArray.Create([A,1,2,3]);
-  FContext.AssertTrue((A.Items[0])=(Data.FindPath('[0][0]')), 'Index [0][0] on array returns item 0');
-  FContext.AssertTrue((A.Items[1])=(Data.FindPath('[0][1]')), 'Index [0][1] on array returns item 1');
-  FContext.AssertTrue((A.Items[2])=(Data.FindPath('[0][2]')), 'Index [0][2] on array returns item 2');
+  TestContext.AssertTrue((A.Items[0])=(Data.FindPath('[0][0]')), 'Index [0][0] on array returns item 0');
+  TestContext.AssertTrue((A.Items[1])=(Data.FindPath('[0][1]')), 'Index [0][1] on array returns item 1');
+  TestContext.AssertTrue((A.Items[2])=(Data.FindPath('[0][2]')), 'Index [0][2] on array returns item 2');
 end;
 
 procedure TTestJSONPath.TestArrayRecursiveObject;
@@ -961,46 +971,46 @@ Var
 begin
   A:=TJSONObject.Create(['a',1,'b',2,'c',3]);
   Data:=TJSONArray.Create([A,1,2,3]);
-  FContext.AssertTrue((A.Elements['a'])=(Data.FindPath('[0]a')), '[0]a on array returns element a of item 0');
-  FContext.AssertTrue((A.Elements['b'])=(Data.FindPath('[0]b')), '[0]b on array returns element b of item 0');
-  FContext.AssertTrue((A.Elements['c'])=(Data.FindPath('[0]c')), '[0]c on array returns element c of item 0');
-  FContext.AssertTrue((A.Elements['a'])=(Data.FindPath('[0].a')), '[0].a on array returns element a of item 0');
-  FContext.AssertTrue((A.Elements['b'])=(Data.FindPath('[0].b')), '[0].b on array returns element b of item 0');
-  FContext.AssertTrue((A.Elements['c'])=(Data.FindPath('[0].c')), '[0].c on array returns element c of item 0');
+  TestContext.AssertTrue((A.Elements['a'])=(Data.FindPath('[0]a')), '[0]a on array returns element a of item 0');
+  TestContext.AssertTrue((A.Elements['b'])=(Data.FindPath('[0]b')), '[0]b on array returns element b of item 0');
+  TestContext.AssertTrue((A.Elements['c'])=(Data.FindPath('[0]c')), '[0]c on array returns element c of item 0');
+  TestContext.AssertTrue((A.Elements['a'])=(Data.FindPath('[0].a')), '[0].a on array returns element a of item 0');
+  TestContext.AssertTrue((A.Elements['b'])=(Data.FindPath('[0].b')), '[0].b on array returns element b of item 0');
+  TestContext.AssertTrue((A.Elements['c'])=(Data.FindPath('[0].c')), '[0].c on array returns element c of item 0');
 end;
 
 procedure TTestJSONPath.TestObjectEmpty;
 begin
   Data:=TJSONObject.Create(['a',1,'b',2,'c',3]);
-  FContext.AssertTrue((Data)=(Data.FindPath('')), 'Empty on object returns object');
+  TestContext.AssertTrue((Data)=(Data.FindPath('')), 'Empty on object returns object');
 end;
 
 procedure TTestJSONPath.TestObjectDots;
 begin
   Data:=TJSONObject.Create(['a',1,'b',2,'c',3]);
-  FContext.AssertTrue((Data)=(Data.FindPath('.')), 'Dot on object returns object');
-  FContext.AssertTrue((Data)=(Data.FindPath('..')), '2 Dots on object returns object');
-  FContext.AssertTrue((Data)=(Data.FindPath('...')), '3 Dots on object returns object');
+  TestContext.AssertTrue((Data)=(Data.FindPath('.')), 'Dot on object returns object');
+  TestContext.AssertTrue((Data)=(Data.FindPath('..')), '2 Dots on object returns object');
+  TestContext.AssertTrue((Data)=(Data.FindPath('...')), '3 Dots on object returns object');
 end;
 
 procedure TTestJSONPath.TestObjectExisting;
 begin
   Data:=TJSONObject.Create(['a',1,'b',2,'c',3]);
-  FContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('a')), 'a on object returns element a');
-  FContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('.a')), '.a on object returns element a');
-  FContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('..a')), '..a on object returns element a');
+  TestContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('a')), 'a on object returns element a');
+  TestContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('.a')), '.a on object returns element a');
+  TestContext.AssertTrue((TJSONObject(Data).Elements['a'])=(Data.FindPath('..a')), '..a on object returns element a');
 end;
 
 procedure TTestJSONPath.TestObjectNonExisting;
 begin
   Data:=TJSONObject.Create(['a',1,'b',2,'c',3]);
-  FContext.AssertTrue((Data.FindPath('d'))=nil, 'd on object returns nil');
+  TestContext.AssertTrue((Data.FindPath('d'))=nil, 'd on object returns nil');
 end;
 
 procedure TTestJSONPath.TestObjectTrailingDot;
 begin
   Data:=TJSONObject.Create(['a',1,'b',2,'c',3]);
-  FContext.AssertTrue((Data.FindPath('a.'))=nil, 'a. on object returns nil');
+  TestContext.AssertTrue((Data.FindPath('a.'))=nil, 'a. on object returns nil');
 end;
 
 procedure TTestJSONPath.TestObjectRecursiveArray;
@@ -1011,7 +1021,7 @@ Var
 begin
   A:=TJSONArray.Create([1,2,3]);
   Data:=TJSONObject.Create(['a',A,'b',2,'c',3]);
-  FContext.AssertTrue((A.Items[0])=(Data.FindPath('a[0]')), 'a[0] returns item 0 of array a');
+  TestContext.AssertTrue((A.Items[0])=(Data.FindPath('a[0]')), 'a[0] returns item 0 of array a');
 end;
 
 procedure TTestJSONPath.TestObjectRecursiveObject;
@@ -1022,8 +1032,8 @@ begin
   D :=TJSONIntegerNumber.Create(1);
   O:=TJSONObject.Create(['b',D]);
   Data:=TJSONObject.Create(['a',O]);
-  FContext.AssertTrue((D)=(Data.FindPath('a.b')), 'a.b returns correct data ');
-  FContext.AssertTrue((D)=(Data.FindPath('a..b')), 'a..b returns correct data ');
+  TestContext.AssertTrue((D)=(Data.FindPath('a.b')), 'a.b returns correct data ');
+  TestContext.AssertTrue((D)=(Data.FindPath('a..b')), 'a..b returns correct data ');
 end;
 
 procedure TTestJSONPath.TestDeepRecursive;
@@ -1034,9 +1044,9 @@ begin
   D :=TJSONIntegerNumber.Create(1);
   A:=TJSONArray.Create([0,'string',TJSONObject.Create(['b',D])]);
   Data:=TJSONObject.Create(['a',TJSONObject.Create(['c',A])]);
-  FContext.AssertTrue((D)=(Data.FindPath('a.c[2].b')), 'a.c[2].b returns correct data ');
-  FContext.AssertTrue((D)=(Data.FindPath('a.c[2]b')), 'a.c[2]b returns correct data ');
-  FContext.AssertTrue((Data.FindPath('a.c[2]d'))=nil, 'a.c[2]d returns nil ');
+  TestContext.AssertTrue((D)=(Data.FindPath('a.c[2].b')), 'a.c[2].b returns correct data ');
+  TestContext.AssertTrue((D)=(Data.FindPath('a.c[2]b')), 'a.c[2]b returns correct data ');
+  TestContext.AssertTrue((Data.FindPath('a.c[2]d'))=nil, 'a.c[2]d returns nil ');
 end;
 
 { TTestJSON }
@@ -1070,7 +1080,7 @@ Var
 
 begin
   For ti:=Low(TJSONInstanceType) to High(TJSONInstanceType) do
-    FContext.AssertTrue((DefJSONInstanceTypes[ti])=(SetJSONInstanceType(Ti,MyJSONInstanceTypes[ti])), 'Previous value is returned by SetJSONInstanceType');
+    TestContext.AssertTrue((DefJSONInstanceTypes[ti])=(SetJSONInstanceType(Ti,MyJSONInstanceTypes[ti])), 'Previous value is returned by SetJSONInstanceType');
 end;
 
 Procedure TTestJSON.SetUp;
@@ -1085,22 +1095,22 @@ end;
 
 Procedure TTestJSON.TestItemCount(J: TJSONData; Expected: Integer);
 begin
-  FContext.AssertTrue((Expected)=(J.Count), J.ClassName+'.ItemCount');
+  TestContext.AssertTrue((Expected)=(J.Count), J.ClassName+'.ItemCount');
 end;
 
 Procedure TTestJSON.TestJSONType(J: TJSONData; Expected: TJSONType);
 begin
-  FContext.AssertTrue((Ord(Expected))=(Ord(J.JSONType)), J.ClassName+'.JSONType');
+  TestContext.AssertTrue((Ord(Expected))=(Ord(J.JSONType)), J.ClassName+'.JSONType');
 end;
 
 Procedure TTestJSON.TestJSON(J: TJSONData; Expected: TJSONStringType);
 begin
-  FContext.AssertTrue((Expected)=(J.AsJSON), J.ClassName+'.AsJSON');
+  TestContext.AssertTrue((Expected)=(J.AsJSON), J.ClassName+'.AsJSON');
 end;
 
 Procedure TTestJSON.TestIsNull(J: TJSONData; Expected: Boolean);
 begin
-  FContext.AssertTrue((Expected)=(J.IsNull), J.ClassName+'.IsNull');
+  TestContext.AssertTrue((Expected)=(J.IsNull), J.ClassName+'.IsNull');
 end;
 
 Procedure TTestJSON.TestAsBoolean(J: TJSONData; Expected: Boolean;
@@ -1117,7 +1127,7 @@ begin
     B:=J.AsBoolean;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((Expected)=(B), J.Classname+'.AsBoolean');
+      TestContext.AssertTrue((Expected)=(B), J.Classname+'.AsBoolean');
   except
     On E : Exception do
       begin
@@ -1128,12 +1138,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsBoolean must raise error');
+      TestContext.Fail(J.ClassName+'.AsBoolean must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsBoolean raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsBoolean raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1151,7 +1161,7 @@ begin
     I:=J.AsInteger;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((Expected)=(I), J.Classname+'.AsInteger');
+      TestContext.AssertTrue((Expected)=(I), J.Classname+'.AsInteger');
   except
     On E : Exception do
       begin
@@ -1162,12 +1172,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsInteger must raise error');
+      TestContext.Fail(J.ClassName+'.AsInteger must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsInteger raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsInteger raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1185,7 +1195,7 @@ begin
     I:=J.AsInt64;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((Expected)=(I), J.Classname+'.AsInt64');
+      TestContext.AssertTrue((Expected)=(I), J.Classname+'.AsInt64');
   except
     On E : Exception do
       begin
@@ -1196,12 +1206,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsInt64 must raise error');
+      TestContext.Fail(J.ClassName+'.AsInt64 must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsInt64 raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsInt64 raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1218,7 +1228,7 @@ begin
     Q:=J.AsQWord;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((IntToStr(Expected))=(IntToStr(Q)), J.Classname+'.AsQWord');
+      TestContext.AssertTrue((IntToStr(Expected))=(IntToStr(Q)), J.Classname+'.AsQWord');
   except
     On E : Exception do
       begin
@@ -1229,12 +1239,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsQWord must raise error');
+      TestContext.Fail(J.ClassName+'.AsQWord must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsInt64 raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsInt64 raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1252,7 +1262,7 @@ begin
     S:=J.AsString;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((Expected)=(S), J.Classname+'.AsString');
+      TestContext.AssertTrue((Expected)=(S), J.Classname+'.AsString');
   except
     On E : Exception do
       begin
@@ -1263,12 +1273,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsString must raise error');
+      TestContext.Fail(J.ClassName+'.AsString must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsString raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsString raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1286,7 +1296,7 @@ begin
     F:=J.AsFloat;
     AssignOK:=True;
     If Not ExpectError then
-      FContext.AssertTrue((Expected)=(F), J.Classname+'.AsFloat');
+      TestContext.AssertTrue((Expected)=(F), J.Classname+'.AsFloat');
   except
     On E : Exception do
       begin
@@ -1297,12 +1307,12 @@ begin
   If ExpectError then
     begin
     If AssignOK then
-      FContext.Fail(J.ClassName+'.AsFloat must raise error');
+      TestContext.Fail(J.ClassName+'.AsFloat must raise error');
     end
   else
     begin
     If not AssignOK then
-      FContext.Fail(J.ClassName+'.AsFloat raised unexpected exception: '+Msg)
+      TestContext.Fail(J.ClassName+'.AsFloat raised unexpected exception: '+Msg)
     end;
 end;
 
@@ -1386,7 +1396,7 @@ begin
     D:=B.Clone;
     try
      TestJSONType(D,jtBoolean);
-     FContext.AssertTrue((TMyBoolean)=(D.ClassType), 'Correct class');
+     TestContext.AssertTrue((TMyBoolean)=(D.ClassType), 'Correct class');
      TestAsBoolean(D,true);
     finally
       D.Free;
@@ -1404,7 +1414,7 @@ Var
 begin
   B:=TJSONBoolean.Create(true);
   try
-    FContext.AssertTrue((B.asJSON)=(B.FormatJSON), 'FormatJSON same as asJSON');
+    TestContext.AssertTrue((B.asJSON)=(B.FormatJSON), 'FormatJSON same as asJSON');
   finally
     B.Free;
   end;
@@ -1468,7 +1478,7 @@ begin
     D:=J.Clone;
     try
       TestIsNull(D,True);
-      FContext.AssertTrue((TMyNull)=(D.ClassType), 'Correct class');
+      TestContext.AssertTrue((TMyNull)=(D.ClassType), 'Correct class');
     finally
       D.Free;
     end;
@@ -1483,7 +1493,7 @@ Var
 begin
   J:=TJSONNull.Create;
   try
-    FContext.AssertTrue((J.asJSON)=(J.FormatJSON), 'FormatJSON same as asJSON');
+    TestContext.AssertTrue((J.asJSON)=(J.FormatJSON), 'FormatJSON same as asJSON');
   finally
     J.Free;
   end;
@@ -1539,7 +1549,7 @@ begin
       else
         T:='\u'+HexStr(I,4);
       end;
-      FContext.AssertTrue(('"-->'+T+'<--"')=(J.AsJSON), 'Control AnsiChar');
+      TestContext.AssertTrue(('"-->'+T+'<--"')=(J.AsJSON), 'Control AnsiChar');
       end;
   finally
     FreeAndNil(J);
@@ -1717,7 +1727,7 @@ begin
   try
     D:=S.Clone;
     try
-      FContext.AssertTrue((TMyString)=(D.ClassType), 'Correct class');
+      TestContext.AssertTrue((TMyString)=(D.ClassType), 'Correct class');
      TestJSONType(D,jtString);
      TestAsString(D,'aloha');
     finally
@@ -1735,7 +1745,7 @@ Var
 begin
   S:=TJSONString.Create('aloha');
   try
-    FContext.AssertTrue((S.AsJSON)=(S.FormatJSOn), 'FormatJSON equals JSON');
+    TestContext.AssertTrue((S.AsJSON)=(S.FormatJSOn), 'FormatJSON equals JSON');
   finally
     FreeAndNil(S);
   end;
@@ -1778,7 +1788,7 @@ begin
   try
     TestJSONType(J,jtNumber);
     TestItemCount(J,0);
-    FContext.AssertTrue((ord(ntInteger))=(Ord(J.NumberType)), 'Numbertype is ntInteger');
+    TestContext.AssertTrue((ord(ntInteger))=(Ord(J.NumberType)), 'Numbertype is ntInteger');
     TestJSON(J,IntToStr(i));
     TestIsNull(J,False);
     TestAsBoolean(J,(I<>0));
@@ -1844,7 +1854,7 @@ begin
   try
     D:=I.Clone;
     try
-     FContext.AssertTrue((TMyInteger)=(D.ClassType), 'Correct class');
+     TestContext.AssertTrue((TMyInteger)=(D.ClassType), 'Correct class');
      TestJSONType(D,jtNumber);
      TestAsInteger(D,99);
     finally
@@ -1863,7 +1873,7 @@ Var
 begin
   I:=TJSONIntegerNumber.Create(99);
   try
-    FContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
+    TestContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
   finally
     FreeAndNil(I);
   end;
@@ -1881,7 +1891,7 @@ begin
   try
     TestJSONType(J,jtNumber);
     TestItemCount(J,0);
-    FContext.AssertTrue((ord(ntInt64))=(Ord(J.NumberType)), 'Numbertype is ntInt64');
+    TestContext.AssertTrue((ord(ntInt64))=(Ord(J.NumberType)), 'Numbertype is ntInt64');
     TestJSON(J,IntToStr(i));
     TestIsNull(J,False);
     TestAsBoolean(J,(I<>0));
@@ -1927,7 +1937,7 @@ begin
     D:=I.Clone;
     try
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntInt64))=(Ord(TJSONInt64Number(D).NumberType)), 'Numbertype is ntInt64');
+     TestContext.AssertTrue((ord(ntInt64))=(Ord(TJSONInt64Number(D).NumberType)), 'Numbertype is ntInt64');
      TestAsInteger(D,99);
     finally
       D.Free;
@@ -1948,9 +1958,9 @@ begin
   try
     D:=I.Clone;
     try
-      FContext.AssertTrue((TMyInt64)=(D.ClassType), 'Correct class');
+      TestContext.AssertTrue((TMyInt64)=(D.ClassType), 'Correct class');
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntInt64))=(Ord(TMyInt64(D).NumberType)), 'Numbertype is ntInt64');
+     TestContext.AssertTrue((ord(ntInt64))=(Ord(TMyInt64(D).NumberType)), 'Numbertype is ntInt64');
      TestAsInteger(D,99);
     finally
       D.Free;
@@ -1967,7 +1977,7 @@ Var
 begin
   I:=TJSONInt64Number.Create(99);
   try
-    FContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
+    TestContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
   finally
     FreeAndNil(I);
   end;
@@ -1985,7 +1995,7 @@ begin
   try
     TestJSONType(J,jtNumber);
     TestItemCount(J,0);
-    FContext.AssertTrue((ord(ntQWord))=(Ord(J.NumberType)), 'Numbertype is ntQWord');
+    TestContext.AssertTrue((ord(ntQWord))=(Ord(J.NumberType)), 'Numbertype is ntQWord');
     TestJSON(J,IntToStr(Q));
     TestIsNull(J,False);
     TestAsBoolean(J,(Q<>0));
@@ -2023,7 +2033,7 @@ begin
     D:=I.Clone;
     try
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntQWord))=(Ord(TJSONQWordNumber(D).NumberType)), 'Numbertype is ntQWord');
+     TestContext.AssertTrue((ord(ntQWord))=(Ord(TJSONQWordNumber(D).NumberType)), 'Numbertype is ntQWord');
      TestAsInteger(D,99);
     finally
       D.Free;
@@ -2044,9 +2054,9 @@ begin
   try
     D:=I.Clone;
     try
-      FContext.AssertTrue((TMyQWord)=(D.ClassType), 'Correct class');
+      TestContext.AssertTrue((TMyQWord)=(D.ClassType), 'Correct class');
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntQWord))=(Ord(TMyQWord(D).NumberType)), 'Numbertype is ntQWord');
+     TestContext.AssertTrue((ord(ntQWord))=(Ord(TMyQWord(D).NumberType)), 'Numbertype is ntQWord');
      TestAsInteger(D,99);
     finally
       D.Free;
@@ -2063,7 +2073,7 @@ Var
 begin
   I:=TJSONQWordNumber.Create(99);
   try
-    FContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
+    TestContext.AssertTrue((I.AsJSON)=(I.FormatJSON), 'FormatJSON equal to JSON');
   finally
     FreeAndNil(I);
   end;
@@ -2085,7 +2095,7 @@ begin
   try
     TestJSONType(J,jtNumber);
     TestItemCount(J,0);
-    FContext.AssertTrue((ord(ntFloat))=(Ord(J.NumberType)), 'Numbertype is ntFloat');
+    TestContext.AssertTrue((ord(ntFloat))=(Ord(J.NumberType)), 'Numbertype is ntFloat');
     TestJSON(J,S);
     TestIsNull(J,False);
     TestAsBoolean(J,(F<>0));
@@ -2140,7 +2150,7 @@ begin
     D:=F.Clone;
     try
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntFloat))=(Ord(TJSONFloatNumber(D).NumberType)), 'Numbertype is ntFloat');
+     TestContext.AssertTrue((ord(ntFloat))=(Ord(TJSONFloatNumber(D).NumberType)), 'Numbertype is ntFloat');
      TestAsFloat(D,1.23);
     finally
       D.Free;
@@ -2162,9 +2172,9 @@ begin
   try
     D:=F.Clone;
     try
-     FContext.AssertTrue((TMyFloat)=(D.ClassType), 'Correct class');
+     TestContext.AssertTrue((TMyFloat)=(D.ClassType), 'Correct class');
      TestJSONType(D,jtNumber);
-     FContext.AssertTrue((ord(ntFloat))=(Ord(TMyFloat(D).NumberType)), 'Numbertype is ntFloat');
+     TestContext.AssertTrue((ord(ntFloat))=(Ord(TMyFloat(D).NumberType)), 'Numbertype is ntFloat');
      TestAsFloat(D,1.23);
     finally
       D.Free;
@@ -2183,8 +2193,8 @@ Var
 begin
   F:=TJSONFloatNumber.Create(1.23);
   try
-    FContext.AssertTrue((F.AsJSON)=(F.FormatJSON), 'FormatJSON equals asJSON');
-    FContext.AssertTrue(('1.23')=(F.FormatJSON([foFormatFloat])), 'Formatjson with float formatting');
+    TestContext.AssertTrue((F.AsJSON)=(F.FormatJSON), 'FormatJSON equals asJSON');
+    TestContext.AssertTrue(('1.23')=(F.FormatJSON([foFormatFloat])), 'Formatjson with float formatting');
   finally
     FreeAndNil(F);
   end;
@@ -2463,7 +2473,7 @@ begin
     Try
       O:=TObject.Create;
       J:=TJSONArray.Create([O]);
-      FContext.Fail('Array constructor accepts only TJSONData');
+      TestContext.Fail('Array constructor accepts only TJSONData');
     finally
       FreeAndNil(J);
       FreeAndNil(O);
@@ -2502,7 +2512,7 @@ begin
   try
     Try
       J:=TJSONArray.Create([P]);
-      FContext.Fail('Array constructor accepts only NIL pointers');
+      TestContext.Fail('Array constructor accepts only NIL pointers');
     finally
       FreeAndNil(J);
     end;
@@ -2522,9 +2532,9 @@ begin
     J.Add(Integer(0));
     TestItemCount(J,1);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((J[0].ClassType)=(TJSONIntegerNumber), 'J[0] is TJSONIntegerNumber');
-    FContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((0)=(J.integers[0]), 'J.Integers[0]=0');
+    TestContext.AssertTrue((J[0].ClassType)=(TJSONIntegerNumber), 'J[0] is TJSONIntegerNumber');
+    TestContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((0)=(J.integers[0]), 'J.Integers[0]=0');
     TestAsInteger(J[0],0);
     TestAsInt64(J[0],0);
     TestAsQword(J[0],0);
@@ -2545,9 +2555,9 @@ begin
     J.Add(Int64(0));
     TestItemCount(J,1);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((J[0].ClassType)=(TJSONInt64Number), 'J[0] is TJSONInt64Number');
-    FContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((0)=(J.Int64s[0]), 'J.Int64s[0]=0');
+    TestContext.AssertTrue((J[0].ClassType)=(TJSONInt64Number), 'J[0] is TJSONInt64Number');
+    TestContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((0)=(J.Int64s[0]), 'J.Int64s[0]=0');
     TestAsInteger(J[0],0);
     TestAsInt64(J[0],0);
     TestAsQword(J[0],0);
@@ -2570,9 +2580,9 @@ begin
     J.Add(F);
     TestItemCount(J,1);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((TJSONfloatNumber)=(J[0].ClassType), 'J[0] is TJSONFloatNumber');
-    FContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[0])), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((F)=(J.Floats[0]), 'J.Floats[0]='+FloatToStr(F));
+    TestContext.AssertTrue((TJSONfloatNumber)=(J[0].ClassType), 'J[0] is TJSONFloatNumber');
+    TestContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[0])), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((F)=(J.Floats[0]), 'J.Floats[0]='+FloatToStr(F));
     TestAsFloat(J[0],F);
     Str(F,S);
     Delete(S,1,1);
@@ -2594,9 +2604,9 @@ begin
     J.Add(B);
     TestItemCount(J,1);
     TestJSONType(J[0],jtBoolean);
-    FContext.AssertTrue((TJSONBoolean)=(J[0].ClassType), 'J[0] is TJSONBoolean');
+    TestContext.AssertTrue((TJSONBoolean)=(J[0].ClassType), 'J[0] is TJSONBoolean');
     TestAsBoolean(J[0],B);
-    FContext.AssertTrue((B)=(J.Booleans[0]), 'J.Booleans[0]='+BoolToStr(B)+'"');
+    TestContext.AssertTrue((B)=(J.Booleans[0]), 'J.Booleans[0]='+BoolToStr(B)+'"');
     If B then
       TestJSON(J,'[true]')
     else
@@ -2619,9 +2629,9 @@ begin
     J.Insert(0,B);
     TestItemCount(J,2);
     TestJSONType(J[0],jtBoolean);
-    FContext.AssertTrue((TJSONBoolean)=(J[0].ClassType), 'J[0] is TJSONBoolean');
+    TestContext.AssertTrue((TJSONBoolean)=(J[0].ClassType), 'J[0] is TJSONBoolean');
     TestAsBoolean(J[0],B);
-    FContext.AssertTrue((B)=(J.Booleans[0]), 'J.Booleans[0]='+BoolToStr(B)+'"');
+    TestContext.AssertTrue((B)=(J.Booleans[0]), 'J.Booleans[0]='+BoolToStr(B)+'"');
     If B then
       TestJSON(J,'[true, false]')
     else
@@ -2656,9 +2666,9 @@ begin
     J.Add(S);
     TestItemCount(J,1);
     TestJSONType(J[0],jtString);
-    FContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[0] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[0] is TJSONString');
     TestAsString(J[0],S);
-    FContext.AssertTrue((S)=(J.Strings[0]), 'J.Strings[0]="'+S+'"');
+    TestContext.AssertTrue((S)=(J.Strings[0]), 'J.Strings[0]="'+S+'"');
     TestJSON(J,'["'+StringToJSONString(S)+'"]');
   finally
     FreeAndNil(J);
@@ -2676,8 +2686,8 @@ begin
     J.Add;
     TestItemCount(J,1);
     TestJSONType(J[0],jtNull);
-    FContext.AssertTrue((TJSONNull)=(J[0].ClassType), 'J[0] is TJSONNull');
-    FContext.AssertTrue((True)=(J.Nulls[0]), 'J.Nulls[0]=True');
+    TestContext.AssertTrue((TJSONNull)=(J[0].ClassType), 'J[0] is TJSONNull');
+    TestContext.AssertTrue((True)=(J.Nulls[0]), 'J.Nulls[0]=True');
     TestIsNull(J[0],true);
     TestJSON(J,'[null]');
   finally
@@ -2699,8 +2709,8 @@ begin
     J.Add(J2);
     TestItemCount(J,1);
     TestJSONType(J[0],jtArray);
-    FContext.AssertTrue((TJSONArray)=(J[0].ClassType), 'J[0] is TJSONArray');
-    FContext.AssertTrue((TJSONArray)=(J.Arrays[0].ClassType), 'J.Arrays[0] is TJSONArray');
+    TestContext.AssertTrue((TJSONArray)=(J[0].ClassType), 'J[0] is TJSONArray');
+    TestContext.AssertTrue((TJSONArray)=(J.Arrays[0].ClassType), 'J.Arrays[0] is TJSONArray');
     TestAsInteger(J.Arrays[0][0],0);
     TestAsInteger(J.Arrays[0][1],1);
     TestAsInt64(J.Arrays[0][0],0);
@@ -2724,9 +2734,9 @@ begin
     J.Insert(0,Integer(0));
     TestItemCount(J,2);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((J[0].ClassType)=(TJSONIntegerNumber), 'J[0] is TJSONIntegerNumber');
-    FContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((0)=(J.integers[0]), 'J.Integers[0]=0');
+    TestContext.AssertTrue((J[0].ClassType)=(TJSONIntegerNumber), 'J[0] is TJSONIntegerNumber');
+    TestContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((0)=(J.integers[0]), 'J.Integers[0]=0');
     TestAsInteger(J[0],0);
     TestAsInt64(J[0],0);
     TestAsQword(J[0],0);
@@ -2747,9 +2757,9 @@ begin
     J.Insert(0,Int64(0));
     TestItemCount(J,2);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((J[0].ClassType)=(TJSONInt64Number), 'J[0] is TJSONInt64Number');
-    FContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((0)=(J.Int64s[0]), 'J.Int64s[0]=0');
+    TestContext.AssertTrue((J[0].ClassType)=(TJSONInt64Number), 'J[0] is TJSONInt64Number');
+    TestContext.AssertTrue((ord(J.Types[0]))=(Ord(jtNumber)), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((0)=(J.Int64s[0]), 'J.Int64s[0]=0');
     TestAsInteger(J[0],0);
     TestAsInt64(J[0],0);
     TestAsQword(J[0],0);
@@ -2772,9 +2782,9 @@ begin
     J.Insert(0,F);
     TestItemCount(J,2);
     TestJSONType(J[0],jtNumber);
-    FContext.AssertTrue((TJSONfloatNumber)=(J[0].ClassType), 'J[0] is TJSONFloatNumber');
-    FContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[0])), 'j.Types[0]=jtNumber');
-    FContext.AssertTrue((F)=(J.Floats[0]), 'J.Floats[0]='+FloatToStr(F));
+    TestContext.AssertTrue((TJSONfloatNumber)=(J[0].ClassType), 'J[0] is TJSONFloatNumber');
+    TestContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[0])), 'j.Types[0]=jtNumber');
+    TestContext.AssertTrue((F)=(J.Floats[0]), 'J.Floats[0]='+FloatToStr(F));
     TestAsFloat(J[0],F);
     Str(F,S);
     Delete(S,1,1);
@@ -2811,9 +2821,9 @@ begin
     J.Insert(0,S);
     TestItemCount(J,2);
     TestJSONType(J[0],jtString);
-    FContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[0] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[0] is TJSONString');
     TestAsString(J[0],S);
-    FContext.AssertTrue((S)=(J.Strings[0]), 'J.Strings[0]="'+S+'"');
+    TestContext.AssertTrue((S)=(J.Strings[0]), 'J.Strings[0]="'+S+'"');
     TestJSON(J,'["'+StringToJSONString(S)+'", "Another string"]');
   finally
     FreeAndNil(J);
@@ -2831,8 +2841,8 @@ begin
     J.Insert(0);
     TestItemCount(J,2);
     TestJSONType(J[0],jtNull);
-    FContext.AssertTrue((TJSONNull)=(J[0].ClassType), 'J[0] is TJSONNull');
-    FContext.AssertTrue((True)=(J.Nulls[0]), 'J.Nulls[0]=True');
+    TestContext.AssertTrue((TJSONNull)=(J[0].ClassType), 'J[0] is TJSONNull');
+    TestContext.AssertTrue((True)=(J.Nulls[0]), 'J.Nulls[0]=True');
     TestIsNull(J[0],true);
     TestJSON(J,'[null, 123]');
   finally
@@ -2859,8 +2869,8 @@ begin
     J.Insert(0,J2);
     TestItemCount(J,2);
     TestJSONType(J[0],jtObject);
-    FContext.AssertTrue((TJSONObject)=(J[0].ClassType), 'J[0] is TJSONObject');
-    FContext.AssertTrue((TJSONObject)=(J.Objects[0].ClassType), 'J.Objects[0] is TJSONObject');
+    TestContext.AssertTrue((TJSONObject)=(J[0].ClassType), 'J[0] is TJSONObject');
+    TestContext.AssertTrue((TJSONObject)=(J.Objects[0].ClassType), 'J.Objects[0] is TJSONObject');
     TestAsInteger(J.Objects[0][A],0);
     TestAsInteger(J.Objects[0][B],1);
     TestAsInt64(J.Objects[0][A],0);
@@ -2887,8 +2897,8 @@ begin
     J.Insert(0,J2);
     TestItemCount(J,2);
     TestJSONType(J[0],jtArray);
-    FContext.AssertTrue((TJSONArray)=(J[0].ClassType), 'J[0] is TJSONArray');
-    FContext.AssertTrue((TJSONArray)=(J.Arrays[0].ClassType), 'J.Arrays[0] is TJSONArray');
+    TestContext.AssertTrue((TJSONArray)=(J[0].ClassType), 'J[0] is TJSONArray');
+    TestContext.AssertTrue((TJSONArray)=(J.Arrays[0].ClassType), 'J.Arrays[0] is TJSONArray');
     TestAsInteger(J.Arrays[0][0],0);
     TestAsInteger(J.Arrays[0][1],1);
     TestAsInt64(J.Arrays[0][0],0);
@@ -2913,8 +2923,8 @@ begin
     J.Add('Third string');
     J.Move(2,1);
     TestItemCount(J,3);
-    FContext.AssertTrue((TJSONString)=(J[1].ClassType), 'J[2] is TJSONString');
-    FContext.AssertTrue((TJSONString)=(J[2].ClassType), 'J[1] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[1].ClassType), 'J[2] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[2].ClassType), 'J[1] is TJSONString');
     TestAsString(J[1],'Third string');
     TestAsString(J[2],'Second string');
   finally
@@ -2934,8 +2944,8 @@ begin
     J.Add('Third string');
     J.Exchange(2,0);
     TestItemCount(J,3);
-    FContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[2] is TJSONString');
-    FContext.AssertTrue((TJSONString)=(J[2].ClassType), 'J[1] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[0].ClassType), 'J[2] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[2].ClassType), 'J[1] is TJSONString');
     TestAsString(J[0],'Third string');
     TestAsString(J[2],'First string');
   finally
@@ -2962,8 +2972,8 @@ begin
     J.Add(J2);
     TestItemCount(J,1);
     TestJSONType(J[0],jtObject);
-    FContext.AssertTrue((TJSONObject)=(J[0].ClassType), 'J[0] is TJSONObject');
-    FContext.AssertTrue((TJSONObject)=(J.Objects[0].ClassType), 'J.Objects[0] is TJSONObject');
+    TestContext.AssertTrue((TJSONObject)=(J[0].ClassType), 'J[0] is TJSONObject');
+    TestContext.AssertTrue((TJSONObject)=(J.Objects[0].ClassType), 'J.Objects[0] is TJSONObject');
     TestAsInteger(J.Objects[0][A],0);
     TestAsInteger(J.Objects[0][B],1);
     TestAsInt64(J.Objects[0][A],0);
@@ -3071,7 +3081,7 @@ begin
     D:=J.Clone;
     try
       TestJSONType(D,jtArray);
-      FContext.AssertTrue((TMyArray)=(D.ClassType), 'Correct class');
+      TestContext.AssertTrue((TMyArray)=(D.ClassType), 'Correct class');
     finally
       D.Free;
     end;
@@ -3095,11 +3105,11 @@ begin
     TestJSONType(J[1],jtNumber);
     TestJSONType(J[2],jtNumber);
     TestJSON(J,'[0, 1, 2]');
-    FContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineArray],1)), 'FormatJSON, single line');
-    FContext.AssertTrue(('['+sLinebreak+'  0,'+sLinebreak+'  1,'+sLinebreak+'  2'+sLinebreak+']')=(J.FormatJSON()), 'FormatJSON, default');
-    FContext.AssertTrue(('['+sLinebreak+#9'0,'+sLinebreak+#9'1,'+sLinebreak+#9'2'+sLinebreak+']')=(J.FormatJSON([foUseTabChar],1)), 'FormatJSON, use tab');
+    TestContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineArray],1)), 'FormatJSON, single line');
+    TestContext.AssertTrue(('['+sLinebreak+'  0,'+sLinebreak+'  1,'+sLinebreak+'  2'+sLinebreak+']')=(J.FormatJSON()), 'FormatJSON, default');
+    TestContext.AssertTrue(('['+sLinebreak+#9'0,'+sLinebreak+#9'1,'+sLinebreak+#9'2'+sLinebreak+']')=(J.FormatJSON([foUseTabChar],1)), 'FormatJSON, use tab');
     J.Add(TJSONObject.Create(['x',1,'y',2]));
-    FContext.AssertTrue(('['+sLinebreak+#9'0,'+sLinebreak+#9'1,'+sLinebreak+#9'2,'+sLinebreak+#9'{'+sLineBreak+#9#9'"x" : 1,'+sLineBreak+#9#9'"y" : 2'+sLinebreak+#9'}'+sLineBreak+']')=(J.FormatJSON([foUseTabChar],1)), 'FormatJSON, use tab indentsize 1');
+    TestContext.AssertTrue(('['+sLinebreak+#9'0,'+sLinebreak+#9'1,'+sLinebreak+#9'2,'+sLinebreak+#9'{'+sLineBreak+#9#9'"x" : 1,'+sLineBreak+#9#9'"y" : 2'+sLinebreak+#9'}'+sLineBreak+']')=(J.FormatJSON([foUseTabChar],1)), 'FormatJSON, use tab indentsize 1');
   finally
     J.Free
   end;
@@ -3116,7 +3126,7 @@ begin
     J.Add(1);
     J.Add(TJSONObject(Nil));
     TestJSON(J,'[1, null]');
-    FContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineArray],1)), 'FormatJSON, single line');
+    TestContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineArray],1)), 'FormatJSON, single line');
   finally
     J.Free;
   end;
@@ -3148,9 +3158,9 @@ begin
   J.Add(A,Integer(0));
   TestItemCount(J,1);
   TestJSONType(J[A],jtNumber);
-  FContext.AssertTrue((J[A].ClassType)=(TJSONIntegerNumber), 'J[''a''] is TJSONIntegerNumber');
-  FContext.AssertTrue((ord(J.Types[A]))=(Ord(jtNumber)), 'j.Types[''a'']=jtNumber');
-  FContext.AssertTrue((0)=(J.integers[A]), 'J.Integers[''a'']=0');
+  TestContext.AssertTrue((J[A].ClassType)=(TJSONIntegerNumber), 'J[''a''] is TJSONIntegerNumber');
+  TestContext.AssertTrue((ord(J.Types[A]))=(Ord(jtNumber)), 'j.Types[''a'']=jtNumber');
+  TestContext.AssertTrue((0)=(J.integers[A]), 'J.Integers[''a'']=0');
   TestAsInteger(J[A],0);
   TestAsInt64(J[A],0);
   TestAsQword(J[A],0);
@@ -3166,9 +3176,9 @@ begin
   J.Add(A,Int64(0));
   TestItemCount(J,1);
   TestJSONType(J[A],jtNumber);
-  FContext.AssertTrue((J[A].ClassType)=(TJSONInt64Number), 'J[''a''] is TJSONInt64Number');
-  FContext.AssertTrue((ord(J.Types[A]))=(Ord(jtNumber)), 'j.Types[''a'']=jtNumber');
-  FContext.AssertTrue((0)=(J.Int64s[A]), 'J.Int64s[''a'']=0');
+  TestContext.AssertTrue((J[A].ClassType)=(TJSONInt64Number), 'J[''a''] is TJSONInt64Number');
+  TestContext.AssertTrue((ord(J.Types[A]))=(Ord(jtNumber)), 'j.Types[''a'']=jtNumber');
+  TestContext.AssertTrue((0)=(J.Int64s[A]), 'J.Int64s[''a'']=0');
   TestAsInteger(J[A],0);
   TestAsInt64(J[A],0);
   TestAsQword(J[A],0);
@@ -3188,9 +3198,9 @@ begin
   J.Add(A,F);
   TestItemCount(J,1);
   TestJSONType(J[A],jtNumber);
-  FContext.AssertTrue((TJSONfloatNumber)=(J[a].ClassType), 'J[''a''] is TJSONFloatNumber');
-  FContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[a])), 'j.Types[''a'']=jtNumber');
-  FContext.AssertTrue((F)=(J.Floats[a]), 'J.Floats[''a'']='+FloatToStr(F));
+  TestContext.AssertTrue((TJSONfloatNumber)=(J[a].ClassType), 'J[''a''] is TJSONFloatNumber');
+  TestContext.AssertTrue((Ord(jtNumber))=(ord(J.Types[a])), 'j.Types[''a'']=jtNumber');
+  TestContext.AssertTrue((F)=(J.Floats[a]), 'J.Floats[''a'']='+FloatToStr(F));
   TestAsFloat(J[A],F);
   Str(F,S);
   TestJSON(J,'{ "'+a+'" :'+S+' }');
@@ -3205,7 +3215,7 @@ end;
 procedure TTestObject.TearDown;
 begin
   FreeAndNil(FJ);
-  inherited TearDown;
+
 end;
 
 procedure TTestObject.TestAddBoolean(B : Boolean);
@@ -3218,9 +3228,9 @@ begin
   J.Add(A,B);
   TestItemCount(J,1);
   TestJSONType(J[A],jtBoolean);
-  FContext.AssertTrue((TJSONBoolean)=(J[a].ClassType), 'J[''a''] is TJSONBoolean');
+  TestContext.AssertTrue((TJSONBoolean)=(J[a].ClassType), 'J[''a''] is TJSONBoolean');
   TestAsBoolean(J[a],B);
-  FContext.AssertTrue((B)=(J.Booleans[a]), 'J.Booleans[''a'']='+BoolToStr(B)+'"');
+  TestContext.AssertTrue((B)=(J.Booleans[a]), 'J.Booleans[''a'']='+BoolToStr(B)+'"');
   If B then
     TestJSON(J,'{ "'+a+'" : true }')
   else
@@ -3258,9 +3268,9 @@ begin
     J.Add(A,S);
     TestItemCount(J,1);
     TestJSONType(J[a],jtString);
-    FContext.AssertTrue((TJSONString)=(J[A].ClassType), 'J[''a''] is TJSONString');
+    TestContext.AssertTrue((TJSONString)=(J[A].ClassType), 'J[''a''] is TJSONString');
     TestAsString(J[a],S);
-    FContext.AssertTrue((S)=(J.Strings[A]), 'J.Strings[''a'']="'+S+'"');
+    TestContext.AssertTrue((S)=(J.Strings[A]), 'J.Strings[''a'']="'+S+'"');
     TestJSON(J,'{ "'+a+'" : "'+StringToJSONString(S)+'" }');
 end;
 
@@ -3273,8 +3283,8 @@ begin
   J.Add(a);
   TestItemCount(J,1);
   TestJSONType(J[a],jtNull);
-  FContext.AssertTrue((TJSONNull)=(J[A].ClassType), 'J[''a''] is TJSONNull');
-  FContext.AssertTrue((True)=(J.Nulls[A]), 'J.Nulls[''a'']=True');
+  TestContext.AssertTrue((TJSONNull)=(J[A].ClassType), 'J[''a''] is TJSONNull');
+  TestContext.AssertTrue((True)=(J.Nulls[A]), 'J.Nulls[''a'']=True');
   TestIsNull(J[a],true);
   TestJSON(J,'{ "'+a+'" : null }');
 end;
@@ -3296,8 +3306,8 @@ begin
   J.Add(A,J2);
   TestItemCount(J,1);
   TestJSONType(J[A],jtObject);
-  FContext.AssertTrue((TJSONObject)=(J[A].ClassType), 'J[''a''] is TJSONObject');
-  FContext.AssertTrue((TJSONObject)=(J.Objects[A].ClassType), 'J.Objects[''a''] is TJSONObject');
+  TestContext.AssertTrue((TJSONObject)=(J[A].ClassType), 'J[''a''] is TJSONObject');
+  TestContext.AssertTrue((TJSONObject)=(J.Objects[A].ClassType), 'J.Objects[''a''] is TJSONObject');
   TestAsInteger(J.Objects[A][B],0);
   TestAsInteger(J.Objects[A][C],1);
   TestAsInt64(J.Objects[A][B],0);
@@ -3322,8 +3332,8 @@ begin
   J.Add(A,J2);
   TestItemCount(J,1);
   TestJSONType(J[A],jtArray);
-  FContext.AssertTrue((TJSONArray)=(J[A].ClassType), 'J[''a''] is TJSONArray');
-  FContext.AssertTrue((TJSONArray)=(J.Arrays[A].ClassType), 'J.Arrays[0] is TJSONArray');
+  TestContext.AssertTrue((TJSONArray)=(J[A].ClassType), 'J[''a''] is TJSONArray');
+  TestContext.AssertTrue((TJSONArray)=(J.Arrays[A].ClassType), 'J.Arrays[0] is TJSONArray');
   TestAsInteger(J.Arrays[A][0],0);
   TestAsInteger(J.Arrays[A][1],1);
   TestAsInt64(J.Arrays[A][0],0);
@@ -3419,7 +3429,7 @@ begin
     O.Add('p2','aloha');
     D:=O.Clone;
     TestJSONType(D,jtObject);
-    FContext.AssertTrue((TMYObject)=(D.ClassType), 'Correct class');
+    TestContext.AssertTrue((TMYObject)=(D.ClassType), 'Correct class');
   finally
     D.Free;
     O.Free;
@@ -3446,18 +3456,18 @@ begin
   TestJSONType(JB,jtNumber);
   TestJSON(J,'{ "a" : 0, "b" : 1 }');
   E:=J.Extract(1);
-  FContext.AssertTrue((JB)=(E), 'Extracted JA');
+  TestContext.AssertTrue((JB)=(E), 'Extracted JA');
   E.Free;
   TestItemCount(J,1);
   E:=J.Extract(0);
-  FContext.AssertTrue((JA)=(E), 'Extracted JB');
+  TestContext.AssertTrue((JA)=(E), 'Extracted JB');
   E.Free;
   TestItemCount(J,0);
 end;
 
 procedure TTestObject.TestNonExistingAccessError;
 begin
-  FContext.AssertRaises(EJSON, @TestAccessError, '');
+  TestContext.AssertRaises(EJSON, @TestAccessError, '');
 end;
 
 procedure TTestObject.TestFormat;
@@ -3469,15 +3479,15 @@ begin
   O:=TJSONObject.Create(['x',1,'y',2]);
   try
     TestJSON(O,'{ "x" : 1, "y" : 2 }');
-    FContext.AssertTrue((O.AsJSON)=(O.FormatJSON([foSingleLineObject])), 'Format equals JSON');
-    FContext.AssertTrue(('{"x":1,"y":2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace])), 'Format using SkipWhiteSpace');
-    FContext.AssertTrue(('{"x": 1,"y": 2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace,foSkipWhiteSpaceOnlyLeading])), 'Format using SkipWhiteSpace,foSkipWhiteSpaceOnlyLeading');
-    FContext.AssertTrue(('{x:1,y:2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace,foDoNotQuoteMembers])), 'Format using SkipWhiteSpace,unquotednames');
-    FContext.AssertTrue(('{'+sLineBreak+'  "x" : 1,'+sLineBreak+'  "y" : 2'+sLineBreak+'}')=(O.FormatJSON([])), 'Format []');
-    FContext.AssertTrue(('{'+sLineBreak+'  x : 1,'+sLineBreak+'  y : 2'+sLineBreak+'}')=(O.FormatJSON([foDoNotQuoteMembers])), 'Format [foDoNotQuoteMembers]');
-    FContext.AssertTrue(('{'+sLineBreak+#9'x : 1,'+sLineBreak+#9'y : 2'+sLineBreak+'}')=(O.FormatJSON([foUseTabChar,foDoNotQuoteMembers],1)), 'Format [foUseTabChar,foDoNotQuoteMembers]');
+    TestContext.AssertTrue((O.AsJSON)=(O.FormatJSON([foSingleLineObject])), 'Format equals JSON');
+    TestContext.AssertTrue(('{"x":1,"y":2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace])), 'Format using SkipWhiteSpace');
+    TestContext.AssertTrue(('{"x": 1,"y": 2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace,foSkipWhiteSpaceOnlyLeading])), 'Format using SkipWhiteSpace,foSkipWhiteSpaceOnlyLeading');
+    TestContext.AssertTrue(('{x:1,y:2}')=(O.FormatJSON([foSingleLineObject,foSkipWhiteSpace,foDoNotQuoteMembers])), 'Format using SkipWhiteSpace,unquotednames');
+    TestContext.AssertTrue(('{'+sLineBreak+'  "x" : 1,'+sLineBreak+'  "y" : 2'+sLineBreak+'}')=(O.FormatJSON([])), 'Format []');
+    TestContext.AssertTrue(('{'+sLineBreak+'  x : 1,'+sLineBreak+'  y : 2'+sLineBreak+'}')=(O.FormatJSON([foDoNotQuoteMembers])), 'Format [foDoNotQuoteMembers]');
+    TestContext.AssertTrue(('{'+sLineBreak+#9'x : 1,'+sLineBreak+#9'y : 2'+sLineBreak+'}')=(O.FormatJSON([foUseTabChar,foDoNotQuoteMembers],1)), 'Format [foUseTabChar,foDoNotQuoteMembers]');
     O.Add('s',TJSONObject.Create(['w',10,'h',20]));
-    FContext.AssertTrue(('{'+sLineBreak+#9'x : 1,'+sLineBreak+#9'y : 2,'+sLineBreak+#9's : {'+sLineBreak+#9#9'w : 10,'+sLineBreak+#9#9'h : 20'+sLineBreak+#9'}'+sLineBreak+'}')=(O.FormatJSON([foUseTabChar,foDoNotQuoteMembers],1)), 'Format [foUseTabChar,foDoNotQuoteMembers] 2');
+    TestContext.AssertTrue(('{'+sLineBreak+#9'x : 1,'+sLineBreak+#9'y : 2,'+sLineBreak+#9's : {'+sLineBreak+#9#9'w : 10,'+sLineBreak+#9#9'h : 20'+sLineBreak+#9'}'+sLineBreak+'}')=(O.FormatJSON([foUseTabChar,foDoNotQuoteMembers],1)), 'Format [foUseTabChar,foDoNotQuoteMembers] 2');
   finally
     O.Free;
   end;
@@ -3489,7 +3499,7 @@ begin
   J.Add('a',1);
   J.Add('b',TJSONObject(Nil));
   TestJSON(J,'{ "a" : 1, "b" : null }');
-  FContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineObject],1)), 'FormatJSON, single line');
+  TestContext.AssertTrue((J.AsJSON)=(J.FormatJSON([foSingleLineObject],1)), 'FormatJSON, single line');
 end;
 
 procedure TTestObject.TestFormatForceLF;
@@ -3497,11 +3507,11 @@ Var
   O : TJSONObject;
 begin
   if sLineBreak=#10 then
-    FContext.Skip('Not relevant when linebreak is LF');
+    TestContext.Skip('Not relevant when linebreak is LF');
   O:=TJSONObject.Create(['x',1,'y',2]);
   try
     TestJSON(O,'{ "x" : 1, "y" : 2 }');
-    FContext.AssertTrue(('{'+#10+'  "x" : 1,'+#10+'  "y" : 2'+#10+'}')=(O.FormatJSON([foForceLF])), 'FormatJSON, forced LF');
+    TestContext.AssertTrue(('{'+#10+'  "x" : 1,'+#10+'  "y" : 2'+#10+'}')=(O.FormatJSON([foForceLF])), 'FormatJSON, forced LF');
   finally
     O.Free;
   end;
@@ -3527,14 +3537,14 @@ begin
   TestJSONType(J[A],jtString);
   TestJSONType(J[B],jtString);
   TestJSON(J,'{ "A" : "'+S+'", "a" : "'+S2+'", "c" : "'+S3+'" }');
-  FContext.AssertTrue((-1)=(J.IndexOfName('D')), 'Nonexisting, case sensitive');
-  FContext.AssertTrue((-1)=(J.IndexOfName('D',True)), 'Nonexisting, case insensitive');
-  FContext.AssertTrue((0)=(J.IndexOfName(A)), '1 Existing , case sensitive');
-  FContext.AssertTrue((0)=(J.IndexOfName(A,true)), '2 Existing exact match, case insensitive');
-  FContext.AssertTrue((1)=(J.IndexOfName(B)), '3 Existing , case sensitive');
-  FContext.AssertTrue((1)=(J.IndexOfName(B,true)), '4 Existing exact match, case insensitive');
-  FContext.AssertTrue((2)=(J.IndexOfName(C)), '5 Existing , case sensitive again');
-  FContext.AssertTrue((2)=(J.IndexOfName(Uppercase(C),true)), '6 Existing case-insensitive match, case insensitive');
+  TestContext.AssertTrue((-1)=(J.IndexOfName('D')), 'Nonexisting, case sensitive');
+  TestContext.AssertTrue((-1)=(J.IndexOfName('D',True)), 'Nonexisting, case insensitive');
+  TestContext.AssertTrue((0)=(J.IndexOfName(A)), '1 Existing , case sensitive');
+  TestContext.AssertTrue((0)=(J.IndexOfName(A,true)), '2 Existing exact match, case insensitive');
+  TestContext.AssertTrue((1)=(J.IndexOfName(B)), '3 Existing , case sensitive');
+  TestContext.AssertTrue((1)=(J.IndexOfName(B,true)), '4 Existing exact match, case insensitive');
+  TestContext.AssertTrue((2)=(J.IndexOfName(C)), '5 Existing , case sensitive again');
+  TestContext.AssertTrue((2)=(J.IndexOfName(Uppercase(C),true)), '6 Existing case-insensitive match, case insensitive');
 end;
 
 procedure TTestObject.TestIfFind;
@@ -3550,10 +3560,10 @@ begin
   TestJSONType(J,jtObject);
   TestIsNull(J,False);
   TestItemCount(J,3);
-  FContext.AssertTrue((true)=(j.Find('b', B)), 'boolean found');
-  FContext.AssertTrue((true)=(j.Find('s', S)), 'string found');
-  FContext.AssertTrue((true)=(j.Find('n', N)), 'number found');
-  FContext.AssertTrue((true)=(j.Find('s', D)), 'data found');
+  TestContext.AssertTrue((true)=(j.Find('b', B)), 'boolean found');
+  TestContext.AssertTrue((true)=(j.Find('s', S)), 'string found');
+  TestContext.AssertTrue((true)=(j.Find('n', N)), 'number found');
+  TestContext.AssertTrue((true)=(j.Find('s', D)), 'data found');
 end;
 
 procedure TTestObject.AppendA;
@@ -3566,7 +3576,7 @@ procedure TTestObject.TestDuplicate;
 
 begin
   J.Add('A',TJSONObject.Create);
-  FContext.AssertRaises(EJSON, @AppendA, '');
+  TestContext.AssertRaises(EJSON, @AppendA, '');
 end;
 
 
@@ -4031,7 +4041,7 @@ begin
     Try
       OO:=TObject.Create;
       O:=TJSONObject.Create([A,OO]);
-      FContext.Fail('Array constructor accepts only TJSONData');
+      TestContext.Fail('Array constructor accepts only TJSONData');
     finally
       FreeAndNil(O);
       FreeAndNil(OO);
@@ -4114,7 +4124,7 @@ begin
   try
     Try
       O:=TJSONObject.Create([A,P]);
-      FContext.Fail('Array constructor accepts only NIL pointers');
+      TestContext.Fail('Array constructor accepts only NIL pointers');
     finally
       FreeAndNil(O);
     end;
@@ -4132,7 +4142,7 @@ Var
 
 begin
   S:='StringToJSONString('''+Src+''')='''+Dest+'''';
-  FContext.AssertTrue((Dest)=(StringToJSONString(Src,Strict)), S);
+  TestContext.AssertTrue((Dest)=(StringToJSONString(Src,Strict)), S);
 end;
 
 procedure TTestJSONString.TestFrom(const Src, Dest: String);
@@ -4143,7 +4153,7 @@ Var
 begin
   S:='JSONStringToString('''+Src+''')='''+Dest+'''';
   Flush(output);
-  FContext.AssertTrue((Dest)=(JSONStringToString(Src)), S);
+  TestContext.AssertTrue((Dest)=(JSONStringToString(Src)), S);
 end;
 
 procedure TTestJSONString.TestJSONStringToString;
@@ -4245,13 +4255,25 @@ begin
 end;
 
 
+constructor TTestJSONString.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestJSON.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestJSONStringTestJSONStringToString(AContext: TNXTestContext);
 var lFixture: TTestJSONString;
 begin
-  lFixture:=TTestJSONString.Create;
+  lFixture:=TTestJSONString.Create(AContext, 'TestJSONStringToString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestJSONStringToString';
     lFixture.TestJSONStringToString;
   finally lFixture.Free; end;
 end;
@@ -4259,10 +4281,8 @@ end;
 procedure RunTTestJSONStringTestStringToJSONString(AContext: TNXTestContext);
 var lFixture: TTestJSONString;
 begin
-  lFixture:=TTestJSONString.Create;
+  lFixture:=TTestJSONString.Create(AContext, 'TestStringToJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringToJSONString';
     lFixture.TestStringToJSONString;
   finally lFixture.Free; end;
 end;
@@ -4270,10 +4290,8 @@ end;
 procedure RunTTestNullTestNull(AContext: TNXTestContext);
 var lFixture: TTestNull;
 begin
-  lFixture:=TTestNull.Create;
+  lFixture:=TTestNull.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     lFixture.TestNull;
   finally lFixture.Free; end;
@@ -4282,10 +4300,8 @@ end;
 procedure RunTTestNullTestClone(AContext: TNXTestContext);
 var lFixture: TTestNull;
 begin
-  lFixture:=TTestNull.Create;
+  lFixture:=TTestNull.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4294,10 +4310,8 @@ end;
 procedure RunTTestNullTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestNull;
 begin
-  lFixture:=TTestNull.Create;
+  lFixture:=TTestNull.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4306,10 +4320,8 @@ end;
 procedure RunTTestNullTestFormat(AContext: TNXTestContext);
 var lFixture: TTestNull;
 begin
-  lFixture:=TTestNull.Create;
+  lFixture:=TTestNull.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4318,10 +4330,8 @@ end;
 procedure RunTTestBooleanTestTrue(AContext: TNXTestContext);
 var lFixture: TTestBoolean;
 begin
-  lFixture:=TTestBoolean.Create;
+  lFixture:=TTestBoolean.Create(AContext, 'TestTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrue';
     lFixture.SetUp;
     lFixture.TestTrue;
   finally lFixture.Free; end;
@@ -4330,10 +4340,8 @@ end;
 procedure RunTTestBooleanTestFalse(AContext: TNXTestContext);
 var lFixture: TTestBoolean;
 begin
-  lFixture:=TTestBoolean.Create;
+  lFixture:=TTestBoolean.Create(AContext, 'TestFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFalse';
     lFixture.SetUp;
     lFixture.TestFalse;
   finally lFixture.Free; end;
@@ -4342,10 +4350,8 @@ end;
 procedure RunTTestBooleanTestClone(AContext: TNXTestContext);
 var lFixture: TTestBoolean;
 begin
-  lFixture:=TTestBoolean.Create;
+  lFixture:=TTestBoolean.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4354,10 +4360,8 @@ end;
 procedure RunTTestBooleanTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestBoolean;
 begin
-  lFixture:=TTestBoolean.Create;
+  lFixture:=TTestBoolean.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4366,10 +4370,8 @@ end;
 procedure RunTTestBooleanTestFormat(AContext: TNXTestContext);
 var lFixture: TTestBoolean;
 begin
-  lFixture:=TTestBoolean.Create;
+  lFixture:=TTestBoolean.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4378,10 +4380,8 @@ end;
 procedure RunTTestIntegerTestPositive(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestPositive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPositive';
     lFixture.SetUp;
     lFixture.TestPositive;
   finally lFixture.Free; end;
@@ -4390,10 +4390,8 @@ end;
 procedure RunTTestIntegerTestNegative(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestNegative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNegative';
     lFixture.SetUp;
     lFixture.TestNegative;
   finally lFixture.Free; end;
@@ -4402,10 +4400,8 @@ end;
 procedure RunTTestIntegerTestZero(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestZero';
     lFixture.SetUp;
     lFixture.TestZero;
   finally lFixture.Free; end;
@@ -4414,10 +4410,8 @@ end;
 procedure RunTTestIntegerTestClone(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4426,10 +4420,8 @@ end;
 procedure RunTTestIntegerTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4438,10 +4430,8 @@ end;
 procedure RunTTestIntegerTestFormat(AContext: TNXTestContext);
 var lFixture: TTestInteger;
 begin
-  lFixture:=TTestInteger.Create;
+  lFixture:=TTestInteger.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4450,10 +4440,8 @@ end;
 procedure RunTTestInt64TestPositive(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestPositive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPositive';
     lFixture.SetUp;
     lFixture.TestPositive;
   finally lFixture.Free; end;
@@ -4462,10 +4450,8 @@ end;
 procedure RunTTestInt64TestNegative(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestNegative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNegative';
     lFixture.SetUp;
     lFixture.TestNegative;
   finally lFixture.Free; end;
@@ -4474,10 +4460,8 @@ end;
 procedure RunTTestInt64TestZero(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestZero';
     lFixture.SetUp;
     lFixture.TestZero;
   finally lFixture.Free; end;
@@ -4486,10 +4470,8 @@ end;
 procedure RunTTestInt64TestClone(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4498,10 +4480,8 @@ end;
 procedure RunTTestInt64TestMyClone(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4510,10 +4490,8 @@ end;
 procedure RunTTestInt64TestFormat(AContext: TNXTestContext);
 var lFixture: TTestInt64;
 begin
-  lFixture:=TTestInt64.Create;
+  lFixture:=TTestInt64.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4522,10 +4500,8 @@ end;
 procedure RunTTestQwordTestPositive(AContext: TNXTestContext);
 var lFixture: TTestQword;
 begin
-  lFixture:=TTestQword.Create;
+  lFixture:=TTestQword.Create(AContext, 'TestPositive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPositive';
     lFixture.SetUp;
     lFixture.TestPositive;
   finally lFixture.Free; end;
@@ -4534,10 +4510,8 @@ end;
 procedure RunTTestQwordTestZero(AContext: TNXTestContext);
 var lFixture: TTestQword;
 begin
-  lFixture:=TTestQword.Create;
+  lFixture:=TTestQword.Create(AContext, 'TestZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestZero';
     lFixture.SetUp;
     lFixture.TestZero;
   finally lFixture.Free; end;
@@ -4546,10 +4520,8 @@ end;
 procedure RunTTestQwordTestClone(AContext: TNXTestContext);
 var lFixture: TTestQword;
 begin
-  lFixture:=TTestQword.Create;
+  lFixture:=TTestQword.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4558,10 +4530,8 @@ end;
 procedure RunTTestQwordTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestQword;
 begin
-  lFixture:=TTestQword.Create;
+  lFixture:=TTestQword.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4570,10 +4540,8 @@ end;
 procedure RunTTestQwordTestFormat(AContext: TNXTestContext);
 var lFixture: TTestQword;
 begin
-  lFixture:=TTestQword.Create;
+  lFixture:=TTestQword.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4582,10 +4550,8 @@ end;
 procedure RunTTestFloatTestPositive(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestPositive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPositive';
     lFixture.SetUp;
     lFixture.TestPositive;
   finally lFixture.Free; end;
@@ -4594,10 +4560,8 @@ end;
 procedure RunTTestFloatTestNegative(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestNegative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNegative';
     lFixture.SetUp;
     lFixture.TestNegative;
   finally lFixture.Free; end;
@@ -4606,10 +4570,8 @@ end;
 procedure RunTTestFloatTestZero(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestZero';
     lFixture.SetUp;
     lFixture.TestZero;
   finally lFixture.Free; end;
@@ -4618,10 +4580,8 @@ end;
 procedure RunTTestFloatTestClone(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4630,10 +4590,8 @@ end;
 procedure RunTTestFloatTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4642,10 +4600,8 @@ end;
 procedure RunTTestFloatTestFormat(AContext: TNXTestContext);
 var lFixture: TTestFloat;
 begin
-  lFixture:=TTestFloat.Create;
+  lFixture:=TTestFloat.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4654,10 +4610,8 @@ end;
 procedure RunTTestStringTestString(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     lFixture.TestString;
   finally lFixture.Free; end;
@@ -4666,10 +4620,8 @@ end;
 procedure RunTTestStringTestControlString(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestControlString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestControlString';
     lFixture.SetUp;
     lFixture.TestControlString;
   finally lFixture.Free; end;
@@ -4678,10 +4630,8 @@ end;
 procedure RunTTestStringTestSolidus(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestSolidus');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSolidus';
     lFixture.SetUp;
     lFixture.TestSolidus;
   finally lFixture.Free; end;
@@ -4690,10 +4640,8 @@ end;
 procedure RunTTestStringTestInteger(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     lFixture.TestInteger;
   finally lFixture.Free; end;
@@ -4702,10 +4650,8 @@ end;
 procedure RunTTestStringTestNegativeInteger(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestNegativeInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNegativeInteger';
     lFixture.SetUp;
     lFixture.TestNegativeInteger;
   finally lFixture.Free; end;
@@ -4714,10 +4660,8 @@ end;
 procedure RunTTestStringTestFloat(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     lFixture.TestFloat;
   finally lFixture.Free; end;
@@ -4726,10 +4670,8 @@ end;
 procedure RunTTestStringTestNegativeFloat(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestNegativeFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNegativeFloat';
     lFixture.SetUp;
     lFixture.TestNegativeFloat;
   finally lFixture.Free; end;
@@ -4738,10 +4680,8 @@ end;
 procedure RunTTestStringTestBooleanTrue(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestBooleanTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBooleanTrue';
     lFixture.SetUp;
     lFixture.TestBooleanTrue;
   finally lFixture.Free; end;
@@ -4750,10 +4690,8 @@ end;
 procedure RunTTestStringTestBooleanFalse(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestBooleanFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBooleanFalse';
     lFixture.SetUp;
     lFixture.TestBooleanFalse;
   finally lFixture.Free; end;
@@ -4762,10 +4700,8 @@ end;
 procedure RunTTestStringTestClone(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -4774,10 +4710,8 @@ end;
 procedure RunTTestStringTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -4786,10 +4720,8 @@ end;
 procedure RunTTestStringTestFormat(AContext: TNXTestContext);
 var lFixture: TTestString;
 begin
-  lFixture:=TTestString.Create;
+  lFixture:=TTestString.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -4798,10 +4730,8 @@ end;
 procedure RunTTestArrayTestCreate(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.SetUp;
     lFixture.TestCreate;
   finally lFixture.Free; end;
@@ -4810,10 +4740,8 @@ end;
 procedure RunTTestArrayTestCreateString(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateString';
     lFixture.SetUp;
     lFixture.TestCreateString;
   finally lFixture.Free; end;
@@ -4822,10 +4750,8 @@ end;
 procedure RunTTestArrayTestCreatePchar(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreatePchar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreatePchar';
     lFixture.SetUp;
     lFixture.TestCreatePchar;
   finally lFixture.Free; end;
@@ -4834,10 +4760,8 @@ end;
 procedure RunTTestArrayTestCreateStrings(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateStrings');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStrings';
     lFixture.SetUp;
     lFixture.TestCreateStrings;
   finally lFixture.Free; end;
@@ -4846,10 +4770,8 @@ end;
 procedure RunTTestArrayTestCreateStringsCompressed(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateStringsCompressed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStringsCompressed';
     lFixture.SetUp;
     lFixture.TestCreateStringsCompressed;
   finally lFixture.Free; end;
@@ -4858,10 +4780,8 @@ end;
 procedure RunTTestArrayTestCreateInteger(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateInteger';
     lFixture.SetUp;
     lFixture.TestCreateInteger;
   finally lFixture.Free; end;
@@ -4870,10 +4790,8 @@ end;
 procedure RunTTestArrayTestCreateInt64(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateInt64';
     lFixture.SetUp;
     lFixture.TestCreateInt64;
   finally lFixture.Free; end;
@@ -4882,10 +4800,8 @@ end;
 procedure RunTTestArrayTestCreateFloat(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateFloat';
     lFixture.SetUp;
     lFixture.TestCreateFloat;
   finally lFixture.Free; end;
@@ -4894,10 +4810,8 @@ end;
 procedure RunTTestArrayTestCreateBoolean(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateBoolean';
     lFixture.SetUp;
     lFixture.TestCreateBoolean;
   finally lFixture.Free; end;
@@ -4906,10 +4820,8 @@ end;
 procedure RunTTestArrayTestCreateObject(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateObject';
     lFixture.SetUp;
     lFixture.TestCreateObject;
   finally lFixture.Free; end;
@@ -4918,10 +4830,8 @@ end;
 procedure RunTTestArrayTestCreateJSONString(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONString';
     lFixture.SetUp;
     lFixture.TestCreateJSONString;
   finally lFixture.Free; end;
@@ -4930,10 +4840,8 @@ end;
 procedure RunTTestArrayTestCreateJSONStringSpecialChars(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateJSONStringSpecialChars');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONStringSpecialChars';
     lFixture.SetUp;
     lFixture.TestCreateJSONStringSpecialChars;
   finally lFixture.Free; end;
@@ -4942,10 +4850,8 @@ end;
 procedure RunTTestArrayTestCreateJSONObject(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateJSONObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONObject';
     lFixture.SetUp;
     lFixture.TestCreateJSONObject;
   finally lFixture.Free; end;
@@ -4954,10 +4860,8 @@ end;
 procedure RunTTestArrayTestCreateNilPointer(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreateNilPointer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateNilPointer';
     lFixture.SetUp;
     lFixture.TestCreateNilPointer;
   finally lFixture.Free; end;
@@ -4966,10 +4870,8 @@ end;
 procedure RunTTestArrayTestCreatePointer(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestCreatePointer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreatePointer';
     lFixture.SetUp;
     lFixture.TestCreatePointer;
   finally lFixture.Free; end;
@@ -4978,10 +4880,8 @@ end;
 procedure RunTTestArrayTestAddInteger(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddInteger';
     lFixture.SetUp;
     lFixture.TestAddInteger;
   finally lFixture.Free; end;
@@ -4990,10 +4890,8 @@ end;
 procedure RunTTestArrayTestAddInt64(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddInt64';
     lFixture.SetUp;
     lFixture.TestAddInt64;
   finally lFixture.Free; end;
@@ -5002,10 +4900,8 @@ end;
 procedure RunTTestArrayTestAddFloat(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddFloat';
     lFixture.SetUp;
     lFixture.TestAddFloat;
   finally lFixture.Free; end;
@@ -5014,10 +4910,8 @@ end;
 procedure RunTTestArrayTestAddBooleanTrue(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddBooleanTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddBooleanTrue';
     lFixture.SetUp;
     lFixture.TestAddBooleanTrue;
   finally lFixture.Free; end;
@@ -5026,10 +4920,8 @@ end;
 procedure RunTTestArrayTestAddBooleanFalse(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddBooleanFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddBooleanFalse';
     lFixture.SetUp;
     lFixture.TestAddBooleanFalse;
   finally lFixture.Free; end;
@@ -5038,10 +4930,8 @@ end;
 procedure RunTTestArrayTestAddString(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddString';
     lFixture.SetUp;
     lFixture.TestAddString;
   finally lFixture.Free; end;
@@ -5050,10 +4940,8 @@ end;
 procedure RunTTestArrayTestAddNull(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddNull';
     lFixture.SetUp;
     lFixture.TestAddNull;
   finally lFixture.Free; end;
@@ -5062,10 +4950,8 @@ end;
 procedure RunTTestArrayTestAddObject(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddObject';
     lFixture.SetUp;
     lFixture.TestAddObject;
   finally lFixture.Free; end;
@@ -5074,10 +4960,8 @@ end;
 procedure RunTTestArrayTestAddArray(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestAddArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddArray';
     lFixture.SetUp;
     lFixture.TestAddArray;
   finally lFixture.Free; end;
@@ -5086,10 +4970,8 @@ end;
 procedure RunTTestArrayTestInsertInteger(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertInteger';
     lFixture.SetUp;
     lFixture.TestInsertInteger;
   finally lFixture.Free; end;
@@ -5098,10 +4980,8 @@ end;
 procedure RunTTestArrayTestInsertInt64(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertInt64';
     lFixture.SetUp;
     lFixture.TestInsertInt64;
   finally lFixture.Free; end;
@@ -5110,10 +4990,8 @@ end;
 procedure RunTTestArrayTestInsertFloat(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertFloat';
     lFixture.SetUp;
     lFixture.TestInsertFloat;
   finally lFixture.Free; end;
@@ -5122,10 +5000,8 @@ end;
 procedure RunTTestArrayTestInsertBooleanTrue(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertBooleanTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertBooleanTrue';
     lFixture.SetUp;
     lFixture.TestInsertBooleanTrue;
   finally lFixture.Free; end;
@@ -5134,10 +5010,8 @@ end;
 procedure RunTTestArrayTestInsertBooleanFalse(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertBooleanFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertBooleanFalse';
     lFixture.SetUp;
     lFixture.TestInsertBooleanFalse;
   finally lFixture.Free; end;
@@ -5146,10 +5020,8 @@ end;
 procedure RunTTestArrayTestInsertString(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertString';
     lFixture.SetUp;
     lFixture.TestInsertString;
   finally lFixture.Free; end;
@@ -5158,10 +5030,8 @@ end;
 procedure RunTTestArrayTestInsertNull(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertNull';
     lFixture.SetUp;
     lFixture.TestInsertNull;
   finally lFixture.Free; end;
@@ -5170,10 +5040,8 @@ end;
 procedure RunTTestArrayTestInsertObject(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertObject';
     lFixture.SetUp;
     lFixture.TestInsertObject;
   finally lFixture.Free; end;
@@ -5182,10 +5050,8 @@ end;
 procedure RunTTestArrayTestInsertArray(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestInsertArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsertArray';
     lFixture.SetUp;
     lFixture.TestInsertArray;
   finally lFixture.Free; end;
@@ -5194,10 +5060,8 @@ end;
 procedure RunTTestArrayTestMove(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestMove');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMove';
     lFixture.SetUp;
     lFixture.TestMove;
   finally lFixture.Free; end;
@@ -5206,10 +5070,8 @@ end;
 procedure RunTTestArrayTestExchange(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestExchange');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExchange';
     lFixture.SetUp;
     lFixture.TestExchange;
   finally lFixture.Free; end;
@@ -5218,10 +5080,8 @@ end;
 procedure RunTTestArrayTestDelete(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestDelete');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDelete';
     lFixture.SetUp;
     lFixture.TestDelete;
   finally lFixture.Free; end;
@@ -5230,10 +5090,8 @@ end;
 procedure RunTTestArrayTestRemove(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestRemove');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRemove';
     lFixture.SetUp;
     lFixture.TestRemove;
   finally lFixture.Free; end;
@@ -5242,10 +5100,8 @@ end;
 procedure RunTTestArrayTestClone(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     lFixture.TestClone;
   finally lFixture.Free; end;
@@ -5254,10 +5110,8 @@ end;
 procedure RunTTestArrayTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     lFixture.TestMyClone;
   finally lFixture.Free; end;
@@ -5266,10 +5120,8 @@ end;
 procedure RunTTestArrayTestFormat(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     lFixture.TestFormat;
   finally lFixture.Free; end;
@@ -5278,10 +5130,8 @@ end;
 procedure RunTTestArrayTestFormatNil(AContext: TNXTestContext);
 var lFixture: TTestArray;
 begin
-  lFixture:=TTestArray.Create;
+  lFixture:=TTestArray.Create(AContext, 'TestFormatNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormatNil';
     lFixture.SetUp;
     lFixture.TestFormatNil;
   finally lFixture.Free; end;
@@ -5290,10 +5140,8 @@ end;
 procedure RunTTestObjectTestCreate(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.SetUp;
     try lFixture.TestCreate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5302,10 +5150,8 @@ end;
 procedure RunTTestObjectTestCreateString(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateString';
     lFixture.SetUp;
     try lFixture.TestCreateString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5314,10 +5160,8 @@ end;
 procedure RunTTestObjectTestCreateStringUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateStringUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStringUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateStringUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5326,10 +5170,8 @@ end;
 procedure RunTTestObjectTestCreatePchar(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreatePchar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreatePchar';
     lFixture.SetUp;
     try lFixture.TestCreatePchar; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5338,10 +5180,8 @@ end;
 procedure RunTTestObjectTestCreatePcharUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreatePcharUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreatePcharUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreatePcharUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5350,10 +5190,8 @@ end;
 procedure RunTTestObjectTestCreateStrings(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateStrings');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStrings';
     lFixture.SetUp;
     try lFixture.TestCreateStrings; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5362,10 +5200,8 @@ end;
 procedure RunTTestObjectTestCreateStringsCompressed(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateStringsCompressed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStringsCompressed';
     lFixture.SetUp;
     try lFixture.TestCreateStringsCompressed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5374,10 +5210,8 @@ end;
 procedure RunTTestObjectTestCreateStringsCompressedUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateStringsCompressedUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateStringsCompressedUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateStringsCompressedUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5386,10 +5220,8 @@ end;
 procedure RunTTestObjectTestCreateInteger(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateInteger';
     lFixture.SetUp;
     try lFixture.TestCreateInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5398,10 +5230,8 @@ end;
 procedure RunTTestObjectTestCreateIntegerUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateIntegerUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateIntegerUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateIntegerUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5410,10 +5240,8 @@ end;
 procedure RunTTestObjectTestCreateInt64(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateInt64';
     lFixture.SetUp;
     try lFixture.TestCreateInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5422,10 +5250,8 @@ end;
 procedure RunTTestObjectTestCreateInt64Unquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateInt64Unquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateInt64Unquoted';
     lFixture.SetUp;
     try lFixture.TestCreateInt64Unquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5434,10 +5260,8 @@ end;
 procedure RunTTestObjectTestCreateQWord(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateQWord');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateQWord';
     lFixture.SetUp;
     try lFixture.TestCreateQWord; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5446,10 +5270,8 @@ end;
 procedure RunTTestObjectTestCreateQWordUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateQWordUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateQWordUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateQWordUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5458,10 +5280,8 @@ end;
 procedure RunTTestObjectTestCreateFloat(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateFloat';
     lFixture.SetUp;
     try lFixture.TestCreateFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5470,10 +5290,8 @@ end;
 procedure RunTTestObjectTestCreateFloatUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateFloatUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateFloatUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateFloatUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5482,10 +5300,8 @@ end;
 procedure RunTTestObjectTestCreateBoolean(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateBoolean';
     lFixture.SetUp;
     try lFixture.TestCreateBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5494,10 +5310,8 @@ end;
 procedure RunTTestObjectTestCreateBooleanUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateBooleanUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateBooleanUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateBooleanUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5506,10 +5320,8 @@ end;
 procedure RunTTestObjectTestCreateObject(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateObject';
     lFixture.SetUp;
     try lFixture.TestCreateObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5518,10 +5330,8 @@ end;
 procedure RunTTestObjectTestCreateJSONUnicodeString(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONUnicodeString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONUnicodeString';
     lFixture.SetUp;
     try lFixture.TestCreateJSONUnicodeString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5530,10 +5340,8 @@ end;
 procedure RunTTestObjectTestCreateJSONWideString(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONWideString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONWideString';
     lFixture.SetUp;
     try lFixture.TestCreateJSONWideString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5542,10 +5350,8 @@ end;
 procedure RunTTestObjectTestCreateJSONString(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONString';
     lFixture.SetUp;
     try lFixture.TestCreateJSONString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5554,10 +5360,8 @@ end;
 procedure RunTTestObjectTestCreateJSONStringUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONStringUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONStringUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateJSONStringUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5566,10 +5370,8 @@ end;
 procedure RunTTestObjectTestCreateJSONObject(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONObject';
     lFixture.SetUp;
     try lFixture.TestCreateJSONObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5578,10 +5380,8 @@ end;
 procedure RunTTestObjectTestCreateJSONObjectUnquoted(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateJSONObjectUnquoted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateJSONObjectUnquoted';
     lFixture.SetUp;
     try lFixture.TestCreateJSONObjectUnquoted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5590,10 +5390,8 @@ end;
 procedure RunTTestObjectTestCreateNilPointer(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreateNilPointer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateNilPointer';
     lFixture.SetUp;
     try lFixture.TestCreateNilPointer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5602,10 +5400,8 @@ end;
 procedure RunTTestObjectTestCreatePointer(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestCreatePointer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreatePointer';
     lFixture.SetUp;
     try lFixture.TestCreatePointer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5614,10 +5410,8 @@ end;
 procedure RunTTestObjectTestAddInteger(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddInteger';
     lFixture.SetUp;
     try lFixture.TestAddInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5626,10 +5420,8 @@ end;
 procedure RunTTestObjectTestAddInt64(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddInt64';
     lFixture.SetUp;
     try lFixture.TestAddInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5638,10 +5430,8 @@ end;
 procedure RunTTestObjectTestAddFloat(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddFloat';
     lFixture.SetUp;
     try lFixture.TestAddFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5650,10 +5440,8 @@ end;
 procedure RunTTestObjectTestAddBooleanTrue(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddBooleanTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddBooleanTrue';
     lFixture.SetUp;
     try lFixture.TestAddBooleanTrue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5662,10 +5450,8 @@ end;
 procedure RunTTestObjectTestAddBooleanFalse(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddBooleanFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddBooleanFalse';
     lFixture.SetUp;
     try lFixture.TestAddBooleanFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5674,10 +5460,8 @@ end;
 procedure RunTTestObjectTestAddString(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddString';
     lFixture.SetUp;
     try lFixture.TestAddString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5686,10 +5470,8 @@ end;
 procedure RunTTestObjectTestAddNull(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddNull';
     lFixture.SetUp;
     try lFixture.TestAddNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5698,10 +5480,8 @@ end;
 procedure RunTTestObjectTestAddObject(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddObject';
     lFixture.SetUp;
     try lFixture.TestAddObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5710,10 +5490,8 @@ end;
 procedure RunTTestObjectTestAddArray(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestAddArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddArray';
     lFixture.SetUp;
     try lFixture.TestAddArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5722,10 +5500,8 @@ end;
 procedure RunTTestObjectTestDelete(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestDelete');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDelete';
     lFixture.SetUp;
     try lFixture.TestDelete; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5734,10 +5510,8 @@ end;
 procedure RunTTestObjectTestRemove(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestRemove');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRemove';
     lFixture.SetUp;
     try lFixture.TestRemove; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5746,10 +5520,8 @@ end;
 procedure RunTTestObjectTestClone(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClone';
     lFixture.SetUp;
     try lFixture.TestClone; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5758,10 +5530,8 @@ end;
 procedure RunTTestObjectTestMyClone(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestMyClone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMyClone';
     lFixture.SetUp;
     try lFixture.TestMyClone; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5770,10 +5540,8 @@ end;
 procedure RunTTestObjectTestExtract(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestExtract');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExtract';
     lFixture.SetUp;
     try lFixture.TestExtract; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5782,10 +5550,8 @@ end;
 procedure RunTTestObjectTestNonExistingAccessError(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestNonExistingAccessError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNonExistingAccessError';
     lFixture.SetUp;
     try lFixture.TestNonExistingAccessError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5794,10 +5560,8 @@ end;
 procedure RunTTestObjectTestFormat(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormat';
     lFixture.SetUp;
     try lFixture.TestFormat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5806,10 +5570,8 @@ end;
 procedure RunTTestObjectTestFormatNil(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestFormatNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormatNil';
     lFixture.SetUp;
     try lFixture.TestFormatNil; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5818,10 +5580,8 @@ end;
 procedure RunTTestObjectTestFormatForceLF(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestFormatForceLF');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFormatForceLF';
     lFixture.SetUp;
     try lFixture.TestFormatForceLF; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5830,10 +5590,8 @@ end;
 procedure RunTTestObjectTestFind(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestFind');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFind';
     lFixture.SetUp;
     try lFixture.TestFind; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5842,10 +5600,8 @@ end;
 procedure RunTTestObjectTestIfFind(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestIfFind');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfFind';
     lFixture.SetUp;
     try lFixture.TestIfFind; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5854,10 +5610,8 @@ end;
 procedure RunTTestObjectTestDuplicate(AContext: TNXTestContext);
 var lFixture: TTestObject;
 begin
-  lFixture:=TTestObject.Create;
+  lFixture:=TTestObject.Create(AContext, 'TestDuplicate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDuplicate';
     lFixture.SetUp;
     try lFixture.TestDuplicate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5866,10 +5620,8 @@ end;
 procedure RunTTestJSONPathTestNullEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestNullEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullEmpty';
     lFixture.SetUp;
     try lFixture.TestNullEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5878,10 +5630,8 @@ end;
 procedure RunTTestJSONPathTestNullGet(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestNullGet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullGet';
     lFixture.SetUp;
     try lFixture.TestNullGet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5890,10 +5640,8 @@ end;
 procedure RunTTestJSONPathTestNullNonExisting(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestNullNonExisting');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullNonExisting';
     lFixture.SetUp;
     try lFixture.TestNullNonExisting; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5902,10 +5650,8 @@ end;
 procedure RunTTestJSONPathTestNullNotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestNullNotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullNotEmpty';
     lFixture.SetUp;
     try lFixture.TestNullNotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5914,10 +5660,8 @@ end;
 procedure RunTTestJSONPathTestBooleanEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestBooleanEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBooleanEmpty';
     lFixture.SetUp;
     try lFixture.TestBooleanEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5926,10 +5670,8 @@ end;
 procedure RunTTestJSONPathTestBooleanNotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestBooleanNotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBooleanNotEmpty';
     lFixture.SetUp;
     try lFixture.TestBooleanNotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5938,10 +5680,8 @@ end;
 procedure RunTTestJSONPathTestIntegerEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestIntegerEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIntegerEmpty';
     lFixture.SetUp;
     try lFixture.TestIntegerEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5950,10 +5690,8 @@ end;
 procedure RunTTestJSONPathTestIntegerNotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestIntegerNotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIntegerNotEmpty';
     lFixture.SetUp;
     try lFixture.TestIntegerNotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5962,10 +5700,8 @@ end;
 procedure RunTTestJSONPathTestInt64Empty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestInt64Empty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64Empty';
     lFixture.SetUp;
     try lFixture.TestInt64Empty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5974,10 +5710,8 @@ end;
 procedure RunTTestJSONPathTestInt64NotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestInt64NotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64NotEmpty';
     lFixture.SetUp;
     try lFixture.TestInt64NotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5986,10 +5720,8 @@ end;
 procedure RunTTestJSONPathTestFloatEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestFloatEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatEmpty';
     lFixture.SetUp;
     try lFixture.TestFloatEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -5998,10 +5730,8 @@ end;
 procedure RunTTestJSONPathTestFloatNotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestFloatNotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatNotEmpty';
     lFixture.SetUp;
     try lFixture.TestFloatNotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6010,10 +5740,8 @@ end;
 procedure RunTTestJSONPathTestStringEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestStringEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringEmpty';
     lFixture.SetUp;
     try lFixture.TestStringEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6022,10 +5750,8 @@ end;
 procedure RunTTestJSONPathTestStringNotEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestStringNotEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringNotEmpty';
     lFixture.SetUp;
     try lFixture.TestStringNotEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6034,10 +5760,8 @@ end;
 procedure RunTTestJSONPathTestArrayEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayEmpty';
     lFixture.SetUp;
     try lFixture.TestArrayEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6046,10 +5770,8 @@ end;
 procedure RunTTestJSONPathTestArrayNotIndex(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayNotIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayNotIndex';
     lFixture.SetUp;
     try lFixture.TestArrayNotIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6058,10 +5780,8 @@ end;
 procedure RunTTestJSONPathTestArrayIncompleteIndex(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayIncompleteIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayIncompleteIndex';
     lFixture.SetUp;
     try lFixture.TestArrayIncompleteIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6070,10 +5790,8 @@ end;
 procedure RunTTestJSONPathTestArrayNonNumericalIndex(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayNonNumericalIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayNonNumericalIndex';
     lFixture.SetUp;
     try lFixture.TestArrayNonNumericalIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6082,10 +5800,8 @@ end;
 procedure RunTTestJSONPathTestArrayOutOfRangeIndex(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayOutOfRangeIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayOutOfRangeIndex';
     lFixture.SetUp;
     try lFixture.TestArrayOutOfRangeIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6094,10 +5810,8 @@ end;
 procedure RunTTestJSONPathTestArrayCorrectIndex(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayCorrectIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayCorrectIndex';
     lFixture.SetUp;
     try lFixture.TestArrayCorrectIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6106,10 +5820,8 @@ end;
 procedure RunTTestJSONPathTestArrayRecursiveArray(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayRecursiveArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayRecursiveArray';
     lFixture.SetUp;
     try lFixture.TestArrayRecursiveArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6118,10 +5830,8 @@ end;
 procedure RunTTestJSONPathTestArrayRecursiveObject(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestArrayRecursiveObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArrayRecursiveObject';
     lFixture.SetUp;
     try lFixture.TestArrayRecursiveObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6130,10 +5840,8 @@ end;
 procedure RunTTestJSONPathTestObjectEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectEmpty';
     lFixture.SetUp;
     try lFixture.TestObjectEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6142,10 +5850,8 @@ end;
 procedure RunTTestJSONPathTestObjectDots(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectDots');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectDots';
     lFixture.SetUp;
     try lFixture.TestObjectDots; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6154,10 +5860,8 @@ end;
 procedure RunTTestJSONPathTestObjectExisting(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectExisting');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectExisting';
     lFixture.SetUp;
     try lFixture.TestObjectExisting; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6166,10 +5870,8 @@ end;
 procedure RunTTestJSONPathTestObjectNonExisting(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectNonExisting');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectNonExisting';
     lFixture.SetUp;
     try lFixture.TestObjectNonExisting; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6178,10 +5880,8 @@ end;
 procedure RunTTestJSONPathTestObjectTrailingDot(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectTrailingDot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectTrailingDot';
     lFixture.SetUp;
     try lFixture.TestObjectTrailingDot; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6190,10 +5890,8 @@ end;
 procedure RunTTestJSONPathTestObjectRecursiveArray(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectRecursiveArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectRecursiveArray';
     lFixture.SetUp;
     try lFixture.TestObjectRecursiveArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6202,10 +5900,8 @@ end;
 procedure RunTTestJSONPathTestObjectRecursiveObject(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestObjectRecursiveObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectRecursiveObject';
     lFixture.SetUp;
     try lFixture.TestObjectRecursiveObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6214,10 +5910,8 @@ end;
 procedure RunTTestJSONPathTestDeepRecursive(AContext: TNXTestContext);
 var lFixture: TTestJSONPath;
 begin
-  lFixture:=TTestJSONPath.Create;
+  lFixture:=TTestJSONPath.Create(AContext, 'TestDeepRecursive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDeepRecursive';
     lFixture.SetUp;
     try lFixture.TestDeepRecursive; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6226,10 +5920,8 @@ end;
 procedure RunTTestFactoryTestSet(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'TestSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet';
     lFixture.SetUp;
     try lFixture.TestSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6238,10 +5930,8 @@ end;
 procedure RunTTestFactoryTestSetInvalid(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'TestSetInvalid');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetInvalid';
     lFixture.SetUp;
     try lFixture.TestSetInvalid; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6250,10 +5940,8 @@ end;
 procedure RunTTestFactoryCreateNull(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateNull';
     lFixture.SetUp;
     try lFixture.CreateNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6262,10 +5950,8 @@ end;
 procedure RunTTestFactoryCreateInteger(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateInteger';
     lFixture.SetUp;
     try lFixture.CreateInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6274,10 +5960,8 @@ end;
 procedure RunTTestFactoryCreateInt64(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateInt64';
     lFixture.SetUp;
     try lFixture.CreateInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6286,10 +5970,8 @@ end;
 procedure RunTTestFactoryCreateFloat(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateFloat';
     lFixture.SetUp;
     try lFixture.CreateFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6298,10 +5980,8 @@ end;
 procedure RunTTestFactoryCreateBoolean(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateBoolean';
     lFixture.SetUp;
     try lFixture.CreateBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6310,10 +5990,8 @@ end;
 procedure RunTTestFactoryCreateString(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateString';
     lFixture.SetUp;
     try lFixture.CreateString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6322,10 +6000,8 @@ end;
 procedure RunTTestFactoryCreateArray(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateArray';
     lFixture.SetUp;
     try lFixture.CreateArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6334,10 +6010,8 @@ end;
 procedure RunTTestFactoryCreateObject(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'CreateObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CreateObject';
     lFixture.SetUp;
     try lFixture.CreateObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6346,10 +6020,8 @@ end;
 procedure RunTTestFactoryArrayAddNull(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddNull';
     lFixture.SetUp;
     try lFixture.ArrayAddNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6358,10 +6030,8 @@ end;
 procedure RunTTestFactoryArrayAddInteger(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddInteger';
     lFixture.SetUp;
     try lFixture.ArrayAddInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6370,10 +6040,8 @@ end;
 procedure RunTTestFactoryArrayAddInt64(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddInt64';
     lFixture.SetUp;
     try lFixture.ArrayAddInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6382,10 +6050,8 @@ end;
 procedure RunTTestFactoryArrayAddFloat(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddFloat';
     lFixture.SetUp;
     try lFixture.ArrayAddFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6394,10 +6060,8 @@ end;
 procedure RunTTestFactoryArrayAddBoolean(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddBoolean';
     lFixture.SetUp;
     try lFixture.ArrayAddBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6406,10 +6070,8 @@ end;
 procedure RunTTestFactoryArrayAddString(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayAddString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayAddString';
     lFixture.SetUp;
     try lFixture.ArrayAddString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6418,10 +6080,8 @@ end;
 procedure RunTTestFactoryArrayCreateNull(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateNull';
     lFixture.SetUp;
     try lFixture.ArrayCreateNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6430,10 +6090,8 @@ end;
 procedure RunTTestFactoryArrayCreateInteger(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateInteger';
     lFixture.SetUp;
     try lFixture.ArrayCreateInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6442,10 +6100,8 @@ end;
 procedure RunTTestFactoryArrayCreateInt64(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateInt64';
     lFixture.SetUp;
     try lFixture.ArrayCreateInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6454,10 +6110,8 @@ end;
 procedure RunTTestFactoryArrayCreateFloat(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateFloat';
     lFixture.SetUp;
     try lFixture.ArrayCreateFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6466,10 +6120,8 @@ end;
 procedure RunTTestFactoryArrayCreateBoolean(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateBoolean';
     lFixture.SetUp;
     try lFixture.ArrayCreateBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6478,10 +6130,8 @@ end;
 procedure RunTTestFactoryArrayCreateString(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ArrayCreateString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ArrayCreateString';
     lFixture.SetUp;
     try lFixture.ArrayCreateString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6490,10 +6140,8 @@ end;
 procedure RunTTestFactoryObjectAddNull(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddNull';
     lFixture.SetUp;
     try lFixture.ObjectAddNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6502,10 +6150,8 @@ end;
 procedure RunTTestFactoryObjectAddInteger(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddInteger';
     lFixture.SetUp;
     try lFixture.ObjectAddInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6514,10 +6160,8 @@ end;
 procedure RunTTestFactoryObjectAddInt64(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddInt64';
     lFixture.SetUp;
     try lFixture.ObjectAddInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6526,10 +6170,8 @@ end;
 procedure RunTTestFactoryObjectAddFloat(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddFloat';
     lFixture.SetUp;
     try lFixture.ObjectAddFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6538,10 +6180,8 @@ end;
 procedure RunTTestFactoryObjectAddBoolean(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddBoolean';
     lFixture.SetUp;
     try lFixture.ObjectAddBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6550,10 +6190,8 @@ end;
 procedure RunTTestFactoryObjectAddString(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectAddString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectAddString';
     lFixture.SetUp;
     try lFixture.ObjectAddString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6562,10 +6200,8 @@ end;
 procedure RunTTestFactoryObjectCreateNull(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateNull';
     lFixture.SetUp;
     try lFixture.ObjectCreateNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6574,10 +6210,8 @@ end;
 procedure RunTTestFactoryObjectCreateInteger(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateInteger';
     lFixture.SetUp;
     try lFixture.ObjectCreateInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6586,10 +6220,8 @@ end;
 procedure RunTTestFactoryObjectCreateInt64(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateInt64';
     lFixture.SetUp;
     try lFixture.ObjectCreateInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6598,10 +6230,8 @@ end;
 procedure RunTTestFactoryObjectCreateFloat(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateFloat';
     lFixture.SetUp;
     try lFixture.ObjectCreateFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6610,10 +6240,8 @@ end;
 procedure RunTTestFactoryObjectCreateBoolean(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateBoolean';
     lFixture.SetUp;
     try lFixture.ObjectCreateBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6622,10 +6250,8 @@ end;
 procedure RunTTestFactoryObjectCreateString(AContext: TNXTestContext);
 var lFixture: TTestFactory;
 begin
-  lFixture:=TTestFactory.Create;
+  lFixture:=TTestFactory.Create(AContext, 'ObjectCreateString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ObjectCreateString';
     lFixture.SetUp;
     try lFixture.ObjectCreateString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6634,10 +6260,8 @@ end;
 procedure RunTTestIteratorTestNull(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6646,10 +6270,8 @@ end;
 procedure RunTTestIteratorTestInteger(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6658,10 +6280,8 @@ end;
 procedure RunTTestIteratorTestInt64(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64';
     lFixture.SetUp;
     try lFixture.TestInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6670,10 +6290,8 @@ end;
 procedure RunTTestIteratorTestFloat(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6682,10 +6300,8 @@ end;
 procedure RunTTestIteratorTestBoolean(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBoolean';
     lFixture.SetUp;
     try lFixture.TestBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6694,10 +6310,8 @@ end;
 procedure RunTTestIteratorTestString(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6706,10 +6320,8 @@ end;
 procedure RunTTestIteratorTestArray(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArray';
     lFixture.SetUp;
     try lFixture.TestArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -6718,10 +6330,8 @@ end;
 procedure RunTTestIteratorTestObject(AContext: TNXTestContext);
 var lFixture: TTestIterator;
 begin
-  lFixture:=TTestIterator.Create;
+  lFixture:=TTestIterator.Create(AContext, 'TestObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObject';
     lFixture.SetUp;
     try lFixture.TestObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

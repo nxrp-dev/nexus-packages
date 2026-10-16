@@ -4,9 +4,7 @@ unit tcmig_quickstart;
   MigLayout v11 Quick Start Guide Tests
 
   These tests replicate examples from the MigLayout Quick Start Guide
-  to verify our procedure RegistertcmigquickstartTests(ARegistry: TNXTestRegistry);
-
-implementation matches expected behavior.
+  to verify our implementation matches expected behavior.
 }
 
 {$mode objfpc}{$H+}
@@ -21,9 +19,14 @@ uses
 type
   { Test suite for Quick Start Guide examples }
   TTestMigQuickStart = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FForm: TfpgForm;
     FLayout: TfpgMigLayoutManager;
@@ -41,6 +44,8 @@ type
     { Test cell spanning - comp2 spans 2 cells, comp4 spans whole row }
     procedure TestCellSpanning;
   end;
+
+procedure RegistertcmigquickstartTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -120,14 +125,14 @@ begin
   // Row 1: comp1, comp2, comp3 (same Y position, different X)
   // Row 2: comp4 alone
 
-  FContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
-  FContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
 
-  FContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
-  FContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
+  TestContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
+  TestContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
 
-  FContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
-  FContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
+  TestContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
+  TestContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
 end;
 
 procedure TTestMigQuickStart.TestAutoWrap_3Columns;
@@ -163,14 +168,14 @@ begin
   FForm.Realign;
 
   // Verify grid structure (same as TestManualWrap_3Columns)
-  FContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
-  FContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
 
-  FContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
-  FContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
+  TestContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
+  TestContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
 
-  FContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
-  FContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
+  TestContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
+  TestContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
 end;
 
 procedure TTestMigQuickStart.TestCellSpanning;
@@ -202,34 +207,39 @@ begin
   FForm.Realign;
 
   // Verify Row 1: comp1, comp2 (spanning 2), comp3
-  FContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
-  FContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp2.Top), 'comp1 and comp2 should be on same row');
+  TestContext.AssertTrue((FComp1.Top)=(FComp3.Top), 'comp1 and comp3 should be on same row');
 
-  FContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
-  FContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
+  TestContext.AssertTrue(FComp1.Left < FComp2.Left, 'comp1 should be left of comp2');
+  TestContext.AssertTrue(FComp2.Left < FComp3.Left, 'comp2 should be left of comp3');
 
   // comp2 should span 2 cells, so it should be wider than comp1
   // NOTE: Use ActualWidth (set by layout manager), not Width (preferred size)
-  FContext.AssertTrue(FComp2.ActualWidth > FComp1.ActualWidth, 'comp2 should be wider than comp1 (spans 2 cells)');
+  TestContext.AssertTrue(FComp2.ActualWidth > FComp1.ActualWidth, 'comp2 should be wider than comp1 (spans 2 cells)');
 
   // Verify Row 2: comp4 (spanning whole row)
-  FContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
-  FContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
+  TestContext.AssertTrue(FComp4.Top > FComp1.Top, 'comp4 should be on next row (below comp1)');
+  TestContext.AssertTrue((FComp1.Left)=(FComp4.Left), 'comp4 should align with comp1 horizontally');
 
   // comp4 should span multiple columns, so it should be wider than single-column components
   // NOTE: Use ActualWidth (set by layout manager), not Width (preferred size)
-  FContext.AssertTrue(FComp4.ActualWidth > FComp1.ActualWidth, 'comp4 should be wider than comp1 (spans whole row)');
-  FContext.AssertTrue(FComp4.ActualWidth > FComp2.ActualWidth, 'comp4 should be wider than comp2 (spans whole row)');
+  TestContext.AssertTrue(FComp4.ActualWidth > FComp1.ActualWidth, 'comp4 should be wider than comp1 (spans whole row)');
+  TestContext.AssertTrue(FComp4.ActualWidth > FComp2.ActualWidth, 'comp4 should be wider than comp2 (spans whole row)');
 end;
 
+
+constructor TTestMigQuickStart.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
 
 procedure RunTTestMigQuickStartTestManualWrap_3Columns(AContext: TNXTestContext);
 var lFixture: TTestMigQuickStart;
 begin
-  lFixture:=TTestMigQuickStart.Create;
+  lFixture:=TTestMigQuickStart.Create(AContext, 'TestManualWrap_3Columns');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestManualWrap_3Columns';
     lFixture.SetUp;
     try lFixture.TestManualWrap_3Columns; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -238,10 +248,8 @@ end;
 procedure RunTTestMigQuickStartTestAutoWrap_3Columns(AContext: TNXTestContext);
 var lFixture: TTestMigQuickStart;
 begin
-  lFixture:=TTestMigQuickStart.Create;
+  lFixture:=TTestMigQuickStart.Create(AContext, 'TestAutoWrap_3Columns');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAutoWrap_3Columns';
     lFixture.SetUp;
     try lFixture.TestAutoWrap_3Columns; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -250,10 +258,8 @@ end;
 procedure RunTTestMigQuickStartTestCellSpanning(AContext: TNXTestContext);
 var lFixture: TTestMigQuickStart;
 begin
-  lFixture:=TTestMigQuickStart.Create;
+  lFixture:=TTestMigQuickStart.Create(AContext, 'TestCellSpanning');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCellSpanning';
     lFixture.SetUp;
     try lFixture.TestCellSpanning; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

@@ -22,9 +22,14 @@ type
   { TTestBuildVarNodeText }
 
   TTestBuildVarNodeText = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestSimpleWithType;
     procedure TestSimpleWithoutType;
@@ -36,9 +41,14 @@ type
   { TTestVarValueIsExpandable }
 
   TTestVarValueIsExpandable = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestSimpleIntegerNotExpandable;
     procedure TestNilNotExpandable;
@@ -55,9 +65,14 @@ type
   { TTestExtractVarTypeName }
 
   TTestExtractVarTypeName = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestSimpleIntegerReturnsEmpty;
     procedure TestNilReturnsEmpty;
@@ -70,9 +85,14 @@ type
   { TTestParseVarChildren }
 
   TTestParseVarChildren = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     procedure AssertChildCount(AExpected: Integer; const AParentPath, AValue: string);
     procedure AssertChild(const AChildren: TVarNodeDataArray; AIndex: Integer;
@@ -118,29 +138,29 @@ implementation
 
 procedure TTestBuildVarNodeText.TestSimpleWithType;
 begin
-  FContext.AssertTrue(('i = 42 : Integer')=(BuildVarNodeText('i', '42', 'Integer', True)), '');
+  TestContext.AssertTrue(('i = 42 : Integer')=(BuildVarNodeText('i', '42', 'Integer', True)), '');
 end;
 
 procedure TTestBuildVarNodeText.TestSimpleWithoutType;
 begin
-  FContext.AssertTrue(('i = 42')=(BuildVarNodeText('i', '42', 'Integer', False)), '');
+  TestContext.AssertTrue(('i = 42')=(BuildVarNodeText('i', '42', 'Integer', False)), '');
 end;
 
 procedure TTestBuildVarNodeText.TestEmptyTypeNameIgnoredWhenShowTypeTrue;
 begin
   { When TypeName is empty, type suffix must not appear even if ShowType=True }
-  FContext.AssertTrue(('x = 5')=(BuildVarNodeText('x', '5', '', True)), '');
+  TestContext.AssertTrue(('x = 5')=(BuildVarNodeText('x', '5', '', True)), '');
 end;
 
 procedure TTestBuildVarNodeText.TestStringValue;
 begin
-  FContext.AssertTrue(('s = ''hello'' : String')=(BuildVarNodeText('s', '''hello''', 'String', True)), '');
+  TestContext.AssertTrue(('s = ''hello'' : String')=(BuildVarNodeText('s', '''hello''', 'String', True)), '');
 end;
 
 procedure TTestBuildVarNodeText.TestCompositeValueSummary;
 begin
   { Composite: the full value summary is the display value }
-  FContext.AssertTrue(('r = TPoint { X: 10, Y: 20 } : TPoint')=(BuildVarNodeText('r', 'TPoint { X: 10, Y: 20 }', 'TPoint', True)), '');
+  TestContext.AssertTrue(('r = TPoint { X: 10, Y: 20 } : TPoint')=(BuildVarNodeText('r', 'TPoint { X: 10, Y: 20 }', 'TPoint', True)), '');
 end;
 
 
@@ -148,53 +168,53 @@ end;
 
 procedure TTestVarValueIsExpandable.TestSimpleIntegerNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('42')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('42')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestNilNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('nil')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('nil')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestEllipsisNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('...')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('...')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestErrorStringNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('<error: type not found>')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('<error: type not found>')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestEmptyStringNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestBooleanNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('True')), '');
-  FContext.AssertTrue(not (VarValueIsExpandable('False')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('True')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('False')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestQuotedStringNotExpandable;
 begin
-  FContext.AssertTrue(not (VarValueIsExpandable('''hello world''')), '');
+  TestContext.AssertTrue(not (VarValueIsExpandable('''hello world''')), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestRecordIsExpandable;
 begin
-  FContext.AssertTrue(VarValueIsExpandable('TPoint { X: 10, Y: 20 }'), '');
+  TestContext.AssertTrue(VarValueIsExpandable('TPoint { X: 10, Y: 20 }'), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestClassWithAddressIsExpandable;
 begin
-  FContext.AssertTrue(VarValueIsExpandable('TMyClass(@$1234ABCD) { FName: ''hello'', FCount: 3 }'), '');
+  TestContext.AssertTrue(VarValueIsExpandable('TMyClass(@$1234ABCD) { FName: ''hello'', FCount: 3 }'), '');
 end;
 
 procedure TTestVarValueIsExpandable.TestNestedRecordIsExpandable;
 begin
-  FContext.AssertTrue(VarValueIsExpandable('TOuter { Inner: TInner { A: 1 }, B: 2 }'), '');
+  TestContext.AssertTrue(VarValueIsExpandable('TOuter { Inner: TInner { A: 1 }, B: 2 }'), '');
 end;
 
 
@@ -202,33 +222,33 @@ end;
 
 procedure TTestExtractVarTypeName.TestSimpleIntegerReturnsEmpty;
 begin
-  FContext.AssertTrue(('')=(ExtractVarTypeName('42')), '');
+  TestContext.AssertTrue(('')=(ExtractVarTypeName('42')), '');
 end;
 
 procedure TTestExtractVarTypeName.TestNilReturnsEmpty;
 begin
-  FContext.AssertTrue(('')=(ExtractVarTypeName('nil')), '');
+  TestContext.AssertTrue(('')=(ExtractVarTypeName('nil')), '');
 end;
 
 procedure TTestExtractVarTypeName.TestQuotedStringReturnsEmpty;
 begin
-  FContext.AssertTrue(('')=(ExtractVarTypeName('''hello''')), '');
+  TestContext.AssertTrue(('')=(ExtractVarTypeName('''hello''')), '');
 end;
 
 procedure TTestExtractVarTypeName.TestRecordReturnsTypeName;
 begin
-  FContext.AssertTrue(('TPoint')=(ExtractVarTypeName('TPoint { X: 10, Y: 20 }')), '');
+  TestContext.AssertTrue(('TPoint')=(ExtractVarTypeName('TPoint { X: 10, Y: 20 }')), '');
 end;
 
 procedure TTestExtractVarTypeName.TestClassReturnsTypeName;
 begin
-  FContext.AssertTrue(('TMyClass')=(ExtractVarTypeName('TMyClass(@$1234ABCD) { FField: 99 }')), '');
+  TestContext.AssertTrue(('TMyClass')=(ExtractVarTypeName('TMyClass(@$1234ABCD) { FField: 99 }')), '');
 end;
 
 procedure TTestExtractVarTypeName.TestNestedDoesNotLeakParenthesis;
 begin
   { The result must not contain '@' or parentheses }
-  FContext.AssertTrue(('TObj')=(ExtractVarTypeName('TObj(@$DEADBEEF) { X: TPoint { A: 1, B: 2 } }')), '');
+  TestContext.AssertTrue(('TObj')=(ExtractVarTypeName('TObj(@$DEADBEEF) { X: TPoint { A: 1, B: 2 } }')), '');
 end;
 
 
@@ -242,7 +262,7 @@ var
 begin
   Children := ParseVarChildren(AParentPath, AValue);
   try
-    FContext.AssertTrue((AExpected)=(Length(Children)), 'child count');
+    TestContext.AssertTrue((AExpected)=(Length(Children)), 'child count');
   finally
     for i := 0 to High(Children) do
       Children[i].Free;
@@ -252,8 +272,8 @@ end;
 procedure TTestParseVarChildren.AssertChild(const AChildren: TVarNodeDataArray;
     AIndex: Integer; const AExpectedName, AExpectedValue: string);
 begin
-  FContext.AssertTrue((AExpectedName)=(AChildren[AIndex].Name), 'child[' + IntToStr(AIndex) + '].Name');
-  FContext.AssertTrue((AExpectedValue)=(AChildren[AIndex].Value), 'child[' + IntToStr(AIndex) + '].Value');
+  TestContext.AssertTrue((AExpectedName)=(AChildren[AIndex].Name), 'child[' + IntToStr(AIndex) + '].Name');
+  TestContext.AssertTrue((AExpectedValue)=(AChildren[AIndex].Value), 'child[' + IntToStr(AIndex) + '].Value');
 end;
 
 procedure TTestParseVarChildren.TestEmptyValueReturnsNoChildren;
@@ -277,7 +297,7 @@ var
 begin
   Children := ParseVarChildren('r', 'TPoint1D { X: 5 }');
   try
-    FContext.AssertTrue((1)=(Length(Children)), '');
+    TestContext.AssertTrue((1)=(Length(Children)), '');
     AssertChild(Children, 0, 'X', '5');
   finally
     if Length(Children) > 0 then Children[0].Free;
@@ -290,7 +310,7 @@ var
 begin
   Children := ParseVarChildren('p', 'TPoint { X: 10, Y: 20 }');
   try
-    FContext.AssertTrue((2)=(Length(Children)), '');
+    TestContext.AssertTrue((2)=(Length(Children)), '');
     AssertChild(Children, 0, 'X', '10');
     AssertChild(Children, 1, 'Y', '20');
   finally
@@ -305,7 +325,7 @@ var
 begin
   Children := ParseVarChildren('r', 'TRect { Left: 0, Top: 0, Width: 100 }');
   try
-    FContext.AssertTrue((3)=(Length(Children)), '');
+    TestContext.AssertTrue((3)=(Length(Children)), '');
     AssertChild(Children, 0, 'Left',  '0');
     AssertChild(Children, 1, 'Top',   '0');
     AssertChild(Children, 2, 'Width', '100');
@@ -323,9 +343,9 @@ begin
   { The nested child 'Inner: TInner { A: 1 }' should be expandable }
   Children := ParseVarChildren('r', 'TOuter { Inner: TInner { A: 1 }, B: 2 }');
   try
-    AssertEquals(2, Length(Children));
-    AssertTrue('Inner should be expandable', Children[0].IsExpandable);
-    AssertFalse('B should not be expandable', Children[1].IsExpandable);
+    TestContext.AssertTrue((2)=(Length(Children)), '');
+    TestContext.AssertTrue(Children[0].IsExpandable, 'Inner should be expandable');
+    TestContext.AssertTrue(not (Children[1].IsExpandable), 'B should not be expandable');
   finally
     if Length(Children) > 0 then Children[0].Free;
     if Length(Children) > 1 then Children[1].Free;
@@ -338,7 +358,7 @@ var
 begin
   Children := ParseVarChildren('r', 'TOuter { Inner: TInner { A: 1 }, B: 42 }');
   try
-    AssertEquals(2, Length(Children));
+    TestContext.AssertTrue((2)=(Length(Children)), '');
     AssertChild(Children, 0, 'Inner', 'TInner { A: 1 }');
     AssertChild(Children, 1, 'B', '42');
   finally
@@ -354,7 +374,7 @@ begin
   { A string value containing ', ' must not be treated as a separator }
   Children := ParseVarChildren('r', 'TRec { Name: ''hello, world'', Age: 25 }');
   try
-    AssertEquals(2, Length(Children));
+    TestContext.AssertTrue((2)=(Length(Children)), '');
     AssertChild(Children, 0, 'Name', '''hello, world''');
     AssertChild(Children, 1, 'Age',  '25');
   finally
@@ -369,9 +389,9 @@ var
 begin
   Children := ParseVarChildren('myVar', 'TPoint { X: 1, Y: 2 }');
   try
-    AssertEquals(2, Length(Children));
-    AssertEquals('myVar.X', Children[0].FullPath);
-    AssertEquals('myVar.Y', Children[1].FullPath);
+    TestContext.AssertTrue((2)=(Length(Children)), '');
+    TestContext.AssertTrue(('myVar.X')=(Children[0].FullPath), '');
+    TestContext.AssertTrue(('myVar.Y')=(Children[1].FullPath), '');
   finally
     if Length(Children) > 0 then Children[0].Free;
     if Length(Children) > 1 then Children[1].Free;
@@ -385,9 +405,9 @@ begin
   { When AParentPath is empty, FullPath is just the field name }
   Children := ParseVarChildren('', 'TPoint { X: 1, Y: 2 }');
   try
-    AssertEquals(2, Length(Children));
-    AssertEquals('X', Children[0].FullPath);
-    AssertEquals('Y', Children[1].FullPath);
+    TestContext.AssertTrue((2)=(Length(Children)), '');
+    TestContext.AssertTrue(('X')=(Children[0].FullPath), '');
+    TestContext.AssertTrue(('Y')=(Children[1].FullPath), '');
   finally
     if Length(Children) > 0 then Children[0].Free;
     if Length(Children) > 1 then Children[1].Free;
@@ -401,7 +421,7 @@ begin
   Children := ParseVarChildren('obj',
     'TMyClass(@$1234ABCD) { FName: ''test'', FCount: 7 }');
   try
-    AssertEquals(2, Length(Children));
+    TestContext.AssertTrue((2)=(Length(Children)), '');
     AssertChild(Children, 0, 'FName',  '''test''');
     AssertChild(Children, 1, 'FCount', '7');
   finally
@@ -417,9 +437,9 @@ begin
   { A child whose value is itself a composite should have TypeName extracted }
   Children := ParseVarChildren('r', 'TOuter { Sub: TPoint { X: 1, Y: 2 }, N: 99 }');
   try
-    AssertEquals(2, Length(Children));
-    AssertEquals('TPoint', Children[0].TypeName);
-    AssertEquals('',       Children[1].TypeName);
+    TestContext.AssertTrue((2)=(Length(Children)), '');
+    TestContext.AssertTrue(('TPoint')=(Children[0].TypeName), '');
+    TestContext.AssertTrue(('')=(Children[1].TypeName), '');
   finally
     if Length(Children) > 0 then Children[0].Free;
     if Length(Children) > 1 then Children[1].Free;
@@ -428,13 +448,39 @@ end;
 
 
 
+constructor TTestBuildVarNodeText.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestVarValueIsExpandable.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestExtractVarTypeName.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestParseVarChildren.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestBuildVarNodeTextTestSimpleWithType(AContext: TNXTestContext);
 var lFixture: TTestBuildVarNodeText;
 begin
-  lFixture:=TTestBuildVarNodeText.Create;
+  lFixture:=TTestBuildVarNodeText.Create(AContext, 'TestSimpleWithType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleWithType';
     lFixture.TestSimpleWithType;
   finally lFixture.Free; end;
 end;
@@ -442,10 +488,8 @@ end;
 procedure RunTTestBuildVarNodeTextTestSimpleWithoutType(AContext: TNXTestContext);
 var lFixture: TTestBuildVarNodeText;
 begin
-  lFixture:=TTestBuildVarNodeText.Create;
+  lFixture:=TTestBuildVarNodeText.Create(AContext, 'TestSimpleWithoutType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleWithoutType';
     lFixture.TestSimpleWithoutType;
   finally lFixture.Free; end;
 end;
@@ -453,10 +497,8 @@ end;
 procedure RunTTestBuildVarNodeTextTestEmptyTypeNameIgnoredWhenShowTypeTrue(AContext: TNXTestContext);
 var lFixture: TTestBuildVarNodeText;
 begin
-  lFixture:=TTestBuildVarNodeText.Create;
+  lFixture:=TTestBuildVarNodeText.Create(AContext, 'TestEmptyTypeNameIgnoredWhenShowTypeTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyTypeNameIgnoredWhenShowTypeTrue';
     lFixture.TestEmptyTypeNameIgnoredWhenShowTypeTrue;
   finally lFixture.Free; end;
 end;
@@ -464,10 +506,8 @@ end;
 procedure RunTTestBuildVarNodeTextTestStringValue(AContext: TNXTestContext);
 var lFixture: TTestBuildVarNodeText;
 begin
-  lFixture:=TTestBuildVarNodeText.Create;
+  lFixture:=TTestBuildVarNodeText.Create(AContext, 'TestStringValue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringValue';
     lFixture.TestStringValue;
   finally lFixture.Free; end;
 end;
@@ -475,10 +515,8 @@ end;
 procedure RunTTestBuildVarNodeTextTestCompositeValueSummary(AContext: TNXTestContext);
 var lFixture: TTestBuildVarNodeText;
 begin
-  lFixture:=TTestBuildVarNodeText.Create;
+  lFixture:=TTestBuildVarNodeText.Create(AContext, 'TestCompositeValueSummary');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCompositeValueSummary';
     lFixture.TestCompositeValueSummary;
   finally lFixture.Free; end;
 end;
@@ -486,10 +524,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestSimpleIntegerNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestSimpleIntegerNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleIntegerNotExpandable';
     lFixture.TestSimpleIntegerNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -497,10 +533,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestNilNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestNilNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNilNotExpandable';
     lFixture.TestNilNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -508,10 +542,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestEllipsisNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestEllipsisNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEllipsisNotExpandable';
     lFixture.TestEllipsisNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -519,10 +551,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestErrorStringNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestErrorStringNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestErrorStringNotExpandable';
     lFixture.TestErrorStringNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -530,10 +560,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestEmptyStringNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestEmptyStringNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyStringNotExpandable';
     lFixture.TestEmptyStringNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -541,10 +569,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestBooleanNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestBooleanNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBooleanNotExpandable';
     lFixture.TestBooleanNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -552,10 +578,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestQuotedStringNotExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestQuotedStringNotExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuotedStringNotExpandable';
     lFixture.TestQuotedStringNotExpandable;
   finally lFixture.Free; end;
 end;
@@ -563,10 +587,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestRecordIsExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestRecordIsExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordIsExpandable';
     lFixture.TestRecordIsExpandable;
   finally lFixture.Free; end;
 end;
@@ -574,10 +596,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestClassWithAddressIsExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestClassWithAddressIsExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClassWithAddressIsExpandable';
     lFixture.TestClassWithAddressIsExpandable;
   finally lFixture.Free; end;
 end;
@@ -585,10 +605,8 @@ end;
 procedure RunTTestVarValueIsExpandableTestNestedRecordIsExpandable(AContext: TNXTestContext);
 var lFixture: TTestVarValueIsExpandable;
 begin
-  lFixture:=TTestVarValueIsExpandable.Create;
+  lFixture:=TTestVarValueIsExpandable.Create(AContext, 'TestNestedRecordIsExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedRecordIsExpandable';
     lFixture.TestNestedRecordIsExpandable;
   finally lFixture.Free; end;
 end;
@@ -596,10 +614,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestSimpleIntegerReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestSimpleIntegerReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleIntegerReturnsEmpty';
     lFixture.TestSimpleIntegerReturnsEmpty;
   finally lFixture.Free; end;
 end;
@@ -607,10 +623,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestNilReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestNilReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNilReturnsEmpty';
     lFixture.TestNilReturnsEmpty;
   finally lFixture.Free; end;
 end;
@@ -618,10 +632,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestQuotedStringReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestQuotedStringReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQuotedStringReturnsEmpty';
     lFixture.TestQuotedStringReturnsEmpty;
   finally lFixture.Free; end;
 end;
@@ -629,10 +641,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestRecordReturnsTypeName(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestRecordReturnsTypeName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordReturnsTypeName';
     lFixture.TestRecordReturnsTypeName;
   finally lFixture.Free; end;
 end;
@@ -640,10 +650,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestClassReturnsTypeName(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestClassReturnsTypeName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClassReturnsTypeName';
     lFixture.TestClassReturnsTypeName;
   finally lFixture.Free; end;
 end;
@@ -651,10 +659,8 @@ end;
 procedure RunTTestExtractVarTypeNameTestNestedDoesNotLeakParenthesis(AContext: TNXTestContext);
 var lFixture: TTestExtractVarTypeName;
 begin
-  lFixture:=TTestExtractVarTypeName.Create;
+  lFixture:=TTestExtractVarTypeName.Create(AContext, 'TestNestedDoesNotLeakParenthesis');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedDoesNotLeakParenthesis';
     lFixture.TestNestedDoesNotLeakParenthesis;
   finally lFixture.Free; end;
 end;
@@ -662,10 +668,8 @@ end;
 procedure RunTTestParseVarChildrenTestEmptyValueReturnsNoChildren(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestEmptyValueReturnsNoChildren');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyValueReturnsNoChildren';
     lFixture.TestEmptyValueReturnsNoChildren;
   finally lFixture.Free; end;
 end;
@@ -673,10 +677,8 @@ end;
 procedure RunTTestParseVarChildrenTestNilReturnsNoChildren(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestNilReturnsNoChildren');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNilReturnsNoChildren';
     lFixture.TestNilReturnsNoChildren;
   finally lFixture.Free; end;
 end;
@@ -684,10 +686,8 @@ end;
 procedure RunTTestParseVarChildrenTestSimpleIntegerReturnsNoChildren(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestSimpleIntegerReturnsNoChildren');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleIntegerReturnsNoChildren';
     lFixture.TestSimpleIntegerReturnsNoChildren;
   finally lFixture.Free; end;
 end;
@@ -695,10 +695,8 @@ end;
 procedure RunTTestParseVarChildrenTestSingleFieldRecord(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestSingleFieldRecord');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSingleFieldRecord';
     lFixture.TestSingleFieldRecord;
   finally lFixture.Free; end;
 end;
@@ -706,10 +704,8 @@ end;
 procedure RunTTestParseVarChildrenTestTwoFieldRecord(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestTwoFieldRecord');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTwoFieldRecord';
     lFixture.TestTwoFieldRecord;
   finally lFixture.Free; end;
 end;
@@ -717,10 +713,8 @@ end;
 procedure RunTTestParseVarChildrenTestThreeFieldRecord(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestThreeFieldRecord');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestThreeFieldRecord';
     lFixture.TestThreeFieldRecord;
   finally lFixture.Free; end;
 end;
@@ -728,10 +722,8 @@ end;
 procedure RunTTestParseVarChildrenTestNestedRecordChildIsExpandable(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestNestedRecordChildIsExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedRecordChildIsExpandable';
     lFixture.TestNestedRecordChildIsExpandable;
   finally lFixture.Free; end;
 end;
@@ -739,10 +731,8 @@ end;
 procedure RunTTestParseVarChildrenTestNestedRecordChildParsesCorrectly(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestNestedRecordChildParsesCorrectly');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedRecordChildParsesCorrectly';
     lFixture.TestNestedRecordChildParsesCorrectly;
   finally lFixture.Free; end;
 end;
@@ -750,10 +740,8 @@ end;
 procedure RunTTestParseVarChildrenTestStringWithCommaNotSplit(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestStringWithCommaNotSplit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringWithCommaNotSplit';
     lFixture.TestStringWithCommaNotSplit;
   finally lFixture.Free; end;
 end;
@@ -761,10 +749,8 @@ end;
 procedure RunTTestParseVarChildrenTestChildFullPathWithParent(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestChildFullPathWithParent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChildFullPathWithParent';
     lFixture.TestChildFullPathWithParent;
   finally lFixture.Free; end;
 end;
@@ -772,10 +758,8 @@ end;
 procedure RunTTestParseVarChildrenTestChildFullPathNoParent(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestChildFullPathNoParent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChildFullPathNoParent';
     lFixture.TestChildFullPathNoParent;
   finally lFixture.Free; end;
 end;
@@ -783,10 +767,8 @@ end;
 procedure RunTTestParseVarChildrenTestClassNonNilIsExpandable(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestClassNonNilIsExpandable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClassNonNilIsExpandable';
     lFixture.TestClassNonNilIsExpandable;
   finally lFixture.Free; end;
 end;
@@ -794,10 +776,8 @@ end;
 procedure RunTTestParseVarChildrenTestChildTypeExtractedFromValue(AContext: TNXTestContext);
 var lFixture: TTestParseVarChildren;
 begin
-  lFixture:=TTestParseVarChildren.Create;
+  lFixture:=TTestParseVarChildren.Create(AContext, 'TestChildTypeExtractedFromValue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChildTypeExtractedFromValue';
     lFixture.TestChildTypeExtractedFromValue;
   finally lFixture.Free; end;
 end;

@@ -20,9 +20,14 @@ type
   { TTestBreakpointList }
 
   TTestBreakpointList = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FBP: TBreakpointList;
     FTempFile: String;
@@ -104,86 +109,86 @@ end;
 procedure TTestBreakpointList.TestToggleAddsBreakpoint;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((1)=(FBP.Count), 'count after add');
+  TestContext.AssertTrue((1)=(FBP.Count), 'count after add');
 end;
 
 procedure TTestBreakpointList.TestToggleExistingRemovesIt;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((0)=(FBP.Count), 'count after remove');
+  TestContext.AssertTrue((0)=(FBP.Count), 'count after remove');
 end;
 
 procedure TTestBreakpointList.TestToggleTwiceResultsInNoBreakpoint;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 10)), 'no breakpoint after double-toggle');
+  TestContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 10)), 'no breakpoint after double-toggle');
 end;
 
 procedure TTestBreakpointList.TestToggleTwiceCountIsZero;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((0)=(FBP.Count), 'count zero after double-toggle');
+  TestContext.AssertTrue((0)=(FBP.Count), 'count zero after double-toggle');
 end;
 
 { HasBreakpoint / FindIndex }
 
 procedure TTestBreakpointList.TestHasBreakpointFalseOnEmpty;
 begin
-  FContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 1)), 'empty list');
+  TestContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 1)), 'empty list');
 end;
 
 procedure TTestBreakpointList.TestHasBreakpointTrueAfterAdd;
 begin
   FBP.Toggle('/src/foo.pas', 42);
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 42), 'has breakpoint');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 42), 'has breakpoint');
 end;
 
 procedure TTestBreakpointList.TestHasBreakpointFalseAfterRemove;
 begin
   FBP.Toggle('/src/foo.pas', 42);
   FBP.Toggle('/src/foo.pas', 42);
-  FContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 42)), 'no breakpoint after remove');
+  TestContext.AssertTrue(not (FBP.HasBreakpoint('/src/foo.pas', 42)), 'no breakpoint after remove');
 end;
 
 procedure TTestBreakpointList.TestFindIndexMinusOneWhenMissing;
 begin
-  FContext.AssertTrue((-1)=(FBP.FindIndex('/src/foo.pas', 1)), '-1 when missing');
+  TestContext.AssertTrue((-1)=(FBP.FindIndex('/src/foo.pas', 1)), '-1 when missing');
 end;
 
 procedure TTestBreakpointList.TestFindIndexCorrectAfterAdd;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((0)=(FBP.FindIndex('/src/foo.pas', 10)), 'index 0');
+  TestContext.AssertTrue((0)=(FBP.FindIndex('/src/foo.pas', 10)), 'index 0');
 end;
 
 { Count }
 
 procedure TTestBreakpointList.TestCountZeroOnEmpty;
 begin
-  FContext.AssertTrue((0)=(FBP.Count), 'zero on empty');
+  TestContext.AssertTrue((0)=(FBP.Count), 'zero on empty');
 end;
 
 procedure TTestBreakpointList.TestCountOneAfterAdd;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((1)=(FBP.Count), 'one after add');
+  TestContext.AssertTrue((1)=(FBP.Count), 'one after add');
 end;
 
 procedure TTestBreakpointList.TestCountZeroAfterRemove;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((0)=(FBP.Count), 'zero after remove');
+  TestContext.AssertTrue((0)=(FBP.Count), 'zero after remove');
 end;
 
 procedure TTestBreakpointList.TestCountTwoAfterTwoAdds;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 20);
-  FContext.AssertTrue((2)=(FBP.Count), 'two after two adds');
+  TestContext.AssertTrue((2)=(FBP.Count), 'two after two adds');
 end;
 
 { GetItem }
@@ -191,25 +196,25 @@ end;
 procedure TTestBreakpointList.TestGetItemFileName;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue(('/src/foo.pas')=(FBP.GetItem(0).FileName), 'filename');
+  TestContext.AssertTrue(('/src/foo.pas')=(FBP.GetItem(0).FileName), 'filename');
 end;
 
 procedure TTestBreakpointList.TestGetItemLine;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((10)=(FBP.GetItem(0).Line), 'line');
+  TestContext.AssertTrue((10)=(FBP.GetItem(0).Line), 'line');
 end;
 
 procedure TTestBreakpointList.TestGetItemEnabledByDefault;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue(FBP.GetItem(0).Enabled, 'enabled by default');
+  TestContext.AssertTrue(FBP.GetItem(0).Enabled, 'enabled by default');
 end;
 
 procedure TTestBreakpointList.TestGetItemHandleMinusOne;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((-1)=(FBP.GetItem(0).Handle), 'handle -1 by default');
+  TestContext.AssertTrue((-1)=(FBP.GetItem(0).Handle), 'handle -1 by default');
 end;
 
 { Filename matching — basename only }
@@ -217,13 +222,13 @@ end;
 procedure TTestBreakpointList.TestMatchByBasename;
 begin
   FBP.Toggle('/project/src/foo.pas', 10);
-  FContext.AssertTrue(FBP.HasBreakpoint('/other/path/foo.pas', 10), 'basename match from different path');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/other/path/foo.pas', 10), 'basename match from different path');
 end;
 
 procedure TTestBreakpointList.TestNoMatchDifferentBasename;
 begin
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue(not (FBP.HasBreakpoint('/src/bar.pas', 10)), 'no match for different basename');
+  TestContext.AssertTrue(not (FBP.HasBreakpoint('/src/bar.pas', 10)), 'no match for different basename');
 end;
 
 { Multiple breakpoints }
@@ -232,16 +237,16 @@ procedure TTestBreakpointList.TestTwoBreakpointsSameFile;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 20);
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'line 10');
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 20), 'line 20');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'line 10');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 20), 'line 20');
 end;
 
 procedure TTestBreakpointList.TestTwoBreakpointsDifferentFiles;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/bar.pas', 10);
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'foo.pas');
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/bar.pas', 10), 'bar.pas');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'foo.pas');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/bar.pas', 10), 'bar.pas');
 end;
 
 procedure TTestBreakpointList.TestRemoveFirstKeepsSecond;
@@ -249,8 +254,8 @@ begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 20);
   FBP.Toggle('/src/foo.pas', 10);  { remove first }
-  FContext.AssertTrue((1)=(FBP.Count), 'count 1');
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 20), 'line 20 still present');
+  TestContext.AssertTrue((1)=(FBP.Count), 'count 1');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 20), 'line 20 still present');
 end;
 
 procedure TTestBreakpointList.TestRemoveSecondKeepsFirst;
@@ -258,8 +263,8 @@ begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 20);
   FBP.Toggle('/src/foo.pas', 20);  { remove second }
-  FContext.AssertTrue((1)=(FBP.Count), 'count 1');
-  FContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'line 10 still present');
+  TestContext.AssertTrue((1)=(FBP.Count), 'count 1');
+  TestContext.AssertTrue(FBP.HasBreakpoint('/src/foo.pas', 10), 'line 10 still present');
 end;
 
 { Handle management }
@@ -268,7 +273,7 @@ procedure TTestBreakpointList.TestSetHandle;
 begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.SetHandle(0, 42);
-  FContext.AssertTrue((42)=(FBP.GetItem(0).Handle), 'handle updated');
+  TestContext.AssertTrue((42)=(FBP.GetItem(0).Handle), 'handle updated');
 end;
 
 procedure TTestBreakpointList.TestClearHandles;
@@ -278,8 +283,8 @@ begin
   FBP.SetHandle(0, 1);
   FBP.SetHandle(1, 2);
   FBP.ClearHandles;
-  FContext.AssertTrue((-1)=(FBP.GetItem(0).Handle), 'handle 0 cleared');
-  FContext.AssertTrue((-1)=(FBP.GetItem(1).Handle), 'handle 1 cleared');
+  TestContext.AssertTrue((-1)=(FBP.GetItem(0).Handle), 'handle 0 cleared');
+  TestContext.AssertTrue((-1)=(FBP.GetItem(1).Handle), 'handle 1 cleared');
 end;
 
 { Clear }
@@ -289,7 +294,7 @@ begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Toggle('/src/foo.pas', 20);
   FBP.Clear;
-  FContext.AssertTrue((0)=(FBP.Count), 'count zero after clear');
+  TestContext.AssertTrue((0)=(FBP.Count), 'count zero after clear');
 end;
 
 procedure TTestBreakpointList.TestClearAllowsReAdd;
@@ -297,7 +302,7 @@ begin
   FBP.Toggle('/src/foo.pas', 10);
   FBP.Clear;
   FBP.Toggle('/src/foo.pas', 10);
-  FContext.AssertTrue((1)=(FBP.Count), 'count 1 after re-add');
+  TestContext.AssertTrue((1)=(FBP.Count), 'count 1 after re-add');
 end;
 
 { Persistence }
@@ -313,9 +318,9 @@ begin
   BPLoad := TBreakpointList.Create;
   try
     BPLoad.LoadFromFile(FTempFile);
-    FContext.AssertTrue((2)=(BPLoad.Count), 'count');
-    FContext.AssertTrue(BPLoad.HasBreakpoint('/src/foo.pas', 10), 'foo.pas:10');
-    FContext.AssertTrue(BPLoad.HasBreakpoint('/src/bar.pas', 42), 'bar.pas:42');
+    TestContext.AssertTrue((2)=(BPLoad.Count), 'count');
+    TestContext.AssertTrue(BPLoad.HasBreakpoint('/src/foo.pas', 10), 'foo.pas:10');
+    TestContext.AssertTrue(BPLoad.HasBreakpoint('/src/bar.pas', 42), 'bar.pas:42');
   finally
     BPLoad.Free;
   end;
@@ -324,7 +329,7 @@ end;
 procedure TTestBreakpointList.TestLoadNonExistentFileIsNoError;
 begin
   FBP.LoadFromFile('/nonexistent/path/breakpoints.json');
-  FContext.AssertTrue((0)=(FBP.Count), 'count zero');
+  TestContext.AssertTrue((0)=(FBP.Count), 'count zero');
 end;
 
 procedure TTestBreakpointList.TestSaveEmptyList;
@@ -335,7 +340,7 @@ begin
   BPLoad := TBreakpointList.Create;
   try
     BPLoad.LoadFromFile(FTempFile);
-    FContext.AssertTrue((0)=(BPLoad.Count), 'count zero after loading empty');
+    TestContext.AssertTrue((0)=(BPLoad.Count), 'count zero after loading empty');
   finally
     BPLoad.Free;
   end;
@@ -359,8 +364,8 @@ begin
   BPLoad := TBreakpointList.Create;
   try
     BPLoad.LoadFromFile(FTempFile);
-    FContext.AssertTrue((1)=(BPLoad.Count), 'only valid entry loaded');
-    FContext.AssertTrue(BPLoad.HasBreakpoint('/src/foo.pas', 10), 'foo.pas:10 present');
+    TestContext.AssertTrue((1)=(BPLoad.Count), 'only valid entry loaded');
+    TestContext.AssertTrue(BPLoad.HasBreakpoint('/src/foo.pas', 10), 'foo.pas:10 present');
   finally
     BPLoad.Free;
   end;
@@ -368,13 +373,18 @@ end;
 
 
 
+constructor TTestBreakpointList.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestBreakpointListTestToggleAddsBreakpoint(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestToggleAddsBreakpoint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggleAddsBreakpoint';
     lFixture.SetUp;
     try lFixture.TestToggleAddsBreakpoint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -383,10 +393,8 @@ end;
 procedure RunTTestBreakpointListTestToggleExistingRemovesIt(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestToggleExistingRemovesIt');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggleExistingRemovesIt';
     lFixture.SetUp;
     try lFixture.TestToggleExistingRemovesIt; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -395,10 +403,8 @@ end;
 procedure RunTTestBreakpointListTestToggleTwiceResultsInNoBreakpoint(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestToggleTwiceResultsInNoBreakpoint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggleTwiceResultsInNoBreakpoint';
     lFixture.SetUp;
     try lFixture.TestToggleTwiceResultsInNoBreakpoint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -407,10 +413,8 @@ end;
 procedure RunTTestBreakpointListTestToggleTwiceCountIsZero(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestToggleTwiceCountIsZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggleTwiceCountIsZero';
     lFixture.SetUp;
     try lFixture.TestToggleTwiceCountIsZero; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -419,10 +423,8 @@ end;
 procedure RunTTestBreakpointListTestHasBreakpointFalseOnEmpty(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestHasBreakpointFalseOnEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHasBreakpointFalseOnEmpty';
     lFixture.SetUp;
     try lFixture.TestHasBreakpointFalseOnEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -431,10 +433,8 @@ end;
 procedure RunTTestBreakpointListTestHasBreakpointTrueAfterAdd(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestHasBreakpointTrueAfterAdd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHasBreakpointTrueAfterAdd';
     lFixture.SetUp;
     try lFixture.TestHasBreakpointTrueAfterAdd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -443,10 +443,8 @@ end;
 procedure RunTTestBreakpointListTestHasBreakpointFalseAfterRemove(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestHasBreakpointFalseAfterRemove');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHasBreakpointFalseAfterRemove';
     lFixture.SetUp;
     try lFixture.TestHasBreakpointFalseAfterRemove; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -455,10 +453,8 @@ end;
 procedure RunTTestBreakpointListTestFindIndexMinusOneWhenMissing(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestFindIndexMinusOneWhenMissing');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindIndexMinusOneWhenMissing';
     lFixture.SetUp;
     try lFixture.TestFindIndexMinusOneWhenMissing; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -467,10 +463,8 @@ end;
 procedure RunTTestBreakpointListTestFindIndexCorrectAfterAdd(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestFindIndexCorrectAfterAdd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindIndexCorrectAfterAdd';
     lFixture.SetUp;
     try lFixture.TestFindIndexCorrectAfterAdd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -479,10 +473,8 @@ end;
 procedure RunTTestBreakpointListTestCountZeroOnEmpty(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestCountZeroOnEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCountZeroOnEmpty';
     lFixture.SetUp;
     try lFixture.TestCountZeroOnEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -491,10 +483,8 @@ end;
 procedure RunTTestBreakpointListTestCountOneAfterAdd(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestCountOneAfterAdd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCountOneAfterAdd';
     lFixture.SetUp;
     try lFixture.TestCountOneAfterAdd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -503,10 +493,8 @@ end;
 procedure RunTTestBreakpointListTestCountZeroAfterRemove(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestCountZeroAfterRemove');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCountZeroAfterRemove';
     lFixture.SetUp;
     try lFixture.TestCountZeroAfterRemove; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -515,10 +503,8 @@ end;
 procedure RunTTestBreakpointListTestCountTwoAfterTwoAdds(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestCountTwoAfterTwoAdds');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCountTwoAfterTwoAdds';
     lFixture.SetUp;
     try lFixture.TestCountTwoAfterTwoAdds; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -527,10 +513,8 @@ end;
 procedure RunTTestBreakpointListTestGetItemFileName(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestGetItemFileName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetItemFileName';
     lFixture.SetUp;
     try lFixture.TestGetItemFileName; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -539,10 +523,8 @@ end;
 procedure RunTTestBreakpointListTestGetItemLine(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestGetItemLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetItemLine';
     lFixture.SetUp;
     try lFixture.TestGetItemLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -551,10 +533,8 @@ end;
 procedure RunTTestBreakpointListTestGetItemEnabledByDefault(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestGetItemEnabledByDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetItemEnabledByDefault';
     lFixture.SetUp;
     try lFixture.TestGetItemEnabledByDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -563,10 +543,8 @@ end;
 procedure RunTTestBreakpointListTestGetItemHandleMinusOne(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestGetItemHandleMinusOne');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetItemHandleMinusOne';
     lFixture.SetUp;
     try lFixture.TestGetItemHandleMinusOne; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -575,10 +553,8 @@ end;
 procedure RunTTestBreakpointListTestMatchByBasename(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestMatchByBasename');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchByBasename';
     lFixture.SetUp;
     try lFixture.TestMatchByBasename; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -587,10 +563,8 @@ end;
 procedure RunTTestBreakpointListTestNoMatchDifferentBasename(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestNoMatchDifferentBasename');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoMatchDifferentBasename';
     lFixture.SetUp;
     try lFixture.TestNoMatchDifferentBasename; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -599,10 +573,8 @@ end;
 procedure RunTTestBreakpointListTestTwoBreakpointsSameFile(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestTwoBreakpointsSameFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTwoBreakpointsSameFile';
     lFixture.SetUp;
     try lFixture.TestTwoBreakpointsSameFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -611,10 +583,8 @@ end;
 procedure RunTTestBreakpointListTestTwoBreakpointsDifferentFiles(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestTwoBreakpointsDifferentFiles');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTwoBreakpointsDifferentFiles';
     lFixture.SetUp;
     try lFixture.TestTwoBreakpointsDifferentFiles; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -623,10 +593,8 @@ end;
 procedure RunTTestBreakpointListTestRemoveFirstKeepsSecond(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestRemoveFirstKeepsSecond');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRemoveFirstKeepsSecond';
     lFixture.SetUp;
     try lFixture.TestRemoveFirstKeepsSecond; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -635,10 +603,8 @@ end;
 procedure RunTTestBreakpointListTestRemoveSecondKeepsFirst(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestRemoveSecondKeepsFirst');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRemoveSecondKeepsFirst';
     lFixture.SetUp;
     try lFixture.TestRemoveSecondKeepsFirst; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -647,10 +613,8 @@ end;
 procedure RunTTestBreakpointListTestSetHandle(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestSetHandle');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetHandle';
     lFixture.SetUp;
     try lFixture.TestSetHandle; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -659,10 +623,8 @@ end;
 procedure RunTTestBreakpointListTestClearHandles(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestClearHandles');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClearHandles';
     lFixture.SetUp;
     try lFixture.TestClearHandles; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -671,10 +633,8 @@ end;
 procedure RunTTestBreakpointListTestClearResetsCount(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestClearResetsCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClearResetsCount';
     lFixture.SetUp;
     try lFixture.TestClearResetsCount; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -683,10 +643,8 @@ end;
 procedure RunTTestBreakpointListTestClearAllowsReAdd(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestClearAllowsReAdd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClearAllowsReAdd';
     lFixture.SetUp;
     try lFixture.TestClearAllowsReAdd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -695,10 +653,8 @@ end;
 procedure RunTTestBreakpointListTestSaveAndLoadRoundTrip(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestSaveAndLoadRoundTrip');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSaveAndLoadRoundTrip';
     lFixture.SetUp;
     try lFixture.TestSaveAndLoadRoundTrip; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -707,10 +663,8 @@ end;
 procedure RunTTestBreakpointListTestLoadNonExistentFileIsNoError(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestLoadNonExistentFileIsNoError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadNonExistentFileIsNoError';
     lFixture.SetUp;
     try lFixture.TestLoadNonExistentFileIsNoError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -719,10 +673,8 @@ end;
 procedure RunTTestBreakpointListTestSaveEmptyList(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestSaveEmptyList');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSaveEmptyList';
     lFixture.SetUp;
     try lFixture.TestSaveEmptyList; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -731,10 +683,8 @@ end;
 procedure RunTTestBreakpointListTestLoadIgnoresInvalidEntries(AContext: TNXTestContext);
 var lFixture: TTestBreakpointList;
 begin
-  lFixture:=TTestBreakpointList.Create;
+  lFixture:=TTestBreakpointList.Create(AContext, 'TestLoadIgnoresInvalidEntries');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadIgnoresInvalidEntries';
     lFixture.SetUp;
     try lFixture.TestLoadIgnoresInvalidEntries; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

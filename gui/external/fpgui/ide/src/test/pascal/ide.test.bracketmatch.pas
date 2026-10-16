@@ -22,9 +22,14 @@ type
   { TTestBracketMatch }
 
   TTestBracketMatch = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHL: TPascalHighlighter;
     FLines: TStringList;
@@ -93,9 +98,9 @@ var
   r: TBracketMatchResult;
 begin
   r := FindMatchingBracket(FHL, ALine, ACol, FLines);
-  FContext.AssertTrue(r.Found, AContext + ': should find match');
-  FContext.AssertTrue((AExpMatchLine)=(r.MatchLine), AContext + ': match line');
-  FContext.AssertTrue((AExpMatchCol)=(r.MatchCol), AContext + ': match col');
+  TestContext.AssertTrue(r.Found, AContext + ': should find match');
+  TestContext.AssertTrue((AExpMatchLine)=(r.MatchLine), AContext + ': match line');
+  TestContext.AssertTrue((AExpMatchCol)=(r.MatchCol), AContext + ': match col');
 end;
 
 procedure TTestBracketMatch.CheckNoMatch(ALine, ACol: Integer;
@@ -104,7 +109,7 @@ var
   r: TBracketMatchResult;
 begin
   r := FindMatchingBracket(FHL, ALine, ACol, FLines);
-  FContext.AssertTrue(not (r.Found), AContext + ': should not find match');
+  TestContext.AssertTrue(not (r.Found), AContext + ': should not find match');
 end;
 
 procedure TTestBracketMatch.SetUp;
@@ -330,13 +335,13 @@ begin
   try
     lines.Add('()[]');
     tok.Column := 0; tok.Length := 1; tok.Category := hcSymbol;
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkRoundOpen, '( is RoundOpen');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkRoundOpen, '( is RoundOpen');
     tok.Column := 1;
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkRoundClose, ') is RoundClose');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkRoundClose, ') is RoundClose');
     tok.Column := 2;
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkSquareOpen, '[ is SquareOpen');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkSquareOpen, '[ is SquareOpen');
     tok.Column := 3;
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkSquareClose, '] is SquareClose');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkSquareClose, '] is SquareClose');
   finally
     lines.Free;
   end;
@@ -353,19 +358,19 @@ begin
     tok.Category := hcKeyword1;
 
     tok.Column := 0; tok.Length := 5; // 'begin'
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'begin is bkBegin');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'begin is bkBegin');
 
     tok.Column := 6; tok.Length := 3; // 'end'
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkEnd, 'end is bkEnd');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkEnd, 'end is bkEnd');
 
     tok.Column := 10; tok.Length := 4; // 'case'
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'case is bkBegin');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'case is bkBegin');
 
     tok.Column := 15; tok.Length := 3; // 'try'
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'try is bkBegin');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'try is bkBegin');
 
     tok.Column := 19; tok.Length := 6; // 'record'
-    FContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'record is bkBegin');
+    TestContext.AssertTrue(ClassifyBracket(tok, lines, 0) = bkBegin, 'record is bkBegin');
   finally
     lines.Free;
   end;
@@ -373,34 +378,39 @@ end;
 
 procedure TTestBracketMatch.TestOppositeKind;
 begin
-  FContext.AssertTrue(OppositeKind(bkRoundOpen) = bkRoundClose, '( opposite is )');
-  FContext.AssertTrue(OppositeKind(bkRoundClose) = bkRoundOpen, ') opposite is (');
-  FContext.AssertTrue(OppositeKind(bkSquareOpen) = bkSquareClose, '[ opposite is ]');
-  FContext.AssertTrue(OppositeKind(bkSquareClose) = bkSquareOpen, '] opposite is [');
-  FContext.AssertTrue(OppositeKind(bkBegin) = bkEnd, 'begin opposite is end');
-  FContext.AssertTrue(OppositeKind(bkEnd) = bkBegin, 'end opposite is begin');
-  FContext.AssertTrue(OppositeKind(bkNone) = bkNone, 'none opposite is none');
+  TestContext.AssertTrue(OppositeKind(bkRoundOpen) = bkRoundClose, '( opposite is )');
+  TestContext.AssertTrue(OppositeKind(bkRoundClose) = bkRoundOpen, ') opposite is (');
+  TestContext.AssertTrue(OppositeKind(bkSquareOpen) = bkSquareClose, '[ opposite is ]');
+  TestContext.AssertTrue(OppositeKind(bkSquareClose) = bkSquareOpen, '] opposite is [');
+  TestContext.AssertTrue(OppositeKind(bkBegin) = bkEnd, 'begin opposite is end');
+  TestContext.AssertTrue(OppositeKind(bkEnd) = bkBegin, 'end opposite is begin');
+  TestContext.AssertTrue(OppositeKind(bkNone) = bkNone, 'none opposite is none');
 end;
 
 procedure TTestBracketMatch.TestIsOpeningBracket;
 begin
-  FContext.AssertTrue(IsOpeningBracket(bkRoundOpen), '( is opening');
-  FContext.AssertTrue(not (IsOpeningBracket(bkRoundClose)), ') is not opening');
-  FContext.AssertTrue(IsOpeningBracket(bkSquareOpen), '[ is opening');
-  FContext.AssertTrue(not (IsOpeningBracket(bkSquareClose)), '] is not opening');
-  FContext.AssertTrue(IsOpeningBracket(bkBegin), 'begin is opening');
-  FContext.AssertTrue(not (IsOpeningBracket(bkEnd)), 'end is not opening');
-  FContext.AssertTrue(not (IsOpeningBracket(bkNone)), 'none is not opening');
+  TestContext.AssertTrue(IsOpeningBracket(bkRoundOpen), '( is opening');
+  TestContext.AssertTrue(not (IsOpeningBracket(bkRoundClose)), ') is not opening');
+  TestContext.AssertTrue(IsOpeningBracket(bkSquareOpen), '[ is opening');
+  TestContext.AssertTrue(not (IsOpeningBracket(bkSquareClose)), '] is not opening');
+  TestContext.AssertTrue(IsOpeningBracket(bkBegin), 'begin is opening');
+  TestContext.AssertTrue(not (IsOpeningBracket(bkEnd)), 'end is not opening');
+  TestContext.AssertTrue(not (IsOpeningBracket(bkNone)), 'none is not opening');
 end;
 
+
+constructor TTestBracketMatch.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
 
 procedure RunTTestBracketMatchTestMatchParenForward(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchParenForward');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchParenForward';
     lFixture.SetUp;
     try lFixture.TestMatchParenForward; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -409,10 +419,8 @@ end;
 procedure RunTTestBracketMatchTestMatchParenBackward(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchParenBackward');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchParenBackward';
     lFixture.SetUp;
     try lFixture.TestMatchParenBackward; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -421,10 +429,8 @@ end;
 procedure RunTTestBracketMatchTestMatchSquareBracketForward(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchSquareBracketForward');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchSquareBracketForward';
     lFixture.SetUp;
     try lFixture.TestMatchSquareBracketForward; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -433,10 +439,8 @@ end;
 procedure RunTTestBracketMatchTestMatchSquareBracketBackward(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchSquareBracketBackward');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchSquareBracketBackward';
     lFixture.SetUp;
     try lFixture.TestMatchSquareBracketBackward; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -445,10 +449,8 @@ end;
 procedure RunTTestBracketMatchTestNestedParens(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestNestedParens');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedParens';
     lFixture.SetUp;
     try lFixture.TestNestedParens; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -457,10 +459,8 @@ end;
 procedure RunTTestBracketMatchTestNestedMixed(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestNestedMixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedMixed';
     lFixture.SetUp;
     try lFixture.TestNestedMixed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -469,10 +469,8 @@ end;
 procedure RunTTestBracketMatchTestMultiLineParens(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMultiLineParens');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiLineParens';
     lFixture.SetUp;
     try lFixture.TestMultiLineParens; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -481,10 +479,8 @@ end;
 procedure RunTTestBracketMatchTestMatchBeginEnd(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchBeginEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchBeginEnd';
     lFixture.SetUp;
     try lFixture.TestMatchBeginEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -493,10 +489,8 @@ end;
 procedure RunTTestBracketMatchTestMatchEndBegin(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchEndBegin');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchEndBegin';
     lFixture.SetUp;
     try lFixture.TestMatchEndBegin; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -505,10 +499,8 @@ end;
 procedure RunTTestBracketMatchTestNestedBeginEnd(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestNestedBeginEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedBeginEnd';
     lFixture.SetUp;
     try lFixture.TestNestedBeginEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -517,10 +509,8 @@ end;
 procedure RunTTestBracketMatchTestBeginEndAcrossLines(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestBeginEndAcrossLines');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBeginEndAcrossLines';
     lFixture.SetUp;
     try lFixture.TestBeginEndAcrossLines; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -529,10 +519,8 @@ end;
 procedure RunTTestBracketMatchTestMatchCaseEnd(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchCaseEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchCaseEnd';
     lFixture.SetUp;
     try lFixture.TestMatchCaseEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -541,10 +529,8 @@ end;
 procedure RunTTestBracketMatchTestMatchTryEnd(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestMatchTryEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMatchTryEnd';
     lFixture.SetUp;
     try lFixture.TestMatchTryEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -553,10 +539,8 @@ end;
 procedure RunTTestBracketMatchTestNoMatchAtNonBracket(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestNoMatchAtNonBracket');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoMatchAtNonBracket';
     lFixture.SetUp;
     try lFixture.TestNoMatchAtNonBracket; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -565,10 +549,8 @@ end;
 procedure RunTTestBracketMatchTestBracketInsideComment(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestBracketInsideComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBracketInsideComment';
     lFixture.SetUp;
     try lFixture.TestBracketInsideComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -577,10 +559,8 @@ end;
 procedure RunTTestBracketMatchTestBracketInsideString(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestBracketInsideString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBracketInsideString';
     lFixture.SetUp;
     try lFixture.TestBracketInsideString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -589,10 +569,8 @@ end;
 procedure RunTTestBracketMatchTestUnmatchedBracket(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestUnmatchedBracket');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnmatchedBracket';
     lFixture.SetUp;
     try lFixture.TestUnmatchedBracket; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -601,10 +579,8 @@ end;
 procedure RunTTestBracketMatchTestCaretAtEndOfLine(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestCaretAtEndOfLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCaretAtEndOfLine';
     lFixture.SetUp;
     try lFixture.TestCaretAtEndOfLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -613,10 +589,8 @@ end;
 procedure RunTTestBracketMatchTestEmptySource(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestEmptySource');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptySource';
     lFixture.SetUp;
     try lFixture.TestEmptySource; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -625,10 +599,8 @@ end;
 procedure RunTTestBracketMatchTestClassifySymbols(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestClassifySymbols');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClassifySymbols';
     lFixture.SetUp;
     try lFixture.TestClassifySymbols; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -637,10 +609,8 @@ end;
 procedure RunTTestBracketMatchTestClassifyKeywords(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestClassifyKeywords');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClassifyKeywords';
     lFixture.SetUp;
     try lFixture.TestClassifyKeywords; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -649,10 +619,8 @@ end;
 procedure RunTTestBracketMatchTestOppositeKind(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestOppositeKind');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOppositeKind';
     lFixture.SetUp;
     try lFixture.TestOppositeKind; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -661,10 +629,8 @@ end;
 procedure RunTTestBracketMatchTestIsOpeningBracket(AContext: TNXTestContext);
 var lFixture: TTestBracketMatch;
 begin
-  lFixture:=TTestBracketMatch.Create;
+  lFixture:=TTestBracketMatch.Create(AContext, 'TestIsOpeningBracket');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsOpeningBracket';
     lFixture.SetUp;
     try lFixture.TestIsOpeningBracket; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

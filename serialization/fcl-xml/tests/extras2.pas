@@ -95,50 +95,50 @@ begin
   begin
     node := TDOMNode(doc).firstChild;
     nodeType := node.nodeType;
-    FContext.AssertTrue((7)=(nodeType), 'PIisFirstChild');
+    TestContext.AssertTrue((7)=(nodeType), 'PIisFirstChild');
     nodeValue := TDOMProcessingInstruction(node).data;
     length := system.length(nodeValue);
-    FContext.AssertTrue((36)=(length), 'piDataLength');
+    TestContext.AssertTrue((36)=(length), 'piDataLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisSecondChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisSecondChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'secondChildLength');
+    TestContext.AssertTrue((1)=(length), 'secondChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((1)=(nodeType), 'ElementisThirdChild');
+    TestContext.AssertTrue((1)=(nodeType), 'ElementisThirdChild');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisFourthChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisFourthChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'fourthChildLength');
+    TestContext.AssertTrue((1)=(length), 'fourthChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((7)=(nodeType), 'PIisFifthChild');
+    TestContext.AssertTrue((7)=(nodeType), 'PIisFifthChild');
     nodeValue := TDOMProcessingInstruction(node).data;
     assertEqualsW('trailingPIData', '', nodeValue);
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisSixthChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisSixthChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'sixthChildLength');
+    TestContext.AssertTrue((1)=(length), 'sixthChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((8)=(nodeType), 'CommentisSeventhChild');
+    TestContext.AssertTrue((8)=(nodeType), 'CommentisSeventhChild');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisEighthChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisEighthChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'eighthChildLength');
+    TestContext.AssertTrue((1)=(length), 'eighthChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((8)=(nodeType), 'CommentisNinthChild');
+    TestContext.AssertTrue((8)=(nodeType), 'CommentisNinthChild');
     node := node.nextSibling;
-    FContext.AssertTrue((node)=nil, 'TenthIsNull');
+    TestContext.AssertTrue((node)=nil, 'TenthIsNull');
   end;
 end;
 
@@ -157,32 +157,32 @@ begin
   begin
     node := TDOMNode(doc).firstChild;
     nodeType := node.nodeType;
-    FContext.AssertTrue((7)=(nodeType), 'PIisFirstChild');
+    TestContext.AssertTrue((7)=(nodeType), 'PIisFirstChild');
     nodeValue := TDOMProcessingInstruction(node).data;
     length := system.length(nodeValue);
-    FContext.AssertTrue((36)=(length), 'piDataLength');
+    TestContext.AssertTrue((36)=(length), 'piDataLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisSecondChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisSecondChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'secondChildLength');
+    TestContext.AssertTrue((1)=(length), 'secondChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((1)=(nodeType), 'ElementisThirdChild');
+    TestContext.AssertTrue((1)=(nodeType), 'ElementisThirdChild');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((3)=(nodeType), 'TextisFourthChild');
+    TestContext.AssertTrue((3)=(nodeType), 'TextisFourthChild');
     nodeValue := node.nodeValue;
     length := system.length(nodeValue);
-    FContext.AssertTrue((1)=(length), 'fourthChildLength');
+    TestContext.AssertTrue((1)=(length), 'fourthChildLength');
     node := node.nextSibling;
     nodeType := node.nodeType;
-    FContext.AssertTrue((7)=(nodeType), 'PIisFifthChild');
+    TestContext.AssertTrue((7)=(nodeType), 'PIisFifthChild');
     nodeValue := TDOMProcessingInstruction(node).data;
     assertEqualsW('trailingPIData', '', nodeValue);
     node := node.nextSibling;
-    FContext.AssertTrue((node)=nil, 'SixthIsNull');
+    TestContext.AssertTrue((node)=nil, 'SixthIsNull');
   end;
 end;
 
@@ -200,9 +200,9 @@ begin
   divList := doc.getElementsByTagName('div');
   TDOMNode(divEl) := divList[5];
   node := divEl.getAttributeNode('xmlns');
-  FContext.AssertTrue((node)<>nil, 'xmlnsPresent');
+  TestContext.AssertTrue((node)<>nil, 'xmlnsPresent');
   node := divEl.getAttributeNode('xmlns:a');
-  FContext.AssertTrue((node)=nil, 'xmlnsANotPresent');
+  TestContext.AssertTrue((node)=nil, 'xmlnsANotPresent');
 end;
 
 { test that defaulted attributes are being replaced by 'normal' ones }
@@ -221,9 +221,9 @@ begin
   elemList := doc.getElementsByTagName('acronym');
   TDOMNode(elem) := elemList[0];
   attr := elem.getAttributeNode('title');
-  FContext.AssertTrue((attr)<>nil, 'titlePresent');
+  TestContext.AssertTrue((attr)<>nil, 'titlePresent');
   attrSpecified := attr.specified;
-  FContext.AssertTrue(attrSpecified, 'titleSpecified');
+  TestContext.AssertTrue(attrSpecified, 'titleSpecified');
   attrValue := attr.nodeValue;
   assertEqualsW('titleValue', 'default', attrValue);
 end;
@@ -306,10 +306,8 @@ end;
 procedure RunTDOMTestExtra2ls3_canonicform08(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_canonicform08');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_canonicform08';
     lFixture.SetUp;
     try lFixture.ls3_canonicform08; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -318,10 +316,8 @@ end;
 procedure RunTDOMTestExtra2ls3_canonicform09(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_canonicform09');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_canonicform09';
     lFixture.SetUp;
     try lFixture.ls3_canonicform09; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -330,10 +326,8 @@ end;
 procedure RunTDOMTestExtra2ls3_canonicform10(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_canonicform10');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_canonicform10';
     lFixture.SetUp;
     try lFixture.ls3_canonicform10; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -342,10 +336,8 @@ end;
 procedure RunTDOMTestExtra2ls3_canonicform11(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_canonicform11');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_canonicform11';
     lFixture.SetUp;
     try lFixture.ls3_canonicform11; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -354,10 +346,8 @@ end;
 procedure RunTDOMTestExtra2ls3_DomWriterTest5(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_DomWriterTest5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_DomWriterTest5';
     lFixture.SetUp;
     try lFixture.ls3_DomWriterTest5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -366,10 +356,8 @@ end;
 procedure RunTDOMTestExtra2ls3_DomWriterTest6(AContext: TNXTestContext);
 var lFixture: TDOMTestExtra2;
 begin
-  lFixture:=TDOMTestExtra2.Create;
+  lFixture:=TDOMTestExtra2.Create(AContext, 'ls3_DomWriterTest6');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ls3_DomWriterTest6';
     lFixture.SetUp;
     try lFixture.ls3_DomWriterTest6; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

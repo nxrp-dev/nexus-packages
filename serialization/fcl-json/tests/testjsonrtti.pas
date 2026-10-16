@@ -21,7 +21,7 @@ type
     procedure DoStreamProperty1(Sender: TObject; AObject: TObject; Info: PPropInfo; var Res: TJSONData);
   protected
     procedure SetUp; override;
-    procedure TearDown; override;
+    procedure TearDown; virtual;
     
     Procedure AssertPropCount(ACount : Integer);
     Function  AssertProperty(APropName : String; AType : TJSONType) : TJSONData;
@@ -126,7 +126,7 @@ type
     Procedure DoNullError;
   protected
     procedure SetUp; override;
-    procedure TearDown; override;
+    procedure TearDown; virtual;
     Procedure AssertVarType(Msg : String; AVarType : TVarType; Const Variant : Variant);
     Property DS : TJSONDeStreamer Read FDS;
     Property JD : TJSONData Read FJD Write FJD;
@@ -193,13 +193,13 @@ begin
   FreeAndNil(FDS);
   FreeAndNil(FJD);
   FreeAndNil(FToFree);
-  inherited TearDown;
+
 end;
 
 procedure TTestJSONDeStreamer.AssertVarType(Msg: String; AVarType: TVarType;
   const Variant: Variant);
 begin
-  FContext.AssertTrue((VarTypeAsText(AVarType))=(VarTypeAsText(VarType(Variant))), Msg);
+  TestContext.AssertTrue((VarTypeAsText(AVarType))=(VarTypeAsText(VarType(Variant))), Msg);
 end;
 
 procedure TTestJSONDeStreamer.TestVariantInteger;
@@ -211,7 +211,7 @@ begin
   JD:=TJSOnIntegerNumber.Create(12);
   V:=DS.JSONToVariant(JD);
   AssertVarType('Integer data',varInteger,V);
-  FContext.AssertTrue((12)=(V), 'Integer value');
+  TestContext.AssertTrue((12)=(V), 'Integer value');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantFloat;
@@ -222,7 +222,7 @@ begin
   JD:=TJSOnFloatNumber.Create(1.2);
   V:=DS.JSONToVariant(JD);
   AssertVarType('Double data',varDouble,V);
-  FContext.AssertTrue((1.2)=(V), 'Float value');
+  TestContext.AssertTrue((1.2)=(V), 'Float value');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantInt64;
@@ -233,7 +233,7 @@ begin
   JD:=TJSONInt64Number.Create(123);
   V:=DS.JSONToVariant(JD);
   AssertVarType('Int64 data',varInt64,V);
-  FContext.AssertTrue((123)=(V), 'Int64 value');
+  TestContext.AssertTrue((123)=(V), 'Int64 value');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantBoolean;
@@ -244,7 +244,7 @@ begin
   JD:=TJSONBoolean.Create(True);
   V:=DS.JSONToVariant(JD);
   AssertVarType('Boolean data',varBoolean,V);
-  FContext.AssertTrue((True)=(V), 'Boolean value');
+  TestContext.AssertTrue((True)=(V), 'Boolean value');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantNull;
@@ -267,7 +267,7 @@ begin
   V:=DS.JSONToVariant(JD);
   AssertVarType('String data',varOleStr,V);
   S:=V;
-  FContext.AssertTrue(('A string')=(S), 'String data');
+  TestContext.AssertTrue(('A string')=(S), 'String data');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantArray;
@@ -276,26 +276,26 @@ Var
 begin
   JD:=TJSONArray.Create([1,2,3]);
   V:=DS.JSONToVariant(JD);
-  FContext.AssertTrue((true)=(VarIsArray(V)), 'Variant is array');
-  FContext.AssertTrue((0)=(VarArrayLowBound(V,1)), 'Lower bound is zero ');
-  FContext.AssertTrue((2)=(VarArrayHighBound(V,1)), 'Higher bound is count-1 ');
-  FContext.AssertTrue((1)=(V[0]), 'Element 0 value correct ');
-  FContext.AssertTrue((2)=(V[1]), 'Element 1 value correct ');
-  FContext.AssertTrue((3)=(V[2]), 'Element 2 value correct ');
+  TestContext.AssertTrue((true)=(VarIsArray(V)), 'Variant is array');
+  TestContext.AssertTrue((0)=(VarArrayLowBound(V,1)), 'Lower bound is zero ');
+  TestContext.AssertTrue((2)=(VarArrayHighBound(V,1)), 'Higher bound is count-1 ');
+  TestContext.AssertTrue((1)=(V[0]), 'Element 0 value correct ');
+  TestContext.AssertTrue((2)=(V[1]), 'Element 1 value correct ');
+  TestContext.AssertTrue((3)=(V[2]), 'Element 2 value correct ');
 end;
 
 procedure TTestJSONDeStreamer.TestEmpty;
 begin
   FTofree:=TComponent.Create(Nil);
   DS.JSONToObject('{}',FTofree);
-  FContext.AssertTrue(('')=(TComponent(FToFree).Name), 'Empty name');
-  FContext.AssertTrue((0)=(TComponent(FToFree).Tag), 'Empty Tag');
+  TestContext.AssertTrue(('')=(TComponent(FToFree).Name), 'Empty name');
+  TestContext.AssertTrue((0)=(TComponent(FToFree).Tag), 'Empty Tag');
 end;
 
 procedure TTestJSONDeStreamer.TestNullError;
 
 begin
-  FContext.AssertRaises(EJSON, @DoNullError, 'Null error');
+  TestContext.AssertRaises(EJSON, @DoNullError, 'Null error');
 end;
 
 procedure TTestJSONDeStreamer.TestNull;
@@ -306,7 +306,7 @@ begin
   B:=TBooleanComponent.Create(Nil);
   DS.Options:=DS.Options+[jdoIgnoreNulls];
   DeStream('{ "BooleanProp" : null }',B);
-  FContext.AssertTrue((False)=(B.BooleanProp), 'Correct boolean value');
+  TestContext.AssertTrue((False)=(B.BooleanProp), 'Correct boolean value');
 end;
 
 procedure TTestJSONDeStreamer.DeStream(JSON : TJSONStringType; AObject : TObject);
@@ -331,7 +331,7 @@ Var
 begin
   B:=TBooleanComponent.Create(Nil);
   DeStream('{ "BooleanProp" : true }',B);
-  FContext.AssertTrue((true)=(B.BooleanProp), 'Correct boolean value');
+  TestContext.AssertTrue((true)=(B.BooleanProp), 'Correct boolean value');
 end;
 
 procedure TTestJSONDeStreamer.TestInteger;
@@ -342,7 +342,7 @@ Var
 begin
   B:=TIntegerComponent.Create(Nil);
   DeStream('{ "IntProp" : 22 }',B);
-  FContext.AssertTrue((22)=(B.IntProp), 'Correct integer value');
+  TestContext.AssertTrue((22)=(B.IntProp), 'Correct integer value');
 end;
 
 procedure TTestJSONDeStreamer.TestIntegerCaseInsensitive;
@@ -354,7 +354,7 @@ begin
   DS.Options:=DS.Options+[jdoCaseInsensitive];
   B:=TIntegerComponent.Create(Nil);
   DeStream('{ "intprop" : 22 }',B);
-  FContext.AssertTrue((22)=(B.IntProp), 'Correct integer value');
+  TestContext.AssertTrue((22)=(B.IntProp), 'Correct integer value');
 end;
 
 procedure TTestJSONDeStreamer.TestIntegerCaseSensitive;
@@ -367,7 +367,7 @@ begin
   B:=TIntegerComponent.Create(Nil);
   B.IntProp:=0;
   DeStream('{ "intprop" : 22 }',B);
-  FContext.AssertTrue((0)=(B.IntProp), 'Correct integer value not reas');
+  TestContext.AssertTrue((0)=(B.IntProp), 'Correct integer value not reas');
 end;
 
 procedure TTestJSONDeStreamer.TestString;
@@ -378,7 +378,7 @@ Var
 begin
   B:=TStringComponent.Create(Nil);
   DeStream('{ "StringProp" : "A nice string"}',B);
-  FContext.AssertTrue(('A nice string')=(B.StringProp), 'Correct string value');
+  TestContext.AssertTrue(('A nice string')=(B.StringProp), 'Correct string value');
 end;
 
 procedure TTestJSONDeStreamer.TestFloat;
@@ -389,7 +389,7 @@ Var
 begin
   B:=TSingleComponent.Create(Nil);
   DeStream('{ "SingleProp" : 2.34 }',B);
-  FContext.AssertTrue((2.34)=(B.SingleProp), 'Correct single value');
+  TestContext.AssertTrue((Single(2.34))=(B.SingleProp), 'Correct single value');
 end;
 
 procedure TTestJSONDeStreamer.TestFloat2;
@@ -400,7 +400,7 @@ Var
 begin
   B:=TDoubleComponent.Create(Nil);
   DeStream('{ "DoubleProp" : 3.45 }',B);
-  FContext.AssertTrue((3.45)=(B.DoubleProp), 'Correct Double value');
+  TestContext.AssertTrue((Double(3.45))=(B.DoubleProp), 'Correct Double value');
 end;
 
 procedure TTestJSONDeStreamer.TestFloat3;
@@ -410,7 +410,7 @@ Var
 begin
   B:=TExtendedComponent.Create(Nil);
   DeStream('{ "ExtendedProp" : 4.56 }',B);
-  FContext.AssertTrue((4.56)=(B.ExtendedProp), 'Correct extended value');
+  TestContext.AssertTrue(Abs(4.56-B.ExtendedProp)<=1e-12, 'Correct extended value');
 end;
 
 procedure TTestJSONDeStreamer.TestFloat4;
@@ -421,7 +421,7 @@ Var
 begin
   B:=TCompComponent.Create(Nil);
   DeStream('{ "CompProp" : 5.67 }',B);
-  FContext.AssertTrue((round(5.67))=(B.CompProp), 'Correct comp value');
+  TestContext.AssertTrue((round(5.67))=(B.CompProp), 'Correct comp value');
 end;
 
 procedure TTestJSONDeStreamer.TestFloat5;
@@ -431,7 +431,7 @@ Var
 begin
   B:=TCurrencyComponent.Create(Nil);
   DeStream('{ "CurrencyProp" : 5.67 }',B);
-  FContext.AssertTrue((5.67)=(B.CurrencyProp), 'Correct string value');
+  TestContext.AssertTrue((5.67)=(B.CurrencyProp), 'Correct string value');
 end;
 
 procedure TTestJSONDeStreamer.TestDateTime;
@@ -444,7 +444,7 @@ begin
   E:=TDateTimeComponent.Create(Nil);
   D:= RecodeMillisecond(Now,0);
   DeStream('{"DateTimeProp" : "'+FormatDateTime(RFC3339DateTimeFormat,D)+'"}',E);
-  FContext.AssertTrue((D)=(E.DateTimeProp), 'Correct value');
+  TestContext.AssertTrue((D)=(E.DateTimeProp), 'Correct value');
 end;
 
 procedure TTestJSONDeStreamer.DoDateTimeFormat;
@@ -476,8 +476,8 @@ begin
   D:=RecodeMillisecond(Now,0);
   DS.DateTimeFormat:=ISO8601;
   DeStream('{"DateTimeProp" : "'+FormatDateTime(Iso8601,D)+'"}',E);
-  FContext.AssertTrue((D)=(E.DateTimeProp), 'Correct value');
-  FContext.AssertRaises(EConvertError, @DoDateTimeFormat, 'Error if  string does not correspond to specified format');
+  TestContext.AssertTrue((D)=(E.DateTimeProp), 'Correct value');
+  TestContext.AssertRaises(EConvertError, @DoDateTimeFormat, 'Error if  string does not correspond to specified format');
 end;
 
 procedure TTestJSONDeStreamer.TestEnum1;
@@ -488,7 +488,7 @@ Var
 begin
   E:=TEnumComponent.Create(Nil);
   DeStream('{ "Dice" : 2 }',E);
-  FContext.AssertTrue((2)=(Ord(E.Dice)), 'Correct value');
+  TestContext.AssertTrue((2)=(Ord(E.Dice)), 'Correct value');
 end;
 
 procedure TTestJSONDeStreamer.TestEnum2;
@@ -499,7 +499,7 @@ Var
 begin
   E:=TEnumComponent.Create(Nil);
   DeStream('{ "Dice" : "three" }',E);
-  FContext.AssertTrue((GetEnumName(TypeInfo(TDice),Ord(Three)))=(GetEnumName(TypeInfo(TDice),Ord(E.Dice))), 'Correct value');
+  TestContext.AssertTrue((GetEnumName(TypeInfo(TDice),Ord(Three)))=(GetEnumName(TypeInfo(TDice),Ord(E.Dice))), 'Correct value');
 end;
 
 procedure TTestJSONDeStreamer.TestSet1;
@@ -511,7 +511,7 @@ begin
   T:=TSetComponent.Create(Nil);
   DeStream('{ "Throw" : "one,two" }',T);
   If not (T.Throw=[one,two]) then
-    FContext.Fail('Correct value for throw');
+    TestContext.Fail('Correct value for throw');
 end;
 
 procedure TTestJSONDeStreamer.TestSet2;
@@ -523,7 +523,7 @@ begin
   T:=TSetComponent.Create(Nil);
   DeStream('{ "Throw" : "[one,two]" }',T);
   If not (T.Throw=[one,two]) then
-    FContext.Fail('Correct value for throw');
+    TestContext.Fail('Correct value for throw');
 end;
 
 procedure TTestJSONDeStreamer.TestSet3;
@@ -535,7 +535,7 @@ begin
   T:=TSetComponent.Create(Nil);
   DeStream('{ "Throw" : [ "one", "two"] }',T);
   If not (T.Throw=[one,two]) then
-    FContext.Fail('Correct value for throw');
+    TestContext.Fail('Correct value for throw');
 end;
 
 procedure TTestJSONDeStreamer.TestSet4;
@@ -547,7 +547,7 @@ begin
   T:=TSetComponent.Create(Nil);
   DeStream('{ "Throw" : [ 0 , 1 ] }',T);
   If not (T.Throw=[one,two]) then
-    FContext.Fail('Correct value for throw');
+    TestContext.Fail('Correct value for throw');
 end;
 
 procedure TTestJSONDeStreamer.TestVariantProp;
@@ -559,7 +559,7 @@ begin
   V:=TVariantComponent.Create(Nil);
   DeStream('{ "VariantProp" : "A string" }',V);
   S:=V.VariantProp;
-  FContext.AssertTrue(('A string')=(S), 'Variant property value');
+  TestContext.AssertTrue(('A string')=(S), 'Variant property value');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection;
@@ -570,11 +570,11 @@ Var
 begin
   C:=TTestCollection.Create;
   DeStream('[ { "StrProp" : "one" }, { "StrProp" : "two" } ]',C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection2;
@@ -585,11 +585,11 @@ Var
 begin
   C:=TTestCollection.Create;
   DeStream('{ "Items" : [ { "StrProp" : "one" }, { "StrProp" : "two" } ] }',C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection3;
@@ -601,11 +601,11 @@ begin
   C:=TTestCollection.Create;
   FTofree:=C;
   DS.JSONToCollection('{ "Items" : [ { "StrProp" : "one" }, { "StrProp" : "two" } ] }',C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection4;
@@ -617,11 +617,11 @@ begin
   C:=TTestCollection.Create;
   FTofree:=C;
   DS.JSONToCollection('[ { "StrProp" : "one" }, { "StrProp" : "two" } ]',C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection5;
@@ -634,11 +634,11 @@ begin
   FTofree:=C;
   JD:=TJSONArray.Create([TJSONObject.Create(['StrProp','one']),TJSONObject.Create(['StrProp','two'])]);
   DS.JSONToCollection(JD,C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollection6;
@@ -650,11 +650,11 @@ begin
   FTofree:=C;
   JD:=TJSONObject.Create(['Items',TJSONArray.Create([TJSONObject.Create(['StrProp','one']),TJSONObject.Create(['StrProp','two'])])]);
   DS.JSONToCollection(JD,C);
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollectionProp;
@@ -666,11 +666,11 @@ begin
   JD:=TJSONObject.Create(['Coll',TJSONArray.Create([TJSONObject.Create(['StrProp','one']),TJSONObject.Create(['StrProp','two'])])]);
   DeStream(JD as TJSONObject,TCollectionComponent.Create(Nil));
   C:=TCollectionComponent(ToFree).Coll;
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestCollectionProp2;
@@ -682,11 +682,11 @@ begin
 
   DeStream('{ "Coll" : [ { "StrProp" : "one" }, { "StrProp" : "two" } ]}',TCollectionComponent.Create(Nil));
   C:=TCollectionComponent(ToFree).Coll;
-  FContext.AssertTrue((2)=(C.Count), 'Item count');
-  FContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
-  FContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
-  FContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
-  FContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
+  TestContext.AssertTrue((2)=(C.Count), 'Item count');
+  TestContext.AssertTrue((TTestItem)=(C.Items[0].ClassType), 'Class item 0');
+  TestContext.AssertTrue((TTestItem)=(C.Items[1].ClassType), 'Class item 1');
+  TestContext.AssertTrue(('one')=(TTestItem(C.Items[0]).StrProp), 'Class item 0');
+  TestContext.AssertTrue(('two')=(TTestItem(C.Items[1]).StrProp), 'Class item 1');
 end;
 
 procedure TTestJSONDeStreamer.TestStrings;
@@ -698,9 +698,9 @@ begin
   S:=TStringList.Create;
   FTofree:=S;
   DS.JSONToStrings('[ "one" , "two" ]',S);
-  FContext.AssertTrue((2)=(S.Count), 'Item count');
-  FContext.AssertTrue(('one')=(S[0]), 'First item');
-  FContext.AssertTrue(('two')=(S[1]), 'First item');
+  TestContext.AssertTrue((2)=(S.Count), 'Item count');
+  TestContext.AssertTrue(('one')=(S[0]), 'First item');
+  TestContext.AssertTrue(('two')=(S[1]), 'First item');
 end;
 
 procedure TTestJSONDeStreamer.TestStrings2;
@@ -712,9 +712,9 @@ begin
   S:=TStringList.Create;
   FTofree:=S;
   DS.JSONToStrings('{ "Strings" : [ "one" , "two" ] }',S);
-  FContext.AssertTrue((2)=(S.Count), 'Item count');
-  FContext.AssertTrue(('one')=(S[0]), 'First item');
-  FContext.AssertTrue(('two')=(S[1]), 'First item');
+  TestContext.AssertTrue((2)=(S.Count), 'Item count');
+  TestContext.AssertTrue(('one')=(S[0]), 'First item');
+  TestContext.AssertTrue(('two')=(S[1]), 'First item');
 end;
 
 procedure TTestJSONDeStreamer.TestStrings3;
@@ -725,9 +725,9 @@ begin
   S:=TStringList.Create;
   FTofree:=S;
   DS.JSONToStrings('{ "Strings" : [ "one" , "two" ] }',S);
-  FContext.AssertTrue((2)=(S.Count), 'Item count');
-  FContext.AssertTrue(('one')=(S[0]), 'First item');
-  FContext.AssertTrue(('two')=(S[1]), 'First item');
+  TestContext.AssertTrue((2)=(S.Count), 'Item count');
+  TestContext.AssertTrue(('one')=(S[0]), 'First item');
+  TestContext.AssertTrue(('two')=(S[1]), 'First item');
 end;
 
 { TTestJSONStreamer }
@@ -743,7 +743,7 @@ procedure TTestJSONStreamer.DoStreamProperty1(Sender: TObject; AObject: TObject;
   Info: PPropInfo; var Res: TJSONData);
 begin
   If (info^.name<>'IntProp') and (info^.name<>'Name') and (info^.name<>'Tag') then
-    FContext.Fail('Wrong property');
+    TestContext.Fail('Wrong property');
   If (info^.name='IntProp') then
     FreeAndNil(Res);
   FCalled:=true;
@@ -760,18 +760,18 @@ begin
   FreeAndNil(FSR);
   FreeAndNil(FRJ);
   FreeAndNil(FToFree);
-  Inherited;
+
 end;
 
 
 
 procedure TTestJSONStreamer.AssertPropCount(ACount: Integer);
 begin
-  FContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
+  TestContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
   If FToFree is TComponent then
     ACount:=ACount+2; // Tag + Name
   // Writeln(FSR.ASJSON);
-  FContext.AssertTrue((ACount)=(FSR.Count), 'Property count correct');
+  TestContext.AssertTrue((ACount)=(FSR.Count), 'Property count correct');
 end;
 
 function TTestJSONStreamer.AssertProperty(APropName: String; AType: TJSONType
@@ -783,37 +783,37 @@ Var
 begin
   I:=FSR.IndexOfName(APropName);
   If (I=-1) then
-    FContext.Fail('No property "'+APropName+'" available');
+    TestContext.Fail('No property "'+APropName+'" available');
   Result:=FSR.Items[i];
-  FContext.AssertTrue((GetEnumName(TypeInfo(TJSONType),Ord(AType)))=(GetEnumName(TypeInfo(TJSONType),Ord(Result.JSONType))), 'Property "'+APropName+'" has correct type');
+  TestContext.AssertTrue((GetEnumName(TypeInfo(TJSONType),Ord(AType)))=(GetEnumName(TypeInfo(TJSONType),Ord(Result.JSONType))), 'Property "'+APropName+'" has correct type');
 end;
 
 procedure TTestJSONStreamer.AssertProp(APropName: String; AValue: Boolean);
 begin
-  FContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
-  FContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
-  FContext.AssertTrue((AValue)=(AssertProperty(APropName,jtBoolean).AsBoolean), 'Correct value');
+  TestContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
+  TestContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
+  TestContext.AssertTrue((AValue)=(AssertProperty(APropName,jtBoolean).AsBoolean), 'Correct value');
 end;
 
 procedure TTestJSONStreamer.AssertProp(APropName: String; AValue: Integer);
 begin
-  FContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
-  FContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
-  FContext.AssertTrue((AValue)=(AssertProperty(APropName,jtNumber).AsInteger), 'Correct value');
+  TestContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
+  TestContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
+  TestContext.AssertTrue((AValue)=(AssertProperty(APropName,jtNumber).AsInteger), 'Correct value');
 end;
 
 procedure TTestJSONStreamer.AssertProp(APropName: String; AValue: String);
 begin
-  FContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
-  FContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
-  FContext.AssertTrue((AValue)=(AssertProperty(APropName,jtString).AsString), 'Correct value');
+  TestContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
+  TestContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
+  TestContext.AssertTrue((AValue)=(AssertProperty(APropName,jtString).AsString), 'Correct value');
 end;
 
 procedure TTestJSONStreamer.AssertProp(APropName: String; AValue: TJSONFloat);
 begin
-  FContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
-  FContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
-  FContext.AssertTrue((AValue)=(AssertProperty(APropName,jtNumber).AsFloat), 'Correct value');
+  TestContext.AssertTrue((FSR)<>nil, 'Result of streaming available');
+  TestContext.AssertTrue((TJSONObject)=(FSR.ClassType), 'Result of streaming is TJSONObject');
+  TestContext.AssertTrue(Abs(AValue-AssertProperty(APropName,jtNumber).AsFloat)<=1e-6, 'Correct value');
 end;
 
 procedure TTestJSONStreamer.AssertProp(APropName: String; AValue: array of String
@@ -824,11 +824,11 @@ Var
 
 begin
   a:=AssertArrayProp(APropName);
-  FContext.AssertTrue((Length(AValue))=(A.Count), 'Correct count ');
+  TestContext.AssertTrue((Length(AValue))=(A.Count), 'Correct count ');
   For I:=Low(AValue) to High(Avalue) do
     begin
-    FContext.AssertTrue((jtString)=(A.Types[i]), 'Array element type');
-    FContext.AssertTrue((AValue[i])=(A.strings[i]), 'Array value');
+    TestContext.AssertTrue((jtString)=(A.Types[i]), 'Array element type');
+    TestContext.AssertTrue((AValue[i])=(A.strings[i]), 'Array value');
     end;
 end;
 
@@ -842,8 +842,8 @@ begin
   a:=AssertArrayProp(APropName);
   For I:=Low(AValue) to High(Avalue) do
     begin
-    FContext.AssertTrue((jtNumber)=(A.Types[i]), 'Array element type');
-    FContext.AssertTrue((AValue[i])=(A.Integers[i]), 'Array value');
+    TestContext.AssertTrue((jtNumber)=(A.Types[i]), 'Array element type');
+    TestContext.AssertTrue((AValue[i])=(A.Integers[i]), 'Array value');
     end;
 end;
 
@@ -870,7 +870,7 @@ end;
 
 procedure TTestJSONStreamer.TestNil;
 begin
-  FContext.AssertTrue((StreamObject(Nil))=nil, 'Nil returns nil');
+  TestContext.AssertTrue((StreamObject(Nil))=nil, 'Nil returns nil');
 end;
 
 procedure TTestJSONStreamer.TestEmpty;
@@ -1045,18 +1045,18 @@ begin
   F:=SR;
   try
     A:=AssertArrayProp('Coll');
-    FContext.AssertTrue((3)=(A.Count), 'Collection item cound');
-    FContext.AssertTrue((jtObject)=(A.Types[0]), 'Item 0 is object');
+    TestContext.AssertTrue((3)=(A.Count), 'Collection item cound');
+    TestContext.AssertTrue((jtObject)=(A.Types[0]), 'Item 0 is object');
     SR:=A.Objects[0];
     FToFree:=SR;
     AssertPropCount(1);
     AssertProp('StrProp','First');
-    FContext.AssertTrue((jtObject)=(A.Types[1]), 'Item 1 is object');
+    TestContext.AssertTrue((jtObject)=(A.Types[1]), 'Item 1 is object');
     SR:=A.Objects[1];
     FToFree:=SR;
     AssertPropCount(1);
     AssertProp('StrProp','Second');
-    FContext.AssertTrue((jtObject)=(A.Types[2]), 'Item 2 is object');
+    TestContext.AssertTrue((jtObject)=(A.Types[2]), 'Item 2 is object');
     SR:=A.Objects[2];
     FToFree:=SR;
     AssertPropCount(1);
@@ -1078,7 +1078,7 @@ begin
   StreamObject(C);
   AssertPropCount (1);
   A:=AssertArrayProp('Coll');
-  FContext.AssertTrue((0)=(A.Count), 'Collection item count');
+  TestContext.AssertTrue((0)=(A.Count), 'Collection item count');
 end;
 
 procedure TTestJSONStreamer.TestPersistentProp1;
@@ -1196,9 +1196,9 @@ begin
     S.Add('one');
     O:=RJ.StreamTStringsArray(S);
     try
-      FContext.AssertTrue((1)=(O.Count), 'one element');
-      FContext.AssertTrue((jtString)=(O.Types[0]), 'string type');
-      FContext.AssertTrue(('one')=(O.Strings[0]), 'string value');
+      TestContext.AssertTrue((1)=(O.Count), 'one element');
+      TestContext.AssertTrue((jtString)=(O.Types[0]), 'string type');
+      TestContext.AssertTrue(('one')=(O.Strings[0]), 'string value');
     finally
       FreeAndNil(O);
     end;
@@ -1219,10 +1219,10 @@ begin
     S.AddObject('one',TEmptyPersistent.Create);
     O:=RJ.StreamTStringsObject(S);
     try
-      FContext.AssertTrue((1)=(O.Count), 'one element');
-      FContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
-      FContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
-      FContext.AssertTrue(('one')=(O.Names[0]), 'string value');
+      TestContext.AssertTrue((1)=(O.Count), 'one element');
+      TestContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
+      TestContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
+      TestContext.AssertTrue(('one')=(O.Names[0]), 'string value');
     finally
       FreeAndNil(O);
     end;
@@ -1246,11 +1246,11 @@ begin
     RJ.Options:=[jsoTstringsAsArray];
     D:=RJ.StreamTStrings(S);
     try
-      FContext.AssertTrue((jtArray)=(D.JSONType), 'Correct type');
+      TestContext.AssertTrue((jtArray)=(D.JSONType), 'Correct type');
       O:=D as TJSONArray;
-      FContext.AssertTrue((1)=(O.Count), 'one element');
-      FContext.AssertTrue((jtString)=(O.Types[0]), 'string type');
-      FContext.AssertTrue(('one')=(O.Strings[0]), 'string value');
+      TestContext.AssertTrue((1)=(O.Count), 'one element');
+      TestContext.AssertTrue((jtString)=(O.Types[0]), 'string type');
+      TestContext.AssertTrue(('one')=(O.Strings[0]), 'string value');
     finally
       FreeAndNil(O);
     end;
@@ -1273,12 +1273,12 @@ begin
     RJ.Options:=[jsoTstringsAsObject];
     D:=RJ.StreamTstrings(S);
     try
-      FContext.AssertTrue((jtObject)=(D.JSONType), 'Correct type');
+      TestContext.AssertTrue((jtObject)=(D.JSONType), 'Correct type');
       O:=D as TJSONObject;
-      FContext.AssertTrue((1)=(O.Count), 'one element');
-      FContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
-      FContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
-      FContext.AssertTrue(('one')=(O.Names[0]), 'string value');
+      TestContext.AssertTrue((1)=(O.Count), 'one element');
+      TestContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
+      TestContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
+      TestContext.AssertTrue(('one')=(O.Names[0]), 'string value');
     finally
       SR:=O;
     end;
@@ -1300,10 +1300,10 @@ begin
     RJ.Options:=[jsoTstringsAsObject];
     SR:=RJ.ObjectToJSON(S);
     O:=AssertObjectProp('Strings');
-    FContext.AssertTrue((1)=(O.Count), 'one element');
-    FContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
-    FContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
-    FContext.AssertTrue(('one')=(O.Names[0]), 'string value');
+    TestContext.AssertTrue((1)=(O.Count), 'one element');
+    TestContext.AssertTrue((0)=(O.IndexOfName('one')), 'Have property');
+    TestContext.AssertTrue((jtObject)=(O.Types['one']), 'string type');
+    TestContext.AssertTrue(('one')=(O.Names[0]), 'string value');
   finally
     S.Objects[0].FRee;
     S.Free;
@@ -1337,8 +1337,8 @@ begin
     S.AddObject('one',TEmptyPersistent.Create);
     D:=RJ.StreamTstrings(S);
     try
-      FContext.AssertTrue((jtString)=(D.JSONType), 'String data');
-      FContext.AssertTrue(('one'+sLineBreak)=(D.AsString), 'String value');
+      TestContext.AssertTrue((jtString)=(D.JSONType), 'String data');
+      TestContext.AssertTrue(('one'+sLineBreak)=(D.AsString), 'String value');
     finally
       D.free;
     end;
@@ -1361,10 +1361,10 @@ begin
   TTestItem(C.Add).StrProp:='Two';
   A:=RJ.StreamCollection(C);
   try
-    FContext.AssertTrue((A)<>nil, 'Have result');
-    FContext.AssertTrue((2)=(A.Count), '2 items');
-    FContext.AssertTrue((jtObject)=(A.Types[0]), 'Type item 0,');
-    FContext.AssertTrue((jtObject)=(A.Types[1]), 'Type item 1,');
+    TestContext.AssertTrue((A)<>nil, 'Have result');
+    TestContext.AssertTrue((2)=(A.Count), '2 items');
+    TestContext.AssertTrue((jtObject)=(A.Types[0]), 'Type item 0,');
+    TestContext.AssertTrue((jtObject)=(A.Types[1]), 'Type item 1,');
     SR:=A.Objects[0];
     AssertPropCount(1);
     AssertProp('StrProp','One');
@@ -1393,10 +1393,10 @@ begin
   O:=SR;
   try
     A:=AssertProperty('Items',jtArray) as TJSONArray;
-    FContext.AssertTrue((A)<>nil, 'Have result');
-    FContext.AssertTrue((2)=(A.Count), '2 items');
-    FContext.AssertTrue((jtObject)=(A.Types[0]), 'Type item 0,');
-    FContext.AssertTrue((jtObject)=(A.Types[1]), 'Type item 1,');
+    TestContext.AssertTrue((A)<>nil, 'Have result');
+    TestContext.AssertTrue((2)=(A.Count), '2 items');
+    TestContext.AssertTrue((jtObject)=(A.Types[0]), 'Type item 0,');
+    TestContext.AssertTrue((jtObject)=(A.Types[1]), 'Type item 1,');
     SR:=A.Objects[0];
     AssertPropCount(1);
     AssertProp('StrProp','One');
@@ -1516,8 +1516,8 @@ begin
   Obj.Value := High(QWord);
   D:=StreamObject(Obj);
   V := D.Find('Value');
-  FContext.AssertTrue(('TJSONQWordNumber')=(V.ClassName), 'Max QWord type');
-  FContext.AssertTrue((High(QWord))=(V.AsQWord), 'Max QWord');
+  TestContext.AssertTrue(('TJSONQWordNumber')=(V.ClassName), 'Max QWord type');
+  TestContext.AssertTrue((High(QWord))=(V.AsQWord), 'Max QWord');
 end;
 
 procedure TTestJSONStreamer.TestVariantShortint;
@@ -1530,7 +1530,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varshortint))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varshortint))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1545,7 +1545,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varByte))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varByte))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1561,7 +1561,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varWord))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varWord))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1577,7 +1577,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varSmallint))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varSmallint))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1592,7 +1592,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varInteger))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varInteger))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1608,7 +1608,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varLongword))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varLongword))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1623,7 +1623,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varInt64))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varInt64))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1638,7 +1638,7 @@ begin
   i:=3;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varQWord))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varQWord))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3);
@@ -1653,7 +1653,7 @@ begin
   i:=3.14;
   C:=CreateVariantComp;
   C.VariantProp:=VarAsType(3.14,varSingle);
-  FContext.AssertTrue((VarTypeAsText(varSingle))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varSingle))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',i);
@@ -1669,7 +1669,7 @@ begin
   i:=3.14;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varDouble))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varDouble))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3.14);
@@ -1684,7 +1684,7 @@ begin
   i:=3.14;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varCurrency))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varCurrency))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',3.14);
@@ -1700,7 +1700,7 @@ begin
   i:='3.14';
   C:=CreateVariantComp;
   C.VariantProp:=VarAsType(i,varOleStr);
-  FContext.AssertTrue((VarTypeAsText(varOleStr))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varOleStr))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp','3.14');
@@ -1715,7 +1715,7 @@ begin
   i:=True;
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varBoolean))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varBoolean))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',True);
@@ -1731,7 +1731,7 @@ begin
   i:=EncodeDate(2010,12,23);
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varDate))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varDate))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',EncodeDate(2010,12,23));
@@ -1748,7 +1748,7 @@ begin
   i:=EncodeDate(2010,12,23);
   C:=CreateVariantComp;
   C.VariantProp:=i;
-  FContext.AssertTrue((VarTypeAsText(varDate))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
+  TestContext.AssertTrue((VarTypeAsText(varDate))=(VarTypeAsText(VarType(C.VariantProp))), 'Variant type');
   StreamObject(FTofree);
   AssertPropCount(1);
   AssertProp('VariantProp',DateToStr(EncodeDate(2010,12,23)));
@@ -1770,11 +1770,11 @@ begin
   StreamObject(FTofree);
   AssertPropCount(1);
   A:=AssertProperty('VariantProp',jtArray) as TJSONArray;
-  FContext.AssertTrue((10)=(A.Count), '10 elements in array');
+  TestContext.AssertTrue((10)=(A.Count), '10 elements in array');
   For I:=1 to 10 do
     begin
-    FContext.AssertTrue((jtNumber)=(A.Types[i-1]), 'Type of element');
-    FContext.AssertTrue((11-i)=(A.Integers[i-1]), 'Value of element');
+    TestContext.AssertTrue((jtNumber)=(A.Types[i-1]), 'Type of element');
+    TestContext.AssertTrue((11-i)=(A.Integers[i-1]), 'Value of element');
     end;
 end;
 
@@ -1792,7 +1792,7 @@ end;
 procedure TTestJSONStreamer.TestObjectToJSONString;
 begin
   StreamObject(TIntegerComponent.Create(Nil));
-  FContext.AssertTrue((SR.AsJSON)=(RJ.ObjectToJSONString(FToFree)), 'Correct stream');
+  TestContext.AssertTrue((SR.AsJSON)=(RJ.ObjectToJSONString(FToFree)), 'Correct stream');
 end;
 
 procedure TTestJSONStreamer.TestStringsToJSONString;
@@ -1804,8 +1804,8 @@ begin
     S.Add('one');
     S.Add('two');
     S.Add('three');
-    FContext.AssertTrue(('["one", "two", "three"]')=(RJ.StringsToJSON(S)), 'StringsToJSONString');
-    FContext.AssertTrue(('{ "one" : null, "two" : null, "three" : null }')=(RJ.StringsToJSON(S,True)), 'StringsToJSONString');
+    TestContext.AssertTrue(('["one", "two", "three"]')=(RJ.StringsToJSON(S)), 'StringsToJSONString');
+    TestContext.AssertTrue(('{ "one" : null, "two" : null, "three" : null }')=(RJ.StringsToJSON(S,True)), 'StringsToJSONString');
   finally
     FreeAndNil(S);
   end;
@@ -1834,7 +1834,7 @@ begin
     Add.StrProp:='two';
     Add.StrProp:='three';
     D:=RJ.StreamTList(C);
-    FContext.AssertTrue(('[{ "StrProp" : "one" }, { "StrProp" : "two" }, { "StrProp" : "three" }]')=(D.AsJSON), 'StreamTlist');
+    TestContext.AssertTrue(('[{ "StrProp" : "one" }, { "StrProp" : "two" }, { "StrProp" : "three" }]')=(D.AsJSON), 'StreamTlist');
   finally
     D.Free;
     For P in C do
@@ -1854,7 +1854,7 @@ begin
     (C.Add as TTestItem).StrProp:='one';
     (C.Add as TTestItem).StrProp:='two';
     (C.Add as TTestItem).StrProp:='three';
-    FContext.AssertTrue(('[{ "StrProp" : "one" }, { "StrProp" : "two" }, { "StrProp" : "three" }]')=(RJ.CollectionToJSON(C)), 'CollectionToJSON');
+    TestContext.AssertTrue(('[{ "StrProp" : "one" }, { "StrProp" : "two" }, { "StrProp" : "three" }]')=(RJ.CollectionToJSON(C)), 'CollectionToJSON');
   finally
     FreeAndNil(C);
   end;
@@ -1871,7 +1871,7 @@ begin
   TComponent.Create(C).Name:='Child2';
   StreamObject(C);
   If SR.IndexOfName('Children')<>-1 then
-    FContext.Fail('Children streamed with default options');
+    TestContext.Fail('Children streamed with default options');
 
 end;
 
@@ -1891,9 +1891,9 @@ begin
   A:=AssertProperty('Children',jtArray) as TJSONArray;
   O:=SR;
   try
-    FContext.AssertTrue((2)=(A.Count), '2 Elements in array');
-    FContext.AssertTrue((jtObject)=(A.Types[0]), 'First in array is object');
-    FContext.AssertTrue((jtObject)=(A.Types[1]), 'Second in array is object');
+    TestContext.AssertTrue((2)=(A.Count), '2 Elements in array');
+    TestContext.AssertTrue((jtObject)=(A.Types[0]), 'First in array is object');
+    TestContext.AssertTrue((jtObject)=(A.Types[1]), 'Second in array is object');
     SR:=A.Objects[0];
     AssertProp('Name','Child1');
     SR:=A.Objects[1];
@@ -1915,10 +1915,8 @@ end;
 procedure RunTTestJSONStreamerTestNil(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNil';
     lFixture.SetUp;
     try lFixture.TestNil; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1927,10 +1925,8 @@ end;
 procedure RunTTestJSONStreamerTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1939,10 +1935,8 @@ end;
 procedure RunTTestJSONStreamerTestEmptyComponent(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestEmptyComponent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyComponent';
     lFixture.SetUp;
     try lFixture.TestEmptyComponent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1951,10 +1945,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteBoolean(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteBoolean';
     lFixture.SetUp;
     try lFixture.TestWriteBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1963,10 +1955,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteInteger(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteInteger';
     lFixture.SetUp;
     try lFixture.TestWriteInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1975,10 +1965,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteString';
     lFixture.SetUp;
     try lFixture.TestWriteString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1987,10 +1975,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteFloat(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteFloat';
     lFixture.SetUp;
     try lFixture.TestWriteFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1999,10 +1985,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteFloat2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteFloat2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteFloat2';
     lFixture.SetUp;
     try lFixture.TestWriteFloat2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2011,10 +1995,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteFloat3(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteFloat3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteFloat3';
     lFixture.SetUp;
     try lFixture.TestWriteFloat3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2023,10 +2005,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteFloat4(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteFloat4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteFloat4';
     lFixture.SetUp;
     try lFixture.TestWriteFloat4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2035,10 +2015,8 @@ end;
 procedure RunTTestJSONStreamerTestWriteFloat5(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestWriteFloat5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWriteFloat5';
     lFixture.SetUp;
     try lFixture.TestWriteFloat5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2047,10 +2025,8 @@ end;
 procedure RunTTestJSONStreamerTestEnum1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestEnum1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnum1';
     lFixture.SetUp;
     try lFixture.TestEnum1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2059,10 +2035,8 @@ end;
 procedure RunTTestJSONStreamerTestEnum2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestEnum2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnum2';
     lFixture.SetUp;
     try lFixture.TestEnum2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2071,10 +2045,8 @@ end;
 procedure RunTTestJSONStreamerTestSet1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestSet1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet1';
     lFixture.SetUp;
     try lFixture.TestSet1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2083,10 +2055,8 @@ end;
 procedure RunTTestJSONStreamerTestSet2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestSet2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet2';
     lFixture.SetUp;
     try lFixture.TestSet2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2095,10 +2065,8 @@ end;
 procedure RunTTestJSONStreamerTestSet3(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestSet3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet3';
     lFixture.SetUp;
     try lFixture.TestSet3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2107,10 +2075,8 @@ end;
 procedure RunTTestJSONStreamerTestSet4(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestSet4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet4';
     lFixture.SetUp;
     try lFixture.TestSet4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2119,10 +2085,8 @@ end;
 procedure RunTTestJSONStreamerTestObjectNil(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestObjectNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectNil';
     lFixture.SetUp;
     try lFixture.TestObjectNil; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2131,10 +2095,8 @@ end;
 procedure RunTTestJSONStreamerTestComponentProp1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestComponentProp1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComponentProp1';
     lFixture.SetUp;
     try lFixture.TestComponentProp1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2143,10 +2105,8 @@ end;
 procedure RunTTestJSONStreamerTestComponentProp2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestComponentProp2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComponentProp2';
     lFixture.SetUp;
     try lFixture.TestComponentProp2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2155,10 +2115,8 @@ end;
 procedure RunTTestJSONStreamerTestCollectionProp1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestCollectionProp1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionProp1';
     lFixture.SetUp;
     try lFixture.TestCollectionProp1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2167,10 +2125,8 @@ end;
 procedure RunTTestJSONStreamerTestCollectionProp2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestCollectionProp2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionProp2';
     lFixture.SetUp;
     try lFixture.TestCollectionProp2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2179,10 +2135,8 @@ end;
 procedure RunTTestJSONStreamerTestPersistentProp1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestPersistentProp1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPersistentProp1';
     lFixture.SetUp;
     try lFixture.TestPersistentProp1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2191,10 +2145,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsProp1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsProp1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsProp1';
     lFixture.SetUp;
     try lFixture.TestStringsProp1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2203,10 +2155,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsProp2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsProp2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsProp2';
     lFixture.SetUp;
     try lFixture.TestStringsProp2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2215,10 +2165,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsProp3(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsProp3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsProp3';
     lFixture.SetUp;
     try lFixture.TestStringsProp3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2227,10 +2175,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsProp4(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsProp4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsProp4';
     lFixture.SetUp;
     try lFixture.TestStringsProp4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2239,10 +2185,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsArray(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsArray';
     lFixture.SetUp;
     try lFixture.TestStringsArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2251,10 +2195,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsObject(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsObject';
     lFixture.SetUp;
     try lFixture.TestStringsObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2263,10 +2205,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsStream1(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsStream1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsStream1';
     lFixture.SetUp;
     try lFixture.TestStringsStream1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2275,10 +2215,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsStream2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsStream2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsStream2';
     lFixture.SetUp;
     try lFixture.TestStringsStream2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2287,10 +2225,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsStream3(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsStream3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsStream3';
     lFixture.SetUp;
     try lFixture.TestStringsStream3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2299,10 +2235,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsStream4(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsStream4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsStream4';
     lFixture.SetUp;
     try lFixture.TestStringsStream4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2311,10 +2245,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsStream5(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsStream5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsStream5';
     lFixture.SetUp;
     try lFixture.TestStringsStream5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2323,10 +2255,8 @@ end;
 procedure RunTTestJSONStreamerTestCollectionStream(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestCollectionStream');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionStream';
     lFixture.SetUp;
     try lFixture.TestCollectionStream; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2335,10 +2265,8 @@ end;
 procedure RunTTestJSONStreamerTestCollectionStream2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestCollectionStream2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionStream2';
     lFixture.SetUp;
     try lFixture.TestCollectionStream2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2347,10 +2275,8 @@ end;
 procedure RunTTestJSONStreamerTestOnStreamProperty(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestOnStreamProperty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOnStreamProperty';
     lFixture.SetUp;
     try lFixture.TestOnStreamProperty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2359,10 +2285,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2371,10 +2295,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimePropDefaultString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimePropDefaultString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimePropDefaultString';
     lFixture.SetUp;
     try lFixture.TestDateTimePropDefaultString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2383,10 +2305,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimePropDefaultStringTime(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimePropDefaultStringTime');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimePropDefaultStringTime';
     lFixture.SetUp;
     try lFixture.TestDateTimePropDefaultStringTime; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2395,10 +2315,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp2';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2407,10 +2325,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp3(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp3';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2419,10 +2335,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp4(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp4';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2431,10 +2345,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp5(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp5';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2443,10 +2355,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp6(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp6');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp6';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp6; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2455,10 +2365,8 @@ end;
 procedure RunTTestJSONStreamerTestDateTimeProp7(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestDateTimeProp7');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeProp7';
     lFixture.SetUp;
     try lFixture.TestDateTimeProp7; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2467,10 +2375,8 @@ end;
 procedure RunTTestJSONStreamerTestQwordProp(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestQwordProp');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestQwordProp';
     lFixture.SetUp;
     try lFixture.TestQwordProp; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2479,10 +2385,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantShortint(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantShortint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantShortint';
     lFixture.SetUp;
     try lFixture.TestVariantShortint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2491,10 +2395,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantbyte(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantbyte');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantbyte';
     lFixture.SetUp;
     try lFixture.TestVariantbyte; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2503,10 +2405,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantword(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantword';
     lFixture.SetUp;
     try lFixture.TestVariantword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2515,10 +2415,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantsmallint(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantsmallint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantsmallint';
     lFixture.SetUp;
     try lFixture.TestVariantsmallint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2527,10 +2425,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantinteger(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantinteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantinteger';
     lFixture.SetUp;
     try lFixture.TestVariantinteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2539,10 +2435,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantlongword(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantlongword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantlongword';
     lFixture.SetUp;
     try lFixture.TestVariantlongword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2551,10 +2445,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantint64(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantint64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantint64';
     lFixture.SetUp;
     try lFixture.TestVariantint64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2563,10 +2455,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantqword(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantqword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantqword';
     lFixture.SetUp;
     try lFixture.TestVariantqword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2575,10 +2465,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantsingle(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantsingle');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantsingle';
     lFixture.SetUp;
     try lFixture.TestVariantsingle; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2587,10 +2475,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantdouble(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantdouble');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantdouble';
     lFixture.SetUp;
     try lFixture.TestVariantdouble; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2599,10 +2485,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantCurrency(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantCurrency');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantCurrency';
     lFixture.SetUp;
     try lFixture.TestVariantCurrency; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2611,10 +2495,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantolestr(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantolestr');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantolestr';
     lFixture.SetUp;
     try lFixture.TestVariantolestr; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2623,10 +2505,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantboolean(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantboolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantboolean';
     lFixture.SetUp;
     try lFixture.TestVariantboolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2635,10 +2515,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantDate(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantDate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantDate';
     lFixture.SetUp;
     try lFixture.TestVariantDate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2647,10 +2525,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantDate2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantDate2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantDate2';
     lFixture.SetUp;
     try lFixture.TestVariantDate2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2659,10 +2535,8 @@ end;
 procedure RunTTestJSONStreamerTestVariantArray(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestVariantArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantArray';
     lFixture.SetUp;
     try lFixture.TestVariantArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2671,10 +2545,8 @@ end;
 procedure RunTTestJSONStreamerTestMultipleProps(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestMultipleProps');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultipleProps';
     lFixture.SetUp;
     try lFixture.TestMultipleProps; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2683,10 +2555,8 @@ end;
 procedure RunTTestJSONStreamerTestObjectToJSONString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestObjectToJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectToJSONString';
     lFixture.SetUp;
     try lFixture.TestObjectToJSONString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2695,10 +2565,8 @@ end;
 procedure RunTTestJSONStreamerTestStringsToJSONString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestStringsToJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringsToJSONString';
     lFixture.SetUp;
     try lFixture.TestStringsToJSONString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2707,10 +2575,8 @@ end;
 procedure RunTTestJSONStreamerTestCollectionToJSONString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestCollectionToJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionToJSONString';
     lFixture.SetUp;
     try lFixture.TestCollectionToJSONString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2719,10 +2585,8 @@ end;
 procedure RunTTestJSONStreamerTestTListToJSONString(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestTListToJSONString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTListToJSONString';
     lFixture.SetUp;
     try lFixture.TestTListToJSONString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2731,10 +2595,8 @@ end;
 procedure RunTTestJSONStreamerTestChildren(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestChildren');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChildren';
     lFixture.SetUp;
     try lFixture.TestChildren; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2743,10 +2605,8 @@ end;
 procedure RunTTestJSONStreamerTestChildren2(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestChildren2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChildren2';
     lFixture.SetUp;
     try lFixture.TestChildren2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2755,10 +2615,8 @@ end;
 procedure RunTTestJSONStreamerTestLowercase(AContext: TNXTestContext);
 var lFixture: TTestJSONStreamer;
 begin
-  lFixture:=TTestJSONStreamer.Create;
+  lFixture:=TTestJSONStreamer.Create(AContext, 'TestLowercase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLowercase';
     lFixture.SetUp;
     try lFixture.TestLowercase; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2767,10 +2625,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantInteger(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantInteger';
     lFixture.SetUp;
     try lFixture.TestVariantInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2779,10 +2635,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantFloat(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantFloat';
     lFixture.SetUp;
     try lFixture.TestVariantFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2791,10 +2645,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantInt64(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantInt64';
     lFixture.SetUp;
     try lFixture.TestVariantInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2803,10 +2655,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantBoolean(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantBoolean';
     lFixture.SetUp;
     try lFixture.TestVariantBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2815,10 +2665,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantNull(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantNull';
     lFixture.SetUp;
     try lFixture.TestVariantNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2827,10 +2675,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantString(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantString';
     lFixture.SetUp;
     try lFixture.TestVariantString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2839,10 +2685,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantArray(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantArray';
     lFixture.SetUp;
     try lFixture.TestVariantArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2851,10 +2695,8 @@ end;
 procedure RunTTestJSONDeStreamerTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2863,10 +2705,8 @@ end;
 procedure RunTTestJSONDeStreamerTestNullError(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestNullError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullError';
     lFixture.SetUp;
     try lFixture.TestNullError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2875,10 +2715,8 @@ end;
 procedure RunTTestJSONDeStreamerTestNull(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2887,10 +2725,8 @@ end;
 procedure RunTTestJSONDeStreamerTestBoolean(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestBoolean');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBoolean';
     lFixture.SetUp;
     try lFixture.TestBoolean; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2899,10 +2735,8 @@ end;
 procedure RunTTestJSONDeStreamerTestInteger(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2911,10 +2745,8 @@ end;
 procedure RunTTestJSONDeStreamerTestIntegerCaseInsensitive(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestIntegerCaseInsensitive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIntegerCaseInsensitive';
     lFixture.SetUp;
     try lFixture.TestIntegerCaseInsensitive; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2923,10 +2755,8 @@ end;
 procedure RunTTestJSONDeStreamerTestIntegerCaseSensitive(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestIntegerCaseSensitive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIntegerCaseSensitive';
     lFixture.SetUp;
     try lFixture.TestIntegerCaseSensitive; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2935,10 +2765,8 @@ end;
 procedure RunTTestJSONDeStreamerTestString(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2947,10 +2775,8 @@ end;
 procedure RunTTestJSONDeStreamerTestFloat(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2959,10 +2785,8 @@ end;
 procedure RunTTestJSONDeStreamerTestFloat2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestFloat2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat2';
     lFixture.SetUp;
     try lFixture.TestFloat2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2971,10 +2795,8 @@ end;
 procedure RunTTestJSONDeStreamerTestFloat3(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestFloat3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat3';
     lFixture.SetUp;
     try lFixture.TestFloat3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2983,10 +2805,8 @@ end;
 procedure RunTTestJSONDeStreamerTestFloat4(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestFloat4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat4';
     lFixture.SetUp;
     try lFixture.TestFloat4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2995,10 +2815,8 @@ end;
 procedure RunTTestJSONDeStreamerTestFloat5(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestFloat5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat5';
     lFixture.SetUp;
     try lFixture.TestFloat5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3007,10 +2825,8 @@ end;
 procedure RunTTestJSONDeStreamerTestDateTime(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestDateTime');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTime';
     lFixture.SetUp;
     try lFixture.TestDateTime; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3019,10 +2835,8 @@ end;
 procedure RunTTestJSONDeStreamerTestDateTimeFormat(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestDateTimeFormat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDateTimeFormat';
     lFixture.SetUp;
     try lFixture.TestDateTimeFormat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3031,10 +2845,8 @@ end;
 procedure RunTTestJSONDeStreamerTestEnum1(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestEnum1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnum1';
     lFixture.SetUp;
     try lFixture.TestEnum1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3043,10 +2855,8 @@ end;
 procedure RunTTestJSONDeStreamerTestEnum2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestEnum2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnum2';
     lFixture.SetUp;
     try lFixture.TestEnum2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3055,10 +2865,8 @@ end;
 procedure RunTTestJSONDeStreamerTestSet1(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestSet1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet1';
     lFixture.SetUp;
     try lFixture.TestSet1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3067,10 +2875,8 @@ end;
 procedure RunTTestJSONDeStreamerTestSet2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestSet2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet2';
     lFixture.SetUp;
     try lFixture.TestSet2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3079,10 +2885,8 @@ end;
 procedure RunTTestJSONDeStreamerTestSet3(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestSet3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet3';
     lFixture.SetUp;
     try lFixture.TestSet3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3091,10 +2895,8 @@ end;
 procedure RunTTestJSONDeStreamerTestSet4(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestSet4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet4';
     lFixture.SetUp;
     try lFixture.TestSet4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3103,10 +2905,8 @@ end;
 procedure RunTTestJSONDeStreamerTestVariantProp(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestVariantProp');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariantProp';
     lFixture.SetUp;
     try lFixture.TestVariantProp; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3115,10 +2915,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection';
     lFixture.SetUp;
     try lFixture.TestCollection; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3127,10 +2925,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection2';
     lFixture.SetUp;
     try lFixture.TestCollection2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3139,10 +2935,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection3(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection3';
     lFixture.SetUp;
     try lFixture.TestCollection3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3151,10 +2945,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection4(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection4';
     lFixture.SetUp;
     try lFixture.TestCollection4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3163,10 +2955,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection5(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection5';
     lFixture.SetUp;
     try lFixture.TestCollection5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3175,10 +2965,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollection6(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollection6');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollection6';
     lFixture.SetUp;
     try lFixture.TestCollection6; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3187,10 +2975,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollectionProp(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollectionProp');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionProp';
     lFixture.SetUp;
     try lFixture.TestCollectionProp; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3199,10 +2985,8 @@ end;
 procedure RunTTestJSONDeStreamerTestCollectionProp2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestCollectionProp2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollectionProp2';
     lFixture.SetUp;
     try lFixture.TestCollectionProp2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3211,10 +2995,8 @@ end;
 procedure RunTTestJSONDeStreamerTestStrings(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestStrings');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStrings';
     lFixture.SetUp;
     try lFixture.TestStrings; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3223,10 +3005,8 @@ end;
 procedure RunTTestJSONDeStreamerTestStrings2(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestStrings2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStrings2';
     lFixture.SetUp;
     try lFixture.TestStrings2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3235,10 +3015,8 @@ end;
 procedure RunTTestJSONDeStreamerTestStrings3(AContext: TNXTestContext);
 var lFixture: TTestJSONDeStreamer;
 begin
-  lFixture:=TTestJSONDeStreamer.Create;
+  lFixture:=TTestJSONDeStreamer.Create(AContext, 'TestStrings3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStrings3';
     lFixture.SetUp;
     try lFixture.TestStrings3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

@@ -154,3 +154,10 @@ console test count. The existing SQLite `.nxpk` SDK packaging stage was not run;
 its native library and Pascal source consumer were built and tested. A full
 compiler/bootstrap/release rebuild was not needed or performed. Delphi support
 is outside Nexus scope.
+
+## 2026-10-16 native retained-test conversion
+
+Useful retained behavior tests now use nxtest directly. The former FPCUnit
+helpers and runners were removed, with their originals preserved in hashed
+archives. The [retirement report](../../../../projects/nxtest/retained/README.md) records conversions,
+corrected invalid expectations, before/after results and verification limits.

@@ -71,15 +71,21 @@ begin
       FTestProcedure(lContext);
       Result.Status := tsPassed;
     except
-      on E: ENXTestSkip do
+      on lError: ENXTestSkip do
+      begin
         Result.Status := tsSkipped;
-      on E: ENXTestFailure do
+        Result.Message := lError.Message;
+      end;
+      on lError: ENXTestFailure do
+      begin
         Result.Status := tsFailed;
-      on E: Exception do
+        Result.Message := lError.Message;
+      end;
+      on lError: Exception do
       begin
         Result.Status := tsError;
-        Result.ErrorClass := E.ClassName;
-        Result.ErrorMessage := E.Message;
+        Result.ErrorClass := lError.ClassName;
+        Result.ErrorMessage := lError.Message;
       end;
     end;
     Result.DurationMs := GetTickCount64 - lStart;

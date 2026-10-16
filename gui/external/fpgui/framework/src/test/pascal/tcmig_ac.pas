@@ -17,9 +17,14 @@ type
 
 type
   TTestMigAC = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Basic creation and structure }
     procedure TestCreate;
@@ -86,7 +91,7 @@ var
 begin
   ac := TfpgMigAC.Create;
   try
-    FContext.AssertTrue((1)=(ac.GetCount), 'Should start with 1 constraint');
+    TestContext.AssertTrue((1)=(ac.GetCount), 'Should start with 1 constraint');
   finally
     ac.Free;
   end;
@@ -98,10 +103,10 @@ var
 begin
   ac := TfpgMigAC.Create;
   try
-    FContext.AssertTrue((1)=(ac.GetCount), 'Initial count should be 1');
+    TestContext.AssertTrue((1)=(ac.GetCount), 'Initial count should be 1');
 
     ac.Index(2);
-    FContext.AssertTrue((3)=(ac.GetCount), 'Count should be 3 after Index(2)');
+    TestContext.AssertTrue((3)=(ac.GetCount), 'Count should be 3 after Index(2)');
   finally
     ac.Free;
   end;
@@ -114,7 +119,7 @@ begin
   ac := TfpgMigAC.Create;
   try
     ac.Count(5);
-    FContext.AssertTrue((6)=(ac.GetCount), 'Count should be 6 after Count(5)');
+    TestContext.AssertTrue((6)=(ac.GetCount), 'Count should be 6 after Count(5)');
   finally
     ac.Free;
   end;
@@ -130,10 +135,10 @@ begin
     ac.Index(2).Fill;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
-    FContext.AssertTrue(constraints[2].IsFill, 'Index 2 should be filled');
-    FContext.AssertTrue(not (constraints[0].IsFill), 'Index 0 should not be filled');
-    FContext.AssertTrue(not (constraints[1].IsFill), 'Index 1 should not be filled');
+    TestContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
+    TestContext.AssertTrue(constraints[2].IsFill, 'Index 2 should be filled');
+    TestContext.AssertTrue(not (constraints[0].IsFill), 'Index 0 should not be filled');
+    TestContext.AssertTrue(not (constraints[1].IsFill), 'Index 1 should not be filled');
   finally
     ac.Free;
   end;
@@ -149,7 +154,7 @@ begin
     ac.NoGrid;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].IsNoGrid, 'Current (0) should have NoGrid');
+    TestContext.AssertTrue(constraints[0].IsNoGrid, 'Current (0) should have NoGrid');
   finally
     ac.Free;
   end;
@@ -165,9 +170,9 @@ begin
     ac.NoGrid(2);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
-    FContext.AssertTrue(constraints[2].IsNoGrid, 'Index 2 should have NoGrid');
-    FContext.AssertTrue(not (constraints[0].IsNoGrid), 'Index 0 should not have NoGrid');
+    TestContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
+    TestContext.AssertTrue(constraints[2].IsNoGrid, 'Index 2 should have NoGrid');
+    TestContext.AssertTrue(not (constraints[0].IsNoGrid), 'Index 0 should not have NoGrid');
   finally
     ac.Free;
   end;
@@ -183,7 +188,7 @@ begin
     ac.Fill;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].IsFill, 'Current (0) should be filled');
+    TestContext.AssertTrue(constraints[0].IsFill, 'Current (0) should be filled');
   finally
     ac.Free;
   end;
@@ -199,9 +204,9 @@ begin
     ac.Fill(1);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((2)=(Length(constraints)), 'Should have 2 constraints');
-    FContext.AssertTrue(constraints[1].IsFill, 'Index 1 should be filled');
-    FContext.AssertTrue(not (constraints[0].IsFill), 'Index 0 should not be filled');
+    TestContext.AssertTrue((2)=(Length(constraints)), 'Should have 2 constraints');
+    TestContext.AssertTrue(constraints[1].IsFill, 'Index 1 should be filled');
+    TestContext.AssertTrue(not (constraints[0].IsFill), 'Index 0 should not be filled');
   finally
     ac.Free;
   end;
@@ -217,7 +222,7 @@ begin
     ac.SizeGroup;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(('')=(constraints[0].GetSizeGroup), 'Size group should be empty string');
+    TestContext.AssertTrue(('')=(constraints[0].GetSizeGroup), 'Size group should be empty string');
   finally
     ac.Free;
   end;
@@ -233,7 +238,7 @@ begin
     ac.SizeGroup('group1');
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(('group1')=(constraints[0].GetSizeGroup), 'Size group should be "group1"');
+    TestContext.AssertTrue(('group1')=(constraints[0].GetSizeGroup), 'Size group should be "group1"');
   finally
     ac.Free;
   end;
@@ -249,8 +254,8 @@ begin
     ac.SizeGroup('mygroup', 2);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(('mygroup')=(constraints[2].GetSizeGroup), 'Index 2 size group should be "mygroup"');
-    FContext.AssertTrue(('')=(constraints[0].GetSizeGroup), 'Index 0 size group should be empty');
+    TestContext.AssertTrue(('mygroup')=(constraints[2].GetSizeGroup), 'Index 2 size group should be "mygroup"');
+    TestContext.AssertTrue(('')=(constraints[0].GetSizeGroup), 'Index 0 size group should be empty');
   finally
     ac.Free;
   end;
@@ -263,10 +268,10 @@ begin
   ac := TfpgMigAC.Create;
   try
     ac.Gap;
-    FContext.AssertTrue((2)=(ac.GetCount), 'Gap should create constraint at new index');
+    TestContext.AssertTrue((2)=(ac.GetCount), 'Gap should create constraint at new index');
 
     ac.Gap;
-    FContext.AssertTrue((3)=(ac.GetCount), 'Second gap should create constraint at index 2');
+    TestContext.AssertTrue((3)=(ac.GetCount), 'Second gap should create constraint at index 2');
   finally
     ac.Free;
   end;
@@ -282,9 +287,9 @@ begin
     ac.Fill.Gap.Fill;  // Fill index 0, gap, then fill index 1
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((2)=(Length(constraints)), 'Should have 2 constraints');
-    FContext.AssertTrue(constraints[0].IsFill, 'Index 0 should be filled');
-    FContext.AssertTrue(constraints[1].IsFill, 'Index 1 should be filled');
+    TestContext.AssertTrue((2)=(Length(constraints)), 'Should have 2 constraints');
+    TestContext.AssertTrue(constraints[0].IsFill, 'Index 0 should be filled');
+    TestContext.AssertTrue(constraints[1].IsFill, 'Index 1 should be filled');
   finally
     ac.Free;
   end;
@@ -302,8 +307,8 @@ begin
     constraints := ac.GetConstraints;
 
     align := constraints[0].GetAlign;
-    FContext.AssertTrue((align)<>nil, 'Alignment should be set');
-    FContext.AssertTrue((UnitValueCenter)=(align), 'Should be center alignment');
+    TestContext.AssertTrue((align)<>nil, 'Alignment should be set');
+    TestContext.AssertTrue((UnitValueCenter)=(align), 'Should be center alignment');
   finally
     ac.Free;
   end;
@@ -319,8 +324,8 @@ begin
     ac.Align('center', 1);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((constraints[1].GetAlign)<>nil, 'Index 1 alignment should be set');
-    FContext.AssertTrue((constraints[0].GetAlign)=nil, 'Index 0 alignment should be nil');
+    TestContext.AssertTrue((constraints[1].GetAlign)<>nil, 'Index 1 alignment should be set');
+    TestContext.AssertTrue((constraints[0].GetAlign)=nil, 'Index 0 alignment should be nil');
   finally
     ac.Free;
   end;
@@ -336,7 +341,7 @@ begin
     ac.GrowPrio(200);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((200)=(constraints[0].GetGrowPriority), 'Grow priority should be 200');
+    TestContext.AssertTrue((200)=(constraints[0].GetGrowPriority), 'Grow priority should be 200');
   finally
     ac.Free;
   end;
@@ -352,8 +357,8 @@ begin
     ac.GrowPrio(150, 1);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((150)=(constraints[1].GetGrowPriority), 'Index 1 grow priority should be 150');
-    FContext.AssertTrue((100)=(constraints[0].GetGrowPriority), 'Index 0 should have default grow priority');
+    TestContext.AssertTrue((150)=(constraints[1].GetGrowPriority), 'Index 1 grow priority should be 150');
+    TestContext.AssertTrue((100)=(constraints[0].GetGrowPriority), 'Index 0 should have default grow priority');
   finally
     ac.Free;
   end;
@@ -369,8 +374,8 @@ begin
     ac.Grow;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].HasGrowWeight, 'Should have grow weight');
-    FContext.AssertTrue(Abs((100.0)-(constraints[0].GetGrowWeight))<=(0.01), 'Default grow weight should be 100');
+    TestContext.AssertTrue(constraints[0].HasGrowWeight, 'Should have grow weight');
+    TestContext.AssertTrue(Abs((100.0)-(constraints[0].GetGrowWeight))<=(0.01), 'Default grow weight should be 100');
   finally
     ac.Free;
   end;
@@ -386,8 +391,8 @@ begin
     ac.Grow(50.5);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].HasGrowWeight, 'Should have grow weight');
-    FContext.AssertTrue(Abs((50.5)-(constraints[0].GetGrowWeight))<=(0.01), 'Grow weight should be 50.5');
+    TestContext.AssertTrue(constraints[0].HasGrowWeight, 'Should have grow weight');
+    TestContext.AssertTrue(Abs((50.5)-(constraints[0].GetGrowWeight))<=(0.01), 'Grow weight should be 50.5');
   finally
     ac.Free;
   end;
@@ -403,9 +408,9 @@ begin
     ac.Grow(75.0, 2);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[2].HasGrowWeight, 'Index 2 should have grow weight');
-    FContext.AssertTrue(Abs((75.0)-(constraints[2].GetGrowWeight))<=(0.01), 'Index 2 grow weight should be 75');
-    FContext.AssertTrue(not (constraints[0].HasGrowWeight), 'Index 0 should not have grow weight');
+    TestContext.AssertTrue(constraints[2].HasGrowWeight, 'Index 2 should have grow weight');
+    TestContext.AssertTrue(Abs((75.0)-(constraints[2].GetGrowWeight))<=(0.01), 'Index 2 grow weight should be 75');
+    TestContext.AssertTrue(not (constraints[0].HasGrowWeight), 'Index 0 should not have grow weight');
   finally
     ac.Free;
   end;
@@ -421,7 +426,7 @@ begin
     ac.ShrinkPrio(50);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((50)=(constraints[0].GetShrinkPriority), 'Shrink priority should be 50');
+    TestContext.AssertTrue((50)=(constraints[0].GetShrinkPriority), 'Shrink priority should be 50');
   finally
     ac.Free;
   end;
@@ -437,8 +442,8 @@ begin
     ac.ShrinkPrio(75, 1);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((75)=(constraints[1].GetShrinkPriority), 'Index 1 shrink priority should be 75');
-    FContext.AssertTrue((100)=(constraints[0].GetShrinkPriority), 'Index 0 should have default shrink priority');
+    TestContext.AssertTrue((75)=(constraints[1].GetShrinkPriority), 'Index 1 shrink priority should be 75');
+    TestContext.AssertTrue((100)=(constraints[0].GetShrinkPriority), 'Index 0 should have default shrink priority');
   finally
     ac.Free;
   end;
@@ -454,8 +459,8 @@ begin
     ac.Shrink;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].HasShrinkWeight, 'Should have shrink weight');
-    FContext.AssertTrue(Abs((100.0)-(constraints[0].GetShrinkWeight))<=(0.01), 'Shrink weight should be 100');
+    TestContext.AssertTrue(constraints[0].HasShrinkWeight, 'Should have shrink weight');
+    TestContext.AssertTrue(Abs((100.0)-(constraints[0].GetShrinkWeight))<=(0.01), 'Shrink weight should be 100');
   finally
     ac.Free;
   end;
@@ -471,8 +476,8 @@ begin
     ac.Shrink(25.5);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[0].HasShrinkWeight, 'Should have shrink weight');
-    FContext.AssertTrue(Abs((25.5)-(constraints[0].GetShrinkWeight))<=(0.01), 'Shrink weight should be 25.5');
+    TestContext.AssertTrue(constraints[0].HasShrinkWeight, 'Should have shrink weight');
+    TestContext.AssertTrue(Abs((25.5)-(constraints[0].GetShrinkWeight))<=(0.01), 'Shrink weight should be 25.5');
   finally
     ac.Free;
   end;
@@ -488,8 +493,8 @@ begin
     ac.Shrink(80.0, 1);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue(constraints[1].HasShrinkWeight, 'Index 1 should have shrink weight');
-    FContext.AssertTrue(Abs((80.0)-(constraints[1].GetShrinkWeight))<=(0.01), 'Index 1 shrink weight should be 80');
+    TestContext.AssertTrue(constraints[1].HasShrinkWeight, 'Index 1 should have shrink weight');
+    TestContext.AssertTrue(Abs((80.0)-(constraints[1].GetShrinkWeight))<=(0.01), 'Index 1 shrink weight should be 80');
   finally
     ac.Free;
   end;
@@ -506,10 +511,10 @@ begin
     ac.Fill.Gap.Grow.Gap.NoGrid;
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
-    FContext.AssertTrue(constraints[0].IsFill, 'Index 0 should be filled');
-    FContext.AssertTrue(constraints[1].HasGrowWeight, 'Index 1 should have grow weight');
-    FContext.AssertTrue(constraints[2].IsNoGrid, 'Index 2 should have NoGrid');
+    TestContext.AssertTrue((3)=(Length(constraints)), 'Should have 3 constraints');
+    TestContext.AssertTrue(constraints[0].IsFill, 'Index 0 should be filled');
+    TestContext.AssertTrue(constraints[1].HasGrowWeight, 'Index 1 should have grow weight');
+    TestContext.AssertTrue(constraints[2].IsNoGrid, 'Index 2 should have NoGrid');
   finally
     ac.Free;
   end;
@@ -525,10 +530,10 @@ begin
     ac.Index(2);
     constraints := ac.GetConstraints;
 
-    FContext.AssertTrue((3)=(Length(constraints)), 'Should return 3 constraints');
-    FContext.AssertTrue((constraints[0])<>nil, 'All constraints should be non-nil');
-    FContext.AssertTrue((constraints[1])<>nil, 'All constraints should be non-nil');
-    FContext.AssertTrue((constraints[2])<>nil, 'All constraints should be non-nil');
+    TestContext.AssertTrue((3)=(Length(constraints)), 'Should return 3 constraints');
+    TestContext.AssertTrue((constraints[0])<>nil, 'All constraints should be non-nil');
+    TestContext.AssertTrue((constraints[1])<>nil, 'All constraints should be non-nil');
+    TestContext.AssertTrue((constraints[2])<>nil, 'All constraints should be non-nil');
   finally
     ac.Free;
   end;
@@ -555,9 +560,9 @@ begin
     ac.SetConstraints(newConstraints);
     result := ac.GetConstraints;
 
-    FContext.AssertTrue((2)=(Length(result)), 'Should have 2 constraints');
-    FContext.AssertTrue(result[0].IsFill, 'First constraint should be filled');
-    FContext.AssertTrue(result[1].IsNoGrid, 'Second constraint should have NoGrid');
+    TestContext.AssertTrue((2)=(Length(result)), 'Should have 2 constraints');
+    TestContext.AssertTrue(result[0].IsFill, 'First constraint should be filled');
+    TestContext.AssertTrue(result[1].IsNoGrid, 'Second constraint should have NoGrid');
   finally
     ac.Free;
     // Note: ac owns the constraints now, so don't free dc1, dc2
@@ -565,13 +570,18 @@ begin
 end;
 
 
+constructor TTestMigAC.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigACTestCreate(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.TestCreate;
   finally lFixture.Free; end;
 end;
@@ -579,10 +589,8 @@ end;
 procedure RunTTestMigACTestGetCount(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGetCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetCount';
     lFixture.TestGetCount;
   finally lFixture.Free; end;
 end;
@@ -590,10 +598,8 @@ end;
 procedure RunTTestMigACTestCount(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCount';
     lFixture.TestCount;
   finally lFixture.Free; end;
 end;
@@ -601,10 +607,8 @@ end;
 procedure RunTTestMigACTestIndex(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndex';
     lFixture.TestIndex;
   finally lFixture.Free; end;
 end;
@@ -612,10 +616,8 @@ end;
 procedure RunTTestMigACTestNoGrid_Current(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestNoGrid_Current');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoGrid_Current';
     lFixture.TestNoGrid_Current;
   finally lFixture.Free; end;
 end;
@@ -623,10 +625,8 @@ end;
 procedure RunTTestMigACTestNoGrid_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestNoGrid_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoGrid_Specific';
     lFixture.TestNoGrid_Specific;
   finally lFixture.Free; end;
 end;
@@ -634,10 +634,8 @@ end;
 procedure RunTTestMigACTestFill_Current(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestFill_Current');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFill_Current';
     lFixture.TestFill_Current;
   finally lFixture.Free; end;
 end;
@@ -645,10 +643,8 @@ end;
 procedure RunTTestMigACTestFill_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestFill_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFill_Specific';
     lFixture.TestFill_Specific;
   finally lFixture.Free; end;
 end;
@@ -656,10 +652,8 @@ end;
 procedure RunTTestMigACTestSizeGroup_Empty(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestSizeGroup_Empty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroup_Empty';
     lFixture.TestSizeGroup_Empty;
   finally lFixture.Free; end;
 end;
@@ -667,10 +661,8 @@ end;
 procedure RunTTestMigACTestSizeGroup_Named(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestSizeGroup_Named');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroup_Named';
     lFixture.TestSizeGroup_Named;
   finally lFixture.Free; end;
 end;
@@ -678,10 +670,8 @@ end;
 procedure RunTTestMigACTestSizeGroup_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestSizeGroup_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroup_Specific';
     lFixture.TestSizeGroup_Specific;
   finally lFixture.Free; end;
 end;
@@ -689,10 +679,8 @@ end;
 procedure RunTTestMigACTestGap_Default(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGap_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGap_Default';
     lFixture.TestGap_Default;
   finally lFixture.Free; end;
 end;
@@ -700,10 +688,8 @@ end;
 procedure RunTTestMigACTestGap_MoveToNext(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGap_MoveToNext');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGap_MoveToNext';
     lFixture.TestGap_MoveToNext;
   finally lFixture.Free; end;
 end;
@@ -711,10 +697,8 @@ end;
 procedure RunTTestMigACTestAlign_Current(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestAlign_Current');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlign_Current';
     lFixture.TestAlign_Current;
   finally lFixture.Free; end;
 end;
@@ -722,10 +706,8 @@ end;
 procedure RunTTestMigACTestAlign_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestAlign_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlign_Specific';
     lFixture.TestAlign_Specific;
   finally lFixture.Free; end;
 end;
@@ -733,10 +715,8 @@ end;
 procedure RunTTestMigACTestGrowPrio_Current(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGrowPrio_Current');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPrio_Current';
     lFixture.TestGrowPrio_Current;
   finally lFixture.Free; end;
 end;
@@ -744,10 +724,8 @@ end;
 procedure RunTTestMigACTestGrowPrio_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGrowPrio_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPrio_Specific';
     lFixture.TestGrowPrio_Specific;
   finally lFixture.Free; end;
 end;
@@ -755,10 +733,8 @@ end;
 procedure RunTTestMigACTestGrow_Default(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGrow_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrow_Default';
     lFixture.TestGrow_Default;
   finally lFixture.Free; end;
 end;
@@ -766,10 +742,8 @@ end;
 procedure RunTTestMigACTestGrow_Weight(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGrow_Weight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrow_Weight';
     lFixture.TestGrow_Weight;
   finally lFixture.Free; end;
 end;
@@ -777,10 +751,8 @@ end;
 procedure RunTTestMigACTestGrow_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGrow_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrow_Specific';
     lFixture.TestGrow_Specific;
   finally lFixture.Free; end;
 end;
@@ -788,10 +760,8 @@ end;
 procedure RunTTestMigACTestShrinkPrio_Current(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestShrinkPrio_Current');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPrio_Current';
     lFixture.TestShrinkPrio_Current;
   finally lFixture.Free; end;
 end;
@@ -799,10 +769,8 @@ end;
 procedure RunTTestMigACTestShrinkPrio_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestShrinkPrio_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPrio_Specific';
     lFixture.TestShrinkPrio_Specific;
   finally lFixture.Free; end;
 end;
@@ -810,10 +778,8 @@ end;
 procedure RunTTestMigACTestShrink_Default(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestShrink_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrink_Default';
     lFixture.TestShrink_Default;
   finally lFixture.Free; end;
 end;
@@ -821,10 +787,8 @@ end;
 procedure RunTTestMigACTestShrink_Weight(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestShrink_Weight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrink_Weight';
     lFixture.TestShrink_Weight;
   finally lFixture.Free; end;
 end;
@@ -832,10 +796,8 @@ end;
 procedure RunTTestMigACTestShrink_Specific(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestShrink_Specific');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrink_Specific';
     lFixture.TestShrink_Specific;
   finally lFixture.Free; end;
 end;
@@ -843,10 +805,8 @@ end;
 procedure RunTTestMigACTestFluentChaining(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestFluentChaining');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFluentChaining';
     lFixture.TestFluentChaining;
   finally lFixture.Free; end;
 end;
@@ -854,10 +814,8 @@ end;
 procedure RunTTestMigACTestGetConstraints(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestGetConstraints');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetConstraints';
     lFixture.TestGetConstraints;
   finally lFixture.Free; end;
 end;
@@ -865,10 +823,8 @@ end;
 procedure RunTTestMigACTestSetConstraints(AContext: TNXTestContext);
 var lFixture: TTestMigAC;
 begin
-  lFixture:=TTestMigAC.Create;
+  lFixture:=TTestMigAC.Create(AContext, 'TestSetConstraints');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetConstraints';
     lFixture.TestSetConstraints;
   finally lFixture.Free; end;
 end;

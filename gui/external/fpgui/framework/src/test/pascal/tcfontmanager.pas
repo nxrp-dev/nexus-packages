@@ -15,9 +15,14 @@ uses
 type
   { TTestFontManager - Unit tests for TfpgFontManager }
   TTestFontManager = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FFontManager: TfpgFontManager;
   protected
@@ -47,17 +52,11 @@ type
     procedure TestCacheClearsOnDestroy;
   end;
 
-procedure RegisterTests;
-
 procedure RegistertcfontmanagerTests(ARegistry: TNXTestRegistry);
 
 implementation
 
-procedure RegisterTests;
-begin
-  // TestFramework.
-  
-end;
+
 
 { TTestFontManager }
 
@@ -84,8 +83,8 @@ end;
 
 procedure TTestFontManager.TestCreate;
 begin
-  FContext.AssertTrue((FFontManager)<>nil, 'FontManager should be created');
-  FContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Cache should start empty');
+  TestContext.AssertTrue((FFontManager)<>nil, 'FontManager should be created');
+  TestContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Cache should start empty');
 end;
 
 procedure TTestFontManager.TestGetDefaultFont;
@@ -94,11 +93,11 @@ var
 begin
   font := FFontManager.GetDefaultFont;
 
-  FContext.AssertTrue((font)<>nil, 'Default font should not be nil');
-  FContext.AssertTrue(font.HandleIsValid, 'Default font should have valid handle');
+  TestContext.AssertTrue((font)<>nil, 'Default font should not be nil');
+  TestContext.AssertTrue(font.HandleIsValid, 'Default font should have valid handle');
 
   { Default font should be cached }
-  FContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Default font should be in cache');
+  TestContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Default font should be in cache');
 end;
 
 procedure TTestFontManager.TestGetFixedFont;
@@ -107,11 +106,11 @@ var
 begin
   font := FFontManager.GetFixedFont;
 
-  FContext.AssertTrue((font)<>nil, 'Fixed font should not be nil');
-  FContext.AssertTrue(font.HandleIsValid, 'Fixed font should have valid handle');
+  TestContext.AssertTrue((font)<>nil, 'Fixed font should not be nil');
+  TestContext.AssertTrue(font.HandleIsValid, 'Fixed font should have valid handle');
 
   { Fixed font should be cached }
-  FContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Fixed font should be in cache');
+  TestContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Fixed font should be in cache');
 end;
 
 procedure TTestFontManager.TestFontCaching_SameDescriptor;
@@ -130,10 +129,10 @@ begin
   font2 := FFontManager.GetFont(descriptor);
 
   { Should return same instance (cached) }
-  FContext.AssertTrue(font1 = font2, 'Same descriptor should return same font instance');
+  TestContext.AssertTrue(font1 = font2, 'Same descriptor should return same font instance');
 
   { Cache should only have one entry }
-  FContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Cache should have only 1 font');
+  TestContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Cache should have only 1 font');
 end;
 
 procedure TTestFontManager.TestFontCaching_DifferentDescriptors;
@@ -149,40 +148,40 @@ begin
   {$ENDIF}
 
   { Different descriptors should return different fonts }
-  FContext.AssertTrue(not (font1 = font2), 'Different descriptors should return different fonts');
+  TestContext.AssertTrue(not (font1 = font2), 'Different descriptors should return different fonts');
 
   { Cache should have two entries }
-  FContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache should have 2 fonts');
+  TestContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache should have 2 fonts');
 end;
 
 procedure TTestFontManager.TestCacheSize;
 begin
-  FContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Initial cache should be empty');
+  TestContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Initial cache should be empty');
 
   {$IFDEF UNIX}
   FFontManager.GetFont('Liberation Sans-10');
   {$ELSE}
   FFontManager.GetFont('Arial-10');
   {$ENDIF}
-  FContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Cache size should be 1');
+  TestContext.AssertTrue((1)=(FFontManager.GetCacheSize), 'Cache size should be 1');
 
   {$IFDEF UNIX}
   FFontManager.GetFont('Liberation Sans-12');
   {$ELSE}
   FFontManager.GetFont('Arial-12');
   {$ENDIF}
-  FContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache size should be 2');
+  TestContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache size should be 2');
 
   {$IFDEF UNIX}
   FFontManager.GetFont('Liberation Mono-10');
   {$ELSE}
   FFontManager.GetFont('Courier New-10');
   {$ENDIF}
-  FContext.AssertTrue((3)=(FFontManager.GetCacheSize), 'Cache size should be 3');
+  TestContext.AssertTrue((3)=(FFontManager.GetCacheSize), 'Cache size should be 3');
 
   { Request cached font - size should not increase }
   FFontManager.GetFont(TfpgFontResource(FFontManager.GetFont('Liberation Sans-10')).FontDesc);
-  FContext.AssertTrue((3)=(FFontManager.GetCacheSize), 'Cache size should still be 3');
+  TestContext.AssertTrue((3)=(FFontManager.GetCacheSize), 'Cache size should still be 3');
 end;
 
 procedure TTestFontManager.TestEmptyDescriptor_ReturnsDefault;
@@ -191,11 +190,11 @@ var
 begin
   font := FFontManager.GetFont('');
 
-  FContext.AssertTrue((font)<>nil, 'Empty descriptor should return default font');
-  FContext.AssertTrue(font.HandleIsValid, 'Returned font should be valid');
+  TestContext.AssertTrue((font)<>nil, 'Empty descriptor should return default font');
+  TestContext.AssertTrue(font.HandleIsValid, 'Returned font should be valid');
 
   { Should be same as explicitly getting default font }
-  FContext.AssertTrue(font = FFontManager.GetDefaultFont, 'Empty descriptor should return same as GetDefaultFont');
+  TestContext.AssertTrue(font = FFontManager.GetDefaultFont, 'Empty descriptor should return same as GetDefaultFont');
 end;
 
 procedure TTestFontManager.TestValidDescriptor;
@@ -211,9 +210,9 @@ begin
 
   font := FFontManager.GetFont(descriptor);
 
-  FContext.AssertTrue((font)<>nil, 'Valid descriptor should return font');
-  FContext.AssertTrue(font.HandleIsValid, 'Font should have valid handle');
-  FContext.AssertTrue((descriptor)=(font.FontDesc), 'Font descriptor should match');
+  TestContext.AssertTrue((font)<>nil, 'Valid descriptor should return font');
+  TestContext.AssertTrue(font.HandleIsValid, 'Font should have valid handle');
+  TestContext.AssertTrue((descriptor)=(font.FontDesc), 'Font descriptor should match');
 end;
 
 procedure TTestFontManager.TestGetCacheStats;
@@ -228,17 +227,17 @@ begin
   {$ELSE}
   font := FFontManager.GetFont('Arial-12');
   {$ENDIF}
-  FContext.AssertTrue((font)<>nil, 'font should be a valid font');
+  TestContext.AssertTrue((font)<>nil, 'font should be a valid font');
   stats := FFontManager.GetCacheStats;
 
-  FContext.AssertTrue(Length(stats) > 0, 'Stats should not be empty');
-  FContext.AssertTrue(Pos('Font Cache Statistics', stats) > 0, 'Stats should contain header');
-  FContext.AssertTrue(Pos('Total cached fonts: 1', stats) > 0, 'Stats should show 1 cached font');
+  TestContext.AssertTrue(Length(stats) > 0, 'Stats should not be empty');
+  TestContext.AssertTrue(Pos('Font Cache Statistics', stats) > 0, 'Stats should contain header');
+  TestContext.AssertTrue(Pos('Total cached fonts: 1', stats) > 0, 'Stats should show 1 cached font');
 end;
 
 procedure TTestFontManager.TestGetCacheSize_Empty;
 begin
-  FContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Empty cache should return 0');
+  TestContext.AssertTrue((0)=(FFontManager.GetCacheSize), 'Empty cache should return 0');
 end;
 
 procedure TTestFontManager.TestGetCacheSize_WithFonts;
@@ -251,7 +250,7 @@ begin
   FFontManager.GetFont('Courier New-10');
   {$ENDIF}
 
-  FContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache with 2 fonts should return 2');
+  TestContext.AssertTrue((2)=(FFontManager.GetCacheSize), 'Cache with 2 fonts should return 2');
 end;
 
 procedure TTestFontManager.TestCacheClearsOnDestroy;
@@ -269,23 +268,28 @@ begin
     tempManager.GetFont('Arial-12');
     {$ENDIF}
 
-    FContext.AssertTrue((1)=(tempManager.GetCacheSize), 'Cache should have 1 font');
+    TestContext.AssertTrue((1)=(tempManager.GetCacheSize), 'Cache should have 1 font');
   finally
     { Destroying manager should free all cached fonts }
     tempManager.Free;
   end;
 
   { Test passes if no memory leaks or access violations }
-  FContext.AssertTrue(True, 'Manager destroyed without errors');
+  TestContext.AssertTrue(True, 'Manager destroyed without errors');
+end;
+
+constructor TTestFontManager.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestFontManagerTestCreate(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.SetUp;
     try lFixture.TestCreate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -294,10 +298,8 @@ end;
 procedure RunTTestFontManagerTestGetDefaultFont(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestGetDefaultFont');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetDefaultFont';
     lFixture.SetUp;
     try lFixture.TestGetDefaultFont; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -306,10 +308,8 @@ end;
 procedure RunTTestFontManagerTestGetFixedFont(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestGetFixedFont');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetFixedFont';
     lFixture.SetUp;
     try lFixture.TestGetFixedFont; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -318,10 +318,8 @@ end;
 procedure RunTTestFontManagerTestFontCaching_SameDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestFontCaching_SameDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFontCaching_SameDescriptor';
     lFixture.SetUp;
     try lFixture.TestFontCaching_SameDescriptor; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -330,10 +328,8 @@ end;
 procedure RunTTestFontManagerTestFontCaching_DifferentDescriptors(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestFontCaching_DifferentDescriptors');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFontCaching_DifferentDescriptors';
     lFixture.SetUp;
     try lFixture.TestFontCaching_DifferentDescriptors; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -342,10 +338,8 @@ end;
 procedure RunTTestFontManagerTestCacheSize(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestCacheSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCacheSize';
     lFixture.SetUp;
     try lFixture.TestCacheSize; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -354,10 +348,8 @@ end;
 procedure RunTTestFontManagerTestEmptyDescriptor_ReturnsDefault(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestEmptyDescriptor_ReturnsDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyDescriptor_ReturnsDefault';
     lFixture.SetUp;
     try lFixture.TestEmptyDescriptor_ReturnsDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -366,10 +358,8 @@ end;
 procedure RunTTestFontManagerTestValidDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestValidDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestValidDescriptor';
     lFixture.SetUp;
     try lFixture.TestValidDescriptor; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -378,10 +368,8 @@ end;
 procedure RunTTestFontManagerTestGetCacheStats(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestGetCacheStats');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetCacheStats';
     lFixture.SetUp;
     try lFixture.TestGetCacheStats; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -390,10 +378,8 @@ end;
 procedure RunTTestFontManagerTestGetCacheSize_Empty(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestGetCacheSize_Empty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetCacheSize_Empty';
     lFixture.SetUp;
     try lFixture.TestGetCacheSize_Empty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -402,10 +388,8 @@ end;
 procedure RunTTestFontManagerTestGetCacheSize_WithFonts(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestGetCacheSize_WithFonts');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetCacheSize_WithFonts';
     lFixture.SetUp;
     try lFixture.TestGetCacheSize_WithFonts; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -414,10 +398,8 @@ end;
 procedure RunTTestFontManagerTestCacheClearsOnDestroy(AContext: TNXTestContext);
 var lFixture: TTestFontManager;
 begin
-  lFixture:=TTestFontManager.Create;
+  lFixture:=TTestFontManager.Create(AContext, 'TestCacheClearsOnDestroy');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCacheClearsOnDestroy';
     lFixture.SetUp;
     try lFixture.TestCacheClearsOnDestroy; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -442,8 +424,5 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.

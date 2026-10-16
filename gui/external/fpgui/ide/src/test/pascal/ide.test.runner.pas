@@ -22,9 +22,14 @@ type
   { TTestResolveExecutablePath }
 
   TTestResolveExecutablePath = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   protected
     procedure TearDown; virtual;
   public
@@ -50,7 +55,7 @@ end;
 procedure TTestResolveExecutablePath.TestNilProjectReturnsEmpty;
 begin
   SetProject(nil);
-  FContext.AssertTrue(('')=(ResolveProjectExecutablePath), 'nil project should return empty');
+  TestContext.AssertTrue(('')=(ResolveProjectExecutablePath), 'nil project should return empty');
 end;
 
 procedure TTestResolveExecutablePath.TestLegacyWithTargetFile;
@@ -61,7 +66,7 @@ begin
   proj.ProjectDir := '/tmp/myproject/';
   proj.TargetFile := 'myapp';
   SetProject(proj);
-  FContext.AssertTrue(('/tmp/myproject/myapp')=(ResolveProjectExecutablePath), 'legacy with target file');
+  TestContext.AssertTrue(('/tmp/myproject/myapp')=(ResolveProjectExecutablePath), 'legacy with target file');
 end;
 
 procedure TTestResolveExecutablePath.TestLegacyWithEmptyTargetFile;
@@ -72,7 +77,7 @@ begin
   proj.ProjectDir := '/tmp/myproject/';
   proj.TargetFile := '';
   SetProject(proj);
-  FContext.AssertTrue(('')=(ResolveProjectExecutablePath), 'legacy with empty target should return empty');
+  TestContext.AssertTrue(('')=(ResolveProjectExecutablePath), 'legacy with empty target should return empty');
 end;
 
 procedure TTestResolveExecutablePath.TestPasBuildWithActiveModulePath;
@@ -87,7 +92,7 @@ begin
   module.ExecutableName := 'maximus';
   pb.ActiveModule := module;
   SetProject(pb);
-  FContext.AssertTrue(('/data/devel/fpgui/ide/target/maximus')=(ResolveProjectExecutablePath), 'projectDir + outputDir + executableName');
+  TestContext.AssertTrue(('/data/devel/fpgui/ide/target/maximus')=(ResolveProjectExecutablePath), 'projectDir + outputDir + executableName');
 end;
 
 procedure TTestResolveExecutablePath.TestPasBuildDocviewModule;
@@ -102,18 +107,23 @@ begin
   module.ExecutableName := 'docview';
   pb.ActiveModule := module;
   SetProject(pb);
-  FContext.AssertTrue(('/data/devel/fpgui/docview/target/docview')=(ResolveProjectExecutablePath), 'docview module resolves correctly');
+  TestContext.AssertTrue(('/data/devel/fpgui/docview/target/docview')=(ResolveProjectExecutablePath), 'docview module resolves correctly');
 end;
 
 
 
+constructor TTestResolveExecutablePath.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestResolveExecutablePathTestNilProjectReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestResolveExecutablePath;
 begin
-  lFixture:=TTestResolveExecutablePath.Create;
+  lFixture:=TTestResolveExecutablePath.Create(AContext, 'TestNilProjectReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNilProjectReturnsEmpty';
     try lFixture.TestNilProjectReturnsEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
 end;
@@ -121,10 +131,8 @@ end;
 procedure RunTTestResolveExecutablePathTestLegacyWithTargetFile(AContext: TNXTestContext);
 var lFixture: TTestResolveExecutablePath;
 begin
-  lFixture:=TTestResolveExecutablePath.Create;
+  lFixture:=TTestResolveExecutablePath.Create(AContext, 'TestLegacyWithTargetFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLegacyWithTargetFile';
     try lFixture.TestLegacyWithTargetFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
 end;
@@ -132,10 +140,8 @@ end;
 procedure RunTTestResolveExecutablePathTestLegacyWithEmptyTargetFile(AContext: TNXTestContext);
 var lFixture: TTestResolveExecutablePath;
 begin
-  lFixture:=TTestResolveExecutablePath.Create;
+  lFixture:=TTestResolveExecutablePath.Create(AContext, 'TestLegacyWithEmptyTargetFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLegacyWithEmptyTargetFile';
     try lFixture.TestLegacyWithEmptyTargetFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
 end;
@@ -143,10 +149,8 @@ end;
 procedure RunTTestResolveExecutablePathTestPasBuildWithActiveModulePath(AContext: TNXTestContext);
 var lFixture: TTestResolveExecutablePath;
 begin
-  lFixture:=TTestResolveExecutablePath.Create;
+  lFixture:=TTestResolveExecutablePath.Create(AContext, 'TestPasBuildWithActiveModulePath');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPasBuildWithActiveModulePath';
     try lFixture.TestPasBuildWithActiveModulePath; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
 end;
@@ -154,10 +158,8 @@ end;
 procedure RunTTestResolveExecutablePathTestPasBuildDocviewModule(AContext: TNXTestContext);
 var lFixture: TTestResolveExecutablePath;
 begin
-  lFixture:=TTestResolveExecutablePath.Create;
+  lFixture:=TTestResolveExecutablePath.Create(AContext, 'TestPasBuildDocviewModule');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPasBuildDocviewModule';
     try lFixture.TestPasBuildDocviewModule; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
 end;

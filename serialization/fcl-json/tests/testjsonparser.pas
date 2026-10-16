@@ -98,7 +98,7 @@ begin
   Try
     J:=P.Parse;
     If (J<>Nil) then
-      FContext.Fail('Empty returns Nil');
+      TestContext.Fail('Empty returns Nil');
   Finally
     FreeAndNil(J);
     FreeAndNil(P);
@@ -116,7 +116,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of 1 fails');
+      TestContext.Fail('Parse of 1 fails');
     TestJSONType(J,jtNumber);
     TestAsInteger(J,1);
   Finally
@@ -136,7 +136,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of 123456789012345 fails');
+      TestContext.Fail('Parse of 123456789012345 fails');
     TestJSONType(J,jtNumber);
     TestAsInt64(J,123456789012345);
   Finally
@@ -156,7 +156,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of null fails');
+      TestContext.Fail('Parse of null fails');
     TestJSONType(J,jtNull);
   Finally
     FreeAndNil(J);
@@ -175,7 +175,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of True fails');
+      TestContext.Fail('Parse of True fails');
     TestJSONType(J,jtBoolean);
     TestAsBoolean(J,True);
   Finally
@@ -195,7 +195,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of False fails');
+      TestContext.Fail('Parse of False fails');
     TestJSONType(J,jtBoolean);
     TestAsBoolean(J,False);
   Finally
@@ -281,12 +281,12 @@ end;
 
 procedure TTestParser.TestTrailingCommaErrorArray;
 begin
-  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorArray, 'Need joIgnoreTrailingComma in options to allow trailing comma') ;
+  TestContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorArray, 'Need joIgnoreTrailingComma in options to allow trailing comma') ;
 end;
 
 procedure TTestParser.TestTrailingCommaErrorObject;
 begin
-  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorObject, 'Need joIgnoreTrailingComma in options to allow trailing comma');
+  TestContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorObject, 'Need joIgnoreTrailingComma in options to allow trailing comma');
 end;
 
 procedure TTestParser.DoTrailingCommaErrorArray;
@@ -388,12 +388,12 @@ begin
     P.Options:=FOptions;
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of object "'+S+'" fails');
+      TestContext.Fail('Parse of object "'+S+'" fails');
     TestJSONType(J,jtObject);
     TestItemCount(J,High(ElNames)-Low(ElNames)+1);
     O:=TJSONObject(J);
     For I:=Low(ElNames) to High(ElNames) do
-      FContext.AssertTrue((ElNames[i])=(O.Names[I-Low(ElNames)]), Format('Element %d name',[I-Low(Elnames)]));
+      TestContext.AssertTrue((ElNames[i])=(O.Names[I-Low(ElNames)]), Format('Element %d name',[I-Low(Elnames)]));
     If DoJSONTest then
       self.TestJSON(J,S);
   Finally
@@ -416,7 +416,7 @@ begin
     P.Options:=FOptions;
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of array "'+S+'" fails');
+      TestContext.Fail('Parse of array "'+S+'" fails');
     TestJSONType(J,jtArray);
     TestItemCount(J,ACount);
     if not IgnoreJSON then
@@ -438,7 +438,7 @@ begin
   try
     D:=P.Parse;
     try
-      FContext.AssertTrue((AClass)=(D.ClassType), 'Correct class for '+S+' : ');
+      TestContext.AssertTrue((AClass)=(D.ClassType), 'Correct class for '+S+' : ');
     finally
       D.Free
     end;
@@ -508,7 +508,7 @@ end;
 
 procedure TTestParser.TestHandler;
 begin
-  FContext.AssertTrue((GetJSONParserHandler)<>nil, 'Handler installed');
+  TestContext.AssertTrue((GetJSONParserHandler)<>nil, 'Handler installed');
 end;
 
 procedure TTestParser.TestNoHandlerError;
@@ -521,10 +521,10 @@ begin
   H:=GetJSONParserHandler;
   HS:=GetJSONStringParserHandler;
   try
-    FContext.AssertTrue((H)=(SetJSONParserHandler(Nil)), 'SetJSONParserHandler returns previous handler');
-    FContext.AssertTrue((HS)=(SetJSONStringParserHandler(Nil)), 'SetJSONStringParserHandler returns previous handler');
-    FContext.AssertRaises(EJSON, @CallNoHandler, 'No handler raises exception');
-    FContext.AssertRaises(EJSON, @CallNoHandlerStream, 'No handler raises exception');
+    TestContext.AssertTrue((H)=(SetJSONParserHandler(Nil)), 'SetJSONParserHandler returns previous handler');
+    TestContext.AssertTrue((HS)=(SetJSONStringParserHandler(Nil)), 'SetJSONStringParserHandler returns previous handler');
+    TestContext.AssertRaises(EJSON, @CallNoHandler, 'No handler raises exception');
+    TestContext.AssertRaises(EJSON, @CallNoHandlerStream, 'No handler raises exception');
   finally
     SetJSONParserHandler(H);
     SetJSONStringParserHandler(HS);
@@ -539,7 +539,7 @@ Var
 begin
   D:=GetJSON('"123"');
   try
-    FContext.AssertTrue(('123')=(D.AsString), 'Have correct string');
+    TestContext.AssertTrue(('123')=(D.AsString), 'Have correct string');
   finally
     D.Free;
   end;
@@ -730,8 +730,8 @@ begin
   With TJSONParser.Create(MyJSON,[joIgnoreDuplicates]) do
     Try
       J:=Parse;
-      FContext.AssertTrue((TJSONObject)=(J.ClassType), 'Correct class');
-      FContext.AssertTrue((100)=(TJSONObject(J).Get('a',0)), 'Correct value');
+      TestContext.AssertTrue((TJSONObject)=(J.ClassType), 'Correct class');
+      TestContext.AssertTrue((100)=(TJSONObject(J).Get('a',0)), 'Correct value');
       J.Free;
     Finally
       Free;
@@ -760,7 +760,7 @@ end;
 procedure TTestParser.TestNoIgnoreDuplicates;
 
 begin
-  FContext.AssertRaises(EJSON, @DoDuplicate, 'No duplicates allowed');
+  TestContext.AssertRaises(EJSON, @DoDuplicate, 'No duplicates allowed');
 end;
 
 procedure TTestParser.DoTestError(S : String; Options : TJSONOptions = DefaultOpts);
@@ -793,7 +793,7 @@ begin
     ParseOk:=False;
   end;
   If ParseOK then
-    FContext.Fail('Parse of JSON string "'+S+'" should fail, but returned '+N);
+    TestContext.Fail('Parse of JSON string "'+S+'" should fail, but returned '+N);
 end;
 
 procedure TTestParser.DoTestString(S: String);
@@ -813,7 +813,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of string "'+S+'" fails');
+      TestContext.Fail('Parse of string "'+S+'" fails');
     TestJSONType(J,jtString);
     TestAsString(J,aResult);
     if Pos('\u',S)=0 then
@@ -845,7 +845,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      FContext.Fail('Parse of float '+S+' fails');
+      TestContext.Fail('Parse of float '+S+' fails');
     TestJSONType(J,jtNumber);
     TestAsFloat(J,F);
   Finally
@@ -859,10 +859,8 @@ end;
 procedure RunTTestParserTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     lFixture.TestEmpty;
   finally lFixture.Free; end;
@@ -871,10 +869,8 @@ end;
 procedure RunTTestParserTestNull(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     lFixture.TestNull;
   finally lFixture.Free; end;
@@ -883,10 +879,8 @@ end;
 procedure RunTTestParserTestTrue(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrue';
     lFixture.SetUp;
     lFixture.TestTrue;
   finally lFixture.Free; end;
@@ -895,10 +889,8 @@ end;
 procedure RunTTestParserTestFalse(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFalse';
     lFixture.SetUp;
     lFixture.TestFalse;
   finally lFixture.Free; end;
@@ -907,10 +899,8 @@ end;
 procedure RunTTestParserTestFloat(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     lFixture.TestFloat;
   finally lFixture.Free; end;
@@ -919,10 +909,8 @@ end;
 procedure RunTTestParserTestInteger(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     lFixture.TestInteger;
   finally lFixture.Free; end;
@@ -931,10 +919,8 @@ end;
 procedure RunTTestParserTestInt64(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64';
     lFixture.SetUp;
     lFixture.TestInt64;
   finally lFixture.Free; end;
@@ -943,10 +929,8 @@ end;
 procedure RunTTestParserTestString(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     lFixture.TestString;
   finally lFixture.Free; end;
@@ -955,10 +939,8 @@ end;
 procedure RunTTestParserTestArray(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArray';
     lFixture.SetUp;
     lFixture.TestArray;
   finally lFixture.Free; end;
@@ -967,10 +949,8 @@ end;
 procedure RunTTestParserTestObject(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObject';
     lFixture.SetUp;
     lFixture.TestObject;
   finally lFixture.Free; end;
@@ -979,10 +959,8 @@ end;
 procedure RunTTestParserTestObjectError(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestObjectError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectError';
     lFixture.SetUp;
     lFixture.TestObjectError;
   finally lFixture.Free; end;
@@ -991,10 +969,8 @@ end;
 procedure RunTTestParserTestObjectKeyIdentifier(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestObjectKeyIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifier';
     lFixture.SetUp;
     lFixture.TestObjectKeyIdentifier;
   finally lFixture.Free; end;
@@ -1003,10 +979,8 @@ end;
 procedure RunTTestParserTestObjectKeyIdentifierStrict(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestObjectKeyIdentifierStrict');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifierStrict';
     lFixture.SetUp;
     lFixture.TestObjectKeyIdentifierStrict;
   finally lFixture.Free; end;
@@ -1015,10 +989,8 @@ end;
 procedure RunTTestParserTestTrailingComma(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestTrailingComma');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingComma';
     lFixture.SetUp;
     lFixture.TestTrailingComma;
   finally lFixture.Free; end;
@@ -1027,10 +999,8 @@ end;
 procedure RunTTestParserTestTrailingCommaErrorArray(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestTrailingCommaErrorArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorArray';
     lFixture.SetUp;
     lFixture.TestTrailingCommaErrorArray;
   finally lFixture.Free; end;
@@ -1039,10 +1009,8 @@ end;
 procedure RunTTestParserTestTrailingCommaErrorObject(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestTrailingCommaErrorObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorObject';
     lFixture.SetUp;
     lFixture.TestTrailingCommaErrorObject;
   finally lFixture.Free; end;
@@ -1051,10 +1019,8 @@ end;
 procedure RunTTestParserTestMixed(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestMixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMixed';
     lFixture.SetUp;
     lFixture.TestMixed;
   finally lFixture.Free; end;
@@ -1063,10 +1029,8 @@ end;
 procedure RunTTestParserTestComment(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment';
     lFixture.SetUp;
     lFixture.TestComment;
   finally lFixture.Free; end;
@@ -1075,10 +1039,8 @@ end;
 procedure RunTTestParserTestErrors(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestErrors');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestErrors';
     lFixture.SetUp;
     lFixture.TestErrors;
   finally lFixture.Free; end;
@@ -1087,10 +1049,8 @@ end;
 procedure RunTTestParserTestClasses(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestClasses');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClasses';
     lFixture.SetUp;
     lFixture.TestClasses;
   finally lFixture.Free; end;
@@ -1099,10 +1059,8 @@ end;
 procedure RunTTestParserTestHandler(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestHandler');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHandler';
     lFixture.SetUp;
     lFixture.TestHandler;
   finally lFixture.Free; end;
@@ -1111,10 +1069,8 @@ end;
 procedure RunTTestParserTestNoHandlerError(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestNoHandlerError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoHandlerError';
     lFixture.SetUp;
     lFixture.TestNoHandlerError;
   finally lFixture.Free; end;
@@ -1123,10 +1079,8 @@ end;
 procedure RunTTestParserTestHandlerResult(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestHandlerResult');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHandlerResult';
     lFixture.SetUp;
     lFixture.TestHandlerResult;
   finally lFixture.Free; end;
@@ -1135,10 +1089,8 @@ end;
 procedure RunTTestParserTestEmptyLine(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestEmptyLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyLine';
     lFixture.SetUp;
     lFixture.TestEmptyLine;
   finally lFixture.Free; end;
@@ -1147,10 +1099,8 @@ end;
 procedure RunTTestParserTestStartEmptyLine(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestStartEmptyLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStartEmptyLine';
     lFixture.SetUp;
     lFixture.TestStartEmptyLine;
   finally lFixture.Free; end;
@@ -1159,10 +1109,8 @@ end;
 procedure RunTTestParserTestObjectEmptyLine(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestObjectEmptyLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectEmptyLine';
     lFixture.SetUp;
     lFixture.TestObjectEmptyLine;
   finally lFixture.Free; end;
@@ -1171,10 +1119,8 @@ end;
 procedure RunTTestParserTestCommentLine(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestCommentLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommentLine';
     lFixture.SetUp;
     lFixture.TestCommentLine;
   finally lFixture.Free; end;
@@ -1183,10 +1129,8 @@ end;
 procedure RunTTestParserTestFirstLineComment(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestFirstLineComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFirstLineComment';
     lFixture.SetUp;
     lFixture.TestFirstLineComment;
   finally lFixture.Free; end;
@@ -1195,10 +1139,8 @@ end;
 procedure RunTTestParserTestMultiLineComment(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestMultiLineComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiLineComment';
     lFixture.SetUp;
     lFixture.TestMultiLineComment;
   finally lFixture.Free; end;
@@ -1207,10 +1149,8 @@ end;
 procedure RunTTestParserTestIgnoreDuplicates(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestIgnoreDuplicates');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIgnoreDuplicates';
     lFixture.SetUp;
     lFixture.TestIgnoreDuplicates;
   finally lFixture.Free; end;
@@ -1219,10 +1159,8 @@ end;
 procedure RunTTestParserTestNoIgnoreDuplicates(AContext: TNXTestContext);
 var lFixture: TTestParser;
 begin
-  lFixture:=TTestParser.Create;
+  lFixture:=TTestParser.Create(AContext, 'TestNoIgnoreDuplicates');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoIgnoreDuplicates';
     lFixture.SetUp;
     lFixture.TestNoIgnoreDuplicates;
   finally lFixture.Free; end;

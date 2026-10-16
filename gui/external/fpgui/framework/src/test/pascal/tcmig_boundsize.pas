@@ -9,9 +9,14 @@ uses
 
 type
   TTestMigBoundSize = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FUV10px: TfpgMigUnitValue;
     FUV20px: TfpgMigUnitValue;
@@ -76,10 +81,10 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px);
   try
-    FContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should have same content as input');
-    FContext.AssertTrue(bs.Preferred.ContentEquals(FUV10px), 'Pref should have same content as input');
-    FContext.AssertTrue(bs.Max.ContentEquals(FUV10px), 'Max should have same content as input');
-    FContext.AssertTrue(not (bs.GapPush), 'GapPush should be false');
+    TestContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should have same content as input');
+    TestContext.AssertTrue(bs.Preferred.ContentEquals(FUV10px), 'Pref should have same content as input');
+    TestContext.AssertTrue(bs.Max.ContentEquals(FUV10px), 'Max should have same content as input');
+    TestContext.AssertTrue(not (bs.GapPush), 'GapPush should be false');
   finally
     bs.Free;
   end;
@@ -91,10 +96,10 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px);
   try
-    FContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should be 10px');
-    FContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Pref should be 20px');
-    FContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max should be 30px');
-    FContext.AssertTrue(not (bs.GapPush), 'GapPush should be false');
+    TestContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should be 10px');
+    TestContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Pref should be 20px');
+    TestContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max should be 30px');
+    TestContext.AssertTrue(not (bs.GapPush), 'GapPush should be false');
   finally
     bs.Free;
   end;
@@ -106,10 +111,10 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px, True);
   try
-    FContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should be 10px');
-    FContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Pref should be 20px');
-    FContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max should be 30px');
-    FContext.AssertTrue(bs.GapPush, 'GapPush should be true');
+    TestContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min should be 10px');
+    TestContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Pref should be 20px');
+    TestContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max should be 30px');
+    TestContext.AssertTrue(bs.GapPush, 'GapPush should be true');
   finally
     bs.Free;
   end;
@@ -121,7 +126,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(nil, nil, nil);
   try
-    FContext.AssertTrue(bs.IsUnset, 'Should be unset when all values are nil');
+    TestContext.AssertTrue(bs.IsUnset, 'Should be unset when all values are nil');
   finally
     bs.Free;
   end;
@@ -133,7 +138,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, nil, nil);
   try
-    FContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when min is set');
+    TestContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when min is set');
   finally
     bs.Free;
   end;
@@ -145,7 +150,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(nil, FUV20px, nil);
   try
-    FContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when pref is set');
+    TestContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when pref is set');
   finally
     bs.Free;
   end;
@@ -157,7 +162,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(nil, nil, FUV30px);
   try
-    FContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when max is set');
+    TestContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when max is set');
   finally
     bs.Free;
   end;
@@ -169,7 +174,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(nil, nil, nil, True);
   try
-    FContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when gapPush is true');
+    TestContext.AssertTrue(not (bs.IsUnset), 'Should not be unset when gapPush is true');
   finally
     bs.Free;
   end;
@@ -180,7 +185,7 @@ var
   bs: TfpgMigBoundSize;
 begin
   bs := BoundSizeZeroPixel;
-  FContext.AssertTrue(bs.IsUnset, 'ZERO_PIXEL constant should report as unset');
+  TestContext.AssertTrue(bs.IsUnset, 'ZERO_PIXEL constant should report as unset');
 end;
 
 procedure TTestMigBoundSize.TestIsLinked_FalseWhenNoLinks;
@@ -189,7 +194,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px);
   try
-    FContext.AssertTrue(not (bs.IsLinked), 'Should not be linked when no links present');
+    TestContext.AssertTrue(not (bs.IsLinked), 'Should not be linked when no links present');
   finally
     bs.Free;
   end;
@@ -201,7 +206,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUVLink, FUV20px, FUV30px);
   try
-    FContext.AssertTrue(bs.IsLinked, 'Should be linked when min contains link');
+    TestContext.AssertTrue(bs.IsLinked, 'Should be linked when min contains link');
   finally
     bs.Free;
   end;
@@ -213,7 +218,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUVLink, FUV30px);
   try
-    FContext.AssertTrue(bs.IsLinked, 'Should be linked when pref contains link');
+    TestContext.AssertTrue(bs.IsLinked, 'Should be linked when pref contains link');
   finally
     bs.Free;
   end;
@@ -225,7 +230,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUVLink);
   try
-    FContext.AssertTrue(bs.IsLinked, 'Should be linked when max contains link');
+    TestContext.AssertTrue(bs.IsLinked, 'Should be linked when max contains link');
   finally
     bs.Free;
   end;
@@ -237,7 +242,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px);
   try
-    FContext.AssertTrue(bs.IsAbsolute, 'Should be absolute when all values are absolute');
+    TestContext.AssertTrue(bs.IsAbsolute, 'Should be absolute when all values are absolute');
   finally
     bs.Free;
   end;
@@ -249,7 +254,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(nil, nil, nil);
   try
-    FContext.AssertTrue(bs.IsAbsolute, 'Should be absolute when all values are nil');
+    TestContext.AssertTrue(bs.IsAbsolute, 'Should be absolute when all values are nil');
   finally
     bs.Free;
   end;
@@ -261,7 +266,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUVPercent, FUV20px, FUV30px);
   try
-    FContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when min is relative');
+    TestContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when min is relative');
   finally
     bs.Free;
   end;
@@ -273,7 +278,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUVPercent, FUV30px);
   try
-    FContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when pref is relative');
+    TestContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when pref is relative');
   finally
     bs.Free;
   end;
@@ -285,7 +290,7 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUVPercent);
   try
-    FContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when max is relative');
+    TestContext.AssertTrue(not (bs.IsAbsolute), 'Should not be absolute when max is relative');
   finally
     bs.Free;
   end;
@@ -296,24 +301,24 @@ var
   nullSize, zeroPixel: TfpgMigBoundSize;
 begin
   nullSize := BoundSizeNullSize;
-  FContext.AssertTrue((nullSize)<>nil, 'NULL_SIZE should not be nil');
-  FContext.AssertTrue(nullSize.IsUnset, 'NULL_SIZE should be unset');
-  FContext.AssertTrue((nullSize.Min)=nil, 'NULL_SIZE min should be nil');
-  FContext.AssertTrue((nullSize.Preferred)=nil, 'NULL_SIZE pref should be nil');
-  FContext.AssertTrue((nullSize.Max)=nil, 'NULL_SIZE max should be nil');
+  TestContext.AssertTrue((nullSize)<>nil, 'NULL_SIZE should not be nil');
+  TestContext.AssertTrue(nullSize.IsUnset, 'NULL_SIZE should be unset');
+  TestContext.AssertTrue((nullSize.Min)=nil, 'NULL_SIZE min should be nil');
+  TestContext.AssertTrue((nullSize.Preferred)=nil, 'NULL_SIZE pref should be nil');
+  TestContext.AssertTrue((nullSize.Max)=nil, 'NULL_SIZE max should be nil');
 
   zeroPixel := BoundSizeZeroPixel;
-  FContext.AssertTrue((zeroPixel)<>nil, 'ZERO_PIXEL should not be nil');
-  FContext.AssertTrue((zeroPixel.Min)<>nil, 'ZERO_PIXEL should have min');
-  FContext.AssertTrue((zeroPixel.Preferred)<>nil, 'ZERO_PIXEL should have pref');
-  FContext.AssertTrue((zeroPixel.Max)<>nil, 'ZERO_PIXEL should have max');
+  TestContext.AssertTrue((zeroPixel)<>nil, 'ZERO_PIXEL should not be nil');
+  TestContext.AssertTrue((zeroPixel.Min)<>nil, 'ZERO_PIXEL should have min');
+  TestContext.AssertTrue((zeroPixel.Preferred)<>nil, 'ZERO_PIXEL should have pref');
+  TestContext.AssertTrue((zeroPixel.Max)<>nil, 'ZERO_PIXEL should have max');
   // Check values are equal (all zero pixels), not pointer equality
-  FContext.AssertTrue((0.0)=(zeroPixel.Min.Value), 'ZERO_PIXEL min should be 0');
-  FContext.AssertTrue((0.0)=(zeroPixel.Preferred.Value), 'ZERO_PIXEL pref should be 0');
-  FContext.AssertTrue((0.0)=(zeroPixel.Max.Value), 'ZERO_PIXEL max should be 0');
-  FContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Min.UnitType)), 'ZERO_PIXEL min should be pixel');
-  FContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Preferred.UnitType)), 'ZERO_PIXEL pref should be pixel');
-  FContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Max.UnitType)), 'ZERO_PIXEL max should be pixel');
+  TestContext.AssertTrue((0.0)=(zeroPixel.Min.Value), 'ZERO_PIXEL min should be 0');
+  TestContext.AssertTrue((0.0)=(zeroPixel.Preferred.Value), 'ZERO_PIXEL pref should be 0');
+  TestContext.AssertTrue((0.0)=(zeroPixel.Max.Value), 'ZERO_PIXEL max should be 0');
+  TestContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Min.UnitType)), 'ZERO_PIXEL min should be pixel');
+  TestContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Preferred.UnitType)), 'ZERO_PIXEL pref should be pixel');
+  TestContext.AssertTrue((Ord(utPixel))=(Ord(zeroPixel.Max.UnitType)), 'ZERO_PIXEL max should be pixel');
 end;
 
 procedure TTestMigBoundSize.TestPropertyAccess;
@@ -322,23 +327,28 @@ var
 begin
   bs := TfpgMigBoundSize.Create(FUV10px, FUV20px, FUV30px, True);
   try
-    FContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min property should return correct value');
-    FContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Preferred property should return correct value');
-    FContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max property should return correct value');
-    FContext.AssertTrue(bs.GapPush, 'GapPush property should return true');
+    TestContext.AssertTrue(bs.Min.ContentEquals(FUV10px), 'Min property should return correct value');
+    TestContext.AssertTrue(bs.Preferred.ContentEquals(FUV20px), 'Preferred property should return correct value');
+    TestContext.AssertTrue(bs.Max.ContentEquals(FUV30px), 'Max property should return correct value');
+    TestContext.AssertTrue(bs.GapPush, 'GapPush property should return true');
   finally
     bs.Free;
   end;
 end;
 
 
+constructor TTestMigBoundSize.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigBoundSizeTestCreateWithSingleValue(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestCreateWithSingleValue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateWithSingleValue';
     lFixture.SetUp;
     try lFixture.TestCreateWithSingleValue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -347,10 +357,8 @@ end;
 procedure RunTTestMigBoundSizeTestCreateWithThreeValues(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestCreateWithThreeValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateWithThreeValues';
     lFixture.SetUp;
     try lFixture.TestCreateWithThreeValues; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -359,10 +367,8 @@ end;
 procedure RunTTestMigBoundSizeTestCreateWithGapPush(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestCreateWithGapPush');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateWithGapPush';
     lFixture.SetUp;
     try lFixture.TestCreateWithGapPush; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -371,10 +377,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_TrueWhenAllNil(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_TrueWhenAllNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_TrueWhenAllNil';
     lFixture.SetUp;
     try lFixture.TestIsUnset_TrueWhenAllNil; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -383,10 +387,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_FalseWhenMinSet(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_FalseWhenMinSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_FalseWhenMinSet';
     lFixture.SetUp;
     try lFixture.TestIsUnset_FalseWhenMinSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -395,10 +397,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_FalseWhenPrefSet(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_FalseWhenPrefSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_FalseWhenPrefSet';
     lFixture.SetUp;
     try lFixture.TestIsUnset_FalseWhenPrefSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -407,10 +407,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_FalseWhenMaxSet(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_FalseWhenMaxSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_FalseWhenMaxSet';
     lFixture.SetUp;
     try lFixture.TestIsUnset_FalseWhenMaxSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -419,10 +417,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_FalseWhenGapPushSet(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_FalseWhenGapPushSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_FalseWhenGapPushSet';
     lFixture.SetUp;
     try lFixture.TestIsUnset_FalseWhenGapPushSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -431,10 +427,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsUnset_TrueForZeroPixelConstant(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsUnset_TrueForZeroPixelConstant');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsUnset_TrueForZeroPixelConstant';
     lFixture.SetUp;
     try lFixture.TestIsUnset_TrueForZeroPixelConstant; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -443,10 +437,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsLinked_FalseWhenNoLinks(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsLinked_FalseWhenNoLinks');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsLinked_FalseWhenNoLinks';
     lFixture.SetUp;
     try lFixture.TestIsLinked_FalseWhenNoLinks; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -455,10 +447,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsLinked_TrueWhenMinLinked(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsLinked_TrueWhenMinLinked');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsLinked_TrueWhenMinLinked';
     lFixture.SetUp;
     try lFixture.TestIsLinked_TrueWhenMinLinked; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -467,10 +457,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsLinked_TrueWhenPrefLinked(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsLinked_TrueWhenPrefLinked');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsLinked_TrueWhenPrefLinked';
     lFixture.SetUp;
     try lFixture.TestIsLinked_TrueWhenPrefLinked; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -479,10 +467,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsLinked_TrueWhenMaxLinked(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsLinked_TrueWhenMaxLinked');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsLinked_TrueWhenMaxLinked';
     lFixture.SetUp;
     try lFixture.TestIsLinked_TrueWhenMaxLinked; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -491,10 +477,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsAbsolute_TrueWhenAllAbsolute(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsAbsolute_TrueWhenAllAbsolute');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsAbsolute_TrueWhenAllAbsolute';
     lFixture.SetUp;
     try lFixture.TestIsAbsolute_TrueWhenAllAbsolute; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -503,10 +487,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsAbsolute_TrueWhenAllNil(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsAbsolute_TrueWhenAllNil');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsAbsolute_TrueWhenAllNil';
     lFixture.SetUp;
     try lFixture.TestIsAbsolute_TrueWhenAllNil; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -515,10 +497,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsAbsolute_FalseWhenMinRelative(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsAbsolute_FalseWhenMinRelative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsAbsolute_FalseWhenMinRelative';
     lFixture.SetUp;
     try lFixture.TestIsAbsolute_FalseWhenMinRelative; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -527,10 +507,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsAbsolute_FalseWhenPrefRelative(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsAbsolute_FalseWhenPrefRelative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsAbsolute_FalseWhenPrefRelative';
     lFixture.SetUp;
     try lFixture.TestIsAbsolute_FalseWhenPrefRelative; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -539,10 +517,8 @@ end;
 procedure RunTTestMigBoundSizeTestIsAbsolute_FalseWhenMaxRelative(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestIsAbsolute_FalseWhenMaxRelative');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsAbsolute_FalseWhenMaxRelative';
     lFixture.SetUp;
     try lFixture.TestIsAbsolute_FalseWhenMaxRelative; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -551,10 +527,8 @@ end;
 procedure RunTTestMigBoundSizeTestConstantValues(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestConstantValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConstantValues';
     lFixture.SetUp;
     try lFixture.TestConstantValues; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -563,10 +537,8 @@ end;
 procedure RunTTestMigBoundSizeTestPropertyAccess(AContext: TNXTestContext);
 var lFixture: TTestMigBoundSize;
 begin
-  lFixture:=TTestMigBoundSize.Create;
+  lFixture:=TTestMigBoundSize.Create(AContext, 'TestPropertyAccess');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPropertyAccess';
     lFixture.SetUp;
     try lFixture.TestPropertyAccess; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

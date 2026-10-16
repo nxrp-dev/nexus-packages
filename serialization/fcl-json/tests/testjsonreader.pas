@@ -84,7 +84,7 @@ type
   Private
     FReader: TMyJSONReader;
   Protected
-    Procedure Teardown; override;
+    Procedure Teardown; virtual;
   Public
     procedure DoTestError(S: String; Options : TJSONOptions = DefaultOpts); override;
     Procedure TestRead(aJSON : String; AResult : Array of TJSONStringType); override;
@@ -123,7 +123,7 @@ type
     FList : TStrings;
     FReader: TJSONConsumerReader;
   Protected
-    Procedure Teardown; override;
+    Procedure Teardown; virtual;
   Public
     procedure DoTestError(S: String; Options : TJSONOptions = DefaultOpts); override;
     Procedure TestRead(aJSON : String; AResult : Array of TJSONStringType); override;
@@ -152,7 +152,7 @@ type
     procedure StartObject(Sender: TObject);
     procedure StringValue(Sender: TObject; const AValue: TJSONStringType);
     Procedure HookupEvents(AReader: TJSONEventReader);
-    Procedure Teardown; override;
+    Procedure Teardown; virtual;
   Public
     procedure DoTestError(S: String; Options : TJSONOptions = DefaultOpts); override;
     Procedure TestRead(aJSON : String; AResult : Array of TJSONStringType); override;
@@ -392,12 +392,12 @@ end;
 
 procedure TBaseTestReader.TestTrailingCommaErrorArray;
 begin
-  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorArray, 'Need joIgnoreTrailingComma in options to allow trailing comma') ;
+  TestContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorArray, 'Need joIgnoreTrailingComma in options to allow trailing comma') ;
 end;
 
 procedure TBaseTestReader.TestTrailingCommaErrorObject;
 begin
-  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorObject, 'Need joIgnoreTrailingComma in options to allow trailing comma');
+  TestContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorObject, 'Need joIgnoreTrailingComma in options to allow trailing comma');
 end;
 
 procedure TBaseTestReader.DoTrailingCommaErrorArray;
@@ -541,7 +541,7 @@ end;
 procedure TTestReader.Teardown;
 begin
   FreeAndNil(FReader);
-  inherited Teardown;
+
 end;
 
 procedure TTestReader.TestRead(aJSON: String; AResult: array of TJSONStringType);
@@ -553,9 +553,9 @@ begin
   FreeAndNil(FReader);
   FReader:=TMyJSONReader.Create(aJSON,Foptions);
   TMyJSONReader(FReader).DoExecute;
-  FContext.AssertTrue((Length(AResult))=(FReader.List.Count), aJSON+': Number of events');
+  TestContext.AssertTrue((Length(AResult))=(FReader.List.Count), aJSON+': Number of events');
   For I:=0 to Length(AResult)-1 do
-    FContext.AssertTrue((AResult[i])=(FReader.List[I]), aJSON+': Event number '+IntToStr(I));
+    TestContext.AssertTrue((AResult[i])=(FReader.List[I]), aJSON+': Event number '+IntToStr(I));
 end;
 
 procedure TTestReader.DoTestError(S : String; Options : TJSONOptions = DefaultOpts);
@@ -579,7 +579,7 @@ begin
     ParseOk:=False;
   end;
   If ParseOK then
-    FContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
+    TestContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
 end;
 
 
@@ -679,16 +679,16 @@ begin
   FReader:=TJSONConsumerReader.Create(aJSON,Foptions);
   FReader.Consumer:=TJSONConsumer.Create(FList);
   TJSONConsumerReader(FReader).Execute;
-  FContext.AssertTrue((Length(AResult))=(FList.Count), aJSON+': Number of events');
+  TestContext.AssertTrue((Length(AResult))=(FList.Count), aJSON+': Number of events');
   For I:=0 to Length(AResult)-1 do
-    FContext.AssertTrue((AResult[i])=(FList[I]), aJSON+': Event number '+IntToStr(I));
+    TestContext.AssertTrue((AResult[i])=(FList[I]), aJSON+': Event number '+IntToStr(I));
 end;
 
 procedure TTestJSONConsumerReader.Teardown;
 begin
   FreeAndNil(FReader);
   FreeAndNil(FList);
-  inherited Teardown;
+
 end;
 
 procedure TTestJSONConsumerReader.DoTestError(S : String; Options : TJSONOptions = DefaultOpts);
@@ -716,7 +716,7 @@ begin
     ParseOk:=False;
   end;
   If ParseOK then
-    FContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
+    TestContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
 end;
 
 { TTestJSONEventReader }
@@ -725,7 +725,7 @@ procedure TTestJSONEventReader.Teardown;
 begin
   FreeAndNil(Freader);
   FreeAndNil(Flist);
-  inherited Teardown;
+
 end;
 
 procedure TTestJSONEventReader.DoTestError(S: String; Options: TJSONOptions);
@@ -753,7 +753,7 @@ begin
     ParseOk:=False;
   end;
   If ParseOK then
-    FContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
+    TestContext.Fail('Parse of JSON string "'+S+'" should fail, but succeeded');
 end;
 
 procedure TTestJSONEventReader.TestRead(aJSON: String; AResult: array of TJSONStringType);
@@ -768,9 +768,9 @@ begin
   FReader:=TJSONEventReader.Create(aJSON,Foptions);
   HookupEvents(FReader);
   FReader.Execute;
-  FContext.AssertTrue((Length(AResult))=(FList.Count), aJSON+': Number of events');
+  TestContext.AssertTrue((Length(AResult))=(FList.Count), aJSON+': Number of events');
   For I:=0 to Length(AResult)-1 do
-    FContext.AssertTrue((AResult[i])=(FList[I]), aJSON+': Event number '+IntToStr(I));
+    TestContext.AssertTrue((AResult[i])=(FList[I]), aJSON+': Event number '+IntToStr(I));
 end;
 
 procedure TTestJSONEventReader.Push(const aType: String; const AValue: String);
@@ -873,10 +873,8 @@ end;
 procedure RunTTestReaderTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -885,10 +883,8 @@ end;
 procedure RunTTestReaderTestNull(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -897,10 +893,8 @@ end;
 procedure RunTTestReaderTestTrue(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrue';
     lFixture.SetUp;
     try lFixture.TestTrue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -909,10 +903,8 @@ end;
 procedure RunTTestReaderTestFalse(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFalse';
     lFixture.SetUp;
     try lFixture.TestFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -921,10 +913,8 @@ end;
 procedure RunTTestReaderTestFloat(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -933,10 +923,8 @@ end;
 procedure RunTTestReaderTestFloatError(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestFloatError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatError';
     lFixture.SetUp;
     try lFixture.TestFloatError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -945,10 +933,8 @@ end;
 procedure RunTTestReaderTestInteger(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -957,10 +943,8 @@ end;
 procedure RunTTestReaderTestInt64(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64';
     lFixture.SetUp;
     try lFixture.TestInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -969,10 +953,8 @@ end;
 procedure RunTTestReaderTestString(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -981,10 +963,8 @@ end;
 procedure RunTTestReaderTestArray(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArray';
     lFixture.SetUp;
     try lFixture.TestArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -993,10 +973,8 @@ end;
 procedure RunTTestReaderTestObject(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObject';
     lFixture.SetUp;
     try lFixture.TestObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1005,10 +983,8 @@ end;
 procedure RunTTestReaderTestObjectError(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestObjectError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectError';
     lFixture.SetUp;
     try lFixture.TestObjectError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1017,10 +993,8 @@ end;
 procedure RunTTestReaderTestObjectKeyIdentifier(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestObjectKeyIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifier';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1029,10 +1003,8 @@ end;
 procedure RunTTestReaderTestObjectKeyIdentifierStrict(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestObjectKeyIdentifierStrict');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifierStrict';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifierStrict; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1041,10 +1013,8 @@ end;
 procedure RunTTestReaderTestTrailingComma(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestTrailingComma');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingComma';
     lFixture.SetUp;
     try lFixture.TestTrailingComma; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1053,10 +1023,8 @@ end;
 procedure RunTTestReaderTestTrailingCommaErrorArray(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestTrailingCommaErrorArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorArray';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1065,10 +1033,8 @@ end;
 procedure RunTTestReaderTestTrailingCommaErrorObject(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestTrailingCommaErrorObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorObject';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1077,10 +1043,8 @@ end;
 procedure RunTTestReaderTestMixed(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestMixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMixed';
     lFixture.SetUp;
     try lFixture.TestMixed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1089,10 +1053,8 @@ end;
 procedure RunTTestReaderTestComment(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment';
     lFixture.SetUp;
     try lFixture.TestComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1101,10 +1063,8 @@ end;
 procedure RunTTestReaderTestErrors(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestErrors');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestErrors';
     lFixture.SetUp;
     try lFixture.TestErrors; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1113,10 +1073,8 @@ end;
 procedure RunTTestReaderTestGarbageOK(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestGarbageOK');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageOK';
     lFixture.SetUp;
     try lFixture.TestGarbageOK; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1125,10 +1083,8 @@ end;
 procedure RunTTestReaderTestGarbageFail(AContext: TNXTestContext);
 var lFixture: TTestReader;
 begin
-  lFixture:=TTestReader.Create;
+  lFixture:=TTestReader.Create(AContext, 'TestGarbageFail');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageFail';
     lFixture.SetUp;
     try lFixture.TestGarbageFail; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1137,10 +1093,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1149,10 +1103,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestNull(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1161,10 +1113,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestTrue(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrue';
     lFixture.SetUp;
     try lFixture.TestTrue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1173,10 +1123,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestFalse(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFalse';
     lFixture.SetUp;
     try lFixture.TestFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1185,10 +1133,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestFloat(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1197,10 +1143,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestFloatError(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestFloatError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatError';
     lFixture.SetUp;
     try lFixture.TestFloatError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1209,10 +1153,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestInteger(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1221,10 +1163,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestInt64(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64';
     lFixture.SetUp;
     try lFixture.TestInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1233,10 +1173,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestString(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1245,10 +1183,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestArray(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArray';
     lFixture.SetUp;
     try lFixture.TestArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1257,10 +1193,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestObject(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObject';
     lFixture.SetUp;
     try lFixture.TestObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1269,10 +1203,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestObjectError(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestObjectError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectError';
     lFixture.SetUp;
     try lFixture.TestObjectError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1281,10 +1213,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestObjectKeyIdentifier(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestObjectKeyIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifier';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1293,10 +1223,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestObjectKeyIdentifierStrict(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestObjectKeyIdentifierStrict');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifierStrict';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifierStrict; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1305,10 +1233,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestTrailingComma(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestTrailingComma');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingComma';
     lFixture.SetUp;
     try lFixture.TestTrailingComma; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1317,10 +1243,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestTrailingCommaErrorArray(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestTrailingCommaErrorArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorArray';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1329,10 +1253,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestTrailingCommaErrorObject(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestTrailingCommaErrorObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorObject';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1341,10 +1263,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestMixed(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestMixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMixed';
     lFixture.SetUp;
     try lFixture.TestMixed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1353,10 +1273,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestComment(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment';
     lFixture.SetUp;
     try lFixture.TestComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1365,10 +1283,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestErrors(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestErrors');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestErrors';
     lFixture.SetUp;
     try lFixture.TestErrors; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1377,10 +1293,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestGarbageOK(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestGarbageOK');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageOK';
     lFixture.SetUp;
     try lFixture.TestGarbageOK; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1389,10 +1303,8 @@ end;
 procedure RunTTestJSONConsumerReaderTestGarbageFail(AContext: TNXTestContext);
 var lFixture: TTestJSONConsumerReader;
 begin
-  lFixture:=TTestJSONConsumerReader.Create;
+  lFixture:=TTestJSONConsumerReader.Create(AContext, 'TestGarbageFail');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageFail';
     lFixture.SetUp;
     try lFixture.TestGarbageFail; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1401,10 +1313,8 @@ end;
 procedure RunTTestJSONEventReaderTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1413,10 +1323,8 @@ end;
 procedure RunTTestJSONEventReaderTestNull(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1425,10 +1333,8 @@ end;
 procedure RunTTestJSONEventReaderTestTrue(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestTrue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrue';
     lFixture.SetUp;
     try lFixture.TestTrue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1437,10 +1343,8 @@ end;
 procedure RunTTestJSONEventReaderTestFalse(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFalse';
     lFixture.SetUp;
     try lFixture.TestFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1449,10 +1353,8 @@ end;
 procedure RunTTestJSONEventReaderTestFloat(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1461,10 +1363,8 @@ end;
 procedure RunTTestJSONEventReaderTestFloatError(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestFloatError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatError';
     lFixture.SetUp;
     try lFixture.TestFloatError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1473,10 +1373,8 @@ end;
 procedure RunTTestJSONEventReaderTestInteger(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1485,10 +1383,8 @@ end;
 procedure RunTTestJSONEventReaderTestInt64(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestInt64');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt64';
     lFixture.SetUp;
     try lFixture.TestInt64; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1497,10 +1393,8 @@ end;
 procedure RunTTestJSONEventReaderTestString(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1509,10 +1403,8 @@ end;
 procedure RunTTestJSONEventReaderTestArray(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestArray';
     lFixture.SetUp;
     try lFixture.TestArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1521,10 +1413,8 @@ end;
 procedure RunTTestJSONEventReaderTestObject(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObject';
     lFixture.SetUp;
     try lFixture.TestObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1533,10 +1423,8 @@ end;
 procedure RunTTestJSONEventReaderTestObjectError(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestObjectError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectError';
     lFixture.SetUp;
     try lFixture.TestObjectError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1545,10 +1433,8 @@ end;
 procedure RunTTestJSONEventReaderTestObjectKeyIdentifier(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestObjectKeyIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifier';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1557,10 +1443,8 @@ end;
 procedure RunTTestJSONEventReaderTestObjectKeyIdentifierStrict(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestObjectKeyIdentifierStrict');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestObjectKeyIdentifierStrict';
     lFixture.SetUp;
     try lFixture.TestObjectKeyIdentifierStrict; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1569,10 +1453,8 @@ end;
 procedure RunTTestJSONEventReaderTestTrailingComma(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestTrailingComma');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingComma';
     lFixture.SetUp;
     try lFixture.TestTrailingComma; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1581,10 +1463,8 @@ end;
 procedure RunTTestJSONEventReaderTestTrailingCommaErrorArray(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestTrailingCommaErrorArray');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorArray';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorArray; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1593,10 +1473,8 @@ end;
 procedure RunTTestJSONEventReaderTestTrailingCommaErrorObject(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestTrailingCommaErrorObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingCommaErrorObject';
     lFixture.SetUp;
     try lFixture.TestTrailingCommaErrorObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1605,10 +1483,8 @@ end;
 procedure RunTTestJSONEventReaderTestMixed(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestMixed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMixed';
     lFixture.SetUp;
     try lFixture.TestMixed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1617,10 +1493,8 @@ end;
 procedure RunTTestJSONEventReaderTestComment(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment';
     lFixture.SetUp;
     try lFixture.TestComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1629,10 +1503,8 @@ end;
 procedure RunTTestJSONEventReaderTestErrors(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestErrors');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestErrors';
     lFixture.SetUp;
     try lFixture.TestErrors; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1641,10 +1513,8 @@ end;
 procedure RunTTestJSONEventReaderTestGarbageOK(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestGarbageOK');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageOK';
     lFixture.SetUp;
     try lFixture.TestGarbageOK; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1653,10 +1523,8 @@ end;
 procedure RunTTestJSONEventReaderTestGarbageFail(AContext: TNXTestContext);
 var lFixture: TTestJSONEventReader;
 begin
-  lFixture:=TTestJSONEventReader.Create;
+  lFixture:=TTestJSONEventReader.Create(AContext, 'TestGarbageFail');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGarbageFail';
     lFixture.SetUp;
     try lFixture.TestGarbageFail; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

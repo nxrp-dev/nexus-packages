@@ -265,3 +265,10 @@ emitted without the corresponding implementation.
 Suggested correction: initialize `HaveComplexArr` before examining the members.
 Verify that generated classes containing only scalar properties compile
 consistently, alongside classes containing complex arrays.
+
+## 2026-10-16 native retained-test conversion
+
+Useful retained behavior tests now use nxtest directly. The former FPCUnit
+helpers and runners were removed, with their originals preserved in hashed
+archives. The [retirement report](../../../../projects/nxtest/retained/README.md) records conversions,
+corrected invalid expectations, before/after results and verification limits.

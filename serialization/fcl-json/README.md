@@ -7,9 +7,7 @@ Subsequent nxtest regressions reproduced and corrected all eleven findings in
 the [saved review](CODE_REVIEW.md).
 
 [FCLJSON.nxpackage](FCLJSON.nxpackage) builds all 13 runtime units as static
-NexusFPC units. It does not require a runtime-package SDK. `jsonfpcunit.pas`
-remains an optional source helper requiring `fcl-fpcunit`; it is excluded from
-the main build. Namespaced wrappers are retained for separate consumers and
+NexusFPC units. It does not require a runtime-package SDK. Namespaced wrappers are retained for separate consumers and
 are not compiled alongside the ordinary unit names.
 
 From the Nexus repository root:
@@ -26,8 +24,8 @@ Outputs go to `output/nxbuild-fcl-json/<target>`; consumers add that directory
 to their unit search path. Source consumers use this package's `src` directory.
 
 The runtime units still use NexusFPC's `fcl-base` and `rtl-objpas` sources.
-This move does not migrate those packages. The retained upstream FPCUnit tests
-remain alongside the new nxtest review regressions.
+This move does not migrate those packages. The retained upstream behavior tests now use nxtest directly, alongside the review
+regressions. See [native retained tests](../../../../projects/nxtest/retained/README.md).
 
 Upstream authorship, source revision, relocation evidence and licensing are
 recorded in the canonical [Nexus attributions](../../../../ATTRIBUTIONS.md#fcl-json).

@@ -29,9 +29,14 @@ type
 
   { Test case for persistent font cache behavior }
   TTestFontCacheRemoval = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FFontManager: TfpgFontManager;
   protected
@@ -44,8 +49,6 @@ type
     procedure TestCacheSizeGrowsWithUniqueFonts;
     procedure TestCacheNormalizationReturnsIdenticalObject;
   end;
-
-procedure RegisterTests;
 
 procedure RegistertcfontcacheremovalTests(ARegistry: TNXTestRegistry);
 
@@ -123,18 +126,18 @@ begin
 
   { Get font - this adds it to cache }
   font := FFontManager.GetFont(fontDesc);
-  FContext.AssertTrue((font)<>nil, 'Font should be created');
+  TestContext.AssertTrue((font)<>nil, 'Font should be created');
 
   { Cache should have grown }
   afterAddSize := FFontManager.GetCacheSize;
-  FContext.AssertTrue((initialCacheSize + 1)=(afterAddSize), Format('Cache should grow by 1 (was %d, now %d)', [initialCacheSize, afterAddSize]));
+  TestContext.AssertTrue((initialCacheSize + 1)=(afterAddSize), Format('Cache should grow by 1 (was %d, now %d)', [initialCacheSize, afterAddSize]));
 
   { Release the font reference }
   font := nil;
 
   { Font should STAY in cache (persistent cache model) }
   afterReleaseSize := FFontManager.GetCacheSize;
-  FContext.AssertTrue((afterAddSize)=(afterReleaseSize), Format('Cache size should stay same after release - persistent cache (expected %d, got %d)',
+  TestContext.AssertTrue((afterAddSize)=(afterReleaseSize), Format('Cache size should stay same after release - persistent cache (expected %d, got %d)',
            [afterAddSize, afterReleaseSize]));
 end;
 
@@ -152,7 +155,7 @@ begin
 
   { Cache should have 3 more fonts }
   afterAdd3 := FFontManager.GetCacheSize;
-  FContext.AssertTrue((initialSize + 3)=(afterAdd3), Format('Cache should have 3 more fonts (expected %d, got %d)',
+  TestContext.AssertTrue((initialSize + 3)=(afterAdd3), Format('Cache should have 3 more fonts (expected %d, got %d)',
            [initialSize + 3, afterAdd3]));
 
   { Release all font references }
@@ -160,7 +163,7 @@ begin
 
   { All fonts should STAY in cache (persistent cache model) }
   afterReleaseAll := FFontManager.GetCacheSize;
-  FContext.AssertTrue((afterAdd3)=(afterReleaseAll), Format('Cache should keep all fonts after release (expected %d, got %d)',
+  TestContext.AssertTrue((afterAdd3)=(afterReleaseAll), Format('Cache should keep all fonts after release (expected %d, got %d)',
            [afterAdd3, afterReleaseAll]));
 end;
 
@@ -175,20 +178,20 @@ begin
   { Add first font }
   font1 := FFontManager.GetFont('Liberation Mono-12');
   afterFont1 := FFontManager.GetCacheSize;
-  FContext.AssertTrue((initialSize + 1)=(afterFont1), 'Cache should grow by 1 for new font');
+  TestContext.AssertTrue((initialSize + 1)=(afterFont1), 'Cache should grow by 1 for new font');
 
   { Add second different font }
   FFontManager.GetFont('Liberation Mono-14');
   afterFont2 := FFontManager.GetCacheSize;
-  FContext.AssertTrue((initialSize + 2)=(afterFont2), 'Cache should grow by 1 for another new font');
+  TestContext.AssertTrue((initialSize + 2)=(afterFont2), 'Cache should grow by 1 for another new font');
 
   { Request first font again - should NOT grow cache }
   font1Again := FFontManager.GetFont('Liberation Mono-12');
   afterFont1Again := FFontManager.GetCacheSize;
-  FContext.AssertTrue((afterFont2)=(afterFont1Again), 'Cache should not grow when requesting existing font');
+  TestContext.AssertTrue((afterFont2)=(afterFont1Again), 'Cache should not grow when requesting existing font');
 
   { Verify it's the same object (cache hit) }
-  FContext.AssertTrue(font1 = font1Again, 'Should return same cached font object');
+  TestContext.AssertTrue(font1 = font1Again, 'Should return same cached font object');
 
   { Cleanup }
   font1 := nil;
@@ -206,23 +209,23 @@ begin
 
   { Request font with normal case }
   font1 := FFontManager.GetFont('Liberation Mono-12');
-  FContext.AssertTrue((font1)<>nil, 'Font1 should be created');
-  FContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should grow by 1 for new font');
+  TestContext.AssertTrue((font1)<>nil, 'Font1 should be created');
+  TestContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should grow by 1 for new font');
 
   { Request same font with different case - should get same object }
   font2 := FFontManager.GetFont('Liberation MONO-12');
-  FContext.AssertTrue(font1 = font2, 'Different case should return same cached object');
-  FContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should not grow - normalization should find existing font');
+  TestContext.AssertTrue(font1 = font2, 'Different case should return same cached object');
+  TestContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should not grow - normalization should find existing font');
 
   { Request with lowercase - should still get same object }
   font3 := FFontManager.GetFont('liberation mono-12');
-  FContext.AssertTrue(font1 = font3, 'Lowercase should return same cached object');
-  FContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should still not grow');
+  TestContext.AssertTrue(font1 = font3, 'Lowercase should return same cached object');
+  TestContext.AssertTrue((initialSize + 1)=(FFontManager.GetCacheSize), 'Cache should still not grow');
 
   { Request with bold attribute in different order }
   font4 := FFontManager.GetFont('Liberation Mono-12:bold');
-  FContext.AssertTrue(font1 <> font4, 'Different attributes should return different object');
-  FContext.AssertTrue((initialSize + 2)=(FFontManager.GetCacheSize), 'Different attributes should create new cache entry');
+  TestContext.AssertTrue(font1 <> font4, 'Different attributes should return different object');
+  TestContext.AssertTrue((initialSize + 2)=(FFontManager.GetCacheSize), 'Different attributes should create new cache entry');
 
   { Cleanup }
   font1 := nil;
@@ -231,18 +234,18 @@ begin
   font4 := nil;
 end;
 
-procedure RegisterTests;
+constructor TTestFontCacheRemoval.Create(AContext: TNXTestContext; const ACaseName: string);
 begin
-  
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestFontCacheRemovalTestFontStaysInCacheWhenReleased(AContext: TNXTestContext);
 var lFixture: TTestFontCacheRemoval;
 begin
-  lFixture:=TTestFontCacheRemoval.Create;
+  lFixture:=TTestFontCacheRemoval.Create(AContext, 'TestFontStaysInCacheWhenReleased');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFontStaysInCacheWhenReleased';
     lFixture.SetUp;
     try lFixture.TestFontStaysInCacheWhenReleased; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -251,10 +254,8 @@ end;
 procedure RunTTestFontCacheRemovalTestMultipleFontsCached(AContext: TNXTestContext);
 var lFixture: TTestFontCacheRemoval;
 begin
-  lFixture:=TTestFontCacheRemoval.Create;
+  lFixture:=TTestFontCacheRemoval.Create(AContext, 'TestMultipleFontsCached');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultipleFontsCached';
     lFixture.SetUp;
     try lFixture.TestMultipleFontsCached; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -263,10 +264,8 @@ end;
 procedure RunTTestFontCacheRemovalTestCacheSizeGrowsWithUniqueFonts(AContext: TNXTestContext);
 var lFixture: TTestFontCacheRemoval;
 begin
-  lFixture:=TTestFontCacheRemoval.Create;
+  lFixture:=TTestFontCacheRemoval.Create(AContext, 'TestCacheSizeGrowsWithUniqueFonts');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCacheSizeGrowsWithUniqueFonts';
     lFixture.SetUp;
     try lFixture.TestCacheSizeGrowsWithUniqueFonts; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -275,10 +274,8 @@ end;
 procedure RunTTestFontCacheRemovalTestCacheNormalizationReturnsIdenticalObject(AContext: TNXTestContext);
 var lFixture: TTestFontCacheRemoval;
 begin
-  lFixture:=TTestFontCacheRemoval.Create;
+  lFixture:=TTestFontCacheRemoval.Create(AContext, 'TestCacheNormalizationReturnsIdenticalObject');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCacheNormalizationReturnsIdenticalObject';
     lFixture.SetUp;
     try lFixture.TestCacheNormalizationReturnsIdenticalObject; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -294,8 +291,5 @@ begin
   lSuite.AddTest('TestCacheNormalizationReturnsIdenticalObject', @RunTTestFontCacheRemovalTestCacheNormalizationReturnsIdenticalObject);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

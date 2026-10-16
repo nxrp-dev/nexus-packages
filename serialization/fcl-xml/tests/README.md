@@ -22,7 +22,7 @@ skips on other hosts. The fixtures otherwise use local files and no external
 services or test data downloads.
 
 The retained reader/DOM suites (`readertest`, `extras`, `extras2`) run 36 local
-FPCUnit tests. `xpathts.pas` is a separate expression runner. Its two namespace-axis
+native nxtest cases. `xpathts.pas` is a separate expression runner. Its two namespace-axis
 expectations were removed because this feature is explicitly unsupported;
 nxtest case 12 verifies rejection. Its two other original failures are fixed
 in the implementation. The runner now returns a failing exit status when its

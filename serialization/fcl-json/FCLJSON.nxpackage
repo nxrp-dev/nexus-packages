@@ -12,7 +12,6 @@ Package FCLJSON {
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
-        // jsonfpcunit is an optional test helper, not a runtime dependency.
         SourceFiles: [
             @FCLJSON.SourceRoot + "/src/fpjson.pas",
             @FCLJSON.SourceRoot + "/src/jsonscanner.pas",

@@ -7,7 +7,7 @@ unit ToolsUnit;
 interface
 
 uses
-  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, DB;
+  Classes, SysUtils, DB;
 
 Const
   // Number of "N" test datasets (as opposed to FieldDatasets) that will be created
@@ -95,29 +95,6 @@ type
        procedure DataEvent(Event: TDataEvent; Info: longint); override;
 {$ENDIF}
      end;
-
-  { TDBBasicsTestSetup }
-
-  TDBBasicsTestSetup = class(TTestSetup)
-    protected
-      procedure OneTimeSetup; override;
-      procedure OneTimeTearDown; override;
-    end;
-
-  { TDBBasicsTestCase }
-  TDBBasicsTestCase = class(TObject)
-  protected
-    FContext: TNXTestContext;
-    FCaseName: string;
-    protected
-      procedure SetUp; virtual;
-      procedure TearDown; virtual;
-      // Verify whether all values in FieldDataset are present and correct
-      procedure CheckFieldDatasetValues(ADataSet: TDataSet);
-      // Verify whether all values in NDataset are present and correct
-      procedure CheckNDatasetValues(ADataSet: TDataSet; n: integer);
-  end;
-
 
 const
   DataEventnames : Array [TDataEvent] of String[21] =
@@ -251,7 +228,6 @@ function TimeStringToDateTime(d: String): TDateTime;
 function StringToByteArray(const s: ansistring): Variant;
 
 
-procedure RegisterToolsUnitTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -440,67 +416,6 @@ begin
 end;
 
 
-{ TDBBasicsTestSetup }
-
-procedure TDBBasicsTestSetup.OneTimeSetup;
-begin
-  InitialiseDBConnector;
-end;
-
-procedure TDBBasicsTestSetup.OneTimeTearDown;
-begin
-  FreeDBConnector;
-end;
-
-{ TDBBasicsTestCase }
-
-procedure TDBBasicsTestCase.SetUp;
-begin
-  
-  DBConnector.StartTest(TestName);
-end;
-
-procedure TDBBasicsTestCase.TearDown;
-begin
-  DBConnector.StopTest(TestName);
-  
-end;
-
-procedure TDBBasicsTestCase.CheckFieldDatasetValues(ADataSet: TDataSet);
-var i: integer;
-begin
-  with ADataSet do
-  begin
-    First;
-    for i := 0 to testValuesCount-1 do
-    begin
-      FContext.AssertTrue((i)=(FieldByName('ID').AsInteger), 'ID');
-      FContext.AssertTrue((testStringValues[i])=(FieldByName('FSTRING').AsString), 'FSTRING');
-      FContext.AssertTrue((testIntValues[i])=(FieldByName('FINTEGER').AsInteger), 'FINTEGER');
-      FContext.AssertTrue((testLargeIntValues[i])=(FieldByName('FLARGEINT').AsLargeInt), 'FLARGEINT');
-      Next;
-    end;
-    FContext.AssertTrue(Eof, 'Eof');
-  end;
-end;
-
-procedure TDBBasicsTestCase.CheckNDatasetValues(ADataSet: TDataSet; n: integer);
-var i: integer;
-begin
-  with ADataSet do
-  begin
-    First;
-    for i := 1 to n do
-    begin
-      FContext.AssertTrue((i)=(FieldByName('ID').AsInteger), 'ID');
-      FContext.AssertTrue(('TestName' + inttostr(i))=(FieldByName('NAME').AsString), 'NAME');
-      Next;
-    end;
-    FContext.AssertTrue(Eof, 'Eof');
-  end;
-end;
-
-
 procedure ReadIniFile;
 
 var IniFile : TIniFile;
@@ -659,9 +574,7 @@ begin
   end;
 end;
 
-procedure RegisterToolsUnitTests(ARegistry: TNXTestRegistry);
-begin
-end;
+
 
 
 

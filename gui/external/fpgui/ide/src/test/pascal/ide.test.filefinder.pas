@@ -20,9 +20,14 @@ type
   { TTestFuzzyMatch }
 
   TTestFuzzyMatch = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Basic matching }
     procedure TestExactPrefixMatch;
@@ -44,9 +49,14 @@ type
   { TTestFuzzyMatchEx - match position tracking }
 
   TTestFuzzyMatchEx = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestExactMatchPositions;
     procedure TestPrefixMatchPositions;
@@ -59,9 +69,14 @@ type
   { TTestFilterFiles }
 
   TTestFilterFiles = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FFiles: TFileEntryArray;
     function MakeEntry(const AFileName, ARelPath: string): TFileEntry;
@@ -86,64 +101,64 @@ procedure TTestFuzzyMatch.TestExactPrefixMatch;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('ide', 'ide.form.main.pas', Score), 'Should match prefix "ide"');
-  FContext.AssertTrue(Score > 0, 'Score should be positive');
+  TestContext.AssertTrue(FuzzyMatch('ide', 'ide.form.main.pas', Score), 'Should match prefix "ide"');
+  TestContext.AssertTrue(Score > 0, 'Score should be positive');
 end;
 
 procedure TTestFuzzyMatch.TestSubstringMatch;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('form', 'ide.form.main.pas', Score), 'Should match substring "form"');
+  TestContext.AssertTrue(FuzzyMatch('form', 'ide.form.main.pas', Score), 'Should match substring "form"');
 end;
 
 procedure TTestFuzzyMatch.TestCamelCaseMatch;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('BT', 'BuilderThread.pas', Score), 'Should match CamelCase "BT" in BuilderThread');
+  TestContext.AssertTrue(FuzzyMatch('BT', 'BuilderThread.pas', Score), 'Should match CamelCase "BT" in BuilderThread');
 end;
 
 procedure TTestFuzzyMatch.TestCamelCaseMatchDotSeparated;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('ifm', 'ide.form.main.pas', Score), 'Should match word starts "ifm" in ide.form.main');
+  TestContext.AssertTrue(FuzzyMatch('ifm', 'ide.form.main.pas', Score), 'Should match word starts "ifm" in ide.form.main');
 end;
 
 procedure TTestFuzzyMatch.TestSubsequenceMatch;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('imn', 'ide.form.main.pas', Score), 'Should match subsequence "imn" (i...m...n)');
+  TestContext.AssertTrue(FuzzyMatch('imn', 'ide.form.main.pas', Score), 'Should match subsequence "imn" (i...m...n)');
 end;
 
 procedure TTestFuzzyMatch.TestNoMatch;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(not (FuzzyMatch('xyz', 'ide.form.main.pas', Score)), 'Should not match "xyz"');
+  TestContext.AssertTrue(not (FuzzyMatch('xyz', 'ide.form.main.pas', Score)), 'Should not match "xyz"');
 end;
 
 procedure TTestFuzzyMatch.TestCaseInsensitive;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('IDE', 'ide.form.main.pas', Score), 'Should match case-insensitively');
+  TestContext.AssertTrue(FuzzyMatch('IDE', 'ide.form.main.pas', Score), 'Should match case-insensitively');
 end;
 
 procedure TTestFuzzyMatch.TestEmptyPatternMatchesAll;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('', 'ide.form.main.pas', Score), 'Empty pattern should match everything');
+  TestContext.AssertTrue(FuzzyMatch('', 'ide.form.main.pas', Score), 'Empty pattern should match everything');
 end;
 
 procedure TTestFuzzyMatch.TestExactMatchFullName;
 var
   Score: Integer;
 begin
-  FContext.AssertTrue(FuzzyMatch('ide.form.main.pas', 'ide.form.main.pas', Score), 'Exact full name should match');
+  TestContext.AssertTrue(FuzzyMatch('ide.form.main.pas', 'ide.form.main.pas', Score), 'Exact full name should match');
 end;
 
 procedure TTestFuzzyMatch.TestExactPrefixScoresHigherThanSubstring;
@@ -152,7 +167,7 @@ var
 begin
   FuzzyMatch('ide', 'ide.main.pas', PrefixScore);
   FuzzyMatch('ide', 'maxide.pas', SubstringScore);
-  FContext.AssertTrue(PrefixScore > SubstringScore, Format('Prefix score (%d) should exceed substring score (%d)',
+  TestContext.AssertTrue(PrefixScore > SubstringScore, Format('Prefix score (%d) should exceed substring score (%d)',
       [PrefixScore, SubstringScore]));
 end;
 
@@ -162,7 +177,7 @@ var
 begin
   FuzzyMatch('main', 'main.pas', ShortScore);
   FuzzyMatch('main', 'ide.form.main.pas', LongScore);
-  FContext.AssertTrue(ShortScore > LongScore, Format('Shorter filename score (%d) should exceed longer (%d)',
+  TestContext.AssertTrue(ShortScore > LongScore, Format('Shorter filename score (%d) should exceed longer (%d)',
       [ShortScore, LongScore]));
 end;
 
@@ -173,8 +188,8 @@ begin
   FuzzyMatch('main.pas', 'main.pas', ExactScore);
   FuzzyMatch('main', 'main.pas', PrefixScore);
   FuzzyMatch('main', 'ide.form.main.pas', SubstringScore);
-  FContext.AssertTrue(ExactScore > PrefixScore, 'Exact match should score higher than prefix');
-  FContext.AssertTrue(PrefixScore > SubstringScore, 'Prefix should score higher than substring in longer name');
+  TestContext.AssertTrue(ExactScore > PrefixScore, 'Exact match should score higher than prefix');
+  TestContext.AssertTrue(PrefixScore > SubstringScore, 'Prefix should score higher than substring in longer name');
 end;
 
 { TTestFilterFiles }
@@ -206,9 +221,9 @@ var
   Results: TFileEntryArray;
 begin
   Results := FilterFiles('main', FFiles);
-  FContext.AssertTrue(Length(Results) >= 2, 'Should match at least 2 files containing "main"');
+  TestContext.AssertTrue(Length(Results) >= 2, 'Should match at least 2 files containing "main"');
   { "main.pas" should score highest (exact prefix on short name) }
-  FContext.AssertTrue(('main.pas')=(Results[0].FileName), 'First result should be "main.pas" (best match)');
+  TestContext.AssertTrue(('main.pas')=(Results[0].FileName), 'First result should be "main.pas" (best match)');
 end;
 
 procedure TTestFilterFiles.TestFilterEmptyPatternReturnsAll;
@@ -216,7 +231,7 @@ var
   Results: TFileEntryArray;
 begin
   Results := FilterFiles('', FFiles);
-  FContext.AssertTrue((Length(FFiles))=(Length(Results)), 'Empty pattern should return all files');
+  TestContext.AssertTrue((Length(FFiles))=(Length(Results)), 'Empty pattern should return all files');
 end;
 
 procedure TTestFilterFiles.TestFilterNoMatchReturnsEmpty;
@@ -224,7 +239,7 @@ var
   Results: TFileEntryArray;
 begin
   Results := FilterFiles('zzzzz', FFiles);
-  FContext.AssertTrue((0)=(Length(Results)), 'Non-matching pattern should return empty');
+  TestContext.AssertTrue((0)=(Length(Results)), 'Non-matching pattern should return empty');
 end;
 
 procedure TTestFilterFiles.TestFilterCamelCaseOrdering;
@@ -233,7 +248,7 @@ var
 begin
   Results := FilterFiles('ifm', FFiles);
   { "ide.form.main.pas" matches word starts i.f.m, "ide.filemonitor.pas" matches i.f.m too }
-  FContext.AssertTrue(Length(Results) >= 1, 'Should match at least 1 file for "ifm"');
+  TestContext.AssertTrue(Length(Results) >= 1, 'Should match at least 1 file for "ifm"');
 end;
 
 
@@ -244,10 +259,10 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(FuzzyMatchEx('main.pas', 'main.pas', Score, Positions), 'Exact match should succeed');
-  FContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for exact match');
-  FContext.AssertTrue((1)=(Positions[0].Start), 'Range should start at 1');
-  FContext.AssertTrue((8)=(Positions[0].Length), 'Range should cover full filename');
+  TestContext.AssertTrue(FuzzyMatchEx('main.pas', 'main.pas', Score, Positions), 'Exact match should succeed');
+  TestContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for exact match');
+  TestContext.AssertTrue((1)=(Positions[0].Start), 'Range should start at 1');
+  TestContext.AssertTrue((8)=(Positions[0].Length), 'Range should cover full filename');
 end;
 
 procedure TTestFuzzyMatchEx.TestPrefixMatchPositions;
@@ -255,10 +270,10 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(FuzzyMatchEx('ide', 'ide.form.main.pas', Score, Positions), 'Prefix match should succeed');
-  FContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for prefix match');
-  FContext.AssertTrue((1)=(Positions[0].Start), 'Range should start at 1');
-  FContext.AssertTrue((3)=(Positions[0].Length), 'Range should cover pattern length');
+  TestContext.AssertTrue(FuzzyMatchEx('ide', 'ide.form.main.pas', Score, Positions), 'Prefix match should succeed');
+  TestContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for prefix match');
+  TestContext.AssertTrue((1)=(Positions[0].Start), 'Range should start at 1');
+  TestContext.AssertTrue((3)=(Positions[0].Length), 'Range should cover pattern length');
 end;
 
 procedure TTestFuzzyMatchEx.TestSubstringMatchPositions;
@@ -266,10 +281,10 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(FuzzyMatchEx('form', 'ide.form.main.pas', Score, Positions), 'Substring match should succeed');
-  FContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for substring match');
-  FContext.AssertTrue((5)=(Positions[0].Start), 'Range should start at position of "form"');
-  FContext.AssertTrue((4)=(Positions[0].Length), 'Range should cover pattern length');
+  TestContext.AssertTrue(FuzzyMatchEx('form', 'ide.form.main.pas', Score, Positions), 'Substring match should succeed');
+  TestContext.AssertTrue((1)=(Length(Positions)), 'Should have 1 range for substring match');
+  TestContext.AssertTrue((5)=(Positions[0].Start), 'Range should start at position of "form"');
+  TestContext.AssertTrue((4)=(Positions[0].Length), 'Range should cover pattern length');
 end;
 
 procedure TTestFuzzyMatchEx.TestWordStartMatchPositions;
@@ -277,11 +292,11 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(FuzzyMatchEx('ifm', 'ide.form.main.pas', Score, Positions), 'Word-start match should succeed');
-  FContext.AssertTrue(Length(Positions) >= 3, Format('Should have at least 3 positions for "ifm", got %d', [Length(Positions)]));
+  TestContext.AssertTrue(FuzzyMatchEx('ifm', 'ide.form.main.pas', Score, Positions), 'Word-start match should succeed');
+  TestContext.AssertTrue(Length(Positions) >= 3, Format('Should have at least 3 positions for "ifm", got %d', [Length(Positions)]));
   { Each position should be a single character at a word boundary }
-  FContext.AssertTrue((1)=(Positions[0].Start), 'First match at "i" in "ide"');
-  FContext.AssertTrue((1)=(Positions[0].Length), 'Single character match');
+  TestContext.AssertTrue((1)=(Positions[0].Start), 'First match at "i" in "ide"');
+  TestContext.AssertTrue((1)=(Positions[0].Length), 'Single character match');
 end;
 
 procedure TTestFuzzyMatchEx.TestSubsequenceMatchPositions;
@@ -289,12 +304,12 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(FuzzyMatchEx('imn', 'ide.form.main.pas', Score, Positions), 'Subsequence match should succeed');
-  FContext.AssertTrue(Length(Positions) >= 3, Format('Should have at least 3 positions for "imn", got %d', [Length(Positions)]));
+  TestContext.AssertTrue(FuzzyMatchEx('imn', 'ide.form.main.pas', Score, Positions), 'Subsequence match should succeed');
+  TestContext.AssertTrue(Length(Positions) >= 3, Format('Should have at least 3 positions for "imn", got %d', [Length(Positions)]));
   { Each matched character should be a single-char range }
-  FContext.AssertTrue((1)=(Positions[0].Length), 'Each match should be 1 character');
-  FContext.AssertTrue((1)=(Positions[1].Length), 'Each match should be 1 character');
-  FContext.AssertTrue((1)=(Positions[2].Length), 'Each match should be 1 character');
+  TestContext.AssertTrue((1)=(Positions[0].Length), 'Each match should be 1 character');
+  TestContext.AssertTrue((1)=(Positions[1].Length), 'Each match should be 1 character');
+  TestContext.AssertTrue((1)=(Positions[2].Length), 'Each match should be 1 character');
 end;
 
 procedure TTestFuzzyMatchEx.TestNoMatchReturnsEmptyPositions;
@@ -302,19 +317,38 @@ var
   Score: Integer;
   Positions: TMatchRangeArray;
 begin
-  FContext.AssertTrue(not (FuzzyMatchEx('xyz', 'ide.form.main.pas', Score, Positions)), 'Should not match');
-  FContext.AssertTrue((0)=(Length(Positions)), 'No match should return empty positions');
+  TestContext.AssertTrue(not (FuzzyMatchEx('xyz', 'ide.form.main.pas', Score, Positions)), 'Should not match');
+  TestContext.AssertTrue((0)=(Length(Positions)), 'No match should return empty positions');
 end;
 
 
 
+constructor TTestFuzzyMatch.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestFuzzyMatchEx.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestFilterFiles.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestFuzzyMatchTestExactPrefixMatch(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestExactPrefixMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExactPrefixMatch';
     lFixture.TestExactPrefixMatch;
   finally lFixture.Free; end;
 end;
@@ -322,10 +356,8 @@ end;
 procedure RunTTestFuzzyMatchTestSubstringMatch(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestSubstringMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubstringMatch';
     lFixture.TestSubstringMatch;
   finally lFixture.Free; end;
 end;
@@ -333,10 +365,8 @@ end;
 procedure RunTTestFuzzyMatchTestCamelCaseMatch(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestCamelCaseMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCamelCaseMatch';
     lFixture.TestCamelCaseMatch;
   finally lFixture.Free; end;
 end;
@@ -344,10 +374,8 @@ end;
 procedure RunTTestFuzzyMatchTestCamelCaseMatchDotSeparated(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestCamelCaseMatchDotSeparated');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCamelCaseMatchDotSeparated';
     lFixture.TestCamelCaseMatchDotSeparated;
   finally lFixture.Free; end;
 end;
@@ -355,10 +383,8 @@ end;
 procedure RunTTestFuzzyMatchTestSubsequenceMatch(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestSubsequenceMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubsequenceMatch';
     lFixture.TestSubsequenceMatch;
   finally lFixture.Free; end;
 end;
@@ -366,10 +392,8 @@ end;
 procedure RunTTestFuzzyMatchTestNoMatch(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestNoMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoMatch';
     lFixture.TestNoMatch;
   finally lFixture.Free; end;
 end;
@@ -377,10 +401,8 @@ end;
 procedure RunTTestFuzzyMatchTestCaseInsensitive(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestCaseInsensitive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCaseInsensitive';
     lFixture.TestCaseInsensitive;
   finally lFixture.Free; end;
 end;
@@ -388,10 +410,8 @@ end;
 procedure RunTTestFuzzyMatchTestEmptyPatternMatchesAll(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestEmptyPatternMatchesAll');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyPatternMatchesAll';
     lFixture.TestEmptyPatternMatchesAll;
   finally lFixture.Free; end;
 end;
@@ -399,10 +419,8 @@ end;
 procedure RunTTestFuzzyMatchTestExactMatchFullName(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestExactMatchFullName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExactMatchFullName';
     lFixture.TestExactMatchFullName;
   finally lFixture.Free; end;
 end;
@@ -410,10 +428,8 @@ end;
 procedure RunTTestFuzzyMatchTestExactPrefixScoresHigherThanSubstring(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestExactPrefixScoresHigherThanSubstring');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExactPrefixScoresHigherThanSubstring';
     lFixture.TestExactPrefixScoresHigherThanSubstring;
   finally lFixture.Free; end;
 end;
@@ -421,10 +437,8 @@ end;
 procedure RunTTestFuzzyMatchTestShorterMatchScoresHigher(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestShorterMatchScoresHigher');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShorterMatchScoresHigher';
     lFixture.TestShorterMatchScoresHigher;
   finally lFixture.Free; end;
 end;
@@ -432,10 +446,8 @@ end;
 procedure RunTTestFuzzyMatchTestExactMatchScoresHighest(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatch;
 begin
-  lFixture:=TTestFuzzyMatch.Create;
+  lFixture:=TTestFuzzyMatch.Create(AContext, 'TestExactMatchScoresHighest');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExactMatchScoresHighest';
     lFixture.TestExactMatchScoresHighest;
   finally lFixture.Free; end;
 end;
@@ -443,10 +455,8 @@ end;
 procedure RunTTestFuzzyMatchExTestExactMatchPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestExactMatchPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExactMatchPositions';
     lFixture.TestExactMatchPositions;
   finally lFixture.Free; end;
 end;
@@ -454,10 +464,8 @@ end;
 procedure RunTTestFuzzyMatchExTestPrefixMatchPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestPrefixMatchPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPrefixMatchPositions';
     lFixture.TestPrefixMatchPositions;
   finally lFixture.Free; end;
 end;
@@ -465,10 +473,8 @@ end;
 procedure RunTTestFuzzyMatchExTestSubstringMatchPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestSubstringMatchPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubstringMatchPositions';
     lFixture.TestSubstringMatchPositions;
   finally lFixture.Free; end;
 end;
@@ -476,10 +482,8 @@ end;
 procedure RunTTestFuzzyMatchExTestWordStartMatchPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestWordStartMatchPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWordStartMatchPositions';
     lFixture.TestWordStartMatchPositions;
   finally lFixture.Free; end;
 end;
@@ -487,10 +491,8 @@ end;
 procedure RunTTestFuzzyMatchExTestSubsequenceMatchPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestSubsequenceMatchPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubsequenceMatchPositions';
     lFixture.TestSubsequenceMatchPositions;
   finally lFixture.Free; end;
 end;
@@ -498,10 +500,8 @@ end;
 procedure RunTTestFuzzyMatchExTestNoMatchReturnsEmptyPositions(AContext: TNXTestContext);
 var lFixture: TTestFuzzyMatchEx;
 begin
-  lFixture:=TTestFuzzyMatchEx.Create;
+  lFixture:=TTestFuzzyMatchEx.Create(AContext, 'TestNoMatchReturnsEmptyPositions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoMatchReturnsEmptyPositions';
     lFixture.TestNoMatchReturnsEmptyPositions;
   finally lFixture.Free; end;
 end;
@@ -509,10 +509,8 @@ end;
 procedure RunTTestFilterFilesTestFilterReturnsMatchesSortedByScore(AContext: TNXTestContext);
 var lFixture: TTestFilterFiles;
 begin
-  lFixture:=TTestFilterFiles.Create;
+  lFixture:=TTestFilterFiles.Create(AContext, 'TestFilterReturnsMatchesSortedByScore');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFilterReturnsMatchesSortedByScore';
     lFixture.SetUp;
     lFixture.TestFilterReturnsMatchesSortedByScore;
   finally lFixture.Free; end;
@@ -521,10 +519,8 @@ end;
 procedure RunTTestFilterFilesTestFilterEmptyPatternReturnsAll(AContext: TNXTestContext);
 var lFixture: TTestFilterFiles;
 begin
-  lFixture:=TTestFilterFiles.Create;
+  lFixture:=TTestFilterFiles.Create(AContext, 'TestFilterEmptyPatternReturnsAll');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFilterEmptyPatternReturnsAll';
     lFixture.SetUp;
     lFixture.TestFilterEmptyPatternReturnsAll;
   finally lFixture.Free; end;
@@ -533,10 +529,8 @@ end;
 procedure RunTTestFilterFilesTestFilterNoMatchReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestFilterFiles;
 begin
-  lFixture:=TTestFilterFiles.Create;
+  lFixture:=TTestFilterFiles.Create(AContext, 'TestFilterNoMatchReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFilterNoMatchReturnsEmpty';
     lFixture.SetUp;
     lFixture.TestFilterNoMatchReturnsEmpty;
   finally lFixture.Free; end;
@@ -545,10 +539,8 @@ end;
 procedure RunTTestFilterFilesTestFilterCamelCaseOrdering(AContext: TNXTestContext);
 var lFixture: TTestFilterFiles;
 begin
-  lFixture:=TTestFilterFiles.Create;
+  lFixture:=TTestFilterFiles.Create(AContext, 'TestFilterCamelCaseOrdering');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFilterCamelCaseOrdering';
     lFixture.SetUp;
     lFixture.TestFilterCamelCaseOrdering;
   finally lFixture.Free; end;

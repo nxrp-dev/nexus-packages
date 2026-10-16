@@ -10,14 +10,7 @@
     <executableName>maximus</executableName>
   </build>
 
-  <test>
-    <testSource>TestRunner.pas</testSource>
-    <framework>fpcunit</framework>
-    <frameworkOptions>
-      <option>--all</option>
-      <option>--format=plain</option>
-    </frameworkOptions>
-  </test>
+  <!-- Native test builds: Nexus projects/nxtest/retained/BuildRetained.py. -->
 
   <moduleDependencies>
     <module>../framework</module>

@@ -44,9 +44,14 @@ type
   { TTestDDDiff }
 
   TTestDDDiff = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     Differ : TMyDiff;
     SourceDD, TargetDD : TFPDataDictionary;
@@ -197,16 +202,16 @@ end;
 
 procedure TTestDDDiff.AssertMessageCount(ACount: integer);
 begin
-  FContext.AssertTrue((ACount)=(Differ.Messages.count), 'Number of differences');
+  TestContext.AssertTrue((ACount)=(Differ.Messages.count), 'Number of differences');
 end;
 
 procedure TTestDDDiff.AssertMessage(AMessage: string);
 begin
   if Differ.Messages.count > 1 then
-    FContext.Fail('More differences then expected: expected '+AMessage+', got '+differ.Messages.Commatext)
+    TestContext.Fail('More differences then expected: expected '+AMessage+', got '+differ.Messages.Commatext)
   else if Differ.messages.count = 0 then
-    FContext.Fail('No differences found, expected 1: '+AMessage);
-  FContext.AssertTrue((AMessage)=(Differ.Messages[0]), 'Difference detected,')
+    TestContext.Fail('No differences found, expected 1: '+AMessage);
+  TestContext.AssertTrue((AMessage)=(Differ.Messages[0]), 'Difference detected,')
 end;
 
 procedure TTestDDDiff.SetUp;
@@ -392,13 +397,18 @@ begin
 end;
 
 
+constructor TTestDDDiff.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestDDDiffTestEquals(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestEquals');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEquals';
     lFixture.SetUp;
     try lFixture.TestEquals; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -407,10 +417,8 @@ end;
 procedure RunTTestDDDiffTestSourceTable(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestSourceTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSourceTable';
     lFixture.SetUp;
     try lFixture.TestSourceTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -419,10 +427,8 @@ end;
 procedure RunTTestDDDiffTestTargetTable(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestTargetTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTargetTable';
     lFixture.SetUp;
     try lFixture.TestTargetTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -431,10 +437,8 @@ end;
 procedure RunTTestDDDiffTestSourceField(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestSourceField');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSourceField';
     lFixture.SetUp;
     try lFixture.TestSourceField; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -443,10 +447,8 @@ end;
 procedure RunTTestDDDiffTestTargetField(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestTargetField');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTargetField';
     lFixture.SetUp;
     try lFixture.TestTargetField; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -455,10 +457,8 @@ end;
 procedure RunTTestDDDiffTestSourceIndex(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestSourceIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSourceIndex';
     lFixture.SetUp;
     try lFixture.TestSourceIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -467,10 +467,8 @@ end;
 procedure RunTTestDDDiffTestTargetIndex(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestTargetIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTargetIndex';
     lFixture.SetUp;
     try lFixture.TestTargetIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -479,10 +477,8 @@ end;
 procedure RunTTestDDDiffTestFieldType(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestFieldType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFieldType';
     lFixture.SetUp;
     try lFixture.TestFieldType; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -491,10 +487,8 @@ end;
 procedure RunTTestDDDiffTestFieldSize(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestFieldSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFieldSize';
     lFixture.SetUp;
     try lFixture.TestFieldSize; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -503,10 +497,8 @@ end;
 procedure RunTTestDDDiffTestFieldPrecision(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestFieldPrecision');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFieldPrecision';
     lFixture.SetUp;
     try lFixture.TestFieldPrecision; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -515,10 +507,8 @@ end;
 procedure RunTTestDDDiffTestFieldDefExpression(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestFieldDefExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFieldDefExpression';
     lFixture.SetUp;
     try lFixture.TestFieldDefExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -527,10 +517,8 @@ end;
 procedure RunTTestDDDiffTestFieldRequired(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestFieldRequired');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFieldRequired';
     lFixture.SetUp;
     try lFixture.TestFieldRequired; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -539,10 +527,8 @@ end;
 procedure RunTTestDDDiffTestIndexOptions(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestIndexOptions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndexOptions';
     lFixture.SetUp;
     try lFixture.TestIndexOptions; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -551,10 +537,8 @@ end;
 procedure RunTTestDDDiffTestIndexExpression(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestIndexExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndexExpression';
     lFixture.SetUp;
     try lFixture.TestIndexExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -563,10 +547,8 @@ end;
 procedure RunTTestDDDiffTestIndexFields(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestIndexFields');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndexFields';
     lFixture.SetUp;
     try lFixture.TestIndexFields; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -575,10 +557,8 @@ end;
 procedure RunTTestDDDiffTestIndexDescFields(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestIndexDescFields');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndexDescFields';
     lFixture.SetUp;
     try lFixture.TestIndexDescFields; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -587,10 +567,8 @@ end;
 procedure RunTTestDDDiffTestIndexCaseInsFields(AContext: TNXTestContext);
 var lFixture: TTestDDDiff;
 begin
-  lFixture:=TTestDDDiff.Create;
+  lFixture:=TTestDDDiff.Create(AContext, 'TestIndexCaseInsFields');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndexCaseInsFields';
     lFixture.SetUp;
     try lFixture.TestIndexCaseInsFields; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

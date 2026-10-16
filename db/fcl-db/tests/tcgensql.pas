@@ -28,9 +28,14 @@ type
   { TTestGenerateSQL }
 
   TTestGenerateSQL= class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   Private
     FToFree:TSQLElement;
   protected
@@ -207,7 +212,7 @@ Var
   S: TSQLStringType;
 begin
   S:=AElement.GetAsSQL(AOptions);
-  FContext.AssertTrue((ASQL)=(S), 'Correct SQL');
+  TestContext.AssertTrue((ASQL)=(S), 'Correct SQL');
 end;
 
 
@@ -2309,14 +2314,14 @@ Var
   C : TSQLExtractExpression;
 
 begin
-  FContext.AssertTrue((ExtractElementNames[eeYear])=('YEAR'), '');
-  FContext.AssertTrue((ExtractElementNames[eeMonth])=('MONTH'), '');
-  FContext.AssertTrue((ExtractElementNames[eeDay])=('DAY'), '');
-  FContext.AssertTrue((ExtractElementNames[eeHour])=('HOUR'), '');
-  FContext.AssertTrue((ExtractElementNames[eeMinute])=('MINUTE'), '');
-  FContext.AssertTrue((ExtractElementNames[eeSecond])=('SECOND'), '');
-  FContext.AssertTrue((ExtractElementNames[eeWeekDay])=('WEEKDAY'), '');
-  FContext.AssertTrue((ExtractElementNames[eeYearDay])=('YEARDAY'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeYear])=('YEAR'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeMonth])=('MONTH'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeDay])=('DAY'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeHour])=('HOUR'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeMinute])=('MINUTE'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeSecond])=('SECOND'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeWeekDay])=('WEEKDAY'), '');
+  TestContext.AssertTrue((ExtractElementNames[eeYearDay])=('YEARDAY'), '');
   C:=TSQLExtractExpression.Create(Nil);
   C.Value:=CreateIdentifierExpression('A');
   C.Element:=eeYear;
@@ -2609,13 +2614,18 @@ end;
 
 
 
+constructor TTestGenerateSQL.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestGenerateSQLTestIdentifier(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier';
     lFixture.SetUp;
     try lFixture.TestIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2624,10 +2634,8 @@ end;
 procedure RunTTestGenerateSQLTestIntegerLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestIntegerLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIntegerLiteral';
     lFixture.SetUp;
     try lFixture.TestIntegerLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2636,10 +2644,8 @@ end;
 procedure RunTTestGenerateSQLTestStringLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestStringLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringLiteral';
     lFixture.SetUp;
     try lFixture.TestStringLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2648,10 +2654,8 @@ end;
 procedure RunTTestGenerateSQLTestFloatLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestFloatLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatLiteral';
     lFixture.SetUp;
     try lFixture.TestFloatLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2660,10 +2664,8 @@ end;
 procedure RunTTestGenerateSQLTestNullLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestNullLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNullLiteral';
     lFixture.SetUp;
     try lFixture.TestNullLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2672,10 +2674,8 @@ end;
 procedure RunTTestGenerateSQLTestUserLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestUserLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUserLiteral';
     lFixture.SetUp;
     try lFixture.TestUserLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2684,10 +2684,8 @@ end;
 procedure RunTTestGenerateSQLTestValueLiteral(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestValueLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestValueLiteral';
     lFixture.SetUp;
     try lFixture.TestValueLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2696,10 +2694,8 @@ end;
 procedure RunTTestGenerateSQLTestLiteralExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestLiteralExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLiteralExpression';
     lFixture.SetUp;
     try lFixture.TestLiteralExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2708,10 +2704,8 @@ end;
 procedure RunTTestGenerateSQLTestSelectField(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSelectField');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSelectField';
     lFixture.SetUp;
     try lFixture.TestSelectField; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2720,10 +2714,8 @@ end;
 procedure RunTTestGenerateSQLTestSelectFieldWithPath(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSelectFieldWithPath');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSelectFieldWithPath';
     lFixture.SetUp;
     try lFixture.TestSelectFieldWithPath; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2732,10 +2724,8 @@ end;
 procedure RunTTestGenerateSQLTestSimpleTablereference(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSimpleTablereference');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleTablereference';
     lFixture.SetUp;
     try lFixture.TestSimpleTablereference; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2744,10 +2734,8 @@ end;
 procedure RunTTestGenerateSQLTestSimpleSelect(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSimpleSelect');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleSelect';
     lFixture.SetUp;
     try lFixture.TestSimpleSelect; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2756,10 +2744,8 @@ end;
 procedure RunTTestGenerateSQLTestAnyExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAnyExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAnyExpression';
     lFixture.SetUp;
     try lFixture.TestAnyExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2768,10 +2754,8 @@ end;
 procedure RunTTestGenerateSQLTestAllExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAllExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAllExpression';
     lFixture.SetUp;
     try lFixture.TestAllExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2780,10 +2764,8 @@ end;
 procedure RunTTestGenerateSQLTestCaseExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCaseExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCaseExpression';
     lFixture.SetUp;
     try lFixture.TestCaseExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2792,10 +2774,8 @@ end;
 procedure RunTTestGenerateSQLTestExistsExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestExistsExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExistsExpression';
     lFixture.SetUp;
     try lFixture.TestExistsExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2804,10 +2784,8 @@ end;
 procedure RunTTestGenerateSQLTestSomeExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSomeExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSomeExpression';
     lFixture.SetUp;
     try lFixture.TestSomeExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2816,10 +2794,8 @@ end;
 procedure RunTTestGenerateSQLTestSingularExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSingularExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSingularExpression';
     lFixture.SetUp;
     try lFixture.TestSingularExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2828,10 +2804,8 @@ end;
 procedure RunTTestGenerateSQLTestUnaryExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestUnaryExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnaryExpression';
     lFixture.SetUp;
     try lFixture.TestUnaryExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2840,10 +2814,8 @@ end;
 procedure RunTTestGenerateSQLTestBinaryExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestBinaryExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBinaryExpression';
     lFixture.SetUp;
     try lFixture.TestBinaryExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2852,10 +2824,8 @@ end;
 procedure RunTTestGenerateSQLTestListExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestListExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestListExpression';
     lFixture.SetUp;
     try lFixture.TestListExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2864,10 +2834,8 @@ end;
 procedure RunTTestGenerateSQLTestTernaryExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTernaryExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTernaryExpression';
     lFixture.SetUp;
     try lFixture.TestTernaryExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2876,10 +2844,8 @@ end;
 procedure RunTTestGenerateSQLTestGenIDExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestGenIDExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGenIDExpression';
     lFixture.SetUp;
     try lFixture.TestGenIDExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2888,10 +2854,8 @@ end;
 procedure RunTTestGenerateSQLTestFunctionCall(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestFunctionCall');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFunctionCall';
     lFixture.SetUp;
     try lFixture.TestFunctionCall; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2900,10 +2864,8 @@ end;
 procedure RunTTestGenerateSQLTestAggregateFunction(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAggregateFunction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAggregateFunction';
     lFixture.SetUp;
     try lFixture.TestAggregateFunction; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2912,10 +2874,8 @@ end;
 procedure RunTTestGenerateSQLTestForeignKey(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestForeignKey');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestForeignKey';
     lFixture.SetUp;
     try lFixture.TestForeignKey; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2924,10 +2884,8 @@ end;
 procedure RunTTestGenerateSQLTestUniqueFieldConstraint(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestUniqueFieldConstraint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUniqueFieldConstraint';
     lFixture.SetUp;
     try lFixture.TestUniqueFieldConstraint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2936,10 +2894,8 @@ end;
 procedure RunTTestGenerateSQLTestPrimaryKeyFieldConstraint(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPrimaryKeyFieldConstraint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPrimaryKeyFieldConstraint';
     lFixture.SetUp;
     try lFixture.TestPrimaryKeyFieldConstraint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2948,10 +2904,8 @@ end;
 procedure RunTTestGenerateSQLTestForeignKeyFieldConstraint(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestForeignKeyFieldConstraint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestForeignKeyFieldConstraint';
     lFixture.SetUp;
     try lFixture.TestForeignKeyFieldConstraint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2960,10 +2914,8 @@ end;
 procedure RunTTestGenerateSQLTestCheckFieldConstraint(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCheckFieldConstraint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCheckFieldConstraint';
     lFixture.SetUp;
     try lFixture.TestCheckFieldConstraint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2972,10 +2924,8 @@ end;
 procedure RunTTestGenerateSQLTestTableUniqueConstraintDef(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTableUniqueConstraintDef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTableUniqueConstraintDef';
     lFixture.SetUp;
     try lFixture.TestTableUniqueConstraintDef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2984,10 +2934,8 @@ end;
 procedure RunTTestGenerateSQLTestTablePrimaryKeyConstraintDef(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTablePrimaryKeyConstraintDef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTablePrimaryKeyConstraintDef';
     lFixture.SetUp;
     try lFixture.TestTablePrimaryKeyConstraintDef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2996,10 +2944,8 @@ end;
 procedure RunTTestGenerateSQLTestTableForeignKeyConstraintDef(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTableForeignKeyConstraintDef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTableForeignKeyConstraintDef';
     lFixture.SetUp;
     try lFixture.TestTableForeignKeyConstraintDef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3008,10 +2954,8 @@ end;
 procedure RunTTestGenerateSQLTestTableCheckConstraintDef(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTableCheckConstraintDef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTableCheckConstraintDef';
     lFixture.SetUp;
     try lFixture.TestTableCheckConstraintDef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3020,10 +2964,8 @@ end;
 procedure RunTTestGenerateSQLTestTypeDefinition(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTypeDefinition');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTypeDefinition';
     lFixture.SetUp;
     try lFixture.TestTypeDefinition; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3032,10 +2974,8 @@ end;
 procedure RunTTestGenerateSQLTestCastExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCastExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCastExpression';
     lFixture.SetUp;
     try lFixture.TestCastExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3044,10 +2984,8 @@ end;
 procedure RunTTestGenerateSQLTestJoinTableReference(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestJoinTableReference');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestJoinTableReference';
     lFixture.SetUp;
     try lFixture.TestJoinTableReference; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3056,10 +2994,8 @@ end;
 procedure RunTTestGenerateSQLTestPlanNatural(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPlanNatural');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlanNatural';
     lFixture.SetUp;
     try lFixture.TestPlanNatural; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3068,10 +3004,8 @@ end;
 procedure RunTTestGenerateSQLTestPlanIndex(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPlanIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlanIndex';
     lFixture.SetUp;
     try lFixture.TestPlanIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3080,10 +3014,8 @@ end;
 procedure RunTTestGenerateSQLTestPlanOrder(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPlanOrder');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlanOrder';
     lFixture.SetUp;
     try lFixture.TestPlanOrder; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3092,10 +3024,8 @@ end;
 procedure RunTTestGenerateSQLTestPlanExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPlanExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlanExpression';
     lFixture.SetUp;
     try lFixture.TestPlanExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3104,10 +3034,8 @@ end;
 procedure RunTTestGenerateSQLTestOrderBy(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestOrderBy');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOrderBy';
     lFixture.SetUp;
     try lFixture.TestOrderBy; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3116,10 +3044,8 @@ end;
 procedure RunTTestGenerateSQLTestSelect(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSelect');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSelect';
     lFixture.SetUp;
     try lFixture.TestSelect; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3128,10 +3054,8 @@ end;
 procedure RunTTestGenerateSQLTestLimit(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestLimit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLimit';
     lFixture.SetUp;
     try lFixture.TestLimit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3140,10 +3064,8 @@ end;
 procedure RunTTestGenerateSQLTestInsert(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestInsert');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsert';
     lFixture.SetUp;
     try lFixture.TestInsert; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3152,10 +3074,8 @@ end;
 procedure RunTTestGenerateSQLTestUpdatePair(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestUpdatePair');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUpdatePair';
     lFixture.SetUp;
     try lFixture.TestUpdatePair; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3164,10 +3084,8 @@ end;
 procedure RunTTestGenerateSQLTestUpdate(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestUpdate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUpdate';
     lFixture.SetUp;
     try lFixture.TestUpdate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3176,10 +3094,8 @@ end;
 procedure RunTTestGenerateSQLTestDelete(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDelete');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDelete';
     lFixture.SetUp;
     try lFixture.TestDelete; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3188,10 +3104,8 @@ end;
 procedure RunTTestGenerateSQLTestRollback(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestRollback');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRollback';
     lFixture.SetUp;
     try lFixture.TestRollback; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3200,10 +3114,8 @@ end;
 procedure RunTTestGenerateSQLTestCommit(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCommit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommit';
     lFixture.SetUp;
     try lFixture.TestCommit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3212,10 +3124,8 @@ end;
 procedure RunTTestGenerateSQLTestExecuteProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestExecuteProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExecuteProcedure';
     lFixture.SetUp;
     try lFixture.TestExecuteProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3224,10 +3134,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateGenerator(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateGenerator');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateGenerator';
     lFixture.SetUp;
     try lFixture.TestCreateGenerator; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3236,10 +3144,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateRole(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateRole');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateRole';
     lFixture.SetUp;
     try lFixture.TestCreateRole; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3248,10 +3154,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateDomain(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateDomain');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateDomain';
     lFixture.SetUp;
     try lFixture.TestCreateDomain; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3260,10 +3164,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainDropDefault(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainDropDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainDropDefault';
     lFixture.SetUp;
     try lFixture.TestAlterDomainDropDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3272,10 +3174,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainDropCheck(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainDropCheck');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainDropCheck';
     lFixture.SetUp;
     try lFixture.TestAlterDomainDropCheck; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3284,10 +3184,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainSetDefault(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainSetDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainSetDefault';
     lFixture.SetUp;
     try lFixture.TestAlterDomainSetDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3296,10 +3194,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainRename(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainRename');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainRename';
     lFixture.SetUp;
     try lFixture.TestAlterDomainRename; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3308,10 +3204,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainNewType(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainNewType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainNewType';
     lFixture.SetUp;
     try lFixture.TestAlterDomainNewType; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3320,10 +3214,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDomainAddCheck(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDomainAddCheck');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDomainAddCheck';
     lFixture.SetUp;
     try lFixture.TestAlterDomainAddCheck; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3332,10 +3224,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateException(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateException';
     lFixture.SetUp;
     try lFixture.TestCreateException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3344,10 +3234,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterException(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterException';
     lFixture.SetUp;
     try lFixture.TestAlterException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3356,10 +3244,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateIndex(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateIndex';
     lFixture.SetUp;
     try lFixture.TestCreateIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3368,10 +3254,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterIndex(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterIndex';
     lFixture.SetUp;
     try lFixture.TestAlterIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3380,10 +3264,8 @@ end;
 procedure RunTTestGenerateSQLTestDeclareExternalFunction(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDeclareExternalFunction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDeclareExternalFunction';
     lFixture.SetUp;
     try lFixture.TestDeclareExternalFunction; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3392,10 +3274,8 @@ end;
 procedure RunTTestGenerateSQLTestTableFieldDefinition(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTableFieldDefinition');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTableFieldDefinition';
     lFixture.SetUp;
     try lFixture.TestTableFieldDefinition; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3404,10 +3284,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateTable(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateTable';
     lFixture.SetUp;
     try lFixture.TestCreateTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3416,10 +3294,8 @@ end;
 procedure RunTTestGenerateSQLTestDropFieldOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDropFieldOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDropFieldOperation';
     lFixture.SetUp;
     try lFixture.TestDropFieldOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3428,10 +3304,8 @@ end;
 procedure RunTTestGenerateSQLTestDropConstraintOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDropConstraintOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDropConstraintOperation';
     lFixture.SetUp;
     try lFixture.TestDropConstraintOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3440,10 +3314,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterFieldNameOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterFieldNameOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterFieldNameOperation';
     lFixture.SetUp;
     try lFixture.TestAlterFieldNameOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3452,10 +3324,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterFieldTypeOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterFieldTypeOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterFieldTypeOperation';
     lFixture.SetUp;
     try lFixture.TestAlterFieldTypeOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3464,10 +3334,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterFieldPositionOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterFieldPositionOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterFieldPositionOperation';
     lFixture.SetUp;
     try lFixture.TestAlterFieldPositionOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3476,10 +3344,8 @@ end;
 procedure RunTTestGenerateSQLTestAddFieldOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAddFieldOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddFieldOperation';
     lFixture.SetUp;
     try lFixture.TestAddFieldOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3488,10 +3354,8 @@ end;
 procedure RunTTestGenerateSQLTestAddConstraintOperation(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAddConstraintOperation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAddConstraintOperation';
     lFixture.SetUp;
     try lFixture.TestAddConstraintOperation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3500,10 +3364,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterTable(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterTable';
     lFixture.SetUp;
     try lFixture.TestAlterTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3512,10 +3374,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateView(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateView');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateView';
     lFixture.SetUp;
     try lFixture.TestCreateView; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3524,10 +3384,8 @@ end;
 procedure RunTTestGenerateSQLTestDatabaseFileInfo(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDatabaseFileInfo');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDatabaseFileInfo';
     lFixture.SetUp;
     try lFixture.TestDatabaseFileInfo; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3536,10 +3394,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateDatabase(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateDatabase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateDatabase';
     lFixture.SetUp;
     try lFixture.TestCreateDatabase; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3548,10 +3404,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterDatabase(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterDatabase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterDatabase';
     lFixture.SetUp;
     try lFixture.TestAlterDatabase; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3560,10 +3414,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateShadow(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateShadow');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateShadow';
     lFixture.SetUp;
     try lFixture.TestCreateShadow; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3572,10 +3424,8 @@ end;
 procedure RunTTestGenerateSQLTestSuspend(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestSuspend');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSuspend';
     lFixture.SetUp;
     try lFixture.TestSuspend; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3584,10 +3434,8 @@ end;
 procedure RunTTestGenerateSQLTestExit(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestExit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExit';
     lFixture.SetUp;
     try lFixture.TestExit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3596,10 +3444,8 @@ end;
 procedure RunTTestGenerateSQLTestBlock(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestBlock');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBlock';
     lFixture.SetUp;
     try lFixture.TestBlock; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3608,10 +3454,8 @@ end;
 procedure RunTTestGenerateSQLTestAssignment(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAssignment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAssignment';
     lFixture.SetUp;
     try lFixture.TestAssignment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3620,10 +3464,8 @@ end;
 procedure RunTTestGenerateSQLTestIf(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestIf');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIf';
     lFixture.SetUp;
     try lFixture.TestIf; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3632,10 +3474,8 @@ end;
 procedure RunTTestGenerateSQLTestFor(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestFor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFor';
     lFixture.SetUp;
     try lFixture.TestFor; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3644,10 +3484,8 @@ end;
 procedure RunTTestGenerateSQLTestWhile(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestWhile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhile';
     lFixture.SetUp;
     try lFixture.TestWhile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3656,10 +3494,8 @@ end;
 procedure RunTTestGenerateSQLTestWhenSQLError(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestWhenSQLError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhenSQLError';
     lFixture.SetUp;
     try lFixture.TestWhenSQLError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3668,10 +3504,8 @@ end;
 procedure RunTTestGenerateSQLTestWhenGDSError(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestWhenGDSError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhenGDSError';
     lFixture.SetUp;
     try lFixture.TestWhenGDSError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3680,10 +3514,8 @@ end;
 procedure RunTTestGenerateSQLTestWhenException(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestWhenException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhenException';
     lFixture.SetUp;
     try lFixture.TestWhenException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3692,10 +3524,8 @@ end;
 procedure RunTTestGenerateSQLTestWhen(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestWhen');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhen';
     lFixture.SetUp;
     try lFixture.TestWhen; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3704,10 +3534,8 @@ end;
 procedure RunTTestGenerateSQLTestException(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestException';
     lFixture.SetUp;
     try lFixture.TestException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3716,10 +3544,8 @@ end;
 procedure RunTTestGenerateSQLTestPostEvent(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestPostEvent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPostEvent';
     lFixture.SetUp;
     try lFixture.TestPostEvent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3728,10 +3554,8 @@ end;
 procedure RunTTestGenerateSQLTestTriggerProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestTriggerProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTriggerProcedure';
     lFixture.SetUp;
     try lFixture.TestTriggerProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3740,10 +3564,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateProcedure';
     lFixture.SetUp;
     try lFixture.TestCreateProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3752,10 +3574,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterProcedure';
     lFixture.SetUp;
     try lFixture.TestAlterProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3764,10 +3584,8 @@ end;
 procedure RunTTestGenerateSQLTestCreateTrigger(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestCreateTrigger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreateTrigger';
     lFixture.SetUp;
     try lFixture.TestCreateTrigger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3776,10 +3594,8 @@ end;
 procedure RunTTestGenerateSQLTestAlterTrigger(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestAlterTrigger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlterTrigger';
     lFixture.SetUp;
     try lFixture.TestAlterTrigger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3788,10 +3604,8 @@ end;
 procedure RunTTestGenerateSQLTestDropStatement(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestDropStatement');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDropStatement';
     lFixture.SetUp;
     try lFixture.TestDropStatement; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3800,10 +3614,8 @@ end;
 procedure RunTTestGenerateSQLTestConnect(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestConnect');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConnect';
     lFixture.SetUp;
     try lFixture.TestConnect; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3812,10 +3624,8 @@ end;
 procedure RunTTestGenerateSQLTestExtract(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestExtract');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExtract';
     lFixture.SetUp;
     try lFixture.TestExtract; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3824,10 +3634,8 @@ end;
 procedure RunTTestGenerateSQLTestParamExpression(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestParamExpression');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParamExpression';
     lFixture.SetUp;
     try lFixture.TestParamExpression; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3836,10 +3644,8 @@ end;
 procedure RunTTestGenerateSQLTestGrantTable(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestGrantTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrantTable';
     lFixture.SetUp;
     try lFixture.TestGrantTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3848,10 +3654,8 @@ end;
 procedure RunTTestGenerateSQLTestGrantProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestGrantProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrantProcedure';
     lFixture.SetUp;
     try lFixture.TestGrantProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3860,10 +3664,8 @@ end;
 procedure RunTTestGenerateSQLTestGrantRole(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestGrantRole');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrantRole';
     lFixture.SetUp;
     try lFixture.TestGrantRole; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3872,10 +3674,8 @@ end;
 procedure RunTTestGenerateSQLTestRevokeTable(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestRevokeTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRevokeTable';
     lFixture.SetUp;
     try lFixture.TestRevokeTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3884,10 +3684,8 @@ end;
 procedure RunTTestGenerateSQLTestRevokeProcedure(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestRevokeProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRevokeProcedure';
     lFixture.SetUp;
     try lFixture.TestRevokeProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3896,10 +3694,8 @@ end;
 procedure RunTTestGenerateSQLTestRevokeRole(AContext: TNXTestContext);
 var lFixture: TTestGenerateSQL;
 begin
-  lFixture:=TTestGenerateSQL.Create;
+  lFixture:=TTestGenerateSQL.Create(AContext, 'TestRevokeRole');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRevokeRole';
     lFixture.SetUp;
     try lFixture.TestRevokeRole; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

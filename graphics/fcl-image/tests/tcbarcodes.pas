@@ -27,9 +27,14 @@ type
   { TTestBarcodes }
 
   TTestBarcodes = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FText: String;
     FType: TBarcodeEncoding;
@@ -90,9 +95,9 @@ Var
   I : Integer;
 
 begin
-  FContext.AssertTrue((Length(aExpected))=(Length(AActual)), Msg+': length equal');
+  TestContext.AssertTrue((Length(aExpected))=(Length(AActual)), Msg+': length equal');
   for I:=0 to Length(aExpected)-1 do
-    FContext.AssertTrue((aExpected[i])=(AActual[i]), Msg+': Element at position ['+intTostr(I)+']');
+    TestContext.AssertTrue((aExpected[i])=(AActual[i]), Msg+': Element at position ['+intTostr(I)+']');
 end;
 
 {
@@ -738,9 +743,9 @@ Var
 begin
   S:=Format('Bar type %d: ',[aType]);
   P:=BarTypeToBarParams(aType);
-  FContext.AssertTrue((aColor)=(P.c), S+'Color');
-  FContext.AssertTrue((aWidth)=(P.w), S+'Width');
-  FContext.AssertTrue((aHeight)=(P.h), S+'Height');
+  TestContext.AssertTrue((aColor)=(P.c), S+'Color');
+  TestContext.AssertTrue((aWidth)=(P.w), S+'Width');
+  TestContext.AssertTrue((aHeight)=(P.h), S+'Height');
 end;
 
 procedure TTestBarcodes.CheckParamsType;
@@ -762,7 +767,7 @@ end;
 
 procedure TTestBarcodes.CheckNumerictypes;
 begin
-  FContext.AssertTrue(NumericalEncodings=[beEAN8,beEAN13,
+  TestContext.AssertTrue(NumericalEncodings=[beEAN8,beEAN13,
     be2of5industrial,be2of5interleaved, be2of5matrix,
     bePostNet,
     beMSI,
@@ -772,13 +777,18 @@ end;
 
 
 
+constructor TTestBarcodes.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestBarcodesTestEan8(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestEan8');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEan8';
     lFixture.TestEan8;
   finally lFixture.Free; end;
 end;
@@ -786,10 +796,8 @@ end;
 procedure RunTTestBarcodesTestEan13(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestEan13');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEan13';
     lFixture.TestEan13;
   finally lFixture.Free; end;
 end;
@@ -797,10 +805,8 @@ end;
 procedure RunTTestBarcodesTestCode39(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode39');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode39';
     lFixture.TestCode39;
   finally lFixture.Free; end;
 end;
@@ -808,10 +814,8 @@ end;
 procedure RunTTestBarcodesTestCode39Extended(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode39Extended');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode39Extended';
     lFixture.TestCode39Extended;
   finally lFixture.Free; end;
 end;
@@ -819,10 +823,8 @@ end;
 procedure RunTTestBarcodesTestCode128A(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode128A');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode128A';
     lFixture.TestCode128A;
   finally lFixture.Free; end;
 end;
@@ -830,10 +832,8 @@ end;
 procedure RunTTestBarcodesTestCode128B(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode128B');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode128B';
     lFixture.TestCode128B;
   finally lFixture.Free; end;
 end;
@@ -841,10 +841,8 @@ end;
 procedure RunTTestBarcodesTestCode128C(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode128C');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode128C';
     lFixture.TestCode128C;
   finally lFixture.Free; end;
 end;
@@ -852,10 +850,8 @@ end;
 procedure RunTTestBarcodesTestbe2of5industrial(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'Testbe2of5industrial');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Testbe2of5industrial';
     lFixture.Testbe2of5industrial;
   finally lFixture.Free; end;
 end;
@@ -863,10 +859,8 @@ end;
 procedure RunTTestBarcodesTestbe2of5interleaved(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'Testbe2of5interleaved');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Testbe2of5interleaved';
     lFixture.Testbe2of5interleaved;
   finally lFixture.Free; end;
 end;
@@ -874,10 +868,8 @@ end;
 procedure RunTTestBarcodesTestbe2of5matrix(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'Testbe2of5matrix');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Testbe2of5matrix';
     lFixture.Testbe2of5matrix;
   finally lFixture.Free; end;
 end;
@@ -885,10 +877,8 @@ end;
 procedure RunTTestBarcodesTestCode93(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode93');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode93';
     lFixture.TestCode93;
   finally lFixture.Free; end;
 end;
@@ -896,10 +886,8 @@ end;
 procedure RunTTestBarcodesTestCode93Extended(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCode93Extended');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCode93Extended';
     lFixture.TestCode93Extended;
   finally lFixture.Free; end;
 end;
@@ -907,10 +895,8 @@ end;
 procedure RunTTestBarcodesTestCodeCodabar(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCodeCodabar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCodeCodabar';
     lFixture.TestCodeCodabar;
   finally lFixture.Free; end;
 end;
@@ -918,10 +904,8 @@ end;
 procedure RunTTestBarcodesTestCodeMSI(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCodeMSI');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCodeMSI';
     lFixture.TestCodeMSI;
   finally lFixture.Free; end;
 end;
@@ -929,10 +913,8 @@ end;
 procedure RunTTestBarcodesTestCodePostNet(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'TestCodePostNet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCodePostNet';
     lFixture.TestCodePostNet;
   finally lFixture.Free; end;
 end;
@@ -940,10 +922,8 @@ end;
 procedure RunTTestBarcodesCheckParamsType(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'CheckParamsType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CheckParamsType';
     lFixture.CheckParamsType;
   finally lFixture.Free; end;
 end;
@@ -951,10 +931,8 @@ end;
 procedure RunTTestBarcodesCheckNumerictypes(AContext: TNXTestContext);
 var lFixture: TTestBarcodes;
 begin
-  lFixture:=TTestBarcodes.Create;
+  lFixture:=TTestBarcodes.Create(AContext, 'CheckNumerictypes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CheckNumerictypes';
     lFixture.CheckNumerictypes;
   finally lFixture.Free; end;
 end;

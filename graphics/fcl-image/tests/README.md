@@ -7,9 +7,10 @@ HeapTrc catches allocation overruns/leaks. Range checks exercise QOI modular
 arithmetic explicitly. The Linux FreeType case skips only if the runtime itself
 cannot be loaded independently; it passes on the verified Linux host.
 
-`FCLImageRetained.nxproject` builds the unchanged upstream barcode runner,
-`testfpimage.lpr`. All 17 tests pass before and after. Retained units and
-regression units use separate output directories to keep instrumentation apart.
+The retained barcode suite now registers 17 native nxtest cases. All pass.
+Its old FPCUnit runner was retired and archived; see the
+[Nexus retained-test report](../../../../../projects/nxtest/retained/README.md).
+Retained and review suites use separate output directories.
 
 From the Nexus root on Linux:
 

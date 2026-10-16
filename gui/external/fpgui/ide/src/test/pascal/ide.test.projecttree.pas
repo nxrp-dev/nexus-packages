@@ -22,9 +22,14 @@ type
   { TTestResolveNodeFilePath }
 
   TTestResolveNodeFilePath = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestNilNode;
     procedure TestNonLeafNode;
@@ -44,7 +49,7 @@ implementation
 
 procedure TTestResolveNodeFilePath.TestNilNode;
 begin
-  FContext.AssertTrue(('')=(ResolveNodeFilePath(nil, '/proj/', 'src/main/pascal', False)), 'nil node should return empty');
+  TestContext.AssertTrue(('')=(ResolveNodeFilePath(nil, '/proj/', 'src/main/pascal', False)), 'nil node should return empty');
 end;
 
 procedure TTestResolveNodeFilePath.TestNonLeafNode;
@@ -57,7 +62,7 @@ begin
     cat.Data := Pointer(1);
     { cat has a child, so cat is not a leaf }
     cat.AppendText('child.pas');
-    FContext.AssertTrue(('')=(ResolveNodeFilePath(cat, '/proj/', 'src/main/pascal', False)), 'non-leaf node should return empty');
+    TestContext.AssertTrue(('')=(ResolveNodeFilePath(cat, '/proj/', 'src/main/pascal', False)), 'non-leaf node should return empty');
   finally
     root.Free;
   end;
@@ -71,7 +76,7 @@ begin
   try
     { root has no Data, so no category ancestor found }
     leaf := root.AppendText('file.pas');
-    FContext.AssertTrue(('')=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'leaf with no category ancestor should return empty');
+    TestContext.AssertTrue(('')=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'leaf with no category ancestor should return empty');
   finally
     root.Free;
   end;
@@ -86,7 +91,7 @@ begin
     cat := root.AppendText('Sources');
     cat.Data := Pointer(1);
     leaf := cat.AppendText('myunit.pas');
-    FContext.AssertTrue((SetDirSeparators('/proj/src/main/pascal/myunit.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to source directory + filename');
+    TestContext.AssertTrue((SetDirSeparators('/proj/src/main/pascal/myunit.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to source directory + filename');
   finally
     root.Free;
   end;
@@ -101,7 +106,7 @@ begin
     cat := root.AppendText('Tests');
     cat.Data := Pointer(2);
     leaf := cat.AppendText('testunit.pas');
-    FContext.AssertTrue((SetDirSeparators('/proj/src/test/pascal/testunit.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to test directory + filename');
+    TestContext.AssertTrue((SetDirSeparators('/proj/src/test/pascal/testunit.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to test directory + filename');
   finally
     root.Free;
   end;
@@ -116,7 +121,7 @@ begin
     cat := root.AppendText('Resources');
     cat.Data := Pointer(3);
     leaf := cat.AppendText('config.ini');
-    FContext.AssertTrue((SetDirSeparators('/proj/src/main/resources/config.ini'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to resources directory + filename');
+    TestContext.AssertTrue((SetDirSeparators('/proj/src/main/resources/config.ini'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to resources directory + filename');
   finally
     root.Free;
   end;
@@ -131,7 +136,7 @@ begin
     cat := root.AppendText('Test Resources');
     cat.Data := Pointer(4);
     leaf := cat.AppendText('testdata.txt');
-    FContext.AssertTrue((SetDirSeparators('/proj/src/test/resources/testdata.txt'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to test resources directory + filename');
+    TestContext.AssertTrue((SetDirSeparators('/proj/src/test/resources/testdata.txt'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should resolve to test resources directory + filename');
   finally
     root.Free;
   end;
@@ -148,7 +153,7 @@ begin
     { Intermediate directory node — no Data }
     subdir := cat.AppendText('gui');
     leaf := subdir.AppendText('fpg_button.pas');
-    FContext.AssertTrue((SetDirSeparators('/proj/src/main/pascal/gui/fpg_button.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should include subdirectory in path');
+    TestContext.AssertTrue((SetDirSeparators('/proj/src/main/pascal/gui/fpg_button.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', False)), 'should include subdirectory in path');
   finally
     root.Free;
   end;
@@ -173,7 +178,7 @@ begin
     cat.Data := Pointer(1);
 
     leaf := cat.AppendText('fpg_main.pas');
-    FContext.AssertTrue((SetDirSeparators('/proj/framework/src/main/pascal/fpg_main.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', True)), 'aggregator leaf should use module directory');
+    TestContext.AssertTrue((SetDirSeparators('/proj/framework/src/main/pascal/fpg_main.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', True)), 'aggregator leaf should use module directory');
   finally
     info.Free;
     root.Free;
@@ -199,7 +204,7 @@ begin
     cat.Data := Pointer(2);
 
     leaf := cat.AppendText('TestRunner.pas');
-    FContext.AssertTrue((SetDirSeparators('/proj/ide/src/test/pascal/TestRunner.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', True)), 'aggregator test leaf should use module test directory');
+    TestContext.AssertTrue((SetDirSeparators('/proj/ide/src/test/pascal/TestRunner.pas'))=(ResolveNodeFilePath(leaf, '/proj/', 'src/main/pascal', True)), 'aggregator test leaf should use module test directory');
   finally
     info.Free;
     root.Free;
@@ -207,13 +212,18 @@ begin
 end;
 
 
+constructor TTestResolveNodeFilePath.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestResolveNodeFilePathTestNilNode(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestNilNode');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNilNode';
     lFixture.TestNilNode;
   finally lFixture.Free; end;
 end;
@@ -221,10 +231,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestNonLeafNode(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestNonLeafNode');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNonLeafNode';
     lFixture.TestNonLeafNode;
   finally lFixture.Free; end;
 end;
@@ -232,10 +240,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafWithNoCategoryAncestor(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafWithNoCategoryAncestor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafWithNoCategoryAncestor';
     lFixture.TestLeafWithNoCategoryAncestor;
   finally lFixture.Free; end;
 end;
@@ -243,10 +249,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafUnderSourcesCategory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafUnderSourcesCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafUnderSourcesCategory';
     lFixture.TestLeafUnderSourcesCategory;
   finally lFixture.Free; end;
 end;
@@ -254,10 +258,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafUnderTestsCategory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafUnderTestsCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafUnderTestsCategory';
     lFixture.TestLeafUnderTestsCategory;
   finally lFixture.Free; end;
 end;
@@ -265,10 +267,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafUnderResourcesCategory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafUnderResourcesCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafUnderResourcesCategory';
     lFixture.TestLeafUnderResourcesCategory;
   finally lFixture.Free; end;
 end;
@@ -276,10 +276,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafUnderTestResourcesCategory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafUnderTestResourcesCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafUnderTestResourcesCategory';
     lFixture.TestLeafUnderTestResourcesCategory;
   finally lFixture.Free; end;
 end;
@@ -287,10 +285,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestLeafWithSubdirectory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestLeafWithSubdirectory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeafWithSubdirectory';
     lFixture.TestLeafWithSubdirectory;
   finally lFixture.Free; end;
 end;
@@ -298,10 +294,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestAggregatorModuleLeaf(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestAggregatorModuleLeaf');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAggregatorModuleLeaf';
     lFixture.TestAggregatorModuleLeaf;
   finally lFixture.Free; end;
 end;
@@ -309,10 +303,8 @@ end;
 procedure RunTTestResolveNodeFilePathTestAggregatorModuleTestsCategory(AContext: TNXTestContext);
 var lFixture: TTestResolveNodeFilePath;
 begin
-  lFixture:=TTestResolveNodeFilePath.Create;
+  lFixture:=TTestResolveNodeFilePath.Create(AContext, 'TestAggregatorModuleTestsCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAggregatorModuleTestsCategory';
     lFixture.TestAggregatorModuleTestsCategory;
   finally lFixture.Free; end;
 end;

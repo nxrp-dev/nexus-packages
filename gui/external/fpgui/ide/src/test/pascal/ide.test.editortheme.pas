@@ -21,9 +21,14 @@ type
   { TTestEditorTheme }
 
   TTestEditorTheme = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Built-in themes }
     procedure TestDefaultThemeHasName;
@@ -79,7 +84,7 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue(('Default')=(t.Name), '');
+  TestContext.AssertTrue(('Default')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestDarkThemeHasName;
@@ -87,7 +92,7 @@ var
   t: TEditorTheme;
 begin
   t := DarkTheme;
-  FContext.AssertTrue(('Dark')=(t.Name), '');
+  TestContext.AssertTrue(('Dark')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestSolarizedDarkThemeHasName;
@@ -95,7 +100,7 @@ var
   t: TEditorTheme;
 begin
   t := SolarizedDarkTheme;
-  FContext.AssertTrue(('Solarized Dark')=(t.Name), '');
+  TestContext.AssertTrue(('Solarized Dark')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestSolarizedLightThemeHasName;
@@ -103,7 +108,7 @@ var
   t: TEditorTheme;
 begin
   t := SolarizedLightTheme;
-  FContext.AssertTrue(('Solarized Light')=(t.Name), '');
+  TestContext.AssertTrue(('Solarized Light')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestDefaultThemeBackground;
@@ -111,7 +116,7 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue((Integer(clWhite))=(Integer(t.Chrome.Background)), 'white background');
+  TestContext.AssertTrue((Integer(clWhite))=(Integer(t.Chrome.Background)), 'white background');
 end;
 
 procedure TTestEditorTheme.TestDefaultThemeKeywordStyle;
@@ -119,7 +124,7 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue(tsfBold in t.TokenStyles[hcKeyword1].Style, 'keyword1 bold');
+  TestContext.AssertTrue(tsfBold in t.TokenStyles[hcKeyword1].Style, 'keyword1 bold');
 end;
 
 procedure TTestEditorTheme.TestDefaultThemeCommentStyle;
@@ -127,7 +132,7 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue(tsfItalic in t.TokenStyles[hcComment1].Style, 'comment1 italic');
+  TestContext.AssertTrue(tsfItalic in t.TokenStyles[hcComment1].Style, 'comment1 italic');
 end;
 
 procedure TTestEditorTheme.TestDarkThemeBackground;
@@ -136,33 +141,33 @@ var
 begin
   t := DarkTheme;
   { Dark theme background should NOT be white }
-  FContext.AssertTrue(t.Chrome.Background <> clWhite, 'dark bg not white');
+  TestContext.AssertTrue(t.Chrome.Background <> clWhite, 'dark bg not white');
 end;
 
 procedure TTestEditorTheme.TestCategoryToName;
 begin
-  FContext.AssertTrue(('Keyword1')=(CategoryToName(hcKeyword1)), '');
-  FContext.AssertTrue(('Comment1')=(CategoryToName(hcComment1)), '');
-  FContext.AssertTrue(('String1')=(CategoryToName(hcString1)), '');
-  FContext.AssertTrue(('Number')=(CategoryToName(hcNumber)), '');
-  FContext.AssertTrue(('Invalid')=(CategoryToName(hcInvalid)), '');
+  TestContext.AssertTrue(('Keyword1')=(CategoryToName(hcKeyword1)), '');
+  TestContext.AssertTrue(('Comment1')=(CategoryToName(hcComment1)), '');
+  TestContext.AssertTrue(('String1')=(CategoryToName(hcString1)), '');
+  TestContext.AssertTrue(('Number')=(CategoryToName(hcNumber)), '');
+  TestContext.AssertTrue(('Invalid')=(CategoryToName(hcInvalid)), '');
 end;
 
 procedure TTestEditorTheme.TestNameToCategory;
 var
   cat: THighlightCategory;
 begin
-  FContext.AssertTrue(NameToCategory('Keyword1', cat), 'find Keyword1');
-  FContext.AssertTrue(cat = hcKeyword1, 'is hcKeyword1');
-  FContext.AssertTrue(NameToCategory('Comment2', cat), 'find Comment2');
-  FContext.AssertTrue(cat = hcComment2, 'is hcComment2');
+  TestContext.AssertTrue(NameToCategory('Keyword1', cat), 'find Keyword1');
+  TestContext.AssertTrue(cat = hcKeyword1, 'is hcKeyword1');
+  TestContext.AssertTrue(NameToCategory('Comment2', cat), 'find Comment2');
+  TestContext.AssertTrue(cat = hcComment2, 'is hcComment2');
 end;
 
 procedure TTestEditorTheme.TestNameToCategoryInvalid;
 var
   cat: THighlightCategory;
 begin
-  FContext.AssertTrue(not (NameToCategory('NonExistent', cat)), 'unknown name');
+  TestContext.AssertTrue(not (NameToCategory('NonExistent', cat)), 'unknown name');
 end;
 
 procedure TTestEditorTheme.TestSaveAndLoadRoundTrip;
@@ -176,12 +181,12 @@ begin
     orig := DarkTheme;
     SaveThemeToINI(orig, fn);
     loaded := LoadThemeFromINI(fn);
-    FContext.AssertTrue((orig.Name)=(loaded.Name), 'name');
-    FContext.AssertTrue((Integer(orig.Chrome.Background))=(Integer(loaded.Chrome.Background)), 'bg');
-    FContext.AssertTrue((Integer(orig.Chrome.Foreground))=(Integer(loaded.Chrome.Foreground)), 'fg');
-    FContext.AssertTrue((Integer(orig.TokenStyles[hcKeyword1].Foreground))=(Integer(loaded.TokenStyles[hcKeyword1].Foreground)), 'kw1 fg');
-    FContext.AssertTrue(tsfBold in loaded.TokenStyles[hcKeyword1].Style, 'kw1 bold');
-    FContext.AssertTrue(tsfItalic in loaded.TokenStyles[hcComment1].Style, 'comment italic');
+    TestContext.AssertTrue((orig.Name)=(loaded.Name), 'name');
+    TestContext.AssertTrue((Integer(orig.Chrome.Background))=(Integer(loaded.Chrome.Background)), 'bg');
+    TestContext.AssertTrue((Integer(orig.Chrome.Foreground))=(Integer(loaded.Chrome.Foreground)), 'fg');
+    TestContext.AssertTrue((Integer(orig.TokenStyles[hcKeyword1].Foreground))=(Integer(loaded.TokenStyles[hcKeyword1].Foreground)), 'kw1 fg');
+    TestContext.AssertTrue(tsfBold in loaded.TokenStyles[hcKeyword1].Style, 'kw1 bold');
+    TestContext.AssertTrue(tsfItalic in loaded.TokenStyles[hcComment1].Style, 'comment italic');
   finally
     if FileExists(fn) then
       DeleteFile(fn);
@@ -196,12 +201,12 @@ begin
   fn := cThemeDir + 'default.ini';
   if not FileExists(fn) then
   begin
-    FContext.Fail('Theme file not found: ' + fn);
+    TestContext.Fail('Theme file not found: ' + fn);
     Exit;
   end;
   t := LoadThemeFromINI(fn);
-  FContext.AssertTrue(('Default')=(t.Name), '');
-  FContext.AssertTrue((Integer(clWhite))=(Integer(t.Chrome.Background)), 'bg white');
+  TestContext.AssertTrue(('Default')=(t.Name), '');
+  TestContext.AssertTrue((Integer(clWhite))=(Integer(t.Chrome.Background)), 'bg white');
 end;
 
 procedure TTestEditorTheme.TestLoadDarkINI;
@@ -212,11 +217,11 @@ begin
   fn := cThemeDir + 'dark.ini';
   if not FileExists(fn) then
   begin
-    FContext.Fail('Theme file not found: ' + fn);
+    TestContext.Fail('Theme file not found: ' + fn);
     Exit;
   end;
   t := LoadThemeFromINI(fn);
-  FContext.AssertTrue(('Dark')=(t.Name), '');
+  TestContext.AssertTrue(('Dark')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestLoadSolarizedDarkINI;
@@ -227,11 +232,11 @@ begin
   fn := cThemeDir + 'solarized-dark.ini';
   if not FileExists(fn) then
   begin
-    FContext.Fail('Theme file not found: ' + fn);
+    TestContext.Fail('Theme file not found: ' + fn);
     Exit;
   end;
   t := LoadThemeFromINI(fn);
-  FContext.AssertTrue(('Solarized Dark')=(t.Name), '');
+  TestContext.AssertTrue(('Solarized Dark')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestLoadSolarizedLightINI;
@@ -242,11 +247,11 @@ begin
   fn := cThemeDir + 'solarized-light.ini';
   if not FileExists(fn) then
   begin
-    FContext.Fail('Theme file not found: ' + fn);
+    TestContext.Fail('Theme file not found: ' + fn);
     Exit;
   end;
   t := LoadThemeFromINI(fn);
-  FContext.AssertTrue(('Solarized Light')=(t.Name), '');
+  TestContext.AssertTrue(('Solarized Light')=(t.Name), '');
 end;
 
 procedure TTestEditorTheme.TestBoldStyleFlag;
@@ -254,8 +259,8 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue(tsfBold in t.TokenStyles[hcKeyword1].Style, 'keyword1 has bold');
-  FContext.AssertTrue(not (tsfItalic in t.TokenStyles[hcKeyword1].Style), 'keyword1 not italic');
+  TestContext.AssertTrue(tsfBold in t.TokenStyles[hcKeyword1].Style, 'keyword1 has bold');
+  TestContext.AssertTrue(not (tsfItalic in t.TokenStyles[hcKeyword1].Style), 'keyword1 not italic');
 end;
 
 procedure TTestEditorTheme.TestItalicStyleFlag;
@@ -263,8 +268,8 @@ var
   t: TEditorTheme;
 begin
   t := DefaultTheme;
-  FContext.AssertTrue(tsfItalic in t.TokenStyles[hcComment1].Style, 'comment1 has italic');
-  FContext.AssertTrue(not (tsfBold in t.TokenStyles[hcComment1].Style), 'comment1 not bold');
+  TestContext.AssertTrue(tsfItalic in t.TokenStyles[hcComment1].Style, 'comment1 has italic');
+  TestContext.AssertTrue(not (tsfBold in t.TokenStyles[hcComment1].Style), 'comment1 not bold');
 end;
 
 procedure TTestEditorTheme.TestTokenBackgroundDefault;
@@ -273,17 +278,22 @@ var
 begin
   { Token backgrounds should default to clNone (use editor background) }
   t := DefaultTheme;
-  FContext.AssertTrue((Integer(clNone))=(Integer(t.TokenStyles[hcIdentifier].Background)), 'identifier bg is clNone');
+  TestContext.AssertTrue((Integer(clNone))=(Integer(t.TokenStyles[hcIdentifier].Background)), 'identifier bg is clNone');
 end;
 
+
+constructor TTestEditorTheme.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
 
 procedure RunTTestEditorThemeTestDefaultThemeHasName(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDefaultThemeHasName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultThemeHasName';
     lFixture.TestDefaultThemeHasName;
   finally lFixture.Free; end;
 end;
@@ -291,10 +301,8 @@ end;
 procedure RunTTestEditorThemeTestDarkThemeHasName(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDarkThemeHasName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDarkThemeHasName';
     lFixture.TestDarkThemeHasName;
   finally lFixture.Free; end;
 end;
@@ -302,10 +310,8 @@ end;
 procedure RunTTestEditorThemeTestSolarizedDarkThemeHasName(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestSolarizedDarkThemeHasName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSolarizedDarkThemeHasName';
     lFixture.TestSolarizedDarkThemeHasName;
   finally lFixture.Free; end;
 end;
@@ -313,10 +319,8 @@ end;
 procedure RunTTestEditorThemeTestSolarizedLightThemeHasName(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestSolarizedLightThemeHasName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSolarizedLightThemeHasName';
     lFixture.TestSolarizedLightThemeHasName;
   finally lFixture.Free; end;
 end;
@@ -324,10 +328,8 @@ end;
 procedure RunTTestEditorThemeTestDefaultThemeBackground(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDefaultThemeBackground');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultThemeBackground';
     lFixture.TestDefaultThemeBackground;
   finally lFixture.Free; end;
 end;
@@ -335,10 +337,8 @@ end;
 procedure RunTTestEditorThemeTestDefaultThemeKeywordStyle(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDefaultThemeKeywordStyle');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultThemeKeywordStyle';
     lFixture.TestDefaultThemeKeywordStyle;
   finally lFixture.Free; end;
 end;
@@ -346,10 +346,8 @@ end;
 procedure RunTTestEditorThemeTestDefaultThemeCommentStyle(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDefaultThemeCommentStyle');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultThemeCommentStyle';
     lFixture.TestDefaultThemeCommentStyle;
   finally lFixture.Free; end;
 end;
@@ -357,10 +355,8 @@ end;
 procedure RunTTestEditorThemeTestDarkThemeBackground(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestDarkThemeBackground');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDarkThemeBackground';
     lFixture.TestDarkThemeBackground;
   finally lFixture.Free; end;
 end;
@@ -368,10 +364,8 @@ end;
 procedure RunTTestEditorThemeTestCategoryToName(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestCategoryToName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCategoryToName';
     lFixture.TestCategoryToName;
   finally lFixture.Free; end;
 end;
@@ -379,10 +373,8 @@ end;
 procedure RunTTestEditorThemeTestNameToCategory(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestNameToCategory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNameToCategory';
     lFixture.TestNameToCategory;
   finally lFixture.Free; end;
 end;
@@ -390,10 +382,8 @@ end;
 procedure RunTTestEditorThemeTestNameToCategoryInvalid(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestNameToCategoryInvalid');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNameToCategoryInvalid';
     lFixture.TestNameToCategoryInvalid;
   finally lFixture.Free; end;
 end;
@@ -401,10 +391,8 @@ end;
 procedure RunTTestEditorThemeTestSaveAndLoadRoundTrip(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestSaveAndLoadRoundTrip');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSaveAndLoadRoundTrip';
     lFixture.TestSaveAndLoadRoundTrip;
   finally lFixture.Free; end;
 end;
@@ -412,10 +400,8 @@ end;
 procedure RunTTestEditorThemeTestLoadDefaultINI(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestLoadDefaultINI');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadDefaultINI';
     lFixture.TestLoadDefaultINI;
   finally lFixture.Free; end;
 end;
@@ -423,10 +409,8 @@ end;
 procedure RunTTestEditorThemeTestLoadDarkINI(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestLoadDarkINI');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadDarkINI';
     lFixture.TestLoadDarkINI;
   finally lFixture.Free; end;
 end;
@@ -434,10 +418,8 @@ end;
 procedure RunTTestEditorThemeTestLoadSolarizedDarkINI(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestLoadSolarizedDarkINI');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadSolarizedDarkINI';
     lFixture.TestLoadSolarizedDarkINI;
   finally lFixture.Free; end;
 end;
@@ -445,10 +427,8 @@ end;
 procedure RunTTestEditorThemeTestLoadSolarizedLightINI(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestLoadSolarizedLightINI');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLoadSolarizedLightINI';
     lFixture.TestLoadSolarizedLightINI;
   finally lFixture.Free; end;
 end;
@@ -456,10 +436,8 @@ end;
 procedure RunTTestEditorThemeTestBoldStyleFlag(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestBoldStyleFlag');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBoldStyleFlag';
     lFixture.TestBoldStyleFlag;
   finally lFixture.Free; end;
 end;
@@ -467,10 +445,8 @@ end;
 procedure RunTTestEditorThemeTestItalicStyleFlag(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestItalicStyleFlag');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestItalicStyleFlag';
     lFixture.TestItalicStyleFlag;
   finally lFixture.Free; end;
 end;
@@ -478,10 +454,8 @@ end;
 procedure RunTTestEditorThemeTestTokenBackgroundDefault(AContext: TNXTestContext);
 var lFixture: TTestEditorTheme;
 begin
-  lFixture:=TTestEditorTheme.Create;
+  lFixture:=TTestEditorTheme.Create(AContext, 'TestTokenBackgroundDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTokenBackgroundDefault';
     lFixture.TestTokenBackgroundDefault;
   finally lFixture.Free; end;
 end;

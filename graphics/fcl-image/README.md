@@ -25,8 +25,7 @@ nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImage.nxpackage /
 nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImageExamples.nxproject /action=build
 nxbuild /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageTests.nxproject /action=build
 output/fcl-image-tests/x86_64-linux/FCLImageTests
-nxbuild /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageRetained.nxproject /action=build
-output/fcl-image-tests/x86_64-linux/retained/testfpimage
+python3 projects/nxtest/retained/BuildRetained.py fcl-image --nxbuild output/nxbuild-next/x86_64-linux/nxbuild --run
 ```
 
 Native host/compiler settings are in

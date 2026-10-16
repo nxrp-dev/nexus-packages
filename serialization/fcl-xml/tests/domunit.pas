@@ -28,9 +28,14 @@ type
   _list = _collection;                // ordered
 
   TDOMTestBase = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     procedure setImplAttr(const name: string; value: Boolean);
     function getImplAttr(const name: string): Boolean;
@@ -123,9 +128,9 @@ procedure TDOMTestBase.assertSame(const id: string; exp, act: TDOMNode);
 begin
   if exp <> act then
   begin
-    FContext.AssertTrue((exp)<>nil, id);
-    FContext.AssertTrue((act)<>nil, id);
-    FContext.AssertTrue((exp.nodeType)=(act.nodeType), id);
+    TestContext.AssertTrue((exp)<>nil, id);
+    TestContext.AssertTrue((act)<>nil, id);
+    TestContext.AssertTrue((exp.nodeType)=(act.nodeType), id);
     assertEqualsW(id, exp.nodeValue, act.nodeValue);
   end;
 end;
@@ -133,12 +138,12 @@ end;
 procedure TDOMTestBase.assertNull(const id: string; const ws: DOMString);
 begin
   if ws <> '' then
-    FContext.Fail(id);
+    TestContext.Fail(id);
 end;
 
 procedure TDOMTestBase.assertEquals(const id: string; exp, act: TObject);
 begin
-  FContext.AssertTrue((exp)=(act), id);
+  TestContext.AssertTrue((exp)=(act), id);
 end;
 
 procedure TDOMTestBase.assertEqualsList(const id: string;
@@ -146,7 +151,7 @@ procedure TDOMTestBase.assertEqualsList(const id: string;
 var
   I: Integer;
 begin
-  FContext.AssertTrue((Length(exp))=(Length(act)), id+'(length)');
+  TestContext.AssertTrue((Length(exp))=(Length(act)), id+'(length)');
   // compare ordered
   for I := 0 to High(exp) do
     AssertEqualsW(id+'['+IntToStr(I)+']', exp[I], act[I]);
@@ -156,7 +161,7 @@ procedure TDOMTestBase.assertEqualsCollection(const id: string; const exp: array
 var
   I, J, matches: Integer;
 begin
-  FContext.AssertTrue((Length(exp))=(Length(act)), id);
+  TestContext.AssertTrue((Length(exp))=(Length(act)), id);
   // compare unordered
   for I := 0 to High(exp) do
   begin
@@ -164,32 +169,32 @@ begin
     for J := 0 to High(act) do
       if act[J] = exp[I] then
         Inc(matches);
-    FContext.AssertTrue(matches <> 0, id+': no match found for <'+exp[I]+'>');
-    FContext.AssertTrue(matches = 1, id+': multiple matches for <'+exp[I]+'>');
+    TestContext.AssertTrue(matches <> 0, id+': no match found for <'+exp[I]+'>');
+    TestContext.AssertTrue(matches = 1, id+': multiple matches for <'+exp[I]+'>');
   end;
 end;
 
 procedure TDOMTestBase.assertEqualsW(const id: string; const exp, act: DOMString);
 begin
-  FContext.AssertTrue(exp = act, id + ComparisonMsg(exp, act));
+  TestContext.AssertTrue(exp = act, id + ': expected <' + UTF8Encode(exp) + '>, actual <' + UTF8Encode(act) + '>');
 end;
 
 procedure TDOMTestBase.assertEqualsNoCase(const id: string; const exp, act: DOMString);
 begin
 // TODO: could write custom comparison because range is limited to ASCII
-  FContext.AssertTrue(WideSameText(exp, act), id + ComparisonMsg(exp, act));
+  TestContext.AssertTrue(WideSameText(exp, act), id + ': expected <' + UTF8Encode(exp) + '>, actual <' + UTF8Encode(act) + '>');
 end;
 
 procedure TDOMTestBase.assertSize(const id: string; size: Integer; obj: TDOMNodeList);
 begin
-  FContext.AssertTrue((obj)<>nil, id);
-  FContext.AssertTrue((size)=(obj.Length), id);
+  TestContext.AssertTrue((obj)<>nil, id);
+  TestContext.AssertTrue((size)=(obj.Length), id);
 end;
 
 procedure TDOMTestBase.assertSize(const id: string; size: Integer; obj: TDOMNamedNodeMap);
 begin
-  FContext.AssertTrue((obj)<>nil, id);
-  FContext.AssertTrue((size)=(obj.Length), id);
+  TestContext.AssertTrue((obj)<>nil, id);
+  TestContext.AssertTrue((size)=(obj.Length), id);
 end;
 
 function TDOMTestBase.getResourceURI(const res: XMLString): XMLString;
@@ -230,7 +235,7 @@ begin
     result := not FParser.Options.PreserveWhitespace
   else
   begin
-    FContext.Fail('Unknown implementation attribute: ''' + name + '''');
+    TestContext.Fail('Unknown implementation attribute: ''' + name + '''');
     result := False;
   end;
 end;
@@ -244,7 +249,7 @@ begin
   else if name = 'coalescing' then
   // TODO: action unknown yet
   else if (name = 'signed') and value then
-    FContext.Skip('Setting implementation attribute ''signed'' to ''true'' is not supported')
+    TestContext.Skip('Setting implementation attribute ''signed'' to ''true'' is not supported')
   else if name = 'hasNullString' then
   // TODO: probably we cannot support this
   else if name = 'namespaceAware' then
@@ -252,7 +257,7 @@ begin
   else if name = 'ignoringElementContentWhitespace' then
     FParser.Options.PreserveWhitespace := not value
   else
-    FContext.Fail('Unknown implementation attribute: ''' + name + '''');
+    TestContext.Fail('Unknown implementation attribute: ''' + name + '''');
 end;
 
 procedure TDOMTestBase.Load(out doc; const uri: string);
@@ -267,7 +272,7 @@ end;
 
 procedure TDOMTestBase.assertInstanceOf(const id: string; obj: TObject; const typename: string);
 begin
-  FContext.AssertTrue(obj.ClassNameIs(typename), id);
+  TestContext.AssertTrue(obj.ClassNameIs(typename), id);
 end;
 
 { expected args already UTF-8 encoded }
@@ -277,30 +282,30 @@ procedure TDOMTestBase.assertURIEquals(const id: string; scheme, path,
 var
   URI: TURI;
 begin
-  FContext.AssertTrue(Actual <> '', id+'#0');
+  TestContext.AssertTrue(Actual <> '', id+'#0');
   URI := ParseURI(utf8Encode(Actual));
   if fragment <> nil then
-    FContext.AssertTrue((string(fragment))=(URI.Bookmark), id+'#1');
+    TestContext.AssertTrue((string(fragment))=(URI.Bookmark), id+'#1');
   if query <> nil then
-    FContext.AssertTrue((string(query))=(URI.Params), id+'#2');
+    TestContext.AssertTrue((string(query))=(URI.Params), id+'#2');
   if scheme <> nil then
-    FContext.AssertTrue((string(scheme))=(URI.Protocol), id+'#3');
+    TestContext.AssertTrue((string(scheme))=(URI.Protocol), id+'#3');
   if host <> nil then
   begin
-    FContext.AssertTrue(URI.HasAuthority, id+'#4');
-    FContext.AssertTrue((string(host))=(URI.Host), id+'#5');
+    TestContext.AssertTrue(URI.HasAuthority, id+'#4');
+    TestContext.AssertTrue((string(host))=(URI.Host), id+'#5');
   end;
   if path <> nil then
-    FContext.AssertTrue((string(path))=('//' + Uri.Host + URI.Path + URI.Document), id+'#6');
+    TestContext.AssertTrue((string(path))=('//' + Uri.Host + URI.Path + URI.Document), id+'#6');
   if file_ <> nil then
-    FContext.AssertTrue((string(file_))=(URI.Document), id+'#7');
+    TestContext.AssertTrue((string(file_))=(URI.Document), id+'#7');
   if name <> nil then
-    FContext.AssertTrue((string(name))=(ChangeFileExt(URI.Document, '')), id+'#8');
+    TestContext.AssertTrue((string(name))=(ChangeFileExt(URI.Document, '')), id+'#8');
 end;
 
 function TDOMTestBase.bad_condition(const TagName: XMLString): Boolean;
 begin
-  FContext.Fail('Unsupported condition: '+ AnsiString(TagName));
+  TestContext.Fail('Unsupported condition: '+ AnsiString(TagName));
   Result := False;
 end;
 
@@ -319,7 +324,6 @@ end;
 
 procedure TDOMTestBase.CheckFeature(const name: string);
 begin
-  // purpose/action is currently unknown
 end;
 
 function TDOMTestBase.GetTestFilesURI: string;
@@ -341,8 +345,17 @@ begin
 end;
 
 
-procedure RegisterdomunitTests(ARegistry: TNXTestRegistry);
+constructor TDOMTestBase.Create(AContext: TNXTestContext; const ACaseName: string);
 begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+procedure RegisterdomunitTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+
 end;
 
 end.

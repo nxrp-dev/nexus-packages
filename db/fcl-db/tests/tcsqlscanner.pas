@@ -26,9 +26,14 @@ type
   { TTestSQLScanner }
 
   TTestSQLScanner= class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   Private
     FStream : TStream;
     FLineReader : TLineReader;
@@ -291,7 +296,7 @@ begin
   CreateScanner(ASource);
   J:=Scanner.FetchToken;
   EN2:=GetEnumName(TypeInfo(TSQLToken),Ord(AToken));
-  FContext.AssertTrue((AToken)=(J), Format('Source %s should result in %s.',[ASource,EN2]));
+  TestContext.AssertTrue((AToken)=(J), Format('Source %s should result in %s.',[ASource,EN2]));
 end;
 
 
@@ -315,12 +320,12 @@ begin
   CreateScanner(S);
   try
     J:=FScanner.FetchToken;
-    FContext.AssertTrue((tsqlFloatNumber)=(J), S+' is a number');
+    TestContext.AssertTrue((tsqlFloatNumber)=(J), S+' is a number');
     V:=FScanner.CurTokenString;
     Val(V,C,I);
     If (I<>0) then
-      FContext.Fail(FScanner.CurTokenString+' does not contain a float value');
-    FContext.AssertTrue((F)=(C), 'Parsed float equals original float');
+      TestContext.Fail(FScanner.CurTokenString+' does not contain a float value');
+    TestContext.AssertTrue((F)=(C), 'Parsed float equals original float');
   finally
     FreeScanner;
   end;
@@ -335,7 +340,7 @@ begin
   CreateScanner(S);
   try
     J:=FScanner.FetchToken;
-    FContext.AssertTrue((tsqlString)=(J), S+' is a string');
+    TestContext.AssertTrue((tsqlString)=(J), S+' is a string');
     If (Length(S)>0) and (S[1] in ['"','''']) then
       begin
       C:=S[1];
@@ -343,7 +348,7 @@ begin
       end;
     If DoubleDelim then
       S:=StringReplace(S,C+C,C,[rfReplaceAll]);
-    FContext.AssertTrue((S)=(FScanner.CurTokenString), 'Correct string is returned');
+    TestContext.AssertTrue((S)=(FScanner.CurTokenString), 'Correct string is returned');
   finally
     FreeScanner;
   end;
@@ -381,7 +386,7 @@ end;
 procedure TTestSQLScanner.TearDown;
 begin
   FreeScanner;
-  iNHERITED;
+
 end;
 
 procedure TTestSQLScanner.TestAction;
@@ -412,7 +417,7 @@ begin
   CreateScanner('');
   J:=Scanner.FetchToken;
   If (J<>tsqlEOF) then
-    FContext.Fail('Empty returns EOF');
+    TestContext.Fail('Empty returns EOF');
 end;
 
 procedure TTestSQLScanner.TestEnd;
@@ -1356,7 +1361,7 @@ procedure TTestSQLScanner.TestTermExclude;
 begin
   CreateScanner('term');
   FScanner.Excludekeywords.Add('term');
-  FContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Term is identifier');
+  TestContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Term is identifier');
 end;
 
 procedure TTestSQLScanner.TestRecreate;
@@ -1388,7 +1393,7 @@ begin
     J:=FScanner.FetchToken;
     S:=GetEnumName(TypeINfo(TSQLToken),Ord(ATokens[i]));
     S:=Format('Source "%s", token %d (%s): expected %s',[ASource,I,FScanner.CurTokenString,S]);
-    FContext.AssertTrue((ATokens[i])=(J), S);
+    TestContext.AssertTrue((ATokens[i])=(J), S);
     end;
 end;
 
@@ -1405,25 +1410,25 @@ end;
 procedure TTestSQLScanner.TestIdentifier;
 begin
   CheckToken(tsqlIdentifier,'something');
-  FContext.AssertTrue(('something')=(FScanner.CurTokenString), 'Correct identifier');
+  TestContext.AssertTrue(('something')=(FScanner.CurTokenString), 'Correct identifier');
 end;
 
 procedure TTestSQLScanner.TestIdentifier2;
 begin
   CheckToken(tsqlIdentifier,'"_something"');
-  FContext.AssertTrue(('_something')=(FScanner.CurTokenString), 'Correct identifier');
+  TestContext.AssertTrue(('_something')=(FScanner.CurTokenString), 'Correct identifier');
 end;
 
 procedure TTestSQLScanner.TestIdentifier3;
 begin
   CheckToken(tsqlIdentifier,'RDB$');
-  FContext.AssertTrue(('RDB$')=(FScanner.CurTokenString), 'Correct identifier');
+  TestContext.AssertTrue(('RDB$')=(FScanner.CurTokenString), 'Correct identifier');
 end;
 
 procedure TTestSQLScanner.TestIdentifier4;
 begin
   CheckToken(tsqlIdentifier,'A_0');
-  FContext.AssertTrue(('A_0')=(FScanner.CurTokenString), 'Correct identifier');
+  TestContext.AssertTrue(('A_0')=(FScanner.CurTokenString), 'Correct identifier');
 end;
 
 procedure TTestSQLScanner.TestIdentifier5;
@@ -1435,8 +1440,8 @@ end;
 procedure TTestSQLScanner.TestIdentifier6;
 begin
   CreateScanner('[A]',[soSquareBracketsIdentifier]);
-  FContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Identifier is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct identifier');
+  TestContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Identifier is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct identifier');
 end;
 
 procedure TTestSQLScanner.TestIdentifierDotIdentifier;
@@ -1449,7 +1454,7 @@ procedure TTestSQLScanner.TestEOLN;
 begin
   CreateScanner('something');
   FScanner.FetchToken;
-  FContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'Got to end of line after reading single token at EOF');
+  TestContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'Got to end of line after reading single token at EOF');
 //  AssertEquals('Correct identifier','something',FScanner.CurTokenString);
 end;
 
@@ -1457,67 +1462,67 @@ procedure TTestSQLScanner.TestEOLN2;
 begin
   CreateScanner('something different');
   FScanner.FetchToken;
-  FContext.AssertTrue((False)=(FScanner.IsEndOfLine), 'Not yet end of line after reading single token at EOF');
+  TestContext.AssertTrue((False)=(FScanner.IsEndOfLine), 'Not yet end of line after reading single token at EOF');
 end;
 
 procedure TTestSQLScanner.TestEOLN3;
 begin
   CreateScanner('something'#13#10'different');
   FScanner.FetchToken;
-  FContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading single token');
+  TestContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading single token');
 end;
 
 procedure TTestSQLScanner.TestEOLN4;
 begin
   CreateScanner('something'#10'different');
   FScanner.FetchToken;
-  FContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading first token');
+  TestContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading first token');
   FScanner.FetchToken;
-  FContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading second token');
+  TestContext.AssertTrue((True)=(FScanner.IsEndOfLine), 'End of line after reading second token');
 end;
 
 procedure TTestSQLScanner.TestComment1;
 begin
   CreateScanner('-- some comment string');
-  FContext.AssertTrue((tsqlEOF)=(FScanner.FetchToken), 'Comment line is skipped');
+  TestContext.AssertTrue((tsqlEOF)=(FScanner.FetchToken), 'Comment line is skipped');
 end;
 
 procedure TTestSQLScanner.TestComment2;
 begin
   CreateScanner('--  some comment string');
   FScanner.Options:=[soReturnComments];
-  FContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
-  FContext.AssertTrue((' some comment string')=(FScanner.CurTokenString), 'Comment contents is returned');
+  TestContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
+  TestContext.AssertTrue((' some comment string')=(FScanner.CurTokenString), 'Comment contents is returned');
 end;
 
 procedure TTestSQLScanner.TestComment3;
 begin
   CreateScanner('/* some comment string */');
-  FContext.AssertTrue((tsqlEOF)=(FScanner.FetchToken), 'Comment line is skipped');
+  TestContext.AssertTrue((tsqlEOF)=(FScanner.FetchToken), 'Comment line is skipped');
 end;
 
 procedure TTestSQLScanner.TestComment4;
 begin
   CreateScanner('/* some comment string */');
   FScanner.Options:=[soReturnComments];
-  FContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
-  FContext.AssertTrue((' some comment string ')=(FScanner.CurTokenString), 'Comment contents is returned');
+  TestContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
+  TestContext.AssertTrue((' some comment string ')=(FScanner.CurTokenString), 'Comment contents is returned');
 end;
 
 procedure TTestSQLScanner.TestComment5;
 begin
   CreateScanner('/* some nested comment -- string */');
   FScanner.Options:=[soReturnComments];
-  FContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
-  FContext.AssertTrue((' some nested comment -- string ')=(FScanner.CurTokenString), 'Comment contents is returned');
+  TestContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
+  TestContext.AssertTrue((' some nested comment -- string ')=(FScanner.CurTokenString), 'Comment contents is returned');
 end;
 
 procedure TTestSQLScanner.TestComment6;
 begin
   CreateScanner('-- /* some nested comment string */');
   FScanner.Options:=[soReturnComments];
-  FContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
-  FContext.AssertTrue(('/* some nested comment string */')=(FScanner.CurTokenString), 'Comment contents is returned');
+  TestContext.AssertTrue((tsqlComment)=(FScanner.FetchToken), 'Comment line is returned');
+  TestContext.AssertTrue(('/* some nested comment string */')=(FScanner.CurTokenString), 'Comment contents is returned');
 end;
 
 procedure TTestSQLScanner.TestFloatLiteral;
@@ -1535,141 +1540,145 @@ procedure TTestSQLScanner.TestStringLiteral1;
 begin
   CreateScanner('''A''');
   FScanner.Options:=[];
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestStringLiteral2;
 begin
   CreateScanner('"A"',[soDoubleQuoteStringLiteral]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestStringError;
 begin
-
 end;
 
 procedure TTestSQLScanner.TestFloatError;
 begin
   FErrorSource:='1xz';
-  FContext.AssertRaises(ESQLScannerError, @TestErrorSource, 'Wrong float');
+  TestContext.AssertRaises(ESQLScannerError, @TestErrorSource, 'Wrong float');
 end;
 
 procedure TTestSQLScanner.TestOptionsoDoubleQuoteStringLiteral;
 begin
   CreateScanner('"A"',[soDoubleQuoteStringLiteral]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoSingleQuoteIdentifier;
 begin
   CreateScanner('''A''',[soSingleQuoteIdentifier,soDoubleQuoteStringLiteral]);
   If (Scanner.Options<>[soSingleQuoteIdentifier,soDoubleQuoteStringLiteral]) then
-    FContext.Fail('Options not correctly set');
-  FContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Identifier is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
+    TestContext.Fail('Options not correctly set');
+  TestContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'Identifier is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackQuoteIdentifier;
 begin
   CreateScanner('`A`',[soBackQuoteIdentifier]);
-  FContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlIdentifier)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('A')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionNosoBackQuoteIdentifier;
 begin
   FErrorSource:='`A`';
-  FContext.AssertRaises(ESQLScannerError, @TestErrorSource, 'Wrong token');
+  TestContext.AssertRaises(ESQLScannerError, @TestErrorSource, 'Wrong token');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesTab;
 begin
   CreateScanner('''\t''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue((#9)=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue((#9)=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesNewLine;
 begin
   CreateScanner('''\n''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue((#10)=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue((#10)=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesLineFeed;
 
 begin
   CreateScanner('''\r''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue((#13)=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue((#13)=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesBackSlash;
 
 begin
   CreateScanner('''\\''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('\')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('\')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesNewPage;
 
 begin
   CreateScanner('''\f''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue((#12)=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue((#12)=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesSlash;
 begin
   CreateScanner('''\/''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('/')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('/')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesBackspace;
 
 begin
   CreateScanner('''\f''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue((#12)=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue((#12)=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesQuote;
 
 begin
   CreateScanner('''\''''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('''')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('''')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionsoBackslashEscapesDoubleQuote;
 begin
   CreateScanner('''\"''',[soBackslashEscapes]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('"')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('"')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 procedure TTestSQLScanner.TestOptionNosoBackslashEscapes;
 begin
   CreateScanner('''\"''',[]);
-  FContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
-  FContext.AssertTrue(('\"')=(FScanner.CurTokenString), 'Correct string');
+  TestContext.AssertTrue((tsqlString)=(FScanner.FetchToken), 'String is returned');
+  TestContext.AssertTrue(('\"')=(FScanner.CurTokenString), 'Correct string');
 end;
 
 
 
+constructor TTestSQLScanner.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestSQLScannerTestAction(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAction';
     lFixture.SetUp;
     try lFixture.TestAction; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1678,10 +1687,8 @@ end;
 procedure RunTTestSQLScannerTestAdd(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAdd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAdd';
     lFixture.SetUp;
     try lFixture.TestAdd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1690,10 +1697,8 @@ end;
 procedure RunTTestSQLScannerTestAdmin(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAdmin');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAdmin';
     lFixture.SetUp;
     try lFixture.TestAdmin; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1702,10 +1707,8 @@ end;
 procedure RunTTestSQLScannerTestAfter(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAfter');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAfter';
     lFixture.SetUp;
     try lFixture.TestAfter; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1714,10 +1717,8 @@ end;
 procedure RunTTestSQLScannerTestALTER(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestALTER');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestALTER';
     lFixture.SetUp;
     try lFixture.TestALTER; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1726,10 +1727,8 @@ end;
 procedure RunTTestSQLScannerTestAnd(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAnd';
     lFixture.SetUp;
     try lFixture.TestAnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1738,10 +1737,8 @@ end;
 procedure RunTTestSQLScannerTestAny(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAny');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAny';
     lFixture.SetUp;
     try lFixture.TestAny; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1750,10 +1747,8 @@ end;
 procedure RunTTestSQLScannerTestAs(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAs';
     lFixture.SetUp;
     try lFixture.TestAs; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1762,10 +1757,8 @@ end;
 procedure RunTTestSQLScannerTestASC(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestASC');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestASC';
     lFixture.SetUp;
     try lFixture.TestASC; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1774,10 +1767,8 @@ end;
 procedure RunTTestSQLScannerTestASCENDING(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestASCENDING');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestASCENDING';
     lFixture.SetUp;
     try lFixture.TestASCENDING; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1786,10 +1777,8 @@ end;
 procedure RunTTestSQLScannerTestAt(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAt');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAt';
     lFixture.SetUp;
     try lFixture.TestAt; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1798,10 +1787,8 @@ end;
 procedure RunTTestSQLScannerTestAuto(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAuto');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAuto';
     lFixture.SetUp;
     try lFixture.TestAuto; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1810,10 +1797,8 @@ end;
 procedure RunTTestSQLScannerTestAVG(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAVG');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAVG';
     lFixture.SetUp;
     try lFixture.TestAVG; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1822,10 +1807,8 @@ end;
 procedure RunTTestSQLScannerTestAssign(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestAssign');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAssign';
     lFixture.SetUp;
     try lFixture.TestAssign; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1834,10 +1817,8 @@ end;
 procedure RunTTestSQLScannerTestBefore(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBefore');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBefore';
     lFixture.SetUp;
     try lFixture.TestBefore; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1846,10 +1827,8 @@ end;
 procedure RunTTestSQLScannerTestBegin(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBegin');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBegin';
     lFixture.SetUp;
     try lFixture.TestBegin; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1858,10 +1837,8 @@ end;
 procedure RunTTestSQLScannerTestBetween(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBetween');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBetween';
     lFixture.SetUp;
     try lFixture.TestBetween; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1870,10 +1847,8 @@ end;
 procedure RunTTestSQLScannerTestBlob(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBlob');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBlob';
     lFixture.SetUp;
     try lFixture.TestBlob; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1882,10 +1857,8 @@ end;
 procedure RunTTestSQLScannerTestBraceClose(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBraceClose');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBraceClose';
     lFixture.SetUp;
     try lFixture.TestBraceClose; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1894,10 +1867,8 @@ end;
 procedure RunTTestSQLScannerTestBraceOpen(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBraceOpen');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBraceOpen';
     lFixture.SetUp;
     try lFixture.TestBraceOpen; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1906,10 +1877,8 @@ end;
 procedure RunTTestSQLScannerTestBy(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestBy');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBy';
     lFixture.SetUp;
     try lFixture.TestBy; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1918,10 +1887,8 @@ end;
 procedure RunTTestSQLScannerTestCache(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCache');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCache';
     lFixture.SetUp;
     try lFixture.TestCache; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1930,10 +1897,8 @@ end;
 procedure RunTTestSQLScannerTestCascade(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCascade');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCascade';
     lFixture.SetUp;
     try lFixture.TestCascade; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1942,10 +1907,8 @@ end;
 procedure RunTTestSQLScannerTestChar(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestChar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestChar';
     lFixture.SetUp;
     try lFixture.TestChar; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1954,10 +1917,8 @@ end;
 procedure RunTTestSQLScannerTestCharacter(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCharacter');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCharacter';
     lFixture.SetUp;
     try lFixture.TestCharacter; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1966,10 +1927,8 @@ end;
 procedure RunTTestSQLScannerTestCheck(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCheck');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCheck';
     lFixture.SetUp;
     try lFixture.TestCheck; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1978,10 +1937,8 @@ end;
 procedure RunTTestSQLScannerTestCollate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCollate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCollate';
     lFixture.SetUp;
     try lFixture.TestCollate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1990,10 +1947,8 @@ end;
 procedure RunTTestSQLScannerTestColon(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestColon');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestColon';
     lFixture.SetUp;
     try lFixture.TestColon; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2002,10 +1957,8 @@ end;
 procedure RunTTestSQLScannerTestColumn(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestColumn');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestColumn';
     lFixture.SetUp;
     try lFixture.TestColumn; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2014,10 +1967,8 @@ end;
 procedure RunTTestSQLScannerTestComma(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComma');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComma';
     lFixture.SetUp;
     try lFixture.TestComma; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2026,10 +1977,8 @@ end;
 procedure RunTTestSQLScannerTestCommit(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCommit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCommit';
     lFixture.SetUp;
     try lFixture.TestCommit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2038,10 +1987,8 @@ end;
 procedure RunTTestSQLScannerTestComputed(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComputed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComputed';
     lFixture.SetUp;
     try lFixture.TestComputed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2050,10 +1997,8 @@ end;
 procedure RunTTestSQLScannerTestConcatenate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestConcatenate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConcatenate';
     lFixture.SetUp;
     try lFixture.TestConcatenate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2062,10 +2007,8 @@ end;
 procedure RunTTestSQLScannerTestConditional(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestConditional');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConditional';
     lFixture.SetUp;
     try lFixture.TestConditional; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2074,10 +2017,8 @@ end;
 procedure RunTTestSQLScannerTestConnect(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestConnect');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConnect';
     lFixture.SetUp;
     try lFixture.TestConnect; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2086,10 +2027,8 @@ end;
 procedure RunTTestSQLScannerTestConstraint(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestConstraint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestConstraint';
     lFixture.SetUp;
     try lFixture.TestConstraint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2098,10 +2037,8 @@ end;
 procedure RunTTestSQLScannerTestContaining(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestContaining');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestContaining';
     lFixture.SetUp;
     try lFixture.TestContaining; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2110,10 +2047,8 @@ end;
 procedure RunTTestSQLScannerTestCount(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCount';
     lFixture.SetUp;
     try lFixture.TestCount; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2122,10 +2057,8 @@ end;
 procedure RunTTestSQLScannerTestCreate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.SetUp;
     try lFixture.TestCreate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2134,10 +2067,8 @@ end;
 procedure RunTTestSQLScannerTestCString(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestCString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCString';
     lFixture.SetUp;
     try lFixture.TestCString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2146,10 +2077,8 @@ end;
 procedure RunTTestSQLScannerTestDatabase(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDatabase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDatabase';
     lFixture.SetUp;
     try lFixture.TestDatabase; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2158,10 +2087,8 @@ end;
 procedure RunTTestSQLScannerTestDate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDate';
     lFixture.SetUp;
     try lFixture.TestDate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2170,10 +2097,8 @@ end;
 procedure RunTTestSQLScannerTestDecimal(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDecimal');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDecimal';
     lFixture.SetUp;
     try lFixture.TestDecimal; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2182,10 +2107,8 @@ end;
 procedure RunTTestSQLScannerTestDeclare(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDeclare');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDeclare';
     lFixture.SetUp;
     try lFixture.TestDeclare; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2194,10 +2117,8 @@ end;
 procedure RunTTestSQLScannerTestDefault(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefault';
     lFixture.SetUp;
     try lFixture.TestDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2206,10 +2127,8 @@ end;
 procedure RunTTestSQLScannerTestDelete(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDelete');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDelete';
     lFixture.SetUp;
     try lFixture.TestDelete; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2218,10 +2137,8 @@ end;
 procedure RunTTestSQLScannerTestDesc(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDesc');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDesc';
     lFixture.SetUp;
     try lFixture.TestDesc; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2230,10 +2147,8 @@ end;
 procedure RunTTestSQLScannerTestDescending(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDescending');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDescending';
     lFixture.SetUp;
     try lFixture.TestDescending; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2242,10 +2157,8 @@ end;
 procedure RunTTestSQLScannerTestDistinct(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDistinct');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDistinct';
     lFixture.SetUp;
     try lFixture.TestDistinct; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2254,10 +2167,8 @@ end;
 procedure RunTTestSQLScannerTestDiv(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDiv');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDiv';
     lFixture.SetUp;
     try lFixture.TestDiv; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2266,10 +2177,8 @@ end;
 procedure RunTTestSQLScannerTestDO(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDO');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDO';
     lFixture.SetUp;
     try lFixture.TestDO; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2278,10 +2187,8 @@ end;
 procedure RunTTestSQLScannerTestDomain(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDomain');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDomain';
     lFixture.SetUp;
     try lFixture.TestDomain; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2290,10 +2197,8 @@ end;
 procedure RunTTestSQLScannerTestDot(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDot';
     lFixture.SetUp;
     try lFixture.TestDot; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2302,10 +2207,8 @@ end;
 procedure RunTTestSQLScannerTestDrop(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestDrop');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDrop';
     lFixture.SetUp;
     try lFixture.TestDrop; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2314,10 +2217,8 @@ end;
 procedure RunTTestSQLScannerTestElse(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestElse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestElse';
     lFixture.SetUp;
     try lFixture.TestElse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2326,10 +2227,8 @@ end;
 procedure RunTTestSQLScannerTestEmpty(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmpty';
     lFixture.SetUp;
     try lFixture.TestEmpty; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2338,10 +2237,8 @@ end;
 procedure RunTTestSQLScannerTestEnd(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnd';
     lFixture.SetUp;
     try lFixture.TestEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2350,10 +2247,8 @@ end;
 procedure RunTTestSQLScannerTestEntryPoint(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEntryPoint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEntryPoint';
     lFixture.SetUp;
     try lFixture.TestEntryPoint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2362,10 +2257,8 @@ end;
 procedure RunTTestSQLScannerTestEq(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEq');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEq';
     lFixture.SetUp;
     try lFixture.TestEq; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2374,10 +2267,8 @@ end;
 procedure RunTTestSQLScannerTestEscape(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEscape');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEscape';
     lFixture.SetUp;
     try lFixture.TestEscape; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2386,10 +2277,8 @@ end;
 procedure RunTTestSQLScannerTestException(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestException');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestException';
     lFixture.SetUp;
     try lFixture.TestException; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2398,10 +2287,8 @@ end;
 procedure RunTTestSQLScannerTestExists(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestExists');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExists';
     lFixture.SetUp;
     try lFixture.TestExists; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2410,10 +2297,8 @@ end;
 procedure RunTTestSQLScannerTestExit(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestExit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExit';
     lFixture.SetUp;
     try lFixture.TestExit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2422,10 +2307,8 @@ end;
 procedure RunTTestSQLScannerTestExternal(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestExternal');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExternal';
     lFixture.SetUp;
     try lFixture.TestExternal; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2434,10 +2317,8 @@ end;
 procedure RunTTestSQLScannerTestExtract(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestExtract');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExtract';
     lFixture.SetUp;
     try lFixture.TestExtract; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2446,10 +2327,8 @@ end;
 procedure RunTTestSQLScannerTestFile(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFile';
     lFixture.SetUp;
     try lFixture.TestFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2458,10 +2337,8 @@ end;
 procedure RunTTestSQLScannerTestFloat(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFloat');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloat';
     lFixture.SetUp;
     try lFixture.TestFloat; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2470,10 +2347,8 @@ end;
 procedure RunTTestSQLScannerTestFor(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFor';
     lFixture.SetUp;
     try lFixture.TestFor; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2482,10 +2357,8 @@ end;
 procedure RunTTestSQLScannerTestForeign(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestForeign');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestForeign';
     lFixture.SetUp;
     try lFixture.TestForeign; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2494,10 +2367,8 @@ end;
 procedure RunTTestSQLScannerTestFreeIt(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFreeIt');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFreeIt';
     lFixture.SetUp;
     try lFixture.TestFreeIt; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2506,10 +2377,8 @@ end;
 procedure RunTTestSQLScannerTestFunction(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFunction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFunction';
     lFixture.SetUp;
     try lFixture.TestFunction; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2518,10 +2387,8 @@ end;
 procedure RunTTestSQLScannerTestGDSError(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGDSError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGDSError';
     lFixture.SetUp;
     try lFixture.TestGDSError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2530,10 +2397,8 @@ end;
 procedure RunTTestSQLScannerTestGE(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGE');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGE';
     lFixture.SetUp;
     try lFixture.TestGE; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2542,10 +2407,8 @@ end;
 procedure RunTTestSQLScannerTestGenerator(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGenerator');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGenerator';
     lFixture.SetUp;
     try lFixture.TestGenerator; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2554,10 +2417,8 @@ end;
 procedure RunTTestSQLScannerTestGrant(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGrant');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrant';
     lFixture.SetUp;
     try lFixture.TestGrant; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2566,10 +2427,8 @@ end;
 procedure RunTTestSQLScannerTestGreaterThan(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGreaterThan');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGreaterThan';
     lFixture.SetUp;
     try lFixture.TestGreaterThan; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2578,10 +2437,8 @@ end;
 procedure RunTTestSQLScannerTestGroup(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestGroup');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGroup';
     lFixture.SetUp;
     try lFixture.TestGroup; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2590,10 +2447,8 @@ end;
 procedure RunTTestSQLScannerTestHaving(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestHaving');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHaving';
     lFixture.SetUp;
     try lFixture.TestHaving; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2602,10 +2457,8 @@ end;
 procedure RunTTestSQLScannerTestIf(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIf');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIf';
     lFixture.SetUp;
     try lFixture.TestIf; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2614,10 +2467,8 @@ end;
 procedure RunTTestSQLScannerTestIn(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIn');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIn';
     lFixture.SetUp;
     try lFixture.TestIn; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2626,10 +2477,8 @@ end;
 procedure RunTTestSQLScannerTestIndex(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIndex');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIndex';
     lFixture.SetUp;
     try lFixture.TestIndex; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2638,10 +2487,8 @@ end;
 procedure RunTTestSQLScannerTestInner(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestInner');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInner';
     lFixture.SetUp;
     try lFixture.TestInner; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2650,10 +2497,8 @@ end;
 procedure RunTTestSQLScannerTestInsert(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestInsert');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInsert';
     lFixture.SetUp;
     try lFixture.TestInsert; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2662,10 +2507,8 @@ end;
 procedure RunTTestSQLScannerTestInt(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestInt');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInt';
     lFixture.SetUp;
     try lFixture.TestInt; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2674,10 +2517,8 @@ end;
 procedure RunTTestSQLScannerTestInteger(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestInteger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInteger';
     lFixture.SetUp;
     try lFixture.TestInteger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2686,10 +2527,8 @@ end;
 procedure RunTTestSQLScannerTestInto(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestInto');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestInto';
     lFixture.SetUp;
     try lFixture.TestInto; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2698,10 +2537,8 @@ end;
 procedure RunTTestSQLScannerTestIs(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIs');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIs';
     lFixture.SetUp;
     try lFixture.TestIs; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2710,10 +2547,8 @@ end;
 procedure RunTTestSQLScannerTestJoin(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestJoin');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestJoin';
     lFixture.SetUp;
     try lFixture.TestJoin; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2722,10 +2557,8 @@ end;
 procedure RunTTestSQLScannerTestKey(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestKey');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestKey';
     lFixture.SetUp;
     try lFixture.TestKey; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2734,10 +2567,8 @@ end;
 procedure RunTTestSQLScannerTestLeft(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestLeft');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLeft';
     lFixture.SetUp;
     try lFixture.TestLeft; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2746,10 +2577,8 @@ end;
 procedure RunTTestSQLScannerTestLength(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestLength');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLength';
     lFixture.SetUp;
     try lFixture.TestLength; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2758,10 +2587,8 @@ end;
 procedure RunTTestSQLScannerTestLike(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestLike');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLike';
     lFixture.SetUp;
     try lFixture.TestLike; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2770,10 +2597,8 @@ end;
 procedure RunTTestSQLScannerTestLE(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestLE');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLE';
     lFixture.SetUp;
     try lFixture.TestLE; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2782,10 +2607,8 @@ end;
 procedure RunTTestSQLScannerTestLessThan(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestLessThan');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLessThan';
     lFixture.SetUp;
     try lFixture.TestLessThan; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2794,10 +2617,8 @@ end;
 procedure RunTTestSQLScannerTestManual(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestManual');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestManual';
     lFixture.SetUp;
     try lFixture.TestManual; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2806,10 +2627,8 @@ end;
 procedure RunTTestSQLScannerTestModuleName(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestModuleName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestModuleName';
     lFixture.SetUp;
     try lFixture.TestModuleName; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2818,10 +2637,8 @@ end;
 procedure RunTTestSQLScannerTestMax(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestMax');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMax';
     lFixture.SetUp;
     try lFixture.TestMax; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2830,10 +2647,8 @@ end;
 procedure RunTTestSQLScannerTestMerge(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestMerge');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMerge';
     lFixture.SetUp;
     try lFixture.TestMerge; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2842,10 +2657,8 @@ end;
 procedure RunTTestSQLScannerTestMin(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestMin');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMin';
     lFixture.SetUp;
     try lFixture.TestMin; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2854,10 +2667,8 @@ end;
 procedure RunTTestSQLScannerTestMinus(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestMinus');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMinus';
     lFixture.SetUp;
     try lFixture.TestMinus; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2866,10 +2677,8 @@ end;
 procedure RunTTestSQLScannerTestMul(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestMul');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMul';
     lFixture.SetUp;
     try lFixture.TestMul; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2878,10 +2687,8 @@ end;
 procedure RunTTestSQLScannerTestNational(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNational');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNational';
     lFixture.SetUp;
     try lFixture.TestNational; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2890,10 +2697,8 @@ end;
 procedure RunTTestSQLScannerTestNatural(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNatural');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNatural';
     lFixture.SetUp;
     try lFixture.TestNatural; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2902,10 +2707,8 @@ end;
 procedure RunTTestSQLScannerTestNE(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNE');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNE';
     lFixture.SetUp;
     try lFixture.TestNE; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2914,10 +2717,8 @@ end;
 procedure RunTTestSQLScannerTestNo(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNo');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNo';
     lFixture.SetUp;
     try lFixture.TestNo; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2926,10 +2727,8 @@ end;
 procedure RunTTestSQLScannerTestNot(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNot';
     lFixture.SetUp;
     try lFixture.TestNot; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2938,10 +2737,8 @@ end;
 procedure RunTTestSQLScannerTestNull(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNull');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNull';
     lFixture.SetUp;
     try lFixture.TestNull; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2950,10 +2747,8 @@ end;
 procedure RunTTestSQLScannerTestNumeric(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestNumeric');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNumeric';
     lFixture.SetUp;
     try lFixture.TestNumeric; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2962,10 +2757,8 @@ end;
 procedure RunTTestSQLScannerTestOn(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOn');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOn';
     lFixture.SetUp;
     try lFixture.TestOn; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2974,10 +2767,8 @@ end;
 procedure RunTTestSQLScannerTestOption(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOption');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOption';
     lFixture.SetUp;
     try lFixture.TestOption; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2986,10 +2777,8 @@ end;
 procedure RunTTestSQLScannerTestOr(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOr');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOr';
     lFixture.SetUp;
     try lFixture.TestOr; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -2998,10 +2787,8 @@ end;
 procedure RunTTestSQLScannerTestOrder(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOrder');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOrder';
     lFixture.SetUp;
     try lFixture.TestOrder; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3010,10 +2797,8 @@ end;
 procedure RunTTestSQLScannerTestOuter(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOuter');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOuter';
     lFixture.SetUp;
     try lFixture.TestOuter; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3022,10 +2807,8 @@ end;
 procedure RunTTestSQLScannerTestPage(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPage');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPage';
     lFixture.SetUp;
     try lFixture.TestPage; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3034,10 +2817,8 @@ end;
 procedure RunTTestSQLScannerTestPages(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPages');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPages';
     lFixture.SetUp;
     try lFixture.TestPages; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3046,10 +2827,8 @@ end;
 procedure RunTTestSQLScannerTestPageSize(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPageSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPageSize';
     lFixture.SetUp;
     try lFixture.TestPageSize; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3058,10 +2837,8 @@ end;
 procedure RunTTestSQLScannerTestPassword(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPassword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPassword';
     lFixture.SetUp;
     try lFixture.TestPassword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3070,10 +2847,8 @@ end;
 procedure RunTTestSQLScannerTestPlus(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPlus');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlus';
     lFixture.SetUp;
     try lFixture.TestPlus; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3082,10 +2857,8 @@ end;
 procedure RunTTestSQLScannerTestPosition(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPosition');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPosition';
     lFixture.SetUp;
     try lFixture.TestPosition; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3094,10 +2867,8 @@ end;
 procedure RunTTestSQLScannerTestPostEvent(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPostEvent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPostEvent';
     lFixture.SetUp;
     try lFixture.TestPostEvent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3106,10 +2877,8 @@ end;
 procedure RunTTestSQLScannerTestPrimary(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPrimary');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPrimary';
     lFixture.SetUp;
     try lFixture.TestPrimary; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3118,10 +2887,8 @@ end;
 procedure RunTTestSQLScannerTestPrivileges(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPrivileges');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPrivileges';
     lFixture.SetUp;
     try lFixture.TestPrivileges; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3130,10 +2897,8 @@ end;
 procedure RunTTestSQLScannerTestProcedure(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestProcedure');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestProcedure';
     lFixture.SetUp;
     try lFixture.TestProcedure; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3142,10 +2907,8 @@ end;
 procedure RunTTestSQLScannerTestPublic(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestPublic');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPublic';
     lFixture.SetUp;
     try lFixture.TestPublic; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3154,10 +2917,8 @@ end;
 procedure RunTTestSQLScannerTestReferences(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestReferences');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestReferences';
     lFixture.SetUp;
     try lFixture.TestReferences; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3166,10 +2927,8 @@ end;
 procedure RunTTestSQLScannerTestRelease(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRelease');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRelease';
     lFixture.SetUp;
     try lFixture.TestRelease; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3178,10 +2937,8 @@ end;
 procedure RunTTestSQLScannerTestReturningValues(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestReturningValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestReturningValues';
     lFixture.SetUp;
     try lFixture.TestReturningValues; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3190,10 +2947,8 @@ end;
 procedure RunTTestSQLScannerTestReturns(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestReturns');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestReturns';
     lFixture.SetUp;
     try lFixture.TestReturns; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3202,10 +2957,8 @@ end;
 procedure RunTTestSQLScannerTestRetain(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRetain');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRetain';
     lFixture.SetUp;
     try lFixture.TestRetain; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3214,10 +2967,8 @@ end;
 procedure RunTTestSQLScannerTestRevoke(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRevoke');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRevoke';
     lFixture.SetUp;
     try lFixture.TestRevoke; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3226,10 +2977,8 @@ end;
 procedure RunTTestSQLScannerTestRight(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRight';
     lFixture.SetUp;
     try lFixture.TestRight; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3238,10 +2987,8 @@ end;
 procedure RunTTestSQLScannerTestRole(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRole');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRole';
     lFixture.SetUp;
     try lFixture.TestRole; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3250,10 +2997,8 @@ end;
 procedure RunTTestSQLScannerTestRollback(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRollback');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRollback';
     lFixture.SetUp;
     try lFixture.TestRollback; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3262,10 +3007,8 @@ end;
 procedure RunTTestSQLScannerTestSegment(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSegment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSegment';
     lFixture.SetUp;
     try lFixture.TestSegment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3274,10 +3017,8 @@ end;
 procedure RunTTestSQLScannerTestSelect(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSelect');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSelect';
     lFixture.SetUp;
     try lFixture.TestSelect; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3286,10 +3027,8 @@ end;
 procedure RunTTestSQLScannerTestSemicolon(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSemicolon');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSemicolon';
     lFixture.SetUp;
     try lFixture.TestSemicolon; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3298,10 +3037,8 @@ end;
 procedure RunTTestSQLScannerTestSet(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSet');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSet';
     lFixture.SetUp;
     try lFixture.TestSet; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3310,10 +3047,8 @@ end;
 procedure RunTTestSQLScannerTestSchema(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSchema');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSchema';
     lFixture.SetUp;
     try lFixture.TestSchema; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3322,10 +3057,8 @@ end;
 procedure RunTTestSQLScannerTestShadow(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestShadow');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShadow';
     lFixture.SetUp;
     try lFixture.TestShadow; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3334,10 +3067,8 @@ end;
 procedure RunTTestSQLScannerTestSingular(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSingular');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSingular';
     lFixture.SetUp;
     try lFixture.TestSingular; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3346,10 +3077,8 @@ end;
 procedure RunTTestSQLScannerTestSize(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSize';
     lFixture.SetUp;
     try lFixture.TestSize; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3358,10 +3087,8 @@ end;
 procedure RunTTestSQLScannerTestSkip(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSkip');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSkip';
     lFixture.SetUp;
     try lFixture.TestSkip; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3370,10 +3097,8 @@ end;
 procedure RunTTestSQLScannerTestSome(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSome');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSome';
     lFixture.SetUp;
     try lFixture.TestSome; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3382,10 +3107,8 @@ end;
 procedure RunTTestSQLScannerTestSort(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSort');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSort';
     lFixture.SetUp;
     try lFixture.TestSort; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3394,10 +3117,8 @@ end;
 procedure RunTTestSQLScannerTestSnapshot(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSnapshot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSnapshot';
     lFixture.SetUp;
     try lFixture.TestSnapshot; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3406,10 +3127,8 @@ end;
 procedure RunTTestSQLScannerTestSQLCode(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSQLCode');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSQLCode';
     lFixture.SetUp;
     try lFixture.TestSQLCode; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3418,10 +3137,8 @@ end;
 procedure RunTTestSQLScannerTestSquareBraceClose(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSquareBraceClose');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSquareBraceClose';
     lFixture.SetUp;
     try lFixture.TestSquareBraceClose; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3430,10 +3147,8 @@ end;
 procedure RunTTestSQLScannerTestSquareBraceOpen(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSquareBraceOpen');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSquareBraceOpen';
     lFixture.SetUp;
     try lFixture.TestSquareBraceOpen; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3442,10 +3157,8 @@ end;
 procedure RunTTestSQLScannerTestStarting(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestStarting');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStarting';
     lFixture.SetUp;
     try lFixture.TestStarting; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3454,10 +3167,8 @@ end;
 procedure RunTTestSQLScannerTestString(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestString';
     lFixture.SetUp;
     try lFixture.TestString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3466,10 +3177,8 @@ end;
 procedure RunTTestSQLScannerTestSubtype(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSubtype');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubtype';
     lFixture.SetUp;
     try lFixture.TestSubtype; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3478,10 +3187,8 @@ end;
 procedure RunTTestSQLScannerTestSum(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSum');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSum';
     lFixture.SetUp;
     try lFixture.TestSum; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3490,10 +3197,8 @@ end;
 procedure RunTTestSQLScannerTestSuspend(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSuspend');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSuspend';
     lFixture.SetUp;
     try lFixture.TestSuspend; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3502,10 +3207,8 @@ end;
 procedure RunTTestSQLScannerTestTable(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTable';
     lFixture.SetUp;
     try lFixture.TestTable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3514,10 +3217,8 @@ end;
 procedure RunTTestSQLScannerTestThen(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestThen');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestThen';
     lFixture.SetUp;
     try lFixture.TestThen; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3526,10 +3227,8 @@ end;
 procedure RunTTestSQLScannerTestTime(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTime');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTime';
     lFixture.SetUp;
     try lFixture.TestTime; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3538,10 +3237,8 @@ end;
 procedure RunTTestSQLScannerTestTimeStamp(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTimeStamp');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTimeStamp';
     lFixture.SetUp;
     try lFixture.TestTimeStamp; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3550,10 +3247,8 @@ end;
 procedure RunTTestSQLScannerTestTo(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTo');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTo';
     lFixture.SetUp;
     try lFixture.TestTo; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3562,10 +3257,8 @@ end;
 procedure RunTTestSQLScannerTestTransaction(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTransaction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTransaction';
     lFixture.SetUp;
     try lFixture.TestTransaction; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3574,10 +3267,8 @@ end;
 procedure RunTTestSQLScannerTestTrigger(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTrigger');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrigger';
     lFixture.SetUp;
     try lFixture.TestTrigger; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3586,10 +3277,8 @@ end;
 procedure RunTTestSQLScannerTestType(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestType');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestType';
     lFixture.SetUp;
     try lFixture.TestType; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3598,10 +3287,8 @@ end;
 procedure RunTTestSQLScannerTestUnion(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestUnion');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnion';
     lFixture.SetUp;
     try lFixture.TestUnion; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3610,10 +3297,8 @@ end;
 procedure RunTTestSQLScannerTestUnique(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestUnique');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnique';
     lFixture.SetUp;
     try lFixture.TestUnique; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3622,10 +3307,8 @@ end;
 procedure RunTTestSQLScannerTestUpdate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestUpdate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUpdate';
     lFixture.SetUp;
     try lFixture.TestUpdate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3634,10 +3317,8 @@ end;
 procedure RunTTestSQLScannerTestUpper(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestUpper');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUpper';
     lFixture.SetUp;
     try lFixture.TestUpper; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3646,10 +3327,8 @@ end;
 procedure RunTTestSQLScannerTestUser(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestUser');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUser';
     lFixture.SetUp;
     try lFixture.TestUser; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3658,10 +3337,8 @@ end;
 procedure RunTTestSQLScannerTestValue(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestValue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestValue';
     lFixture.SetUp;
     try lFixture.TestValue; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3670,10 +3347,8 @@ end;
 procedure RunTTestSQLScannerTestValues(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestValues';
     lFixture.SetUp;
     try lFixture.TestValues; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3682,10 +3357,8 @@ end;
 procedure RunTTestSQLScannerTestVariable(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestVariable');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVariable';
     lFixture.SetUp;
     try lFixture.TestVariable; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3694,10 +3367,8 @@ end;
 procedure RunTTestSQLScannerTestVarChar(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestVarChar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVarChar';
     lFixture.SetUp;
     try lFixture.TestVarChar; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3706,10 +3377,8 @@ end;
 procedure RunTTestSQLScannerTestVarying(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestVarying');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVarying';
     lFixture.SetUp;
     try lFixture.TestVarying; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3718,10 +3387,8 @@ end;
 procedure RunTTestSQLScannerTestView(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestView');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestView';
     lFixture.SetUp;
     try lFixture.TestView; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3730,10 +3397,8 @@ end;
 procedure RunTTestSQLScannerTestWhen(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestWhen');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhen';
     lFixture.SetUp;
     try lFixture.TestWhen; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3742,10 +3407,8 @@ end;
 procedure RunTTestSQLScannerTestWhere(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestWhere');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhere';
     lFixture.SetUp;
     try lFixture.TestWhere; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3754,10 +3417,8 @@ end;
 procedure RunTTestSQLScannerTestWhile(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestWhile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWhile';
     lFixture.SetUp;
     try lFixture.TestWhile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3766,10 +3427,8 @@ end;
 procedure RunTTestSQLScannerTestWith(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestWith');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWith';
     lFixture.SetUp;
     try lFixture.TestWith; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3778,10 +3437,8 @@ end;
 procedure RunTTestSQLScannerTestWork(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestWork');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWork';
     lFixture.SetUp;
     try lFixture.TestWork; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3790,10 +3447,8 @@ end;
 procedure RunTTestSQLScannerTestTerm(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTerm');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTerm';
     lFixture.SetUp;
     try lFixture.TestTerm; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3802,10 +3457,8 @@ end;
 procedure RunTTestSQLScannerTestTermExclude(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestTermExclude');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTermExclude';
     lFixture.SetUp;
     try lFixture.TestTermExclude; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3814,10 +3467,8 @@ end;
 procedure RunTTestSQLScannerTestRecreate(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRecreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecreate';
     lFixture.SetUp;
     try lFixture.TestRecreate; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3826,10 +3477,8 @@ end;
 procedure RunTTestSQLScannerTestRestart(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestRestart');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRestart';
     lFixture.SetUp;
     try lFixture.TestRestart; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3838,10 +3487,8 @@ end;
 procedure RunTTestSQLScannerTestSequence(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSequence');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSequence';
     lFixture.SetUp;
     try lFixture.TestSequence; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3850,10 +3497,8 @@ end;
 procedure RunTTestSQLScannerTest2Words(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'Test2Words');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Test2Words';
     lFixture.SetUp;
     try lFixture.Test2Words; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3862,10 +3507,8 @@ end;
 procedure RunTTestSQLScannerTest3Words(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'Test3Words');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Test3Words';
     lFixture.SetUp;
     try lFixture.Test3Words; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3874,10 +3517,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier';
     lFixture.SetUp;
     try lFixture.TestIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3886,10 +3527,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier2(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier2';
     lFixture.SetUp;
     try lFixture.TestIdentifier2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3898,10 +3537,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier3(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier3';
     lFixture.SetUp;
     try lFixture.TestIdentifier3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3910,10 +3547,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier4(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier4';
     lFixture.SetUp;
     try lFixture.TestIdentifier4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3922,10 +3557,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier5(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier5';
     lFixture.SetUp;
     try lFixture.TestIdentifier5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3934,10 +3567,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifier6(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifier6');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifier6';
     lFixture.SetUp;
     try lFixture.TestIdentifier6; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3946,10 +3577,8 @@ end;
 procedure RunTTestSQLScannerTestIdentifierDotIdentifier(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestIdentifierDotIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIdentifierDotIdentifier';
     lFixture.SetUp;
     try lFixture.TestIdentifierDotIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3958,10 +3587,8 @@ end;
 procedure RunTTestSQLScannerTestEOLN(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEOLN');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEOLN';
     lFixture.SetUp;
     try lFixture.TestEOLN; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3970,10 +3597,8 @@ end;
 procedure RunTTestSQLScannerTestEOLN2(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEOLN2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEOLN2';
     lFixture.SetUp;
     try lFixture.TestEOLN2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3982,10 +3607,8 @@ end;
 procedure RunTTestSQLScannerTestEOLN3(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEOLN3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEOLN3';
     lFixture.SetUp;
     try lFixture.TestEOLN3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -3994,10 +3617,8 @@ end;
 procedure RunTTestSQLScannerTestEOLN4(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestEOLN4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEOLN4';
     lFixture.SetUp;
     try lFixture.TestEOLN4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4006,10 +3627,8 @@ end;
 procedure RunTTestSQLScannerTestComment1(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment1';
     lFixture.SetUp;
     try lFixture.TestComment1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4018,10 +3637,8 @@ end;
 procedure RunTTestSQLScannerTestComment2(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment2';
     lFixture.SetUp;
     try lFixture.TestComment2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4030,10 +3647,8 @@ end;
 procedure RunTTestSQLScannerTestComment3(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment3');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment3';
     lFixture.SetUp;
     try lFixture.TestComment3; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4042,10 +3657,8 @@ end;
 procedure RunTTestSQLScannerTestComment4(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment4');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment4';
     lFixture.SetUp;
     try lFixture.TestComment4; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4054,10 +3667,8 @@ end;
 procedure RunTTestSQLScannerTestComment5(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment5');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment5';
     lFixture.SetUp;
     try lFixture.TestComment5; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4066,10 +3677,8 @@ end;
 procedure RunTTestSQLScannerTestComment6(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestComment6');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestComment6';
     lFixture.SetUp;
     try lFixture.TestComment6; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4078,10 +3687,8 @@ end;
 procedure RunTTestSQLScannerTestFloatLiteral(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFloatLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatLiteral';
     lFixture.SetUp;
     try lFixture.TestFloatLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4090,10 +3697,8 @@ end;
 procedure RunTTestSQLScannerTestStringLiteral1(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestStringLiteral1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringLiteral1';
     lFixture.SetUp;
     try lFixture.TestStringLiteral1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4102,10 +3707,8 @@ end;
 procedure RunTTestSQLScannerTestStringLiteral2(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestStringLiteral2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringLiteral2';
     lFixture.SetUp;
     try lFixture.TestStringLiteral2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4114,10 +3717,8 @@ end;
 procedure RunTTestSQLScannerTestSymbolLiteral1(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSymbolLiteral1');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSymbolLiteral1';
     lFixture.SetUp;
     try lFixture.TestSymbolLiteral1; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4126,10 +3727,8 @@ end;
 procedure RunTTestSQLScannerTestSymbolLiteral2(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestSymbolLiteral2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSymbolLiteral2';
     lFixture.SetUp;
     try lFixture.TestSymbolLiteral2; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4138,10 +3737,8 @@ end;
 procedure RunTTestSQLScannerTestStringError(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestStringError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStringError';
     lFixture.SetUp;
     try lFixture.TestStringError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4150,10 +3747,8 @@ end;
 procedure RunTTestSQLScannerTestFloatError(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestFloatError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFloatError';
     lFixture.SetUp;
     try lFixture.TestFloatError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4162,10 +3757,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoDoubleQuoteStringLiteral(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoDoubleQuoteStringLiteral');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoDoubleQuoteStringLiteral';
     lFixture.SetUp;
     try lFixture.TestOptionsoDoubleQuoteStringLiteral; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4174,10 +3767,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoSingleQuoteIdentifier(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoSingleQuoteIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoSingleQuoteIdentifier';
     lFixture.SetUp;
     try lFixture.TestOptionsoSingleQuoteIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4186,10 +3777,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackQuoteIdentifier(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackQuoteIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackQuoteIdentifier';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackQuoteIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4198,10 +3787,8 @@ end;
 procedure RunTTestSQLScannerTestOptionNosoBackQuoteIdentifier(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionNosoBackQuoteIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionNosoBackQuoteIdentifier';
     lFixture.SetUp;
     try lFixture.TestOptionNosoBackQuoteIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4210,10 +3797,8 @@ end;
 procedure RunTTestSQLScannerTestOptionNosoBackslashEscapes(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionNosoBackslashEscapes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionNosoBackslashEscapes';
     lFixture.SetUp;
     try lFixture.TestOptionNosoBackslashEscapes; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4222,10 +3807,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesTab(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesTab');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesTab';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesTab; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4234,10 +3817,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesNewLine(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesNewLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesNewLine';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesNewLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4246,10 +3827,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesBackSlash(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesBackSlash');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesBackSlash';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesBackSlash; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4258,10 +3837,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesBackspace(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesBackspace');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesBackspace';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesBackspace; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4270,10 +3847,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesLineFeed(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesLineFeed');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesLineFeed';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesLineFeed; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4282,10 +3857,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesNewPage(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesNewPage');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesNewPage';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesNewPage; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4294,10 +3867,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesSlash(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesSlash');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesSlash';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesSlash; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4306,10 +3877,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesQuote(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesQuote');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesQuote';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesQuote; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -4318,10 +3887,8 @@ end;
 procedure RunTTestSQLScannerTestOptionsoBackslashEscapesDoubleQuote(AContext: TNXTestContext);
 var lFixture: TTestSQLScanner;
 begin
-  lFixture:=TTestSQLScanner.Create;
+  lFixture:=TTestSQLScanner.Create(AContext, 'TestOptionsoBackslashEscapesDoubleQuote');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestOptionsoBackslashEscapesDoubleQuote';
     lFixture.SetUp;
     try lFixture.TestOptionsoBackslashEscapesDoubleQuote; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

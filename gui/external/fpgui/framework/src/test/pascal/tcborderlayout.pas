@@ -11,9 +11,14 @@ uses
 type
 
   TTestBorderLayout = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestLayout;
     procedure TestGaps;
@@ -21,19 +26,12 @@ type
     procedure TestMinimumSize;
   end;
 
-procedure RegisterTests;
-
 procedure RegistertcborderlayoutTests(ARegistry: TNXTestRegistry);
 
 implementation
 
 uses
   fpg_layoutmanager;
-
-procedure RegisterTests;
-begin
-  
-end;
 
 { TTestBorderLayout }
 
@@ -87,30 +85,30 @@ begin
 
   container.Realign;
 
-  FContext.AssertTrue((0)=(wNorth.Top), 'wNorth.Top');
-  FContext.AssertTrue((0)=(wNorth.Left), 'wNorth.Left');
-  FContext.AssertTrue((200)=(wNorth.ActualWidth), 'wNorth.ActualWidth');
-  FContext.AssertTrue((20)=(wNorth.ActualHeight), 'wNorth.ActualHeight');
+  TestContext.AssertTrue((0)=(wNorth.Top), 'wNorth.Top');
+  TestContext.AssertTrue((0)=(wNorth.Left), 'wNorth.Left');
+  TestContext.AssertTrue((200)=(wNorth.ActualWidth), 'wNorth.ActualWidth');
+  TestContext.AssertTrue((20)=(wNorth.ActualHeight), 'wNorth.ActualHeight');
 
-  FContext.AssertTrue((180)=(wSouth.Top), 'wSouth.Top');
-  FContext.AssertTrue((0)=(wSouth.Left), 'wSouth.Left');
-  FContext.AssertTrue((200)=(wSouth.ActualWidth), 'wSouth.ActualWidth');
-  FContext.AssertTrue((20)=(wSouth.ActualHeight), 'wSouth.ActualHeight');
+  TestContext.AssertTrue((180)=(wSouth.Top), 'wSouth.Top');
+  TestContext.AssertTrue((0)=(wSouth.Left), 'wSouth.Left');
+  TestContext.AssertTrue((200)=(wSouth.ActualWidth), 'wSouth.ActualWidth');
+  TestContext.AssertTrue((20)=(wSouth.ActualHeight), 'wSouth.ActualHeight');
 
-  FContext.AssertTrue((20)=(wWest.Top), 'wWest.Top');
-  FContext.AssertTrue((0)=(wWest.Left), 'wWest.Left');
-  FContext.AssertTrue((20)=(wWest.ActualWidth), 'wWest.ActualWidth');
-  FContext.AssertTrue((160)=(wWest.ActualHeight), 'wWest.ActualHeight');
+  TestContext.AssertTrue((20)=(wWest.Top), 'wWest.Top');
+  TestContext.AssertTrue((0)=(wWest.Left), 'wWest.Left');
+  TestContext.AssertTrue((20)=(wWest.ActualWidth), 'wWest.ActualWidth');
+  TestContext.AssertTrue((160)=(wWest.ActualHeight), 'wWest.ActualHeight');
 
-  FContext.AssertTrue((20)=(wEast.Top), 'wEast.Top');
-  FContext.AssertTrue((180)=(wEast.Left), 'wEast.Left');
-  FContext.AssertTrue((20)=(wEast.ActualWidth), 'wEast.ActualWidth');
-  FContext.AssertTrue((160)=(wEast.ActualHeight), 'wEast.ActualHeight');
+  TestContext.AssertTrue((20)=(wEast.Top), 'wEast.Top');
+  TestContext.AssertTrue((180)=(wEast.Left), 'wEast.Left');
+  TestContext.AssertTrue((20)=(wEast.ActualWidth), 'wEast.ActualWidth');
+  TestContext.AssertTrue((160)=(wEast.ActualHeight), 'wEast.ActualHeight');
 
-  FContext.AssertTrue((20)=(wCenter.Top), 'wCenter.Top');
-  FContext.AssertTrue((20)=(wCenter.Left), 'wCenter.Left');
-  FContext.AssertTrue((160)=(wCenter.ActualWidth), 'wCenter.ActualWidth');
-  FContext.AssertTrue((160)=(wCenter.ActualHeight), 'wCenter.ActualHeight');
+  TestContext.AssertTrue((20)=(wCenter.Top), 'wCenter.Top');
+  TestContext.AssertTrue((20)=(wCenter.Left), 'wCenter.Left');
+  TestContext.AssertTrue((160)=(wCenter.ActualWidth), 'wCenter.ActualWidth');
+  TestContext.AssertTrue((160)=(wCenter.ActualHeight), 'wCenter.ActualHeight');
 
   container.Free;
 end;
@@ -152,10 +150,10 @@ begin
 
   container.Realign;
 
-  FContext.AssertTrue((12)=(wNorth.Top), 'wNorth.Top with gap');
-  FContext.AssertTrue((42)=(wWest.Top), 'wWest.Top with gap');
-  FContext.AssertTrue((168)=(wSouth.Top), 'wSouth.Top with gap');
-  FContext.AssertTrue((7)=(wWest.Left), 'wWest.Left with gap');
+  TestContext.AssertTrue((12)=(wNorth.Top), 'wNorth.Top with gap');
+  TestContext.AssertTrue((42)=(wWest.Top), 'wWest.Top with gap');
+  TestContext.AssertTrue((168)=(wSouth.Top), 'wSouth.Top with gap');
+  TestContext.AssertTrue((7)=(wWest.Left), 'wWest.Left with gap');
 
   container.Free;
 end;
@@ -186,8 +184,8 @@ begin
 
   pref := lm.GetPreferredSize(container);
 
-  FContext.AssertTrue((100)=(pref.W), 'PreferredWidth');
-  FContext.AssertTrue((70)=(pref.H), 'PreferredHeight');
+  TestContext.AssertTrue((100)=(pref.W), 'PreferredWidth');
+  TestContext.AssertTrue((70)=(pref.H), 'PreferredHeight');
 
   container.Free;
 end;
@@ -220,19 +218,24 @@ begin
 
   min := lm.GetMinimumSize(container);
 
-  FContext.AssertTrue((80)=(min.W), 'MinimumWidth');
-  FContext.AssertTrue((55)=(min.H), 'MinimumHeight');
+  TestContext.AssertTrue((80)=(min.W), 'MinimumWidth');
+  TestContext.AssertTrue((55)=(min.H), 'MinimumHeight');
 
   container.Free;
+end;
+
+constructor TTestBorderLayout.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestBorderLayoutTestLayout(AContext: TNXTestContext);
 var lFixture: TTestBorderLayout;
 begin
-  lFixture:=TTestBorderLayout.Create;
+  lFixture:=TTestBorderLayout.Create(AContext, 'TestLayout');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLayout';
     lFixture.TestLayout;
   finally lFixture.Free; end;
 end;
@@ -240,10 +243,8 @@ end;
 procedure RunTTestBorderLayoutTestGaps(AContext: TNXTestContext);
 var lFixture: TTestBorderLayout;
 begin
-  lFixture:=TTestBorderLayout.Create;
+  lFixture:=TTestBorderLayout.Create(AContext, 'TestGaps');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGaps';
     lFixture.TestGaps;
   finally lFixture.Free; end;
 end;
@@ -251,10 +252,8 @@ end;
 procedure RunTTestBorderLayoutTestPreferredSize(AContext: TNXTestContext);
 var lFixture: TTestBorderLayout;
 begin
-  lFixture:=TTestBorderLayout.Create;
+  lFixture:=TTestBorderLayout.Create(AContext, 'TestPreferredSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPreferredSize';
     lFixture.TestPreferredSize;
   finally lFixture.Free; end;
 end;
@@ -262,10 +261,8 @@ end;
 procedure RunTTestBorderLayoutTestMinimumSize(AContext: TNXTestContext);
 var lFixture: TTestBorderLayout;
 begin
-  lFixture:=TTestBorderLayout.Create;
+  lFixture:=TTestBorderLayout.Create(AContext, 'TestMinimumSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMinimumSize';
     lFixture.TestMinimumSize;
   finally lFixture.Free; end;
 end;
@@ -280,8 +277,5 @@ begin
   lSuite.AddTest('TestMinimumSize', @RunTTestBorderLayoutTestMinimumSize);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

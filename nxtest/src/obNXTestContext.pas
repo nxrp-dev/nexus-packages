@@ -18,7 +18,7 @@ unit obNXTestContext;
 interface
 
 uses
-  SysUtils, obNXTestResult;
+  SysUtils, obNXTestResult, tpNXTest;
 
 type
   ENXTestFailure = class(Exception);
@@ -36,6 +36,10 @@ type
     procedure AssertFalse(AValue: Boolean; const AMessage: string = '');
     procedure AssertEquals(const AExpected, AActual: string; const AMessage: string = ''); overload;
     procedure AssertEquals(AExpected, AActual: Integer; const AMessage: string = ''); overload;
+    procedure AssertRaises(AExceptionClass: ExceptClass; AAction: TNXTestAction;
+      const AMessage: string = ''); overload;
+    procedure AssertRaises(AExceptionClass: ExceptClass; AAction: TNXTestRoutine;
+      const AMessage: string = ''); overload;
 
     property Result: TNXTestResult read FResult;
   end;
@@ -99,6 +103,60 @@ end;
 procedure TNXTestContext.AssertEquals(AExpected, AActual: Integer; const AMessage: string); overload;
 begin
   AssertEquals(IntToStr(AExpected), IntToStr(AActual), AMessage);
+end;
+
+procedure TNXTestContext.AssertRaises(AExceptionClass: ExceptClass;
+  AAction: TNXTestAction; const AMessage: string);
+var
+  lMessage, lExpected, lActual: string;
+begin
+  lMessage := FResult.Message;
+  lExpected := FResult.Expected;
+  lActual := FResult.Actual;
+  try
+    AAction;
+  except
+    on lError: Exception do
+    begin
+      if lError is AExceptionClass then
+      begin
+        FResult.Message := lMessage;
+        FResult.Expected := lExpected;
+        FResult.Actual := lActual;
+        Exit;
+      end;
+      Fail(AMessage + ' Expected ' + AExceptionClass.ClassName +
+        ', received ' + lError.ClassName + ': ' + lError.Message);
+    end;
+  end;
+  Fail(AMessage + ' Expected ' + AExceptionClass.ClassName + '.');
+end;
+
+procedure TNXTestContext.AssertRaises(AExceptionClass: ExceptClass;
+  AAction: TNXTestRoutine; const AMessage: string);
+var
+  lMessage, lExpected, lActual: string;
+begin
+  lMessage := FResult.Message;
+  lExpected := FResult.Expected;
+  lActual := FResult.Actual;
+  try
+    AAction;
+  except
+    on lError: Exception do
+    begin
+      if lError is AExceptionClass then
+      begin
+        FResult.Message := lMessage;
+        FResult.Expected := lExpected;
+        FResult.Actual := lActual;
+        Exit;
+      end;
+      Fail(AMessage + ' Expected ' + AExceptionClass.ClassName +
+        ', received ' + lError.ClassName + ': ' + lError.Message);
+    end;
+  end;
+  Fail(AMessage + ' Expected ' + AExceptionClass.ClassName + '.');
 end;
 
 end.

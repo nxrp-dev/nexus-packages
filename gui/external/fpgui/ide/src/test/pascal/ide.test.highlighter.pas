@@ -21,9 +21,14 @@ type
   { TTestPascalHighlighter }
 
   TTestPascalHighlighter = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHL: TPascalHighlighter;
     procedure CheckToken(ALine, AIndex: Integer; AExpCol, AExpLen: Integer;
@@ -91,9 +96,14 @@ type
     identically to the Tokenise(string) path (GitHub issue #187) }
 
   TTestHighlighterTStrings = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHL: TPascalHighlighter;
     FRef: TPascalHighlighter;
@@ -143,13 +153,13 @@ var
     'hcOperator', 'hcFunction', 'hcLabel', 'hcMarkup', 'hcInvalid');
 begin
   tokens := FHL.GetLineTokens(ALine);
-  FContext.AssertTrue(tokens <> nil, Format('%s: line %d has no tokens', [AContext, ALine]));
-  FContext.AssertTrue(AIndex < Length(tokens), Format('%s: line %d token index %d out of range (count=%d)',
+  TestContext.AssertTrue(tokens <> nil, Format('%s: line %d has no tokens', [AContext, ALine]));
+  TestContext.AssertTrue(AIndex < Length(tokens), Format('%s: line %d token index %d out of range (count=%d)',
     [AContext, ALine, AIndex, Length(tokens)]));
   tok := tokens[AIndex];
-  FContext.AssertTrue((AExpCol)=(tok.Column), Format('%s: line %d token %d Column', [AContext, ALine, AIndex]));
-  FContext.AssertTrue((AExpLen)=(tok.Length), Format('%s: line %d token %d Length', [AContext, ALine, AIndex]));
-  FContext.AssertTrue(AExpCat = tok.Category, Format('%s: line %d token %d Category expected %s got %s',
+  TestContext.AssertTrue((AExpCol)=(tok.Column), Format('%s: line %d token %d Column', [AContext, ALine, AIndex]));
+  TestContext.AssertTrue((AExpLen)=(tok.Length), Format('%s: line %d token %d Length', [AContext, ALine, AIndex]));
+  TestContext.AssertTrue(AExpCat = tok.Category, Format('%s: line %d token %d Category expected %s got %s',
     [AContext, ALine, AIndex, catNames[AExpCat], catNames[tok.Category]]));
 end;
 
@@ -247,21 +257,21 @@ begin
          '  line three }';
   FHL.Tokenise(src);
   { First line }
-  FContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'line 0 has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcComment1, 'line 0 is comment');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'line 0 has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcComment1, 'line 0 is comment');
   { Middle line }
-  FContext.AssertTrue(FHL.GetLineTokenCount(1) > 0, 'line 1 has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(1)[0].Category = hcComment1, 'line 1 is comment');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(1) > 0, 'line 1 has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(1)[0].Category = hcComment1, 'line 1 is comment');
   { Last line }
-  FContext.AssertTrue(FHL.GetLineTokenCount(2) > 0, 'line 2 has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(2)[0].Category = hcComment1, 'line 2 is comment');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(2) > 0, 'line 2 has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(2)[0].Category = hcComment1, 'line 2 is comment');
 end;
 
 procedure TTestPascalHighlighter.TestUnitHeader;
 begin
   { "unit MyUnit;" on one line }
   FHL.Tokenise('unit MyUnit;');
-  FContext.AssertTrue((3)=(FHL.GetLineTokenCount(0)), 'token count');
+  TestContext.AssertTrue((3)=(FHL.GetLineTokenCount(0)), 'token count');
   CheckToken(0, 0, 0, 4, hcKeyword1, 'unit keyword');
   CheckToken(0, 1, 5, 6, hcIdentifier, 'MyUnit');
   CheckToken(0, 2, 11, 1, hcSymbol, 'semicolon');
@@ -270,13 +280,13 @@ end;
 procedure TTestPascalHighlighter.TestLineCount;
 begin
   FHL.Tokenise('a' + LineEnding + 'b' + LineEnding + 'c');
-  FContext.AssertTrue(FHL.LineCount >= 3, 'at least 3 lines');
+  TestContext.AssertTrue(FHL.LineCount >= 3, 'at least 3 lines');
 end;
 
 procedure TTestPascalHighlighter.TestEmptyInput;
 begin
   FHL.Tokenise('');
-  FContext.AssertTrue((0)=(FHL.LineCount), 'no lines');
+  TestContext.AssertTrue((0)=(FHL.LineCount), 'no lines');
 end;
 
 procedure TTestPascalHighlighter.TestIncompleteSource;
@@ -285,7 +295,7 @@ begin
     We should get at least partial tokens. }
   FHL.Tokenise('x := ''unclosed');
   { Should not raise, and should have some tokens for "x" and ":=" }
-  FContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'has some tokens');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'has some tokens');
 end;
 
 procedure TTestPascalHighlighter.TestTrailingLineComment;
@@ -305,18 +315,18 @@ begin
   { "syncobjs, // TCriticalSection usage" }
   FHL.Tokenise('syncobjs, // TCriticalSection usage');
   tokens := FHL.GetLineTokens(0);
-  FContext.AssertTrue(tokens <> nil, 'has tokens');
+  TestContext.AssertTrue(tokens <> nil, 'has tokens');
   { Find a comment token on this line }
   found := False;
   for i := 0 to Length(tokens) - 1 do
     if tokens[i].Category = hcComment1 then
     begin
       found := True;
-      FContext.AssertTrue((10)=(tokens[i].Column), 'comment col');
-      FContext.AssertTrue((25)=(tokens[i].Length), 'comment len');
+      TestContext.AssertTrue((10)=(tokens[i].Column), 'comment col');
+      TestContext.AssertTrue((25)=(tokens[i].Length), 'comment len');
       Break;
     end;
-  FContext.AssertTrue(found, 'comment token found');
+  TestContext.AssertTrue(found, 'comment token found');
 end;
 
 procedure TTestPascalHighlighter.TestIncludeDirectiveContinues;
@@ -329,11 +339,11 @@ begin
          '// comment after include';
   FHL.Tokenise(src);
   { Line 0: the include directive }
-  FContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'include line has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcDirective, 'include is directive');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'include line has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcDirective, 'include is directive');
   { Line 1: code after include must be tokenised }
-  FContext.AssertTrue(FHL.GetLineTokenCount(1) > 0, 'line after include has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(1)[0].Category = hcComment1, 'comment after include');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(1) > 0, 'line after include has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(1)[0].Category = hcComment1, 'comment after include');
 end;
 
 procedure TTestPascalHighlighter.TestIfdefDirective;
@@ -347,11 +357,11 @@ begin
          '{$ENDIF}';
   FHL.Tokenise(src);
   { Line 0: the IFDEF directive }
-  FContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'IFDEF line has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcDirective, 'IFDEF is directive');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(0) > 0, 'IFDEF line has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(0)[0].Category = hcDirective, 'IFDEF is directive');
   { Line 2: the ENDIF directive }
-  FContext.AssertTrue(FHL.GetLineTokenCount(2) > 0, 'ENDIF line has tokens');
-  FContext.AssertTrue(FHL.GetLineTokens(2)[0].Category = hcDirective, 'ENDIF is directive');
+  TestContext.AssertTrue(FHL.GetLineTokenCount(2) > 0, 'ENDIF line has tokens');
+  TestContext.AssertTrue(FHL.GetLineTokens(2)[0].Category = hcDirective, 'ENDIF is directive');
 end;
 
 procedure TTestPascalHighlighter.TestIfdefSkippedContent;
@@ -367,13 +377,13 @@ begin
   FHL.Tokenise(src);
   { IFDEF on line 0 }
   tokens := FHL.GetLineTokens(0);
-  FContext.AssertTrue(tokens <> nil, 'IFDEF token exists');
-  FContext.AssertTrue((0)=(tokens[0].Column), 'IFDEF col');
-  FContext.AssertTrue(tokens[0].Category = hcDirective, 'IFDEF category');
+  TestContext.AssertTrue(tokens <> nil, 'IFDEF token exists');
+  TestContext.AssertTrue((0)=(tokens[0].Column), 'IFDEF col');
+  TestContext.AssertTrue(tokens[0].Category = hcDirective, 'IFDEF category');
   { ENDIF on line 2 }
   tokens := FHL.GetLineTokens(2);
-  FContext.AssertTrue(tokens <> nil, 'ENDIF token exists');
-  FContext.AssertTrue(tokens[0].Category = hcDirective, 'ENDIF category');
+  TestContext.AssertTrue(tokens <> nil, 'ENDIF token exists');
+  TestContext.AssertTrue(tokens[0].Category = hcDirective, 'ENDIF category');
 end;
 
 procedure TTestPascalHighlighter.TestVisibilityModifiers;
@@ -446,12 +456,12 @@ begin
     Indices:                              0         1   2 3       4 5        6 }
   FHL.Tokenise('procedure Foo; virtual; override;');
   tokens := FHL.GetLineTokens(0);
-  FContext.AssertTrue(Length(tokens) >= 7, 'has tokens');
-  FContext.AssertTrue((Ord(hcKeyword1))=(Ord(tokens[0].Category)), 'procedure is keyword1');
-  FContext.AssertTrue((15)=(tokens[3].Column), 'virtual col');
-  FContext.AssertTrue((Ord(hcKeyword2))=(Ord(tokens[3].Category)), 'virtual cat');
-  FContext.AssertTrue((24)=(tokens[5].Column), 'override col');
-  FContext.AssertTrue((Ord(hcKeyword2))=(Ord(tokens[5].Category)), 'override cat');
+  TestContext.AssertTrue(Length(tokens) >= 7, 'has tokens');
+  TestContext.AssertTrue((Ord(hcKeyword1))=(Ord(tokens[0].Category)), 'procedure is keyword1');
+  TestContext.AssertTrue((15)=(tokens[3].Column), 'virtual col');
+  TestContext.AssertTrue((Ord(hcKeyword2))=(Ord(tokens[3].Category)), 'virtual cat');
+  TestContext.AssertTrue((24)=(tokens[5].Column), 'override col');
+  TestContext.AssertTrue((Ord(hcKeyword2))=(Ord(tokens[5].Category)), 'override cat');
   { Also verify no modifier was misclassified as keyword1 }
   foundVirtual  := False;
   foundOverride := False;
@@ -460,8 +470,8 @@ begin
     if tokens[i].Column = 15 then foundVirtual  := tokens[i].Category = hcKeyword2;
     if tokens[i].Column = 24 then foundOverride := tokens[i].Category = hcKeyword2;
   end;
-  FContext.AssertTrue(foundVirtual, 'virtual is hcKeyword2');
-  FContext.AssertTrue(foundOverride, 'override is hcKeyword2');
+  TestContext.AssertTrue(foundVirtual, 'virtual is hcKeyword2');
+  TestContext.AssertTrue(foundOverride, 'override is hcKeyword2');
 end;
 
 { TTestHighlighterTStrings }
@@ -487,17 +497,17 @@ var
 begin
   { FRef holds the reference result from Tokenise(string);
     FHL holds the result from Tokenise(TStrings) }
-  FContext.AssertTrue((FRef.LineCount)=(FHL.LineCount), AContext + ': line count');
+  TestContext.AssertTrue((FRef.LineCount)=(FHL.LineCount), AContext + ': line count');
   for line := 0 to FRef.LineCount - 1 do
   begin
     a := FRef.GetLineTokens(line);
     b := FHL.GetLineTokens(line);
-    FContext.AssertTrue((Length(a))=(Length(b)), Format('%s: line %d token count', [AContext, line]));
+    TestContext.AssertTrue((Length(a))=(Length(b)), Format('%s: line %d token count', [AContext, line]));
     for i := 0 to Length(a) - 1 do
     begin
-      FContext.AssertTrue((a[i].Column)=(b[i].Column), Format('%s: line %d token %d Column', [AContext, line, i]));
-      FContext.AssertTrue((a[i].Length)=(b[i].Length), Format('%s: line %d token %d Length', [AContext, line, i]));
-      FContext.AssertTrue(a[i].Category = b[i].Category, Format('%s: line %d token %d Category', [AContext, line, i]));
+      TestContext.AssertTrue((a[i].Column)=(b[i].Column), Format('%s: line %d token %d Column', [AContext, line, i]));
+      TestContext.AssertTrue((a[i].Length)=(b[i].Length), Format('%s: line %d token %d Length', [AContext, line, i]));
+      TestContext.AssertTrue(a[i].Category = b[i].Category, Format('%s: line %d token %d Category', [AContext, line, i]));
     end;
   end;
 end;
@@ -536,20 +546,32 @@ end;
 procedure TTestHighlighterTStrings.TestEmptyListClearsState;
 begin
   FHL.Tokenise('unit foo;');
-  FContext.AssertTrue(FHL.LineCount > 0, 'has state before');
+  TestContext.AssertTrue(FHL.LineCount > 0, 'has state before');
   FHL.Tokenise(FList);
-  FContext.AssertTrue((0)=(FHL.LineCount), 'state cleared');
+  TestContext.AssertTrue((0)=(FHL.LineCount), 'state cleared');
 end;
 
 
 
+constructor TTestPascalHighlighter.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestHighlighterTStrings.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestPascalHighlighterTestKeywordUnit(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestKeywordUnit');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestKeywordUnit';
     lFixture.SetUp;
     try lFixture.TestKeywordUnit; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -558,10 +580,8 @@ end;
 procedure RunTTestPascalHighlighterTestKeywordAndIdentifier(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestKeywordAndIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestKeywordAndIdentifier';
     lFixture.SetUp;
     try lFixture.TestKeywordAndIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -570,10 +590,8 @@ end;
 procedure RunTTestPascalHighlighterTestKeywordBeginEnd(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestKeywordBeginEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestKeywordBeginEnd';
     lFixture.SetUp;
     try lFixture.TestKeywordBeginEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -582,10 +600,8 @@ end;
 procedure RunTTestPascalHighlighterTestDecimalNumber(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestDecimalNumber');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDecimalNumber';
     lFixture.SetUp;
     try lFixture.TestDecimalNumber; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -594,10 +610,8 @@ end;
 procedure RunTTestPascalHighlighterTestHexNumber(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestHexNumber');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHexNumber';
     lFixture.SetUp;
     try lFixture.TestHexNumber; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -606,10 +620,8 @@ end;
 procedure RunTTestPascalHighlighterTestSimpleString(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestSimpleString');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleString';
     lFixture.SetUp;
     try lFixture.TestSimpleString; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -618,10 +630,8 @@ end;
 procedure RunTTestPascalHighlighterTestLineComment(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestLineComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLineComment';
     lFixture.SetUp;
     try lFixture.TestLineComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -630,10 +640,8 @@ end;
 procedure RunTTestPascalHighlighterTestBraceComment(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestBraceComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBraceComment';
     lFixture.SetUp;
     try lFixture.TestBraceComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -642,10 +650,8 @@ end;
 procedure RunTTestPascalHighlighterTestParenStarComment(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestParenStarComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParenStarComment';
     lFixture.SetUp;
     try lFixture.TestParenStarComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -654,10 +660,8 @@ end;
 procedure RunTTestPascalHighlighterTestBraceDirective(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestBraceDirective');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBraceDirective';
     lFixture.SetUp;
     try lFixture.TestBraceDirective; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -666,10 +670,8 @@ end;
 procedure RunTTestPascalHighlighterTestModeDirective(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestModeDirective');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestModeDirective';
     lFixture.SetUp;
     try lFixture.TestModeDirective; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -678,10 +680,8 @@ end;
 procedure RunTTestPascalHighlighterTestMultiLineBraceComment(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestMultiLineBraceComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiLineBraceComment';
     lFixture.SetUp;
     try lFixture.TestMultiLineBraceComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -690,10 +690,8 @@ end;
 procedure RunTTestPascalHighlighterTestUnitHeader(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestUnitHeader');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnitHeader';
     lFixture.SetUp;
     try lFixture.TestUnitHeader; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -702,10 +700,8 @@ end;
 procedure RunTTestPascalHighlighterTestLineCount(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestLineCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLineCount';
     lFixture.SetUp;
     try lFixture.TestLineCount; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -714,10 +710,8 @@ end;
 procedure RunTTestPascalHighlighterTestEmptyInput(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestEmptyInput');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyInput';
     lFixture.SetUp;
     try lFixture.TestEmptyInput; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -726,10 +720,8 @@ end;
 procedure RunTTestPascalHighlighterTestIncompleteSource(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestIncompleteSource');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIncompleteSource';
     lFixture.SetUp;
     try lFixture.TestIncompleteSource; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -738,10 +730,8 @@ end;
 procedure RunTTestPascalHighlighterTestTrailingLineComment(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestTrailingLineComment');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingLineComment';
     lFixture.SetUp;
     try lFixture.TestTrailingLineComment; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -750,10 +740,8 @@ end;
 procedure RunTTestPascalHighlighterTestLineCommentAfterCode(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestLineCommentAfterCode');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLineCommentAfterCode';
     lFixture.SetUp;
     try lFixture.TestLineCommentAfterCode; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -762,10 +750,8 @@ end;
 procedure RunTTestPascalHighlighterTestIncludeDirectiveContinues(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestIncludeDirectiveContinues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIncludeDirectiveContinues';
     lFixture.SetUp;
     try lFixture.TestIncludeDirectiveContinues; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -774,10 +760,8 @@ end;
 procedure RunTTestPascalHighlighterTestIfdefDirective(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestIfdefDirective');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfdefDirective';
     lFixture.SetUp;
     try lFixture.TestIfdefDirective; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -786,10 +770,8 @@ end;
 procedure RunTTestPascalHighlighterTestIfdefSkippedContent(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestIfdefSkippedContent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIfdefSkippedContent';
     lFixture.SetUp;
     try lFixture.TestIfdefSkippedContent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -798,10 +780,8 @@ end;
 procedure RunTTestPascalHighlighterTestVisibilityModifiers(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestVisibilityModifiers');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestVisibilityModifiers';
     lFixture.SetUp;
     try lFixture.TestVisibilityModifiers; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -810,10 +790,8 @@ end;
 procedure RunTTestPascalHighlighterTestMethodModifiers(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestMethodModifiers');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMethodModifiers';
     lFixture.SetUp;
     try lFixture.TestMethodModifiers; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -822,10 +800,8 @@ end;
 procedure RunTTestPascalHighlighterTestCallingConventions(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestCallingConventions');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCallingConventions';
     lFixture.SetUp;
     try lFixture.TestCallingConventions; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -834,10 +810,8 @@ end;
 procedure RunTTestPascalHighlighterTestModifierMixedWithKeyword(AContext: TNXTestContext);
 var lFixture: TTestPascalHighlighter;
 begin
-  lFixture:=TTestPascalHighlighter.Create;
+  lFixture:=TTestPascalHighlighter.Create(AContext, 'TestModifierMixedWithKeyword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestModifierMixedWithKeyword';
     lFixture.SetUp;
     try lFixture.TestModifierMixedWithKeyword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -846,10 +820,8 @@ end;
 procedure RunTTestHighlighterTStringsTestSingleLineMatchesStringPath(AContext: TNXTestContext);
 var lFixture: TTestHighlighterTStrings;
 begin
-  lFixture:=TTestHighlighterTStrings.Create;
+  lFixture:=TTestHighlighterTStrings.Create(AContext, 'TestSingleLineMatchesStringPath');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSingleLineMatchesStringPath';
     lFixture.SetUp;
     try lFixture.TestSingleLineMatchesStringPath; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -858,10 +830,8 @@ end;
 procedure RunTTestHighlighterTStringsTestMultiLineMatchesStringPath(AContext: TNXTestContext);
 var lFixture: TTestHighlighterTStrings;
 begin
-  lFixture:=TTestHighlighterTStrings.Create;
+  lFixture:=TTestHighlighterTStrings.Create(AContext, 'TestMultiLineMatchesStringPath');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiLineMatchesStringPath';
     lFixture.SetUp;
     try lFixture.TestMultiLineMatchesStringPath; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -870,10 +840,8 @@ end;
 procedure RunTTestHighlighterTStringsTestMultiLineCommentMatchesStringPath(AContext: TNXTestContext);
 var lFixture: TTestHighlighterTStrings;
 begin
-  lFixture:=TTestHighlighterTStrings.Create;
+  lFixture:=TTestHighlighterTStrings.Create(AContext, 'TestMultiLineCommentMatchesStringPath');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiLineCommentMatchesStringPath';
     lFixture.SetUp;
     try lFixture.TestMultiLineCommentMatchesStringPath; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -882,10 +850,8 @@ end;
 procedure RunTTestHighlighterTStringsTestEmptyListClearsState(AContext: TNXTestContext);
 var lFixture: TTestHighlighterTStrings;
 begin
-  lFixture:=TTestHighlighterTStrings.Create;
+  lFixture:=TTestHighlighterTStrings.Create(AContext, 'TestEmptyListClearsState');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyListClearsState';
     lFixture.SetUp;
     try lFixture.TestEmptyListClearsState; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

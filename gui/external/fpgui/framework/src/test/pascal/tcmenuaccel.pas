@@ -43,9 +43,14 @@ uses
 type
 
   TTestMenuBarAccel = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FForm: TfpgForm;
     FMenuBar: TfpgMenuBar;
@@ -68,9 +73,6 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 procedure RegistertcmenuaccelTests(ARegistry: TNXTestRegistry);
 
 implementation
@@ -81,12 +83,6 @@ uses
 
 type
   TfpgMenuBarFriend = class(TfpgMenuBar);
-
-
-procedure RegisterTests;
-begin
-  
-end;
 
 
 { TTestMenuBarAccel }
@@ -140,58 +136,63 @@ end;
 
 procedure TTestMenuBarAccel.TestAltAccelIsRecognised;
 begin
-  FContext.AssertTrue(fpgIsAccelShiftState([ssAlt]), 'plain Alt must be accepted');
-  FContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('F')), 'Alt+F should resolve to the ''&File'' item at index 0');
+  TestContext.AssertTrue(fpgIsAccelShiftState([ssAlt]), 'plain Alt must be accepted');
+  TestContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('F')), 'Alt+F should resolve to the ''&File'' item at index 0');
 end;
 
 procedure TTestMenuBarAccel.TestAltAccelIsCaseInsensitive;
 begin
   { the item declares '&File', so a lowercase 'f' must match it too }
-  FContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('f')), '');
+  TestContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('f')), '');
 end;
 
 procedure TTestMenuBarAccel.TestMultiByteAccelIsRecognised;
 begin
   { the old 'length(s) = 5' test could never match a multi-byte accelerator }
   FMenuBar.MenuItem(0).Text := '&Über';
-  FContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('Ü')), 'a UTF-8 accelerator character must resolve');
+  TestContext.AssertTrue((0)=(TfpgMenuBarFriend(FMenuBar).SearchItemByAccel('Ü')), 'a UTF-8 accelerator character must resolve');
 end;
 
 procedure TTestMenuBarAccel.TestCtrlAltDoesNotOpenMenu;
 begin
   { Ctrl+Alt+F is a distinct combination and must not open the File menu }
-  FContext.AssertTrue(not (SendKey(keyF, [ssCtrl, ssAlt])), 'Ctrl+Alt+F must not be consumed');
+  TestContext.AssertTrue(not (SendKey(keyF, [ssCtrl, ssAlt])), 'Ctrl+Alt+F must not be consumed');
 end;
 
 procedure TTestMenuBarAccel.TestShiftAltDoesNotOpenMenu;
 begin
-  FContext.AssertTrue(not (SendKey(keyF, [ssShift, ssAlt])), 'Shift+Alt+F must not be consumed');
+  TestContext.AssertTrue(not (SendKey(keyF, [ssShift, ssAlt])), 'Shift+Alt+F must not be consumed');
 end;
 
 procedure TTestMenuBarAccel.TestNoModifierDoesNotOpenMenu;
 begin
   { a bare 'F' keypress must not open the menu }
-  FContext.AssertTrue(not (SendKey(keyF, [])), 'plain F must not be consumed');
+  TestContext.AssertTrue(not (SendKey(keyF, [])), 'plain F must not be consumed');
 end;
 
 procedure TTestMenuBarAccel.TestWrongLetterDoesNotOpenMenu;
 begin
-  FContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), 'Alt+Q matches no menu item');
+  TestContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), 'Alt+Q matches no menu item');
 end;
 
 procedure TTestMenuBarAccel.TestDisabledItemDoesNotOpenMenu;
 begin
   FMenuBar.MenuItem(0).Enabled := False;
-  FContext.AssertTrue(not (SendKey(keyF, [ssAlt])), 'a disabled menu must not respond');
+  TestContext.AssertTrue(not (SendKey(keyF, [ssAlt])), 'a disabled menu must not respond');
+end;
+
+constructor TTestMenuBarAccel.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestMenuBarAccelTestAltAccelIsRecognised(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestAltAccelIsRecognised');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAltAccelIsRecognised';
     lFixture.SetUp;
     try lFixture.TestAltAccelIsRecognised; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -200,10 +201,8 @@ end;
 procedure RunTTestMenuBarAccelTestAltAccelIsCaseInsensitive(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestAltAccelIsCaseInsensitive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAltAccelIsCaseInsensitive';
     lFixture.SetUp;
     try lFixture.TestAltAccelIsCaseInsensitive; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -212,10 +211,8 @@ end;
 procedure RunTTestMenuBarAccelTestMultiByteAccelIsRecognised(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestMultiByteAccelIsRecognised');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMultiByteAccelIsRecognised';
     lFixture.SetUp;
     try lFixture.TestMultiByteAccelIsRecognised; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -224,10 +221,8 @@ end;
 procedure RunTTestMenuBarAccelTestCtrlAltDoesNotOpenMenu(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestCtrlAltDoesNotOpenMenu');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlAltDoesNotOpenMenu';
     lFixture.SetUp;
     try lFixture.TestCtrlAltDoesNotOpenMenu; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -236,10 +231,8 @@ end;
 procedure RunTTestMenuBarAccelTestShiftAltDoesNotOpenMenu(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestShiftAltDoesNotOpenMenu');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShiftAltDoesNotOpenMenu';
     lFixture.SetUp;
     try lFixture.TestShiftAltDoesNotOpenMenu; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -248,10 +241,8 @@ end;
 procedure RunTTestMenuBarAccelTestNoModifierDoesNotOpenMenu(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestNoModifierDoesNotOpenMenu');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoModifierDoesNotOpenMenu';
     lFixture.SetUp;
     try lFixture.TestNoModifierDoesNotOpenMenu; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -260,10 +251,8 @@ end;
 procedure RunTTestMenuBarAccelTestWrongLetterDoesNotOpenMenu(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestWrongLetterDoesNotOpenMenu');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWrongLetterDoesNotOpenMenu';
     lFixture.SetUp;
     try lFixture.TestWrongLetterDoesNotOpenMenu; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -272,10 +261,8 @@ end;
 procedure RunTTestMenuBarAccelTestDisabledItemDoesNotOpenMenu(AContext: TNXTestContext);
 var lFixture: TTestMenuBarAccel;
 begin
-  lFixture:=TTestMenuBarAccel.Create;
+  lFixture:=TTestMenuBarAccel.Create(AContext, 'TestDisabledItemDoesNotOpenMenu');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDisabledItemDoesNotOpenMenu';
     lFixture.SetUp;
     try lFixture.TestDisabledItemDoesNotOpenMenu; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -296,8 +283,5 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.

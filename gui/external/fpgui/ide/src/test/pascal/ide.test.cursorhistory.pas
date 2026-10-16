@@ -20,9 +20,14 @@ type
   { TTestCursorHistory }
 
   TTestCursorHistory = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHistory: TCursorHistory;
     function MakeLoc(const AFile: string; ALine: Integer; ACol: Integer = 0): TCursorLocation;
@@ -101,26 +106,26 @@ end;
 
 procedure TTestCursorHistory.TestEmptyHistory;
 begin
-  FContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False for empty history');
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False for empty history');
-  FContext.AssertTrue((0)=(FHistory.Count), 'Count should be 0');
+  TestContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False for empty history');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False for empty history');
+  TestContext.AssertTrue((0)=(FHistory.Count), 'Count should be 0');
 end;
 
 procedure TTestCursorHistory.TestRecordSingleLocation;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
-  FContext.AssertTrue((1)=(FHistory.Count), 'Count should be 1 after one record');
-  FContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False with single entry');
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False at tip');
+  TestContext.AssertTrue((1)=(FHistory.Count), 'Count should be 1 after one record');
+  TestContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False with single entry');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False at tip');
 end;
 
 procedure TTestCursorHistory.TestRecordTwoLocations;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
   FHistory.RecordLocation(MakeLoc('file1.pas', 50));
-  FContext.AssertTrue((2)=(FHistory.Count), 'Count should be 2');
-  FContext.AssertTrue(FHistory.CanGoBack, 'CanGoBack should be True with two entries');
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False at tip');
+  TestContext.AssertTrue((2)=(FHistory.Count), 'Count should be 2');
+  TestContext.AssertTrue(FHistory.CanGoBack, 'CanGoBack should be True with two entries');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False at tip');
 end;
 
 procedure TTestCursorHistory.TestGoBackReturnsCorrectLocation;
@@ -129,9 +134,9 @@ var
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
   FHistory.RecordLocation(MakeLoc('file2.pas', 20));
-  FContext.AssertTrue(FHistory.GoBack(loc), 'GoBack should succeed');
-  FContext.AssertTrue(('file1.pas')=(loc.Filename), 'GoBack should return first location');
-  FContext.AssertTrue((10)=(loc.Line), 'GoBack should return line 10');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'GoBack should succeed');
+  TestContext.AssertTrue(('file1.pas')=(loc.Filename), 'GoBack should return first location');
+  TestContext.AssertTrue((10)=(loc.Line), 'GoBack should return line 10');
 end;
 
 procedure TTestCursorHistory.TestGoForwardAfterBack;
@@ -141,9 +146,9 @@ begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
   FHistory.RecordLocation(MakeLoc('file2.pas', 20));
   FHistory.GoBack(loc);
-  FContext.AssertTrue(FHistory.GoForward(loc), 'GoForward should succeed after GoBack');
-  FContext.AssertTrue(('file2.pas')=(loc.Filename), 'GoForward should return second location');
-  FContext.AssertTrue((20)=(loc.Line), 'GoForward should return line 20');
+  TestContext.AssertTrue(FHistory.GoForward(loc), 'GoForward should succeed after GoBack');
+  TestContext.AssertTrue(('file2.pas')=(loc.Filename), 'GoForward should return second location');
+  TestContext.AssertTrue((20)=(loc.Line), 'GoForward should return line 20');
 end;
 
 procedure TTestCursorHistory.TestGoBackTwice;
@@ -153,10 +158,10 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.RecordLocation(MakeLoc('c.pas', 3));
-  FContext.AssertTrue(FHistory.GoBack(loc), 'First GoBack should succeed');
-  FContext.AssertTrue(('b.pas')=(loc.Filename), 'First GoBack returns B');
-  FContext.AssertTrue(FHistory.GoBack(loc), 'Second GoBack should succeed');
-  FContext.AssertTrue(('a.pas')=(loc.Filename), 'Second GoBack returns A');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'First GoBack should succeed');
+  TestContext.AssertTrue(('b.pas')=(loc.Filename), 'First GoBack returns B');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'Second GoBack should succeed');
+  TestContext.AssertTrue(('a.pas')=(loc.Filename), 'Second GoBack returns A');
 end;
 
 { --- Edge cases --- }
@@ -166,7 +171,7 @@ var
   loc: TCursorLocation;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
-  FContext.AssertTrue(not (FHistory.GoBack(loc)), 'GoBack should fail with single entry');
+  TestContext.AssertTrue(not (FHistory.GoBack(loc)), 'GoBack should fail with single entry');
 end;
 
 procedure TTestCursorHistory.TestGoForwardAtEnd;
@@ -175,7 +180,7 @@ var
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 10));
   FHistory.RecordLocation(MakeLoc('file2.pas', 20));
-  FContext.AssertTrue(not (FHistory.GoForward(loc)), 'GoForward should fail at tip');
+  TestContext.AssertTrue(not (FHistory.GoForward(loc)), 'GoForward should fail at tip');
 end;
 
 procedure TTestCursorHistory.TestCanGoBackAfterGoBack;
@@ -186,9 +191,9 @@ begin
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.RecordLocation(MakeLoc('c.pas', 3));
   FHistory.GoBack(loc);  { now at B }
-  FContext.AssertTrue(FHistory.CanGoBack, 'CanGoBack should be True at B (A still behind)');
+  TestContext.AssertTrue(FHistory.CanGoBack, 'CanGoBack should be True at B (A still behind)');
   FHistory.GoBack(loc);  { now at A }
-  FContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False at start');
+  TestContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False at start');
 end;
 
 { --- Deduplication --- }
@@ -197,28 +202,28 @@ procedure TTestCursorHistory.TestDuplicateSameFileLine;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 5, 0));
   FHistory.RecordLocation(MakeLoc('file1.pas', 5, 0));
-  FContext.AssertTrue((1)=(FHistory.Count), 'Duplicate same file+line should not add entry');
+  TestContext.AssertTrue((1)=(FHistory.Count), 'Duplicate same file+line should not add entry');
 end;
 
 procedure TTestCursorHistory.TestDuplicateDifferentCol;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 5, 0));
   FHistory.RecordLocation(MakeLoc('file1.pas', 5, 15));
-  FContext.AssertTrue((1)=(FHistory.Count), 'Same file+line with different col should deduplicate');
+  TestContext.AssertTrue((1)=(FHistory.Count), 'Same file+line with different col should deduplicate');
 end;
 
 procedure TTestCursorHistory.TestDifferentLine;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 5));
   FHistory.RecordLocation(MakeLoc('file1.pas', 50));
-  FContext.AssertTrue((2)=(FHistory.Count), 'Different line should record');
+  TestContext.AssertTrue((2)=(FHistory.Count), 'Different line should record');
 end;
 
 procedure TTestCursorHistory.TestDifferentFile;
 begin
   FHistory.RecordLocation(MakeLoc('file1.pas', 5));
   FHistory.RecordLocation(MakeLoc('file2.pas', 5));
-  FContext.AssertTrue((2)=(FHistory.Count), 'Different file should record');
+  TestContext.AssertTrue((2)=(FHistory.Count), 'Different file should record');
 end;
 
 { --- Forward truncation --- }
@@ -232,10 +237,10 @@ begin
   FHistory.RecordLocation(MakeLoc('c.pas', 3));
   FHistory.GoBack(loc);  { now at B, C is forward }
   FHistory.RecordLocation(MakeLoc('d.pas', 4));  { should truncate C }
-  FContext.AssertTrue((3)=(FHistory.Count), 'Count should be 3 (A, B, D) after truncation');
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after recording new location');
-  FContext.AssertTrue(FHistory.GoBack(loc), 'GoBack should succeed');
-  FContext.AssertTrue(('b.pas')=(loc.Filename), 'GoBack from D should return B');
+  TestContext.AssertTrue((3)=(FHistory.Count), 'Count should be 3 (A, B, D) after truncation');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after recording new location');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'GoBack should succeed');
+  TestContext.AssertTrue(('b.pas')=(loc.Filename), 'GoBack from D should return B');
 end;
 
 procedure TTestCursorHistory.TestCanGoForwardFalseAfterTruncation;
@@ -246,7 +251,7 @@ begin
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.GoBack(loc);
   FHistory.RecordLocation(MakeLoc('c.pas', 3));
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after truncation');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after truncation');
 end;
 
 { --- Capacity --- }
@@ -261,10 +266,10 @@ begin
   try
     for i := 1 to 7 do
       h.RecordLocation(MakeLoc('file.pas', i * 10));
-    FContext.AssertTrue((5)=(h.Count), 'Count should not exceed capacity');
+    TestContext.AssertTrue((5)=(h.Count), 'Count should not exceed capacity');
     { Oldest entries (line 10, 20) should be dropped. Newest is line 70. }
-    FContext.AssertTrue(h.GoBack(loc), 'GoBack should succeed');
-    FContext.AssertTrue((60)=(loc.Line), 'GoBack from line 70 should return line 60');
+    TestContext.AssertTrue(h.GoBack(loc), 'GoBack should succeed');
+    TestContext.AssertTrue((60)=(loc.Line), 'GoBack from line 70 should return line 60');
   finally
     h.Free;
   end;
@@ -285,9 +290,9 @@ begin
     ok := True;
     for i := 1 to 4 do
       ok := ok and h.GoBack(loc);
-    FContext.AssertTrue(ok, 'Should traverse back through 4 entries');
-    FContext.AssertTrue((30)=(loc.Line), 'Oldest surviving entry should be line 30');
-    FContext.AssertTrue(not (h.CanGoBack), 'Should not be able to go further back');
+    TestContext.AssertTrue(ok, 'Should traverse back through 4 entries');
+    TestContext.AssertTrue((30)=(loc.Line), 'Oldest surviving entry should be line 30');
+    TestContext.AssertTrue(not (h.CanGoBack), 'Should not be able to go further back');
   finally
     h.Free;
   end;
@@ -300,7 +305,7 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.RecordBeforeJump(MakeLoc('c.pas', 3));
-  FContext.AssertTrue((3)=(FHistory.Count), 'RecordBeforeJump at tip should record (Count = 3)');
+  TestContext.AssertTrue((3)=(FHistory.Count), 'RecordBeforeJump at tip should record (Count = 3)');
 end;
 
 procedure TTestCursorHistory.TestRecordBeforeJumpWhileTraversing;
@@ -312,7 +317,7 @@ begin
   FHistory.RecordLocation(MakeLoc('c.pas', 3));
   FHistory.GoBack(loc);  { now traversing }
   FHistory.RecordBeforeJump(MakeLoc('x.pas', 99));
-  FContext.AssertTrue((3)=(FHistory.Count), 'RecordBeforeJump while traversing should be no-op');
+  TestContext.AssertTrue((3)=(FHistory.Count), 'RecordBeforeJump while traversing should be no-op');
 end;
 
 procedure TTestCursorHistory.TestRecordBeforeJumpThenGoBack;
@@ -322,10 +327,10 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.RecordBeforeJump(MakeLoc('c.pas', 3));
-  FContext.AssertTrue(FHistory.GoBack(loc), 'GoBack from C should succeed');
-  FContext.AssertTrue(('b.pas')=(loc.Filename), 'GoBack from C should return B');
-  FContext.AssertTrue(FHistory.GoBack(loc), 'GoBack from B should succeed');
-  FContext.AssertTrue(('a.pas')=(loc.Filename), 'GoBack from B should return A');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'GoBack from C should succeed');
+  TestContext.AssertTrue(('b.pas')=(loc.Filename), 'GoBack from C should return B');
+  TestContext.AssertTrue(FHistory.GoBack(loc), 'GoBack from B should succeed');
+  TestContext.AssertTrue(('a.pas')=(loc.Filename), 'GoBack from B should return A');
 end;
 
 procedure TTestCursorHistory.TestRecordLocationResetsTraversal;
@@ -335,16 +340,16 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.GoBack(loc);  { traversing }
-  FContext.AssertTrue(FHistory.IsTraversing, 'Should be traversing after GoBack');
+  TestContext.AssertTrue(FHistory.IsTraversing, 'Should be traversing after GoBack');
   FHistory.RecordLocation(MakeLoc('d.pas', 4));
-  FContext.AssertTrue(not (FHistory.IsTraversing), 'RecordLocation should reset traversal');
+  TestContext.AssertTrue(not (FHistory.IsTraversing), 'RecordLocation should reset traversal');
 end;
 
 { --- IsTraversing --- }
 
 procedure TTestCursorHistory.TestIsTraversingInitiallyFalse;
 begin
-  FContext.AssertTrue(not (FHistory.IsTraversing), 'IsTraversing should be False initially');
+  TestContext.AssertTrue(not (FHistory.IsTraversing), 'IsTraversing should be False initially');
 end;
 
 procedure TTestCursorHistory.TestIsTraversingAfterGoBack;
@@ -354,7 +359,7 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.GoBack(loc);
-  FContext.AssertTrue(FHistory.IsTraversing, 'IsTraversing should be True after GoBack');
+  TestContext.AssertTrue(FHistory.IsTraversing, 'IsTraversing should be True after GoBack');
 end;
 
 procedure TTestCursorHistory.TestIsTraversingAfterGoForwardToTip;
@@ -365,7 +370,7 @@ begin
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.GoBack(loc);
   FHistory.GoForward(loc);
-  FContext.AssertTrue(not (FHistory.IsTraversing), 'IsTraversing should be False after returning to tip');
+  TestContext.AssertTrue(not (FHistory.IsTraversing), 'IsTraversing should be False after returning to tip');
 end;
 
 { --- Clear --- }
@@ -375,20 +380,25 @@ begin
   FHistory.RecordLocation(MakeLoc('a.pas', 1));
   FHistory.RecordLocation(MakeLoc('b.pas', 2));
   FHistory.Clear;
-  FContext.AssertTrue((0)=(FHistory.Count), 'Count should be 0 after Clear');
-  FContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False after Clear');
-  FContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after Clear');
+  TestContext.AssertTrue((0)=(FHistory.Count), 'Count should be 0 after Clear');
+  TestContext.AssertTrue(not (FHistory.CanGoBack), 'CanGoBack should be False after Clear');
+  TestContext.AssertTrue(not (FHistory.CanGoForward), 'CanGoForward should be False after Clear');
 end;
 
 
 
+constructor TTestCursorHistory.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestCursorHistoryTestEmptyHistory(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestEmptyHistory');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyHistory';
     lFixture.SetUp;
     try lFixture.TestEmptyHistory; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -397,10 +407,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordSingleLocation(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordSingleLocation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordSingleLocation';
     lFixture.SetUp;
     try lFixture.TestRecordSingleLocation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -409,10 +417,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordTwoLocations(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordTwoLocations');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordTwoLocations';
     lFixture.SetUp;
     try lFixture.TestRecordTwoLocations; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -421,10 +427,8 @@ end;
 procedure RunTTestCursorHistoryTestGoBackReturnsCorrectLocation(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestGoBackReturnsCorrectLocation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGoBackReturnsCorrectLocation';
     lFixture.SetUp;
     try lFixture.TestGoBackReturnsCorrectLocation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -433,10 +437,8 @@ end;
 procedure RunTTestCursorHistoryTestGoForwardAfterBack(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestGoForwardAfterBack');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGoForwardAfterBack';
     lFixture.SetUp;
     try lFixture.TestGoForwardAfterBack; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -445,10 +447,8 @@ end;
 procedure RunTTestCursorHistoryTestGoBackTwice(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestGoBackTwice');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGoBackTwice';
     lFixture.SetUp;
     try lFixture.TestGoBackTwice; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -457,10 +457,8 @@ end;
 procedure RunTTestCursorHistoryTestGoBackAtStart(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestGoBackAtStart');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGoBackAtStart';
     lFixture.SetUp;
     try lFixture.TestGoBackAtStart; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -469,10 +467,8 @@ end;
 procedure RunTTestCursorHistoryTestGoForwardAtEnd(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestGoForwardAtEnd');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGoForwardAtEnd';
     lFixture.SetUp;
     try lFixture.TestGoForwardAtEnd; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -481,10 +477,8 @@ end;
 procedure RunTTestCursorHistoryTestCanGoBackAfterGoBack(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestCanGoBackAfterGoBack');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCanGoBackAfterGoBack';
     lFixture.SetUp;
     try lFixture.TestCanGoBackAfterGoBack; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -493,10 +487,8 @@ end;
 procedure RunTTestCursorHistoryTestDuplicateSameFileLine(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestDuplicateSameFileLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDuplicateSameFileLine';
     lFixture.SetUp;
     try lFixture.TestDuplicateSameFileLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -505,10 +497,8 @@ end;
 procedure RunTTestCursorHistoryTestDuplicateDifferentCol(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestDuplicateDifferentCol');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDuplicateDifferentCol';
     lFixture.SetUp;
     try lFixture.TestDuplicateDifferentCol; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -517,10 +507,8 @@ end;
 procedure RunTTestCursorHistoryTestDifferentLine(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestDifferentLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDifferentLine';
     lFixture.SetUp;
     try lFixture.TestDifferentLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -529,10 +517,8 @@ end;
 procedure RunTTestCursorHistoryTestDifferentFile(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestDifferentFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDifferentFile';
     lFixture.SetUp;
     try lFixture.TestDifferentFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -541,10 +527,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordAfterGoBackTruncates(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordAfterGoBackTruncates');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordAfterGoBackTruncates';
     lFixture.SetUp;
     try lFixture.TestRecordAfterGoBackTruncates; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -553,10 +537,8 @@ end;
 procedure RunTTestCursorHistoryTestCanGoForwardFalseAfterTruncation(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestCanGoForwardFalseAfterTruncation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCanGoForwardFalseAfterTruncation';
     lFixture.SetUp;
     try lFixture.TestCanGoForwardFalseAfterTruncation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -565,10 +547,8 @@ end;
 procedure RunTTestCursorHistoryTestCapacityOverflow(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestCapacityOverflow');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCapacityOverflow';
     lFixture.SetUp;
     try lFixture.TestCapacityOverflow; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -577,10 +557,8 @@ end;
 procedure RunTTestCursorHistoryTestCapacityOverflowPreservesNewest(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestCapacityOverflowPreservesNewest');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCapacityOverflowPreservesNewest';
     lFixture.SetUp;
     try lFixture.TestCapacityOverflowPreservesNewest; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -589,10 +567,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordBeforeJumpAtTip(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordBeforeJumpAtTip');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordBeforeJumpAtTip';
     lFixture.SetUp;
     try lFixture.TestRecordBeforeJumpAtTip; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -601,10 +577,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordBeforeJumpWhileTraversing(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordBeforeJumpWhileTraversing');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordBeforeJumpWhileTraversing';
     lFixture.SetUp;
     try lFixture.TestRecordBeforeJumpWhileTraversing; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -613,10 +587,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordBeforeJumpThenGoBack(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordBeforeJumpThenGoBack');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordBeforeJumpThenGoBack';
     lFixture.SetUp;
     try lFixture.TestRecordBeforeJumpThenGoBack; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -625,10 +597,8 @@ end;
 procedure RunTTestCursorHistoryTestRecordLocationResetsTraversal(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestRecordLocationResetsTraversal');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRecordLocationResetsTraversal';
     lFixture.SetUp;
     try lFixture.TestRecordLocationResetsTraversal; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -637,10 +607,8 @@ end;
 procedure RunTTestCursorHistoryTestIsTraversingInitiallyFalse(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestIsTraversingInitiallyFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsTraversingInitiallyFalse';
     lFixture.SetUp;
     try lFixture.TestIsTraversingInitiallyFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -649,10 +617,8 @@ end;
 procedure RunTTestCursorHistoryTestIsTraversingAfterGoBack(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestIsTraversingAfterGoBack');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsTraversingAfterGoBack';
     lFixture.SetUp;
     try lFixture.TestIsTraversingAfterGoBack; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -661,10 +627,8 @@ end;
 procedure RunTTestCursorHistoryTestIsTraversingAfterGoForwardToTip(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestIsTraversingAfterGoForwardToTip');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestIsTraversingAfterGoForwardToTip';
     lFixture.SetUp;
     try lFixture.TestIsTraversingAfterGoForwardToTip; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -673,10 +637,8 @@ end;
 procedure RunTTestCursorHistoryTestClear(AContext: TNXTestContext);
 var lFixture: TTestCursorHistory;
 begin
-  lFixture:=TTestCursorHistory.Create;
+  lFixture:=TTestCursorHistory.Create(AContext, 'TestClear');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClear';
     lFixture.SetUp;
     try lFixture.TestClear; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

@@ -27,9 +27,14 @@ uses
 type
 
   TTestAccelParsing = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestNoAccelReturnsEmpty;
     procedure TestSimpleAccel;
@@ -53,9 +58,14 @@ type
   end;
 
   TTestAccelShiftState = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestPlainAltMatches;
     procedure TestCtrlAltDoesNotMatch;
@@ -68,9 +78,14 @@ type
 
   { End-to-end dispatch through TfpgWidget.DoKeyShortcut }
   TTestAccelDispatch = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FForm: TfpgForm;
     FButton: TfpgButton;
@@ -96,9 +111,14 @@ type
 
   { TfpgLabel.FocusWidget - an accelerator on a label focuses another widget }
   TTestLabelFocusWidget = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FForm: TfpgForm;
     FLabel: TfpgLabel;
@@ -118,9 +138,6 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 procedure RegistertcacceleratorTests(ARegistry: TNXTestRegistry);
 
 implementation
@@ -128,14 +145,6 @@ implementation
 uses
   fpg_main;
 
-
-procedure RegisterTests;
-begin
-  
-  
-  
-  
-end;
 
 type
   { DoKeyShortcut is protected, so reach it the usual friend-class way }
@@ -146,106 +155,106 @@ type
 
 procedure TTestAccelParsing.TestNoAccelReturnsEmpty;
 begin
-  FContext.AssertTrue(('')=(fpgExtractAccelChar('Scan')), '');
+  TestContext.AssertTrue(('')=(fpgExtractAccelChar('Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestSimpleAccel;
 begin
-  FContext.AssertTrue(('S')=(fpgExtractAccelChar('&Scan')), '');
+  TestContext.AssertTrue(('S')=(fpgExtractAccelChar('&Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelNotFirstChar;
 begin
   { the marked character is returned verbatim, case included }
-  FContext.AssertTrue(('c')=(fpgExtractAccelChar('S&can')), '');
+  TestContext.AssertTrue(('c')=(fpgExtractAccelChar('S&can')), '');
 end;
 
 procedure TTestAccelParsing.TestEscapedAmpersandIsNotAnAccel;
 begin
   { '&&' is a literal ampersand, so there is no accelerator here }
-  FContext.AssertTrue(('')=(fpgExtractAccelChar('Black && White')), '');
+  TestContext.AssertTrue(('')=(fpgExtractAccelChar('Black && White')), '');
 end;
 
 procedure TTestAccelParsing.TestEscapedAmpersandFollowedByRealAccel;
 begin
-  FContext.AssertTrue(('W')=(fpgExtractAccelChar('Black && &White')), '');
+  TestContext.AssertTrue(('W')=(fpgExtractAccelChar('Black && &White')), '');
 end;
 
 procedure TTestAccelParsing.TestTrailingAmpersandIsIgnored;
 begin
   { a lone trailing '&' has no character after it }
-  FContext.AssertTrue(('')=(fpgExtractAccelChar('Scan&')), '');
+  TestContext.AssertTrue(('')=(fpgExtractAccelChar('Scan&')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelIsCaseInsensitiveOnMatch;
 begin
   { the helper returns the char as-is; matching is done case-insensitively
     by the caller, so a lowercase accel must be preserved verbatim here }
-  FContext.AssertTrue(('s')=(fpgExtractAccelChar('&scan')), '');
+  TestContext.AssertTrue(('s')=(fpgExtractAccelChar('&scan')), '');
 end;
 
 procedure TTestAccelParsing.TestUTF8Accel;
 begin
   { a multi-byte accelerator character must come back whole }
-  FContext.AssertTrue(('ü')=(fpgExtractAccelChar('&überprüfen')), '');
+  TestContext.AssertTrue(('ü')=(fpgExtractAccelChar('&überprüfen')), '');
 end;
 
 procedure TTestAccelParsing.TestStripNoAccel;
 begin
-  FContext.AssertTrue(('Scan')=(fpgStripAccelChars('Scan')), '');
+  TestContext.AssertTrue(('Scan')=(fpgStripAccelChars('Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestStripSimpleAccel;
 begin
-  FContext.AssertTrue(('Scan')=(fpgStripAccelChars('&Scan')), '');
+  TestContext.AssertTrue(('Scan')=(fpgStripAccelChars('&Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestStripEscapedAmpersand;
 begin
-  FContext.AssertTrue(('Black & White')=(fpgStripAccelChars('Black && White')), '');
+  TestContext.AssertTrue(('Black & White')=(fpgStripAccelChars('Black && White')), '');
 end;
 
 procedure TTestAccelParsing.TestStripEscapedAndRealAccel;
 begin
-  FContext.AssertTrue(('Black & White')=(fpgStripAccelChars('Black && &White')), '');
+  TestContext.AssertTrue(('Black & White')=(fpgStripAccelChars('Black && &White')), '');
 end;
 
 procedure TTestAccelParsing.TestStripTrailingAmpersand;
 begin
-  FContext.AssertTrue(('Scan')=(fpgStripAccelChars('Scan&')), '');
+  TestContext.AssertTrue(('Scan')=(fpgStripAccelChars('Scan&')), '');
 end;
 
 procedure TTestAccelParsing.TestStripUTF8;
 begin
-  FContext.AssertTrue(('überprüfen')=(fpgStripAccelChars('&überprüfen')), '');
+  TestContext.AssertTrue(('überprüfen')=(fpgStripAccelChars('&überprüfen')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelPosNone;
 begin
-  FContext.AssertTrue((0)=(fpgAccelCharPos('Scan')), '');
+  TestContext.AssertTrue((0)=(fpgAccelCharPos('Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelPosFirst;
 begin
-  FContext.AssertTrue((1)=(fpgAccelCharPos('&Scan')), '');
+  TestContext.AssertTrue((1)=(fpgAccelCharPos('&Scan')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelPosMidWord;
 begin
   { 'S&can' strips to 'Scan', where 'c' is the 2nd character }
-  FContext.AssertTrue((2)=(fpgAccelCharPos('S&can')), '');
+  TestContext.AssertTrue((2)=(fpgAccelCharPos('S&can')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelPosAfterEscapedAmpersand;
 begin
   { 'Black && &White' strips to 'Black & White', where 'W' is the 9th char }
-  FContext.AssertTrue((9)=(fpgAccelCharPos('Black && &White')), '');
+  TestContext.AssertTrue((9)=(fpgAccelCharPos('Black && &White')), '');
 end;
 
 procedure TTestAccelParsing.TestAccelPosUTF8;
 begin
   { position is in characters, not bytes - 'S&ürnamè' strips to 'Sürnamè' }
-  FContext.AssertTrue((2)=(fpgAccelCharPos('S&ürnamè')), '');
+  TestContext.AssertTrue((2)=(fpgAccelCharPos('S&ürnamè')), '');
 end;
 
 
@@ -253,40 +262,40 @@ end;
 
 procedure TTestAccelShiftState.TestPlainAltMatches;
 begin
-  FContext.AssertTrue(fpgIsAccelShiftState([ssAlt]), '');
+  TestContext.AssertTrue(fpgIsAccelShiftState([ssAlt]), '');
 end;
 
 procedure TTestAccelShiftState.TestCtrlAltDoesNotMatch;
 begin
   { Ctrl+Alt+S must never fire an Alt+S accelerator }
-  FContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl, ssAlt])), '');
+  TestContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl, ssAlt])), '');
 end;
 
 procedure TTestAccelShiftState.TestShiftAltDoesNotMatch;
 begin
-  FContext.AssertTrue(not (fpgIsAccelShiftState([ssShift, ssAlt])), '');
+  TestContext.AssertTrue(not (fpgIsAccelShiftState([ssShift, ssAlt])), '');
 end;
 
 procedure TTestAccelShiftState.TestCtrlShiftAltDoesNotMatch;
 begin
-  FContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl, ssShift, ssAlt])), '');
+  TestContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl, ssShift, ssAlt])), '');
 end;
 
 procedure TTestAccelShiftState.TestNoModifierDoesNotMatch;
 begin
-  FContext.AssertTrue(not (fpgIsAccelShiftState([])), '');
+  TestContext.AssertTrue(not (fpgIsAccelShiftState([])), '');
 end;
 
 procedure TTestAccelShiftState.TestCtrlAloneDoesNotMatch;
 begin
-  FContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl])), '');
+  TestContext.AssertTrue(not (fpgIsAccelShiftState([ssCtrl])), '');
 end;
 
 procedure TTestAccelShiftState.TestAltPlusUnrelatedModifierStillMatches;
 begin
   { only Shift/Alt/Ctrl take part in the test - a stray mouse-button state
     in the set must not stop a legitimate accelerator from firing }
-  FContext.AssertTrue(fpgIsAccelShiftState([ssAlt, ssLeft]), '');
+  TestContext.AssertTrue(fpgIsAccelShiftState([ssAlt, ssLeft]), '');
 end;
 
 
@@ -325,56 +334,56 @@ end;
 
 procedure TTestAccelDispatch.TestAltAccelFiresButton;
 begin
-  FContext.AssertTrue(SendKey(keyS, [ssAlt]), 'Alt+S should be consumed');
-  FContext.AssertTrue((1)=(FClickCount), '');
+  TestContext.AssertTrue(SendKey(keyS, [ssAlt]), 'Alt+S should be consumed');
+  TestContext.AssertTrue((1)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestAltAccelIsCaseInsensitive;
 begin
   { '&scan' declares a lowercase accelerator, but Alt+S must still fire it }
   FButton.Text := '&scan';
-  FContext.AssertTrue(SendKey(keyS, [ssAlt]), '');
-  FContext.AssertTrue((1)=(FClickCount), '');
+  TestContext.AssertTrue(SendKey(keyS, [ssAlt]), '');
+  TestContext.AssertTrue((1)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestCtrlAltDoesNotFireButton;
 begin
   { the regression this guards: Ctrl+Alt+S must not trigger Alt+S }
-  FContext.AssertTrue(not (SendKey(keyS, [ssCtrl, ssAlt])), 'Ctrl+Alt+S must not be consumed');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyS, [ssCtrl, ssAlt])), 'Ctrl+Alt+S must not be consumed');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestShiftAltDoesNotFireButton;
 begin
-  FContext.AssertTrue(not (SendKey(keyS, [ssShift, ssAlt])), '');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyS, [ssShift, ssAlt])), '');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestNoModifierDoesNotFireButton;
 begin
   { a bare 'S' keypress must not activate the button }
-  FContext.AssertTrue(not (SendKey(keyS, [])), '');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyS, [])), '');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestWrongLetterDoesNotFire;
 begin
-  FContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), '');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), '');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestDisabledButtonDoesNotFire;
 begin
   FButton.Enabled := False;
-  FContext.AssertTrue(not (SendKey(keyS, [ssAlt])), '');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyS, [ssAlt])), '');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestButtonWithoutAccelDoesNotFire;
 begin
   FButton.Text := 'Scan';
-  FContext.AssertTrue(not (SendKey(keyS, [ssAlt])), '');
-  FContext.AssertTrue((0)=(FClickCount), '');
+  TestContext.AssertTrue(not (SendKey(keyS, [ssAlt])), '');
+  TestContext.AssertTrue((0)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestNestedButtonInPanelFires;
@@ -388,8 +397,8 @@ begin
   btn := TfpgButton.Create(pnl);
   btn.Text := '&Deep';
   btn.OnClick := @ButtonClicked;
-  FContext.AssertTrue(SendKey(keyD, [ssAlt]), 'nested Alt+D should be consumed');
-  FContext.AssertTrue((1)=(FClickCount), '');
+  TestContext.AssertTrue(SendKey(keyD, [ssAlt]), 'nested Alt+D should be consumed');
+  TestContext.AssertTrue((1)=(FClickCount), '');
 end;
 
 procedure TTestAccelDispatch.TestCheckBoxAccelToggles;
@@ -399,11 +408,11 @@ begin
   FButton.Text := 'Plain';
   cb := TfpgCheckBox.Create(FForm);
   cb.Text := '&Verbose';
-  FContext.AssertTrue(not (cb.Checked), 'precondition: unchecked');
-  FContext.AssertTrue(SendKey(keyV, [ssAlt]), 'Alt+V should be consumed');
-  FContext.AssertTrue(cb.Checked, 'checkbox should have toggled on');
-  FContext.AssertTrue(SendKey(keyV, [ssAlt]), '');
-  FContext.AssertTrue(not (cb.Checked), 'checkbox should have toggled back off');
+  TestContext.AssertTrue(not (cb.Checked), 'precondition: unchecked');
+  TestContext.AssertTrue(SendKey(keyV, [ssAlt]), 'Alt+V should be consumed');
+  TestContext.AssertTrue(cb.Checked, 'checkbox should have toggled on');
+  TestContext.AssertTrue(SendKey(keyV, [ssAlt]), '');
+  TestContext.AssertTrue(not (cb.Checked), 'checkbox should have toggled back off');
 end;
 
 
@@ -436,9 +445,9 @@ end;
 
 procedure TTestLabelFocusWidget.TestAccelFocusesFocusWidget;
 begin
-  FContext.AssertTrue(not (FEdit.Focused), 'precondition: edit not focused');
-  FContext.AssertTrue(SendKey(keyN, [ssAlt]), 'Alt+N should be consumed');
-  FContext.AssertTrue(FEdit.Focused, 'the edit should have received focus');
+  TestContext.AssertTrue(not (FEdit.Focused), 'precondition: edit not focused');
+  TestContext.AssertTrue(SendKey(keyN, [ssAlt]), 'Alt+N should be consumed');
+  TestContext.AssertTrue(FEdit.Focused, 'the edit should have received focus');
 end;
 
 procedure TTestLabelFocusWidget.TestNoFocusWidgetMeansNoAccelerator;
@@ -446,28 +455,28 @@ begin
   { a label with no FocusWidget has nothing to activate, so it must not
     swallow the keystroke - something else on the form may want it }
   FLabel.FocusWidget := nil;
-  FContext.AssertTrue(not (SendKey(keyN, [ssAlt])), 'Alt+N must not be consumed');
-  FContext.AssertTrue(not (FEdit.Focused), '');
+  TestContext.AssertTrue(not (SendKey(keyN, [ssAlt])), 'Alt+N must not be consumed');
+  TestContext.AssertTrue(not (FEdit.Focused), '');
 end;
 
 procedure TTestLabelFocusWidget.TestCtrlAltDoesNotFocus;
 begin
-  FContext.AssertTrue(not (SendKey(keyN, [ssCtrl, ssAlt])), 'Ctrl+Alt+N must not be consumed');
-  FContext.AssertTrue(not (FEdit.Focused), '');
+  TestContext.AssertTrue(not (SendKey(keyN, [ssCtrl, ssAlt])), 'Ctrl+Alt+N must not be consumed');
+  TestContext.AssertTrue(not (FEdit.Focused), '');
 end;
 
 procedure TTestLabelFocusWidget.TestWrongLetterDoesNotFocus;
 begin
-  FContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), '');
-  FContext.AssertTrue(not (FEdit.Focused), '');
+  TestContext.AssertTrue(not (SendKey(keyQ, [ssAlt])), '');
+  TestContext.AssertTrue(not (FEdit.Focused), '');
 end;
 
 procedure TTestLabelFocusWidget.TestDisabledTargetIsNotFocused;
 begin
   { no point focusing a widget the user cannot interact with }
   FEdit.Enabled := False;
-  FContext.AssertTrue(not (SendKey(keyN, [ssAlt])), 'Alt+N must not be consumed');
-  FContext.AssertTrue(not (FEdit.Focused), '');
+  TestContext.AssertTrue(not (SendKey(keyN, [ssAlt])), 'Alt+N must not be consumed');
+  TestContext.AssertTrue(not (FEdit.Focused), '');
 end;
 
 procedure TTestLabelFocusWidget.TestFreeingTargetClearsFocusWidget;
@@ -485,29 +494,55 @@ begin
   otherForm := TfpgForm.Create(nil);
   otherEdit := TfpgEdit.Create(otherForm);
   FLabel.FocusWidget := otherEdit;
-  FContext.AssertTrue((otherEdit)=(FLabel.FocusWidget), 'precondition: target assigned');
+  TestContext.AssertTrue((otherEdit)=(FLabel.FocusWidget), 'precondition: target assigned');
 
   otherForm.Free;
 
-  FContext.AssertTrue((FLabel.FocusWidget)=nil, 'FocusWidget should have been nilled');
+  TestContext.AssertTrue((FLabel.FocusWidget)=nil, 'FocusWidget should have been nilled');
   { and the now-targetless label must not claim the accelerator }
-  FContext.AssertTrue(not (SendKey(keyN, [ssAlt])), '');
+  TestContext.AssertTrue(not (SendKey(keyN, [ssAlt])), '');
 end;
 
 procedure TTestLabelFocusWidget.TestLabelWithoutAmpersandHasNoAccelerator;
 begin
   FLabel.Text := 'Name:';
-  FContext.AssertTrue(not (SendKey(keyN, [ssAlt])), '');
-  FContext.AssertTrue(not (FEdit.Focused), '');
+  TestContext.AssertTrue(not (SendKey(keyN, [ssAlt])), '');
+  TestContext.AssertTrue(not (FEdit.Focused), '');
+end;
+
+constructor TTestAccelParsing.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestAccelShiftState.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestAccelDispatch.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+constructor TTestLabelFocusWidget.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestAccelParsingTestNoAccelReturnsEmpty(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestNoAccelReturnsEmpty');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoAccelReturnsEmpty';
     lFixture.TestNoAccelReturnsEmpty;
   finally lFixture.Free; end;
 end;
@@ -515,10 +550,8 @@ end;
 procedure RunTTestAccelParsingTestSimpleAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestSimpleAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSimpleAccel';
     lFixture.TestSimpleAccel;
   finally lFixture.Free; end;
 end;
@@ -526,10 +559,8 @@ end;
 procedure RunTTestAccelParsingTestAccelNotFirstChar(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelNotFirstChar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelNotFirstChar';
     lFixture.TestAccelNotFirstChar;
   finally lFixture.Free; end;
 end;
@@ -537,10 +568,8 @@ end;
 procedure RunTTestAccelParsingTestEscapedAmpersandIsNotAnAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestEscapedAmpersandIsNotAnAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEscapedAmpersandIsNotAnAccel';
     lFixture.TestEscapedAmpersandIsNotAnAccel;
   finally lFixture.Free; end;
 end;
@@ -548,10 +577,8 @@ end;
 procedure RunTTestAccelParsingTestEscapedAmpersandFollowedByRealAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestEscapedAmpersandFollowedByRealAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEscapedAmpersandFollowedByRealAccel';
     lFixture.TestEscapedAmpersandFollowedByRealAccel;
   finally lFixture.Free; end;
 end;
@@ -559,10 +586,8 @@ end;
 procedure RunTTestAccelParsingTestTrailingAmpersandIsIgnored(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestTrailingAmpersandIsIgnored');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestTrailingAmpersandIsIgnored';
     lFixture.TestTrailingAmpersandIsIgnored;
   finally lFixture.Free; end;
 end;
@@ -570,10 +595,8 @@ end;
 procedure RunTTestAccelParsingTestAccelIsCaseInsensitiveOnMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelIsCaseInsensitiveOnMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelIsCaseInsensitiveOnMatch';
     lFixture.TestAccelIsCaseInsensitiveOnMatch;
   finally lFixture.Free; end;
 end;
@@ -581,10 +604,8 @@ end;
 procedure RunTTestAccelParsingTestUTF8Accel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestUTF8Accel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUTF8Accel';
     lFixture.TestUTF8Accel;
   finally lFixture.Free; end;
 end;
@@ -592,10 +613,8 @@ end;
 procedure RunTTestAccelParsingTestStripNoAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripNoAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripNoAccel';
     lFixture.TestStripNoAccel;
   finally lFixture.Free; end;
 end;
@@ -603,10 +622,8 @@ end;
 procedure RunTTestAccelParsingTestStripSimpleAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripSimpleAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripSimpleAccel';
     lFixture.TestStripSimpleAccel;
   finally lFixture.Free; end;
 end;
@@ -614,10 +631,8 @@ end;
 procedure RunTTestAccelParsingTestStripEscapedAmpersand(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripEscapedAmpersand');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripEscapedAmpersand';
     lFixture.TestStripEscapedAmpersand;
   finally lFixture.Free; end;
 end;
@@ -625,10 +640,8 @@ end;
 procedure RunTTestAccelParsingTestStripEscapedAndRealAccel(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripEscapedAndRealAccel');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripEscapedAndRealAccel';
     lFixture.TestStripEscapedAndRealAccel;
   finally lFixture.Free; end;
 end;
@@ -636,10 +649,8 @@ end;
 procedure RunTTestAccelParsingTestStripTrailingAmpersand(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripTrailingAmpersand');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripTrailingAmpersand';
     lFixture.TestStripTrailingAmpersand;
   finally lFixture.Free; end;
 end;
@@ -647,10 +658,8 @@ end;
 procedure RunTTestAccelParsingTestStripUTF8(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestStripUTF8');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStripUTF8';
     lFixture.TestStripUTF8;
   finally lFixture.Free; end;
 end;
@@ -658,10 +667,8 @@ end;
 procedure RunTTestAccelParsingTestAccelPosNone(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelPosNone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelPosNone';
     lFixture.TestAccelPosNone;
   finally lFixture.Free; end;
 end;
@@ -669,10 +676,8 @@ end;
 procedure RunTTestAccelParsingTestAccelPosFirst(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelPosFirst');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelPosFirst';
     lFixture.TestAccelPosFirst;
   finally lFixture.Free; end;
 end;
@@ -680,10 +685,8 @@ end;
 procedure RunTTestAccelParsingTestAccelPosMidWord(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelPosMidWord');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelPosMidWord';
     lFixture.TestAccelPosMidWord;
   finally lFixture.Free; end;
 end;
@@ -691,10 +694,8 @@ end;
 procedure RunTTestAccelParsingTestAccelPosAfterEscapedAmpersand(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelPosAfterEscapedAmpersand');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelPosAfterEscapedAmpersand';
     lFixture.TestAccelPosAfterEscapedAmpersand;
   finally lFixture.Free; end;
 end;
@@ -702,10 +703,8 @@ end;
 procedure RunTTestAccelParsingTestAccelPosUTF8(AContext: TNXTestContext);
 var lFixture: TTestAccelParsing;
 begin
-  lFixture:=TTestAccelParsing.Create;
+  lFixture:=TTestAccelParsing.Create(AContext, 'TestAccelPosUTF8');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelPosUTF8';
     lFixture.TestAccelPosUTF8;
   finally lFixture.Free; end;
 end;
@@ -713,10 +712,8 @@ end;
 procedure RunTTestAccelShiftStateTestPlainAltMatches(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestPlainAltMatches');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestPlainAltMatches';
     lFixture.TestPlainAltMatches;
   finally lFixture.Free; end;
 end;
@@ -724,10 +721,8 @@ end;
 procedure RunTTestAccelShiftStateTestCtrlAltDoesNotMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestCtrlAltDoesNotMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlAltDoesNotMatch';
     lFixture.TestCtrlAltDoesNotMatch;
   finally lFixture.Free; end;
 end;
@@ -735,10 +730,8 @@ end;
 procedure RunTTestAccelShiftStateTestShiftAltDoesNotMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestShiftAltDoesNotMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShiftAltDoesNotMatch';
     lFixture.TestShiftAltDoesNotMatch;
   finally lFixture.Free; end;
 end;
@@ -746,10 +739,8 @@ end;
 procedure RunTTestAccelShiftStateTestCtrlShiftAltDoesNotMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestCtrlShiftAltDoesNotMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlShiftAltDoesNotMatch';
     lFixture.TestCtrlShiftAltDoesNotMatch;
   finally lFixture.Free; end;
 end;
@@ -757,10 +748,8 @@ end;
 procedure RunTTestAccelShiftStateTestNoModifierDoesNotMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestNoModifierDoesNotMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoModifierDoesNotMatch';
     lFixture.TestNoModifierDoesNotMatch;
   finally lFixture.Free; end;
 end;
@@ -768,10 +757,8 @@ end;
 procedure RunTTestAccelShiftStateTestCtrlAloneDoesNotMatch(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestCtrlAloneDoesNotMatch');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlAloneDoesNotMatch';
     lFixture.TestCtrlAloneDoesNotMatch;
   finally lFixture.Free; end;
 end;
@@ -779,10 +766,8 @@ end;
 procedure RunTTestAccelShiftStateTestAltPlusUnrelatedModifierStillMatches(AContext: TNXTestContext);
 var lFixture: TTestAccelShiftState;
 begin
-  lFixture:=TTestAccelShiftState.Create;
+  lFixture:=TTestAccelShiftState.Create(AContext, 'TestAltPlusUnrelatedModifierStillMatches');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAltPlusUnrelatedModifierStillMatches';
     lFixture.TestAltPlusUnrelatedModifierStillMatches;
   finally lFixture.Free; end;
 end;
@@ -790,10 +775,8 @@ end;
 procedure RunTTestAccelDispatchTestAltAccelFiresButton(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestAltAccelFiresButton');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAltAccelFiresButton';
     lFixture.SetUp;
     try lFixture.TestAltAccelFiresButton; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -802,10 +785,8 @@ end;
 procedure RunTTestAccelDispatchTestAltAccelIsCaseInsensitive(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestAltAccelIsCaseInsensitive');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAltAccelIsCaseInsensitive';
     lFixture.SetUp;
     try lFixture.TestAltAccelIsCaseInsensitive; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -814,10 +795,8 @@ end;
 procedure RunTTestAccelDispatchTestCtrlAltDoesNotFireButton(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestCtrlAltDoesNotFireButton');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlAltDoesNotFireButton';
     lFixture.SetUp;
     try lFixture.TestCtrlAltDoesNotFireButton; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -826,10 +805,8 @@ end;
 procedure RunTTestAccelDispatchTestShiftAltDoesNotFireButton(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestShiftAltDoesNotFireButton');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShiftAltDoesNotFireButton';
     lFixture.SetUp;
     try lFixture.TestShiftAltDoesNotFireButton; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -838,10 +815,8 @@ end;
 procedure RunTTestAccelDispatchTestNoModifierDoesNotFireButton(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestNoModifierDoesNotFireButton');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoModifierDoesNotFireButton';
     lFixture.SetUp;
     try lFixture.TestNoModifierDoesNotFireButton; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -850,10 +825,8 @@ end;
 procedure RunTTestAccelDispatchTestWrongLetterDoesNotFire(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestWrongLetterDoesNotFire');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWrongLetterDoesNotFire';
     lFixture.SetUp;
     try lFixture.TestWrongLetterDoesNotFire; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -862,10 +835,8 @@ end;
 procedure RunTTestAccelDispatchTestDisabledButtonDoesNotFire(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestDisabledButtonDoesNotFire');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDisabledButtonDoesNotFire';
     lFixture.SetUp;
     try lFixture.TestDisabledButtonDoesNotFire; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -874,10 +845,8 @@ end;
 procedure RunTTestAccelDispatchTestButtonWithoutAccelDoesNotFire(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestButtonWithoutAccelDoesNotFire');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestButtonWithoutAccelDoesNotFire';
     lFixture.SetUp;
     try lFixture.TestButtonWithoutAccelDoesNotFire; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -886,10 +855,8 @@ end;
 procedure RunTTestAccelDispatchTestNestedButtonInPanelFires(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestNestedButtonInPanelFires');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNestedButtonInPanelFires';
     lFixture.SetUp;
     try lFixture.TestNestedButtonInPanelFires; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -898,10 +865,8 @@ end;
 procedure RunTTestAccelDispatchTestCheckBoxAccelToggles(AContext: TNXTestContext);
 var lFixture: TTestAccelDispatch;
 begin
-  lFixture:=TTestAccelDispatch.Create;
+  lFixture:=TTestAccelDispatch.Create(AContext, 'TestCheckBoxAccelToggles');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCheckBoxAccelToggles';
     lFixture.SetUp;
     try lFixture.TestCheckBoxAccelToggles; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -910,10 +875,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestAccelFocusesFocusWidget(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestAccelFocusesFocusWidget');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAccelFocusesFocusWidget';
     lFixture.SetUp;
     try lFixture.TestAccelFocusesFocusWidget; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -922,10 +885,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestNoFocusWidgetMeansNoAccelerator(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestNoFocusWidgetMeansNoAccelerator');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoFocusWidgetMeansNoAccelerator';
     lFixture.SetUp;
     try lFixture.TestNoFocusWidgetMeansNoAccelerator; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -934,10 +895,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestCtrlAltDoesNotFocus(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestCtrlAltDoesNotFocus');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCtrlAltDoesNotFocus';
     lFixture.SetUp;
     try lFixture.TestCtrlAltDoesNotFocus; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -946,10 +905,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestWrongLetterDoesNotFocus(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestWrongLetterDoesNotFocus');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWrongLetterDoesNotFocus';
     lFixture.SetUp;
     try lFixture.TestWrongLetterDoesNotFocus; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -958,10 +915,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestDisabledTargetIsNotFocused(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestDisabledTargetIsNotFocused');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDisabledTargetIsNotFocused';
     lFixture.SetUp;
     try lFixture.TestDisabledTargetIsNotFocused; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -970,10 +925,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestFreeingTargetClearsFocusWidget(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestFreeingTargetClearsFocusWidget');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFreeingTargetClearsFocusWidget';
     lFixture.SetUp;
     try lFixture.TestFreeingTargetClearsFocusWidget; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -982,10 +935,8 @@ end;
 procedure RunTTestLabelFocusWidgetTestLabelWithoutAmpersandHasNoAccelerator(AContext: TNXTestContext);
 var lFixture: TTestLabelFocusWidget;
 begin
-  lFixture:=TTestLabelFocusWidget.Create;
+  lFixture:=TTestLabelFocusWidget.Create(AContext, 'TestLabelWithoutAmpersandHasNoAccelerator');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLabelWithoutAmpersandHasNoAccelerator';
     lFixture.SetUp;
     try lFixture.TestLabelWithoutAmpersandHasNoAccelerator; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1044,8 +995,5 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.

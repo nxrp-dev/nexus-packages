@@ -23,8 +23,7 @@ From the Nexus root, with nxbuild available:
 nxbuild /project=packages/nexus-packages/db/fcl-db/FCLDB.nxpackage /action=build
 nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBTests.nxproject /action=build
 output/fcl-db-tests/x86_64-linux/FCLDBTests
-nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBRetained.nxproject /action=build
-output/fcl-db-tests/x86_64-linux/retained/FCLDBRetained
+python3 projects/nxtest/retained/BuildRetained.py fcl-db --nxbuild output/nxbuild-next/x86_64-linux/nxbuild --run
 ```
 
 The recipes use NexusFPC's installed RTL, fcl-base, rtl-objpas, rtl-extra,

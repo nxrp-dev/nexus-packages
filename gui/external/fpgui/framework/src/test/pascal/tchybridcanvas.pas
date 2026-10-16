@@ -44,9 +44,14 @@ type
   end;
 
   TTestHybridCanvas = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FSavedFactory: TBufferManagerFactory;
     FSurfaceWidget, FChildWidget: TfpgWidget;
@@ -189,10 +194,10 @@ begin
       lChanged := True;
     if lInside and not AExact then Continue;
     if lInside then lExpected := cFillPixel else lExpected := cSentinel;
-    FContext.AssertTrue((IntToHex(lExpected, 8))=(IntToHex(FMemory.FStorage[lIndex], 8)), 'buffer pixel ' + IntToStr(lIndex));
+    TestContext.AssertTrue((IntToHex(lExpected, 8))=(IntToHex(FMemory.FStorage[lIndex], 8)), 'buffer pixel ' + IntToStr(lIndex));
   end;
   if (ARect.Width > 0) and (ARect.Height > 0) then
-    FContext.AssertTrue(lChanged, 'drawing reached the visible part of the surface');
+    TestContext.AssertTrue(lChanged, 'drawing reached the visible part of the surface');
 end;
 
 procedure TTestHybridCanvas.OversizedChildCannotWrapRows;
@@ -223,10 +228,10 @@ begin
   AttachChild(10, 12, 20, 20);
   FChild.SetClipRect(fpgRect(2, 3, 8, 9));
   lRect := FChild.GetClipRect;
-  FContext.AssertTrue((2)=(lRect.Left), '');
-  FContext.AssertTrue((3)=(lRect.Top), '');
-  FContext.AssertTrue((8)=(lRect.Width), '');
-  FContext.AssertTrue((9)=(lRect.Height), '');
+  TestContext.AssertTrue((2)=(lRect.Left), '');
+  TestContext.AssertTrue((3)=(lRect.Top), '');
+  TestContext.AssertTrue((8)=(lRect.Width), '');
+  TestContext.AssertTrue((9)=(lRect.Height), '');
   FChild.AddClipRect(fpgRect(4, 5, 8, 9));
   FChild.FillRectangle(0, 0, 20, 20);
   AssertPixels(fpgRect(14, 17, 6, 7));
@@ -290,7 +295,7 @@ begin
   AttachChild(60, 60, 200, 200);
   FChild.XORFillRectangle(cFillColor, 0, 0, 200, 200);
   FChild.Pixels[199, 199] := cFillColor;
-  FContext.AssertTrue((0)=(Int64(FChild.Pixels[199, 199])), 'out-of-buffer read');
+  TestContext.AssertTrue((0)=(Int64(FChild.Pixels[199, 199])), 'out-of-buffer read');
   AssertPixels(fpgRect(60, 60, 10, 10), False);
 end;
 
@@ -311,13 +316,13 @@ begin
     for lCycle := 1 to 2 do
     begin
       lPopup.ShowAt(lForm, 70, 50);
-      FContext.AssertTrue(lPopup.Window <> lForm.Window, 'popup owns a different native window');
-      FContext.AssertTrue(lPopup.ActualWidth > lForm.ActualWidth, 'popup extends beyond the owner');
+      TestContext.AssertTrue(lPopup.Window <> lForm.Window, 'popup owns a different native window');
+      TestContext.AssertTrue(lPopup.ActualWidth > lForm.ActualWidth, 'popup extends beyond the owner');
       lPopup.Canvas.BeginDraw;
       try
         lPopup.Canvas.SetColor(cFillColor);
         lPopup.Canvas.FillRectangle(100, 70, 8, 8);
-        FContext.AssertTrue((Int64(cFillColor))=(Int64(lPopup.Canvas.Pixels[103, 73])), 'popup draws beyond the owner extent');
+        TestContext.AssertTrue((Int64(cFillColor))=(Int64(lPopup.Canvas.Pixels[103, 73])), 'popup draws beyond the owner extent');
       finally
         lPopup.Canvas.EndDraw;
       end;
@@ -330,13 +335,18 @@ begin
 end;
 
 
+constructor TTestHybridCanvas.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestHybridCanvasOversizedChildCannotWrapRows(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'OversizedChildCannotWrapRows');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='OversizedChildCannotWrapRows';
     lFixture.SetUp;
     try lFixture.OversizedChildCannotWrapRows; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -345,10 +355,8 @@ end;
 procedure RunTTestHybridCanvasNegativeOriginStaysInBuffer(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'NegativeOriginStaysInBuffer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='NegativeOriginStaysInBuffer';
     lFixture.SetUp;
     try lFixture.NegativeOriginStaysInBuffer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -357,10 +365,8 @@ end;
 procedure RunTTestHybridCanvasOffSurfaceChildWritesNothing(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'OffSurfaceChildWritesNothing');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='OffSurfaceChildWritesNothing';
     lFixture.SetUp;
     try lFixture.OffSurfaceChildWritesNothing; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -369,10 +375,8 @@ end;
 procedure RunTTestHybridCanvasClipCoordinatesRemainLocal(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'ClipCoordinatesRemainLocal');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ClipCoordinatesRemainLocal';
     lFixture.SetUp;
     try lFixture.ClipCoordinatesRemainLocal; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -381,10 +385,8 @@ end;
 procedure RunTTestHybridCanvasExplicitClipCanExtendOutsideChild(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'ExplicitClipCanExtendOutsideChild');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ExplicitClipCanExtendOutsideChild';
     lFixture.SetUp;
     try lFixture.ExplicitClipCanExtendOutsideChild; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -393,10 +395,8 @@ end;
 procedure RunTTestHybridCanvasClearClipRestoresChildArea(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'ClearClipRestoresChildArea');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ClearClipRestoresChildArea';
     lFixture.SetUp;
     try lFixture.ClearClipRestoresChildArea; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -405,10 +405,8 @@ end;
 procedure RunTTestHybridCanvasAggRenderingStaysInBuffer(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'AggRenderingStaysInBuffer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='AggRenderingStaysInBuffer';
     lFixture.SetUp;
     try lFixture.AggRenderingStaysInBuffer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -417,10 +415,8 @@ end;
 procedure RunTTestHybridCanvasTextRenderingStaysInBuffer(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'TextRenderingStaysInBuffer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TextRenderingStaysInBuffer';
     lFixture.SetUp;
     try lFixture.TextRenderingStaysInBuffer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -429,10 +425,8 @@ end;
 procedure RunTTestHybridCanvasImageBlitStaysInBuffer(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'ImageBlitStaysInBuffer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ImageBlitStaysInBuffer';
     lFixture.SetUp;
     try lFixture.ImageBlitStaysInBuffer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -441,10 +435,8 @@ end;
 procedure RunTTestHybridCanvasXorAndPixelsStayInBuffer(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'XorAndPixelsStayInBuffer');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='XorAndPixelsStayInBuffer';
     lFixture.SetUp;
     try lFixture.XorAndPixelsStayInBuffer; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -453,10 +445,8 @@ end;
 procedure RunTTestHybridCanvasPopupHasIndependentSurface(AContext: TNXTestContext);
 var lFixture: TTestHybridCanvas;
 begin
-  lFixture:=TTestHybridCanvas.Create;
+  lFixture:=TTestHybridCanvas.Create(AContext, 'PopupHasIndependentSurface');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='PopupHasIndependentSurface';
     lFixture.SetUp;
     try lFixture.PopupHasIndependentSurface; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

@@ -10,9 +10,14 @@ uses
 
 type
   TTestMigResizeConstraint = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestDefaultConstructor;
     procedure TestParameterizedConstructor;
@@ -30,10 +35,10 @@ var
 begin
   rc := TfpgMigResizeConstraint.Create;
   try
-    FContext.AssertTrue(IsNaN(rc.Grow), 'Default Grow should be NaN');
-    FContext.AssertTrue((100)=(rc.GrowPrio), 'Default GrowPrio should be 100');
-    FContext.AssertTrue(Abs((100.0)-(rc.Shrink))<=(0.001), 'Default Shrink should be 100.0');
-    FContext.AssertTrue((100)=(rc.ShrinkPrio), 'Default ShrinkPrio should be 100');
+    TestContext.AssertTrue(IsNaN(rc.Grow), 'Default Grow should be NaN');
+    TestContext.AssertTrue((100)=(rc.GrowPrio), 'Default GrowPrio should be 100');
+    TestContext.AssertTrue(Abs((100.0)-(rc.Shrink))<=(0.001), 'Default Shrink should be 100.0');
+    TestContext.AssertTrue((100)=(rc.ShrinkPrio), 'Default ShrinkPrio should be 100');
   finally
     rc.Free;
   end;
@@ -47,23 +52,28 @@ begin
   nanFloat := NaN;
   rc := TfpgMigResizeConstraint.Create(50, 50.0, 150, nanFloat);
   try
-    FContext.AssertTrue(IsNaN(rc.Grow), 'Grow should be NaN');
-    FContext.AssertTrue((150)=(rc.GrowPrio), 'GrowPrio should be 150');
-    FContext.AssertTrue(Abs((50.0)-(rc.Shrink))<=(0.001), 'Shrink should be 50.0');
-    FContext.AssertTrue((50)=(rc.ShrinkPrio), 'ShrinkPrio should be 50');
+    TestContext.AssertTrue(IsNaN(rc.Grow), 'Grow should be NaN');
+    TestContext.AssertTrue((150)=(rc.GrowPrio), 'GrowPrio should be 150');
+    TestContext.AssertTrue(Abs((50.0)-(rc.Shrink))<=(0.001), 'Shrink should be 50.0');
+    TestContext.AssertTrue((50)=(rc.ShrinkPrio), 'ShrinkPrio should be 50');
   finally
     rc.Free;
   end;
 end;
 
 
+constructor TTestMigResizeConstraint.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigResizeConstraintTestDefaultConstructor(AContext: TNXTestContext);
 var lFixture: TTestMigResizeConstraint;
 begin
-  lFixture:=TTestMigResizeConstraint.Create;
+  lFixture:=TTestMigResizeConstraint.Create(AContext, 'TestDefaultConstructor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultConstructor';
     lFixture.TestDefaultConstructor;
   finally lFixture.Free; end;
 end;
@@ -71,10 +81,8 @@ end;
 procedure RunTTestMigResizeConstraintTestParameterizedConstructor(AContext: TNXTestContext);
 var lFixture: TTestMigResizeConstraint;
 begin
-  lFixture:=TTestMigResizeConstraint.Create;
+  lFixture:=TTestMigResizeConstraint.Create(AContext, 'TestParameterizedConstructor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParameterizedConstructor';
     lFixture.TestParameterizedConstructor;
   finally lFixture.Free; end;
 end;

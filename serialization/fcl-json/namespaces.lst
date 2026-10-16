@@ -12,5 +12,4 @@ src/jsonparser.pas=namespaced/FpJson.Parser.pas
 src/jsonreader.pas=namespaced/FpJson.Reader.pas
 src/jsonwriter.pas=namespaced/FpJson.Writer.pas
 src/jsonconf.pas=namespaced/FpJson.Conf.pas
-src/jsonfpcunit.pas=namespaced/FpJson.FpcUnit.pas
 src/jsoncomparer.pas=namespaced/FpJson.Comparer.pas

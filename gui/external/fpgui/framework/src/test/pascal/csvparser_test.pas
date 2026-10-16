@@ -16,9 +16,14 @@ uses
 
 type
   TTestCSVParser= class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FParser: TCsvParser;
     FFieldList: TStringList;
@@ -41,13 +46,6 @@ implementation
 uses
   StrUtils
   ;
-
-procedure RegisterTests;
-begin
-  //AddToNonPersistentTestSuite(TTestCSVParser);
-  
-end;
-
 
 procedure TTestCSVParser.SetUp;
 begin
@@ -88,32 +86,37 @@ const
   TestLine = Field1 + ',' + Field2 + ',' + Field3 + ',' + Field4;
 begin
   FParser.ExtractFields(TestLine,FFieldList);
-  FContext.AssertTrue((Field1)=(FFieldList[0]), 'Failing on 1');
+  TestContext.AssertTrue((Field1)=(FFieldList[0]), 'Failing on 1');
   { Remove quotes to test Field2 - parser remove outer double quotes }
-  FContext.AssertTrue((MidStr(Field2, 2, Length(Field2)-2))=(FFieldList[1]), 'Failing on 2');
-  FContext.AssertTrue((Field3)=(FFieldList[2]), 'Failing on 3');
-  FContext.AssertTrue((Field4)=(FFieldList[3]), 'Failing on 4');
+  TestContext.AssertTrue((MidStr(Field2, 2, Length(Field2)-2))=(FFieldList[1]), 'Failing on 2');
+  TestContext.AssertTrue((Field3)=(FFieldList[2]), 'Failing on 3');
+  TestContext.AssertTrue((Field4)=(FFieldList[3]), 'Failing on 4');
 end;
 
 
 procedure TTestCSVParser.TestBadChar;
 begin
-  FContext.AssertRaises(Exception, @BadChar, 'Did not raise exception for extra chars after end quote');
+  TestContext.AssertRaises(Exception, @BadChar, 'Did not raise exception for extra chars after end quote');
 end;
 
 
 procedure TTestCSVParser.TestMissingQuote;
 begin
-  FContext.AssertRaises(Exception, @MissingQuote, 'Did not raise exception for missing quote');
+  TestContext.AssertRaises(Exception, @MissingQuote, 'Did not raise exception for missing quote');
+end;
+
+constructor TTestCSVParser.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestCSVParserTestExtractFields(AContext: TNXTestContext);
 var lFixture: TTestCSVParser;
 begin
-  lFixture:=TTestCSVParser.Create;
+  lFixture:=TTestCSVParser.Create(AContext, 'TestExtractFields');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestExtractFields';
     lFixture.SetUp;
     try lFixture.TestExtractFields; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -122,10 +125,8 @@ end;
 procedure RunTTestCSVParserTestBadChar(AContext: TNXTestContext);
 var lFixture: TTestCSVParser;
 begin
-  lFixture:=TTestCSVParser.Create;
+  lFixture:=TTestCSVParser.Create(AContext, 'TestBadChar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBadChar';
     lFixture.SetUp;
     try lFixture.TestBadChar; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -134,10 +135,8 @@ end;
 procedure RunTTestCSVParserTestMissingQuote(AContext: TNXTestContext);
 var lFixture: TTestCSVParser;
 begin
-  lFixture:=TTestCSVParser.Create;
+  lFixture:=TTestCSVParser.Create(AContext, 'TestMissingQuote');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestMissingQuote';
     lFixture.SetUp;
     try lFixture.TestMissingQuote; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -153,9 +152,6 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.
 

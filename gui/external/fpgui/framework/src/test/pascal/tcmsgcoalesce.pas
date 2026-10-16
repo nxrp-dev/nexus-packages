@@ -15,9 +15,14 @@ type
   { TTestMessageCoalescing }
 
   TTestMessageCoalescing = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Multiple FPGM_PAINT for the same widget should coalesce into one }
     procedure TestCoalesce_DuplicatePaintSameTarget;
@@ -34,18 +39,9 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 procedure RegistertcmsgcoalesceTests(ARegistry: TNXTestRegistry);
 
 implementation
-
-
-procedure RegisterTests;
-begin
-  
-end;
 
 
 { Helper: post N paint messages for the same dest object }
@@ -93,7 +89,7 @@ begin
     { Coalesce should reduce 5 paint messages to 1 }
     fpgCoalesceMessages;
     count := CountMessagesFor(dummy, FPGM_PAINT);
-    FContext.AssertTrue((1)=(count), '5 paints for same target should coalesce to 1');
+    TestContext.AssertTrue((1)=(count), '5 paints for same target should coalesce to 1');
   finally
     dummy.Free;
   end;
@@ -125,8 +121,8 @@ begin
         if (m.Dest = d2) and (m.MsgCode = FPGM_PAINT) then Inc(c2);
       end;
     until mp = nil;
-    FContext.AssertTrue((1)=(c1), 'd1 should have 1 paint');
-    FContext.AssertTrue((1)=(c2), 'd2 should have 1 paint');
+    TestContext.AssertTrue((1)=(c1), 'd1 should have 1 paint');
+    TestContext.AssertTrue((1)=(c2), 'd2 should have 1 paint');
   finally
     d2.Free;
     d1.Free;
@@ -156,7 +152,7 @@ begin
 
     fpgCoalesceMessages;
     count := CountMessagesFor(dummy, FPGM_RESIZE);
-    FContext.AssertTrue((1)=(count), '3 resizes should coalesce to 1');
+    TestContext.AssertTrue((1)=(count), '3 resizes should coalesce to 1');
   finally
     dummy.Free;
   end;
@@ -189,7 +185,7 @@ begin
         Inc(count);
       end;
     until mp = nil;
-    FContext.AssertTrue((3)=(count), 'Non-coalescable messages should pass through');
+    TestContext.AssertTrue((3)=(count), 'Non-coalescable messages should pass through');
   finally
     dummy.Free;
   end;
@@ -227,19 +223,24 @@ begin
       end;
     until mp = nil;
     { 1 key + 1 mouse + 1 coalesced paint = 3 }
-    FContext.AssertTrue((3)=(count), 'Mixed messages: 1 key + 1 mouse + 1 coalesced paint');
+    TestContext.AssertTrue((3)=(count), 'Mixed messages: 1 key + 1 mouse + 1 coalesced paint');
   finally
     dummy.Free;
   end;
 end;
 
+constructor TTestMessageCoalescing.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMessageCoalescingTestCoalesce_DuplicatePaintSameTarget(AContext: TNXTestContext);
 var lFixture: TTestMessageCoalescing;
 begin
-  lFixture:=TTestMessageCoalescing.Create;
+  lFixture:=TTestMessageCoalescing.Create(AContext, 'TestCoalesce_DuplicatePaintSameTarget');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCoalesce_DuplicatePaintSameTarget';
     lFixture.TestCoalesce_DuplicatePaintSameTarget;
   finally lFixture.Free; end;
 end;
@@ -247,10 +248,8 @@ end;
 procedure RunTTestMessageCoalescingTestCoalesce_PaintDifferentTargets(AContext: TNXTestContext);
 var lFixture: TTestMessageCoalescing;
 begin
-  lFixture:=TTestMessageCoalescing.Create;
+  lFixture:=TTestMessageCoalescing.Create(AContext, 'TestCoalesce_PaintDifferentTargets');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCoalesce_PaintDifferentTargets';
     lFixture.TestCoalesce_PaintDifferentTargets;
   finally lFixture.Free; end;
 end;
@@ -258,10 +257,8 @@ end;
 procedure RunTTestMessageCoalescingTestCoalesce_DuplicateResizeSameTarget(AContext: TNXTestContext);
 var lFixture: TTestMessageCoalescing;
 begin
-  lFixture:=TTestMessageCoalescing.Create;
+  lFixture:=TTestMessageCoalescing.Create(AContext, 'TestCoalesce_DuplicateResizeSameTarget');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCoalesce_DuplicateResizeSameTarget';
     lFixture.TestCoalesce_DuplicateResizeSameTarget;
   finally lFixture.Free; end;
 end;
@@ -269,10 +266,8 @@ end;
 procedure RunTTestMessageCoalescingTestCoalesce_NonCoalescableUnchanged(AContext: TNXTestContext);
 var lFixture: TTestMessageCoalescing;
 begin
-  lFixture:=TTestMessageCoalescing.Create;
+  lFixture:=TTestMessageCoalescing.Create(AContext, 'TestCoalesce_NonCoalescableUnchanged');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCoalesce_NonCoalescableUnchanged';
     lFixture.TestCoalesce_NonCoalescableUnchanged;
   finally lFixture.Free; end;
 end;
@@ -280,10 +275,8 @@ end;
 procedure RunTTestMessageCoalescingTestCoalesce_MixedMessages(AContext: TNXTestContext);
 var lFixture: TTestMessageCoalescing;
 begin
-  lFixture:=TTestMessageCoalescing.Create;
+  lFixture:=TTestMessageCoalescing.Create(AContext, 'TestCoalesce_MixedMessages');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCoalesce_MixedMessages';
     lFixture.TestCoalesce_MixedMessages;
   finally lFixture.Free; end;
 end;
@@ -300,8 +293,5 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.

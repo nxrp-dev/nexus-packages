@@ -22,12 +22,15 @@ unit readertest;
 {$mode objfpc}{$h+}
 
 interface
+
+uses obNXTestRegistry;
+
 procedure RegisterreadertestTests(ARegistry: TNXTestRegistry);
 
 implementation
 
 uses
-  obNXTestContext, obNXTestRegistry, obNXTestSuite, sysutils, xmlutils, readerunit, XmlReader;
+  obNXTestContext, obNXTestSuite, sysutils, xmlutils, readerunit, XmlReader;
 
 type
   TXMLReaderTest = class(TXMLReaderTestBase)
@@ -83,12 +86,12 @@ const
 
 procedure TXMLReaderTest.TestInitialState(r: TXMLReader);
 begin
-  FContext.AssertTrue((0)=(r.Depth), 'Depth');
-  FContext.AssertTrue((False)=(r.EOF), 'EOF');
-  FContext.AssertTrue((False)=(r.HasValue), 'HasValue');
+  TestContext.AssertTrue((0)=(r.Depth), 'Depth');
+  TestContext.AssertTrue((False)=(r.EOF), 'EOF');
+  TestContext.AssertTrue((False)=(r.HasValue), 'HasValue');
   AssertEqualsW('LocalName', '', r.LocalName);
-  FContext.AssertTrue((ntNone)=(r.NodeType), 'NodeType');
-  FContext.AssertTrue((rsInitial)=(r.ReadState), 'ReadState');
+  TestContext.AssertTrue((ntNone)=(r.NodeType), 'NodeType');
+  TestContext.AssertTrue((rsInitial)=(r.ReadState), 'ReadState');
 end;
 
 procedure TXMLReaderTest.InitialState;
@@ -101,7 +104,7 @@ procedure TXMLReaderTest.TestReadEmptySource(r: TXMLReader);
 begin
   try
     r.Read;
-    FContext.Fail('Read empty source succeeded');
+    TestContext.Fail('Read empty source succeeded');
   except
   end;
 end;
@@ -114,31 +117,31 @@ end;
 procedure TXMLReaderTest.TestRead(r: TXMLReader);
 begin
   r.Read;
-  FContext.AssertTrue((ntElement)=(r.NodeType), '<root>.NodeType');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '<root>.NodeType');
   AssertEqualsW('<root>.Name', 'root', r.Name);
-  FContext.AssertTrue((rsInteractive)=(r.ReadState), '<root>.ReadState');
-  FContext.AssertTrue((0)=(r.Depth), '<root>.Depth');
+  TestContext.AssertTrue((rsInteractive)=(r.ReadState), '<root>.ReadState');
+  TestContext.AssertTrue((0)=(r.Depth), '<root>.Depth');
 
   // move to 'child'
   r.Read;
-  FContext.AssertTrue((1)=(r.Depth), '<child/>.Depth');
-  FContext.AssertTrue((ntElement)=(r.NodeType), '<child/>.NodeType');
+  TestContext.AssertTrue((1)=(r.Depth), '<child/>.Depth');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '<child/>.NodeType');
   AssertEqualsW('<child/>.Name', 'child', r.Name);
 
   { this differs from .net; we don't support EmptyElement }
   r.Read;
-  FContext.AssertTrue((1)=(r.Depth), '<child/>.EndDepth');
-  FContext.AssertTrue((ntEndElement)=(r.NodeType), '<child/>.EndNodeType');
+  TestContext.AssertTrue((1)=(r.Depth), '<child/>.EndDepth');
+  TestContext.AssertTrue((ntEndElement)=(r.NodeType), '<child/>.EndNodeType');
   AssertEqualsW('<child/>.EndName', 'child', r.Name);
 
   r.Read;
-  FContext.AssertTrue((0)=(r.Depth), '</root>.Depth');
-  FContext.AssertTrue((ntEndElement)=(r.NodeType), '</root>.NodeType');
+  TestContext.AssertTrue((0)=(r.Depth), '</root>.Depth');
+  TestContext.AssertTrue((ntEndElement)=(r.NodeType), '</root>.NodeType');
   AssertEqualsW('</root>.Name', 'root', r.Name);
 
   r.Read;
-  FContext.AssertTrue(r.EOF, 'end.EOF');
-  FContext.AssertTrue((ntNone)=(r.NodeType), 'end.NodeType');
+  TestContext.AssertTrue(r.EOF, 'end.EOF');
+  TestContext.AssertTrue((ntNone)=(r.NodeType), 'end.NodeType');
 end;
 
 procedure TXMLReaderTest.Read;
@@ -149,15 +152,15 @@ end;
 procedure TXMLReaderTest.TestReadAttributeValue(r: TXMLReader);
 begin
   r.Read;       // root
-  FContext.AssertTrue(r.MoveToFirstAttribute, '#1');
+  TestContext.AssertTrue(r.MoveToFirstAttribute, '#1');
   AssertNodeValues('#2', r,
     ntAttribute,
     1, 'attr', '', 'attr', '', 'value', true, 1, true);
-  FContext.AssertTrue(r.ReadAttributeValue, '#3');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#3');
   AssertNodeValues('#4', r,
     ntText,
     2, '', '', '', '', 'value', true, 1, true);
-  FContext.AssertTrue(r.MoveToElement, '#5');
+  TestContext.AssertTrue(r.MoveToElement, '#5');
   AssertNodeValues('#6', r,
     ntElement,
     0, 'root', '', 'root', '', '', false, 1, true);
@@ -172,65 +175,65 @@ procedure TXMLReaderTest.TestReadAttributeValue2(r: TXMLReader);
 begin
   r.Read;       // DTD
   r.Read;       // root
-  FContext.AssertTrue(r.MoveToFirstAttribute, '#1');
+  TestContext.AssertTrue(r.MoveToFirstAttribute, '#1');
   AssertNodeValues('#2', r,
     ntAttribute,
     1, 'attr', '', 'attr', '', 'ax1y1x1b', true, 1, true);
-  FContext.AssertTrue(r.ReadAttributeValue, '#3');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#3');
   AssertNodeValues('#4', r,
     ntText, 2,
     '', '', '', '', 'a', true, 1, true);
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#5');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#5');
   AssertNodeValues('#6', r,
     ntEntityReference, 2,
     'e1','','e1','', '', false, 1, true);
 
   r.ResolveEntity;
-  FContext.AssertTrue((2)=(r.Depth), '#6a');
-  FContext.AssertTrue((ntEntityReference)=(r.nodeType), '#6b');
+  TestContext.AssertTrue((2)=(r.Depth), '#6a');
+  TestContext.AssertTrue((ntEntityReference)=(r.nodeType), '#6b');
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#6c');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#6c');
   AssertNodeValues('#6d', r,
     ntEntityReference, 3,
     'e2', '', 'e2', '', '', false, 1, true);
 
   // Don't resolve it and advance to 'y1' textnode
-  FContext.AssertTrue(r.ReadAttributeValue, '#6e');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#6e');
   AssertNodeValues('#6f', r,
     ntText, 3,
     '', '', '', '', 'y1', true, 1, true);
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#6g');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#6g');
   AssertNodeValues('#6h', r,
     ntEntityReference, 3,
     'e2', '', 'e2', '', '', false, 1, true);
 
   r.ResolveEntity;
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#6i');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#6i');
   AssertNodeValues('#6j', r,
     ntText, 4,
     '','','','','x1', true, 1, true);
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#6k');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#6k');
   AssertNodeValues('#6l', r,
     ntEndEntity, 3,
     'e2','','e2','', '', false, 1, true);
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#7');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#7');
   AssertNodeValues('#8', r,
     ntEndEntity, 2,
     'e1','','e1','', '', false, 1, true);
 
-  FContext.AssertTrue(r.ReadAttributeValue, '#9');
+  TestContext.AssertTrue(r.ReadAttributeValue, '#9');
 
   AssertNodeValues('#10', r,
     ntText, 2,
     '', '', '', '', 'b', true, 1, true);
-  FContext.AssertTrue(not (r.ReadAttributeValue), '#11');
+  TestContext.AssertTrue(not (r.ReadAttributeValue), '#11');
 
-  FContext.AssertTrue(r.MoveToElement, '#12');
+  TestContext.AssertTrue(r.MoveToElement, '#12');
   AssertNodeValues('#13', r,
     ntElement, 0,
     'root', '', 'root', '', '', false, 1, true);
@@ -282,16 +285,16 @@ begin
   AssertEqualsW('readString.1.Name', 'b', r.Name);
   s := r.ReadString;
   AssertEqualsW('readString.2.ret_val', 'mixed', s);
-  FContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.2.nodeType');
+  TestContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.2.nodeType');
   s := r.ReadString; // does not advance
   AssertEqualsW('readString.3.ret_val', '',s);
-  FContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.3.nodeType');
+  TestContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.3.nodeType');
   r.Read;
-  FContext.AssertTrue((ntText)=(r.NodeType), 'readString.4.nodeType');
+  TestContext.AssertTrue((ntText)=(r.NodeType), 'readString.4.nodeType');
   AssertEqualsW('readString.4.Value', ' string.', r.Value);
   s := r.ReadString;
   AssertEqualsW('readString.5.ret_val', ' string. cdata string.', s);
-  FContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.5.nodeType');
+  TestContext.AssertTrue((ntEndElement)=(r.NodeType), 'readString.5.nodeType');
 end;
 
 procedure TXMLReaderTest.ReadStringFromElement;
@@ -513,19 +516,19 @@ begin
     '', 0);
 
   AssertEqualsW('http://foo/', r.LookupNamespace('foo'));
-  FContext.AssertTrue((r.LookupNamespace('baz'))=nil, '');
+  TestContext.AssertTrue(r.LookupNamespace('baz')='', '');
 
   AssertEndDocument(r);
 end;
 
 procedure TXMLReaderTest.TestMoveToElementFromAttribute(r: TXMLReader);
 begin
-  FContext.AssertTrue(r.Read, '');
-  FContext.AssertTrue((ntElement)=(r.NodeType), '');
-  FContext.AssertTrue(r.MoveToFirstAttribute, '');
-  FContext.AssertTrue((ntAttribute)=(r.NodeType), '');
-  FContext.AssertTrue(r.MoveToElement, '');
-  FContext.AssertTrue((ntElement)=(r.NodeType), '');
+  TestContext.AssertTrue(r.Read, '');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '');
+  TestContext.AssertTrue(r.MoveToFirstAttribute, '');
+  TestContext.AssertTrue((ntAttribute)=(r.NodeType), '');
+  TestContext.AssertTrue(r.MoveToElement, '');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '');
 end;
 
 procedure TXMLReaderTest.MoveToElementFromAttribute;
@@ -535,10 +538,10 @@ end;
 
 procedure TXMLReaderTest.TestMoveToElementFromElement(r: TXMLReader);
 begin
-  FContext.AssertTrue(r.Read, '');
-  FContext.AssertTrue((ntElement)=(r.NodeType), '');
-  FContext.AssertTrue(not (r.MoveToElement), '');
-  FContext.AssertTrue((ntElement)=(r.NodeType), '');
+  TestContext.AssertTrue(r.Read, '');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '');
+  TestContext.AssertTrue(not (r.MoveToElement), '');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '');
 end;
 
 procedure TXMLReaderTest.MoveToElementFromElement;
@@ -562,14 +565,14 @@ begin
   AssertAttribute(r,
     'quux', '', 'quux', '',
     'quuux');
-  FContext.AssertTrue(r.MoveToNextAttribute, '');
+  TestContext.AssertTrue(r.MoveToNextAttribute, '');
   AssertEqualsW('bar', r.Name);
   AssertEqualsW('baz', r.Value);
-  FContext.AssertTrue(r.MoveToNextAttribute, '');
+  TestContext.AssertTrue(r.MoveToNextAttribute, '');
   AssertEqualsW('quux', r.Name);
   AssertEqualsW('quuux', r.Value);
-  FContext.AssertTrue(not (r.MoveToNextAttribute), '');
-  FContext.AssertTrue(r.MoveToElement, '');
+  TestContext.AssertTrue(not (r.MoveToNextAttribute), '');
+  TestContext.AssertTrue(r.MoveToElement, '');
   AssertNodeValues('#1', r,
     ntElement, 0,
     'foo','','foo','',
@@ -591,33 +594,33 @@ begin
   r.Read;       // DTD
   r.Read;       // root
   r.Read;       // &ent;
-  FContext.AssertTrue((ntEntityReference)=(r.NodeType), '#1');
-  FContext.AssertTrue((1)=(r.Depth), '#2');
+  TestContext.AssertTrue((ntEntityReference)=(r.NodeType), '#1');
+  TestContext.AssertTrue((1)=(r.Depth), '#2');
   r.ResolveEntity;
   // stays on entity reference
-  FContext.AssertTrue((ntEntityReference)=(r.NodeType), '#3');
-  FContext.AssertTrue((1)=(r.Depth), '#3a');
+  TestContext.AssertTrue((ntEntityReference)=(r.NodeType), '#3');
+  TestContext.AssertTrue((1)=(r.Depth), '#3a');
   r.Read;
   // now advances to replacement text
-  FContext.AssertTrue((ntText)=(r.NodeType), '#4');
-  FContext.AssertTrue((2)=(r.Depth), '#5');
+  TestContext.AssertTrue((ntText)=(r.NodeType), '#4');
+  TestContext.AssertTrue((2)=(r.Depth), '#5');
   AssertEqualsW('#6', 'entity string', r.Value);
   r.Read;
-  FContext.AssertTrue((ntEndEntity)=(r.NodeType), '#7');
-  FContext.AssertTrue((1)=(r.Depth), '#8');
+  TestContext.AssertTrue((ntEndEntity)=(r.NodeType), '#7');
+  TestContext.AssertTrue((1)=(r.Depth), '#8');
   AssertEqualsW('#9', '', r.Value);
 
   r.Read;     // &ent2;
-  FContext.AssertTrue((ntEntityReference)=(r.NodeType), '#10');
-  FContext.AssertTrue((1)=(r.Depth), '#11');
+  TestContext.AssertTrue((ntEntityReference)=(r.NodeType), '#10');
+  TestContext.AssertTrue((1)=(r.Depth), '#11');
   r.ResolveEntity;
   // stays on entity reference
-  FContext.AssertTrue((ntEntityReference)=(r.NodeType), '#12');
-  FContext.AssertTrue((1)=(r.Depth), '#12a');
+  TestContext.AssertTrue((ntEntityReference)=(r.NodeType), '#12');
+  TestContext.AssertTrue((1)=(r.Depth), '#12a');
   // now advances to element node
   r.Read;
-  FContext.AssertTrue((ntElement)=(r.NodeType), '#13');
-  FContext.AssertTrue((2)=(r.Depth), '#14');
+  TestContext.AssertTrue((ntElement)=(r.NodeType), '#13');
+  TestContext.AssertTrue((2)=(r.Depth), '#14');
 end;
 
 procedure TXMLReaderTest.ResolveEntity;
@@ -636,30 +639,30 @@ var
 begin
   if not Supports(r, IXmlLineInfo, aux) then
     Exit;
-  FContext.AssertTrue((0)=(aux.LineNumber), '#1a');
-  FContext.AssertTrue((0)=(aux.LinePosition), '#1b');
+  TestContext.AssertTrue((0)=(aux.LineNumber), '#1a');
+  TestContext.AssertTrue((0)=(aux.LinePosition), '#1b');
   r.MoveToContent;
-  FContext.AssertTrue((1)=(aux.LineNumber), '#2a');
-  FContext.AssertTrue((2)=(aux.LinePosition), '#2b');
+  TestContext.AssertTrue((1)=(aux.LineNumber), '#2a');
+  TestContext.AssertTrue((2)=(aux.LinePosition), '#2b');
   r.Read;
-  FContext.AssertTrue((1)=(aux.LineNumber), '#3a');
-  FContext.AssertTrue((7)=(aux.LinePosition), '#3b');
+  TestContext.AssertTrue((1)=(aux.LineNumber), '#3a');
+  TestContext.AssertTrue((7)=(aux.LinePosition), '#3b');
   r.Read;
   r.Read;
 //  r.ReadOuterXml;
-  FContext.AssertTrue((1)=(aux.LineNumber), '#4a');
-  FContext.AssertTrue((22)=(aux.LinePosition), '#4b');
+  TestContext.AssertTrue((1)=(aux.LineNumber), '#4a');
+  TestContext.AssertTrue((22)=(aux.LinePosition), '#4b');
   r.Read;
   r.Read;
 //  r.ReadInnerXml;
-  FContext.AssertTrue((1)=(aux.LineNumber), '#5a');
-  FContext.AssertTrue((34)=(aux.LinePosition), '#5b');
+  TestContext.AssertTrue((1)=(aux.LineNumber), '#5a');
+  TestContext.AssertTrue((34)=(aux.LinePosition), '#5b');
   r.Read;     { now at EOF }
-  FContext.AssertTrue((1)=(aux.LineNumber), '#6a');
-  FContext.AssertTrue((38)=(aux.LinePosition), '#6b');
+  TestContext.AssertTrue((1)=(aux.LineNumber), '#6a');
+  TestContext.AssertTrue((38)=(aux.LinePosition), '#6b');
   r.Close;
-  FContext.AssertTrue((0)=(aux.LineNumber), '#7a');
-  FContext.AssertTrue((0)=(aux.LinePosition), '#7b');
+  TestContext.AssertTrue((0)=(aux.LineNumber), '#7a');
+  TestContext.AssertTrue((0)=(aux.LinePosition), '#7b');
 end;
 
 procedure TXMLReaderTest.LineInfo;
@@ -671,10 +674,8 @@ end;
 procedure RunTXMLReaderTestInitialState(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'InitialState');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='InitialState';
     lFixture.InitialState;
   finally lFixture.Free; end;
 end;
@@ -682,10 +683,8 @@ end;
 procedure RunTXMLReaderTestReadEmptySource(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ReadEmptySource');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ReadEmptySource';
     lFixture.ReadEmptySource;
   finally lFixture.Free; end;
 end;
@@ -693,10 +692,8 @@ end;
 procedure RunTXMLReaderTestRead(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'Read');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='Read';
     lFixture.Read;
   finally lFixture.Free; end;
 end;
@@ -704,10 +701,8 @@ end;
 procedure RunTXMLReaderTestReadAttributeValue(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ReadAttributeValue');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ReadAttributeValue';
     lFixture.ReadAttributeValue;
   finally lFixture.Free; end;
 end;
@@ -715,10 +710,8 @@ end;
 procedure RunTXMLReaderTestReadAttributeValue2(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ReadAttributeValue2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ReadAttributeValue2';
     lFixture.ReadAttributeValue2;
   finally lFixture.Free; end;
 end;
@@ -726,10 +719,8 @@ end;
 procedure RunTXMLReaderTestDTDProperties(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'DTDProperties');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='DTDProperties';
     lFixture.DTDProperties;
   finally lFixture.Free; end;
 end;
@@ -737,10 +728,8 @@ end;
 procedure RunTXMLReaderTestReadStringFromElement(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ReadStringFromElement');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ReadStringFromElement';
     lFixture.ReadStringFromElement;
   finally lFixture.Free; end;
 end;
@@ -748,10 +737,8 @@ end;
 procedure RunTXMLReaderTestEmptyElement(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'EmptyElement');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='EmptyElement';
     lFixture.EmptyElement;
   finally lFixture.Free; end;
 end;
@@ -759,10 +746,8 @@ end;
 procedure RunTXMLReaderTestNestedEmptyTag(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'NestedEmptyTag');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='NestedEmptyTag';
     lFixture.NestedEmptyTag;
   finally lFixture.Free; end;
 end;
@@ -770,10 +755,8 @@ end;
 procedure RunTXMLReaderTestNestedText(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'NestedText');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='NestedText';
     lFixture.NestedText;
   finally lFixture.Free; end;
 end;
@@ -781,10 +764,8 @@ end;
 procedure RunTXMLReaderTestEmptyElementWithAttributes(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'EmptyElementWithAttributes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='EmptyElementWithAttributes';
     lFixture.EmptyElementWithAttributes;
   finally lFixture.Free; end;
 end;
@@ -792,10 +773,8 @@ end;
 procedure RunTXMLReaderTestPIBeforeRoot(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'PIBeforeRoot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='PIBeforeRoot';
     lFixture.PIBeforeRoot;
   finally lFixture.Free; end;
 end;
@@ -803,10 +782,8 @@ end;
 procedure RunTXMLReaderTestCommentBeforeRoot(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'CommentBeforeRoot');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CommentBeforeRoot';
     lFixture.CommentBeforeRoot;
   finally lFixture.Free; end;
 end;
@@ -814,10 +791,8 @@ end;
 procedure RunTXMLReaderTestCDATA(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'CDATA');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='CDATA';
     lFixture.CDATA;
   finally lFixture.Free; end;
 end;
@@ -825,10 +800,8 @@ end;
 procedure RunTXMLReaderTestChildElementInNamespace(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ChildElementInNamespace');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ChildElementInNamespace';
     lFixture.ChildElementInNamespace;
   finally lFixture.Free; end;
 end;
@@ -836,10 +809,8 @@ end;
 procedure RunTXMLReaderTestMoveToElementFromAttribute(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'MoveToElementFromAttribute');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='MoveToElementFromAttribute';
     lFixture.MoveToElementFromAttribute;
   finally lFixture.Free; end;
 end;
@@ -847,10 +818,8 @@ end;
 procedure RunTXMLReaderTestMoveToElementFromElement(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'MoveToElementFromElement');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='MoveToElementFromElement';
     lFixture.MoveToElementFromElement;
   finally lFixture.Free; end;
 end;
@@ -858,10 +827,8 @@ end;
 procedure RunTXMLReaderTestMoveToNextAttribute(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'MoveToNextAttribute');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='MoveToNextAttribute';
     lFixture.MoveToNextAttribute;
   finally lFixture.Free; end;
 end;
@@ -869,10 +836,8 @@ end;
 procedure RunTXMLReaderTestResolveEntity(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'ResolveEntity');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='ResolveEntity';
     lFixture.ResolveEntity;
   finally lFixture.Free; end;
 end;
@@ -880,10 +845,8 @@ end;
 procedure RunTXMLReaderTestLineInfo(AContext: TNXTestContext);
 var lFixture: TXMLReaderTest;
 begin
-  lFixture:=TXMLReaderTest.Create;
+  lFixture:=TXMLReaderTest.Create(AContext, 'LineInfo');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='LineInfo';
     lFixture.LineInfo;
   finally lFixture.Free; end;
 end;

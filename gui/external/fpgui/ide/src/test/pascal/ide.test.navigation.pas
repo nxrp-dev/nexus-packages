@@ -1,9 +1,7 @@
 {
     fpGUI IDE - Navigation Tests
 
-    Tests for interface/procedure RegisteridetestnavigationTests(ARegistry: TNXTestRegistry);
-
-implementation navigation using tokenised
+    Tests for interface/implementation navigation using tokenised
     highlight data.
 }
 unit ide.test.navigation;
@@ -23,9 +21,14 @@ type
   { TTestNavigation }
 
   TTestNavigation = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHL: TPascalHighlighter;
     FLines: TStringList;
@@ -51,6 +54,8 @@ type
     procedure TestNavigateToIntf_FromIncludeFile;
   end;
 
+
+procedure RegisteridetestnavigationTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -133,19 +138,19 @@ end;
 procedure TTestNavigation.TestGetSectionAtLine_Interface;
 begin
   SetSource(cSimpleUnit);
-  FContext.AssertTrue((Ord(usInterface))=(Ord(GetSectionAtLine(FHL, FLines, 6))), 'Line 6 should be in interface section');
+  TestContext.AssertTrue((Ord(usInterface))=(Ord(GetSectionAtLine(FHL, FLines, 6))), 'Line 6 should be in interface section');
 end;
 
 procedure TTestNavigation.TestGetSectionAtLine_Implementation;
 begin
   SetSource(cSimpleUnit);
-  FContext.AssertTrue((Ord(usImplementation))=(Ord(GetSectionAtLine(FHL, FLines, 11))), 'Line 11 should be in implementation section');
+  TestContext.AssertTrue((Ord(usImplementation))=(Ord(GetSectionAtLine(FHL, FLines, 11))), 'Line 11 should be in implementation section');
 end;
 
 procedure TTestNavigation.TestGetSectionAtLine_BeforeInterface;
 begin
   SetSource(cSimpleUnit);
-  FContext.AssertTrue((Ord(usUnknown))=(Ord(GetSectionAtLine(FHL, FLines, 0))), 'Line 0 should be usUnknown (before interface)');
+  TestContext.AssertTrue((Ord(usUnknown))=(Ord(GetSectionAtLine(FHL, FLines, 0))), 'Line 0 should be usUnknown (before interface)');
 end;
 
 procedure TTestNavigation.TestNavigateFromImplToIntf_StandaloneProc;
@@ -155,8 +160,8 @@ begin
   SetSource(cSimpleUnit);
   { Cursor on 'procedure DoSomething' in implementation (line 11) }
   nav := NavigateToInterface(FHL, FLines, 11);
-  FContext.AssertTrue(nav.Found, 'Should find interface declaration');
-  FContext.AssertTrue((6)=(nav.Line), 'Should jump to line 6 (interface declaration)');
+  TestContext.AssertTrue(nav.Found, 'Should find interface declaration');
+  TestContext.AssertTrue((6)=(nav.Line), 'Should jump to line 6 (interface declaration)');
 end;
 
 procedure TTestNavigation.TestNavigateFromIntfToImpl_StandaloneProc;
@@ -166,8 +171,8 @@ begin
   SetSource(cSimpleUnit);
   { Cursor on 'procedure DoSomething' in interface (line 6) }
   nav := NavigateToImplementation(FHL, FLines, 6);
-  FContext.AssertTrue(nav.Found, 'Should find implementation');
-  FContext.AssertTrue((11)=(nav.Line), 'Should jump to line 11 (implementation)');
+  TestContext.AssertTrue(nav.Found, 'Should find implementation');
+  TestContext.AssertTrue((11)=(nav.Line), 'Should jump to line 11 (implementation)');
 end;
 
 procedure TTestNavigation.TestNavigateFromImplToIntf_ClassMethod;
@@ -177,8 +182,8 @@ begin
   SetSource(cClassUnit);
   { Cursor on 'procedure TMyClass.DoWork' in implementation (line 14) }
   nav := NavigateToInterface(FHL, FLines, 14);
-  FContext.AssertTrue(nav.Found, 'Should find interface declaration');
-  FContext.AssertTrue((8)=(nav.Line), 'Should jump to line 8 (class method declaration)');
+  TestContext.AssertTrue(nav.Found, 'Should find interface declaration');
+  TestContext.AssertTrue((8)=(nav.Line), 'Should jump to line 8 (class method declaration)');
 end;
 
 procedure TTestNavigation.TestNavigateFromIntfToImpl_ClassMethod;
@@ -188,8 +193,8 @@ begin
   SetSource(cClassUnit);
   { Cursor on 'procedure DoWork' inside class declaration (line 8) }
   nav := NavigateToImplementation(FHL, FLines, 8);
-  FContext.AssertTrue(nav.Found, 'Should find implementation');
-  FContext.AssertTrue((14)=(nav.Line), 'Should jump to line 14 (implementation)');
+  TestContext.AssertTrue(nav.Found, 'Should find implementation');
+  TestContext.AssertTrue((14)=(nav.Line), 'Should jump to line 14 (implementation)');
 end;
 
 procedure TTestNavigation.TestNavigateFromImplBody_FindsEnclosingMethod;
@@ -199,8 +204,8 @@ begin
   SetSource(cClassUnit);
   { Cursor inside the method body at line 18 (for i := 0 to 9 do) }
   nav := NavigateToInterface(FHL, FLines, 18);
-  FContext.AssertTrue(nav.Found, 'Should find interface declaration from method body');
-  FContext.AssertTrue((8)=(nav.Line), 'Should jump to line 8 (class method declaration)');
+  TestContext.AssertTrue(nav.Found, 'Should find interface declaration from method body');
+  TestContext.AssertTrue((8)=(nav.Line), 'Should jump to line 8 (class method declaration)');
 end;
 
 procedure TTestNavigation.TestToggle_FromInterface;
@@ -209,8 +214,8 @@ var
 begin
   SetSource(cSimpleUnit);
   nav := NavigateInterfaceImplementation(FHL, FLines, 7);
-  FContext.AssertTrue(nav.Found, 'Toggle from interface should find implementation');
-  FContext.AssertTrue((16)=(nav.Line), 'Should jump to GetValue implementation (line 16)');
+  TestContext.AssertTrue(nav.Found, 'Toggle from interface should find implementation');
+  TestContext.AssertTrue((16)=(nav.Line), 'Should jump to GetValue implementation (line 16)');
 end;
 
 procedure TTestNavigation.TestToggle_FromImplementation;
@@ -220,12 +225,12 @@ begin
   SetSource(cSimpleUnit);
   { Line 18 is inside GetValue body — toggle should jump to interface }
   nav := NavigateInterfaceImplementation(FHL, FLines, 18);
-  FContext.AssertTrue(nav.Found, 'Toggle from implementation should find interface');
-  FContext.AssertTrue((7)=(nav.Line), 'Should jump to GetValue interface declaration (line 7)');
+  TestContext.AssertTrue(nav.Found, 'Toggle from implementation should find interface');
+  TestContext.AssertTrue((7)=(nav.Line), 'Should jump to GetValue interface declaration (line 7)');
   { Now from the interface line, toggle back to implementation }
   nav := NavigateInterfaceImplementation(FHL, FLines, 7);
-  FContext.AssertTrue(nav.Found, 'Toggle from interface should find implementation');
-  FContext.AssertTrue((16)=(nav.Line), 'Should jump to line 16 (implementation)');
+  TestContext.AssertTrue(nav.Found, 'Toggle from interface should find implementation');
+  TestContext.AssertTrue((16)=(nav.Line), 'Should jump to line 16 (implementation)');
 end;
 
 procedure TTestNavigation.TestNavigateFromImpl_NoEnclosingMethod;
@@ -235,8 +240,8 @@ begin
   SetSource(cSimpleUnit);
   { Cursor on line 10 (empty line right after 'implementation') }
   nav := NavigateToInterface(FHL, FLines, 10);
-  FContext.AssertTrue(nav.Found, 'Should still navigate');
-  FContext.AssertTrue((4)=(nav.Line), 'Should jump to interface keyword (line 4)');
+  TestContext.AssertTrue(nav.Found, 'Should still navigate');
+  TestContext.AssertTrue((4)=(nav.Line), 'Should jump to interface keyword (line 4)');
 end;
 
 procedure TTestNavigation.TestNoSections_ReturnsFalse;
@@ -245,7 +250,7 @@ var
 begin
   SetSource('program Test;' + LineEnding + 'begin' + LineEnding + 'end.');
   nav := NavigateInterfaceImplementation(FHL, FLines, 1);
-  FContext.AssertTrue(not (nav.Found), 'Program without interface/implementation should return not found');
+  TestContext.AssertTrue(not (nav.Found), 'Program without interface/implementation should return not found');
 end;
 
 procedure TTestNavigation.TestNavigateToImpl_IncludeFile;
@@ -287,9 +292,9 @@ begin
 
     { Navigate from interface (line 4) to implementation, passing the unit file path }
     nav := NavigateToImplementation(FHL, FLines, 4, UnitFile);
-    FContext.AssertTrue(nav.Found, 'Should find implementation in include file');
-    FContext.AssertTrue((IncFile)=(nav.Filename), 'Should report the include file path');
-    FContext.AssertTrue((1)=(nav.Line), 'Should point to line 1 in the include file (procedure DoSomething)');
+    TestContext.AssertTrue(nav.Found, 'Should find implementation in include file');
+    TestContext.AssertTrue((IncFile)=(nav.Filename), 'Should report the include file path');
+    TestContext.AssertTrue((1)=(nav.Line), 'Should point to line 1 in the include file (procedure DoSomething)');
   finally
     DeleteFile(IncFile);
     RemoveDir(TmpDir);
@@ -331,9 +336,9 @@ begin
 
     { Method not in include file — should fall back to implementation keyword }
     nav := NavigateToImplementation(FHL, FLines, 4, UnitFile);
-    FContext.AssertTrue(nav.Found, 'Should still return found (fallback)');
-    FContext.AssertTrue(('')=(nav.Filename), 'Filename should be empty (fallback to current file)');
-    FContext.AssertTrue((6)=(nav.Line), 'Should fall back to implementation keyword (line 6)');
+    TestContext.AssertTrue(nav.Found, 'Should still return found (fallback)');
+    TestContext.AssertTrue(('')=(nav.Filename), 'Filename should be empty (fallback to current file)');
+    TestContext.AssertTrue((6)=(nav.Line), 'Should fall back to implementation keyword (line 6)');
   finally
     DeleteFile(IncFile);
     RemoveDir(TmpDir);
@@ -403,15 +408,15 @@ begin
 
     { Navigate from include file (line 2, DoSomething) to interface }
     nav := NavigateToInterface(FHL, FLines, 2, IncFile);
-    FContext.AssertTrue(nav.Found, 'Should find interface declaration in parent unit');
-    FContext.AssertTrue((UnitFile)=(nav.Filename), 'Should report the parent unit file path');
-    FContext.AssertTrue((4)=(nav.Line), 'Should point to line 4 in parent unit (procedure DoSomething)');
+    TestContext.AssertTrue(nav.Found, 'Should find interface declaration in parent unit');
+    TestContext.AssertTrue((UnitFile)=(nav.Filename), 'Should report the parent unit file path');
+    TestContext.AssertTrue((4)=(nav.Line), 'Should point to line 4 in parent unit (procedure DoSomething)');
 
     { Also test from within a method body (line 4) }
     nav := NavigateToInterface(FHL, FLines, 4, IncFile);
-    FContext.AssertTrue(nav.Found, 'Should find interface from method body');
-    FContext.AssertTrue((UnitFile)=(nav.Filename), 'Should report parent unit from body too');
-    FContext.AssertTrue((4)=(nav.Line), 'Should still find DoSomething declaration (line 4)');
+    TestContext.AssertTrue(nav.Found, 'Should find interface from method body');
+    TestContext.AssertTrue((UnitFile)=(nav.Filename), 'Should report parent unit from body too');
+    TestContext.AssertTrue((4)=(nav.Line), 'Should still find DoSomething declaration (line 4)');
   finally
     DeleteFile(IncFile);
     DeleteFile(UnitFile);
@@ -421,13 +426,18 @@ begin
 end;
 
 
+constructor TTestNavigation.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestNavigationTestGetSectionAtLine_Interface(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestGetSectionAtLine_Interface');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetSectionAtLine_Interface';
     lFixture.SetUp;
     try lFixture.TestGetSectionAtLine_Interface; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -436,10 +446,8 @@ end;
 procedure RunTTestNavigationTestGetSectionAtLine_Implementation(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestGetSectionAtLine_Implementation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetSectionAtLine_Implementation';
     lFixture.SetUp;
     try lFixture.TestGetSectionAtLine_Implementation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -448,10 +456,8 @@ end;
 procedure RunTTestNavigationTestGetSectionAtLine_BeforeInterface(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestGetSectionAtLine_BeforeInterface');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetSectionAtLine_BeforeInterface';
     lFixture.SetUp;
     try lFixture.TestGetSectionAtLine_BeforeInterface; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -460,10 +466,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromImplToIntf_StandaloneProc(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromImplToIntf_StandaloneProc');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromImplToIntf_StandaloneProc';
     lFixture.SetUp;
     try lFixture.TestNavigateFromImplToIntf_StandaloneProc; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -472,10 +476,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromIntfToImpl_StandaloneProc(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromIntfToImpl_StandaloneProc');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromIntfToImpl_StandaloneProc';
     lFixture.SetUp;
     try lFixture.TestNavigateFromIntfToImpl_StandaloneProc; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -484,10 +486,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromImplToIntf_ClassMethod(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromImplToIntf_ClassMethod');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromImplToIntf_ClassMethod';
     lFixture.SetUp;
     try lFixture.TestNavigateFromImplToIntf_ClassMethod; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -496,10 +496,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromIntfToImpl_ClassMethod(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromIntfToImpl_ClassMethod');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromIntfToImpl_ClassMethod';
     lFixture.SetUp;
     try lFixture.TestNavigateFromIntfToImpl_ClassMethod; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -508,10 +506,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromImplBody_FindsEnclosingMethod(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromImplBody_FindsEnclosingMethod');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromImplBody_FindsEnclosingMethod';
     lFixture.SetUp;
     try lFixture.TestNavigateFromImplBody_FindsEnclosingMethod; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -520,10 +516,8 @@ end;
 procedure RunTTestNavigationTestToggle_FromInterface(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestToggle_FromInterface');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggle_FromInterface';
     lFixture.SetUp;
     try lFixture.TestToggle_FromInterface; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -532,10 +526,8 @@ end;
 procedure RunTTestNavigationTestToggle_FromImplementation(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestToggle_FromImplementation');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestToggle_FromImplementation';
     lFixture.SetUp;
     try lFixture.TestToggle_FromImplementation; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -544,10 +536,8 @@ end;
 procedure RunTTestNavigationTestNavigateFromImpl_NoEnclosingMethod(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateFromImpl_NoEnclosingMethod');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateFromImpl_NoEnclosingMethod';
     lFixture.SetUp;
     try lFixture.TestNavigateFromImpl_NoEnclosingMethod; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -556,10 +546,8 @@ end;
 procedure RunTTestNavigationTestNoSections_ReturnsFalse(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNoSections_ReturnsFalse');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoSections_ReturnsFalse';
     lFixture.SetUp;
     try lFixture.TestNoSections_ReturnsFalse; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -568,10 +556,8 @@ end;
 procedure RunTTestNavigationTestNavigateToImpl_IncludeFile(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateToImpl_IncludeFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateToImpl_IncludeFile';
     lFixture.SetUp;
     try lFixture.TestNavigateToImpl_IncludeFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -580,10 +566,8 @@ end;
 procedure RunTTestNavigationTestNavigateToImpl_IncludeFile_NotFound(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateToImpl_IncludeFile_NotFound');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateToImpl_IncludeFile_NotFound';
     lFixture.SetUp;
     try lFixture.TestNavigateToImpl_IncludeFile_NotFound; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -592,10 +576,8 @@ end;
 procedure RunTTestNavigationTestNavigateToIntf_FromIncludeFile(AContext: TNXTestContext);
 var lFixture: TTestNavigation;
 begin
-  lFixture:=TTestNavigation.Create;
+  lFixture:=TTestNavigation.Create(AContext, 'TestNavigateToIntf_FromIncludeFile');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNavigateToIntf_FromIncludeFile';
     lFixture.SetUp;
     try lFixture.TestNavigateToIntf_FromIncludeFile; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

@@ -5,9 +5,7 @@ unit tccanvasblit;
 { Tests for the TfpgCanvasBase BlitImage/BlitImagePart API (GitHub issue #194).
 
   The blit contract: BlitImage/BlitImagePart dispatch through the protected
-  virtual DoBlitImagePart, whose default procedure RegistertccanvasblitTests(ARegistry: TNXTestRegistry);
-
-implementation forwards to
+  virtual DoBlitImagePart, whose default implementation forwards to
   DoDrawImagePart so backends without an opaque fast path still render
   correctly. These tests verify the dispatch plumbing with a recording mock
   canvas; the THybridCanvas pixel-copy override needs an attached window
@@ -62,9 +60,14 @@ type
 
 
   TTestCanvasBlit = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FCanvas: TMockCanvas;
     FImage: TfpgImageBase;
@@ -82,6 +85,8 @@ type
     procedure TestBlitImageNilIsIgnored;
   end;
 
+
+procedure RegistertccanvasblitTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -176,28 +181,28 @@ procedure TTestCanvasBlit.TestBlitImageDispatchesFullBounds;
 begin
   FCanvas.BlitOverridden := True;
   FCanvas.BlitImage(10, 20, FImage);
-  FContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
-  FContext.AssertTrue(('DoBlitImagePart')=(FCanvas.Calls[0].Name), 'routed via DoBlitImagePart');
-  FContext.AssertTrue((10)=(FCanvas.Calls[0].x), 'x');
-  FContext.AssertTrue((20)=(FCanvas.Calls[0].y), 'y');
-  FContext.AssertTrue((0)=(FCanvas.Calls[0].xi), 'xi');
-  FContext.AssertTrue((0)=(FCanvas.Calls[0].yi), 'yi');
-  FContext.AssertTrue((8)=(FCanvas.Calls[0].w), 'w');
-  FContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
+  TestContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
+  TestContext.AssertTrue(('DoBlitImagePart')=(FCanvas.Calls[0].Name), 'routed via DoBlitImagePart');
+  TestContext.AssertTrue((10)=(FCanvas.Calls[0].x), 'x');
+  TestContext.AssertTrue((20)=(FCanvas.Calls[0].y), 'y');
+  TestContext.AssertTrue((0)=(FCanvas.Calls[0].xi), 'xi');
+  TestContext.AssertTrue((0)=(FCanvas.Calls[0].yi), 'yi');
+  TestContext.AssertTrue((8)=(FCanvas.Calls[0].w), 'w');
+  TestContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
 end;
 
 procedure TTestCanvasBlit.TestBlitImagePartPassesArguments;
 begin
   FCanvas.BlitOverridden := True;
   FCanvas.BlitImagePart(1, 2, FImage, 3, 4, 5, 6);
-  FContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
-  FContext.AssertTrue(('DoBlitImagePart')=(FCanvas.Calls[0].Name), 'routed via DoBlitImagePart');
-  FContext.AssertTrue((1)=(FCanvas.Calls[0].x), 'x');
-  FContext.AssertTrue((2)=(FCanvas.Calls[0].y), 'y');
-  FContext.AssertTrue((3)=(FCanvas.Calls[0].xi), 'xi');
-  FContext.AssertTrue((4)=(FCanvas.Calls[0].yi), 'yi');
-  FContext.AssertTrue((5)=(FCanvas.Calls[0].w), 'w');
-  FContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
+  TestContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
+  TestContext.AssertTrue(('DoBlitImagePart')=(FCanvas.Calls[0].Name), 'routed via DoBlitImagePart');
+  TestContext.AssertTrue((1)=(FCanvas.Calls[0].x), 'x');
+  TestContext.AssertTrue((2)=(FCanvas.Calls[0].y), 'y');
+  TestContext.AssertTrue((3)=(FCanvas.Calls[0].xi), 'xi');
+  TestContext.AssertTrue((4)=(FCanvas.Calls[0].yi), 'yi');
+  TestContext.AssertTrue((5)=(FCanvas.Calls[0].w), 'w');
+  TestContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
 end;
 
 procedure TTestCanvasBlit.TestDefaultBlitForwardsToDraw;
@@ -205,30 +210,35 @@ begin
   { BlitOverridden = False: the mock defers to the inherited default,
     which must render through the normal image path }
   FCanvas.BlitImage(7, 8, FImage);
-  FContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
-  FContext.AssertTrue(('DoDrawImagePart')=(FCanvas.Calls[0].Name), 'forwarded to DoDrawImagePart');
-  FContext.AssertTrue((7)=(FCanvas.Calls[0].x), 'x');
-  FContext.AssertTrue((8)=(FCanvas.Calls[0].y), 'y');
-  FContext.AssertTrue((8)=(FCanvas.Calls[0].w), 'w');
-  FContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
-  FContext.AssertTrue((FImage)=(TObject(FCanvas.Calls[0].img)), 'same image');
+  TestContext.AssertTrue((1)=(Length(FCanvas.Calls)), 'call count');
+  TestContext.AssertTrue(('DoDrawImagePart')=(FCanvas.Calls[0].Name), 'forwarded to DoDrawImagePart');
+  TestContext.AssertTrue((7)=(FCanvas.Calls[0].x), 'x');
+  TestContext.AssertTrue((8)=(FCanvas.Calls[0].y), 'y');
+  TestContext.AssertTrue((8)=(FCanvas.Calls[0].w), 'w');
+  TestContext.AssertTrue((6)=(FCanvas.Calls[0].h), 'h');
+  TestContext.AssertTrue((FImage)=(TObject(FCanvas.Calls[0].img)), 'same image');
 end;
 
 procedure TTestCanvasBlit.TestBlitImageNilIsIgnored;
 begin
   FCanvas.BlitImage(0, 0, nil);
-  FContext.AssertTrue((0)=(Length(FCanvas.Calls)), 'no dispatch for nil image');
+  TestContext.AssertTrue((0)=(Length(FCanvas.Calls)), 'no dispatch for nil image');
 end;
 
 
 
+constructor TTestCanvasBlit.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestCanvasBlitTestBlitImageDispatchesFullBounds(AContext: TNXTestContext);
 var lFixture: TTestCanvasBlit;
 begin
-  lFixture:=TTestCanvasBlit.Create;
+  lFixture:=TTestCanvasBlit.Create(AContext, 'TestBlitImageDispatchesFullBounds');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBlitImageDispatchesFullBounds';
     lFixture.SetUp;
     try lFixture.TestBlitImageDispatchesFullBounds; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -237,10 +247,8 @@ end;
 procedure RunTTestCanvasBlitTestBlitImagePartPassesArguments(AContext: TNXTestContext);
 var lFixture: TTestCanvasBlit;
 begin
-  lFixture:=TTestCanvasBlit.Create;
+  lFixture:=TTestCanvasBlit.Create(AContext, 'TestBlitImagePartPassesArguments');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBlitImagePartPassesArguments';
     lFixture.SetUp;
     try lFixture.TestBlitImagePartPassesArguments; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -249,10 +257,8 @@ end;
 procedure RunTTestCanvasBlitTestDefaultBlitForwardsToDraw(AContext: TNXTestContext);
 var lFixture: TTestCanvasBlit;
 begin
-  lFixture:=TTestCanvasBlit.Create;
+  lFixture:=TTestCanvasBlit.Create(AContext, 'TestDefaultBlitForwardsToDraw');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultBlitForwardsToDraw';
     lFixture.SetUp;
     try lFixture.TestDefaultBlitForwardsToDraw; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -261,10 +267,8 @@ end;
 procedure RunTTestCanvasBlitTestBlitImageNilIsIgnored(AContext: TNXTestContext);
 var lFixture: TTestCanvasBlit;
 begin
-  lFixture:=TTestCanvasBlit.Create;
+  lFixture:=TTestCanvasBlit.Create(AContext, 'TestBlitImageNilIsIgnored');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBlitImageNilIsIgnored';
     lFixture.SetUp;
     try lFixture.TestBlitImageNilIsIgnored; finally lFixture.TearDown; end;
   finally lFixture.Free; end;

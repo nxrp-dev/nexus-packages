@@ -86,3 +86,10 @@ four failures while returning zero; their final disposition is recorded above.
 
 Normative references: [XPath 1.0](https://www.w3.org/TR/1999/REC-xpath-19991116/)
 and [DOM Level 2 Core](https://www.w3.org/TR/DOM-Level-2-Core/).
+
+## 2026-10-16 native retained-test conversion
+
+Useful retained behavior tests now use nxtest directly. The former FPCUnit
+helpers and runners were removed, with their originals preserved in hashed
+archives. The [retirement report](../../../../projects/nxtest/retained/README.md) records conversions,
+corrected invalid expectations, before/after results and verification limits.

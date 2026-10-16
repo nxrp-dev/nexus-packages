@@ -13,9 +13,14 @@ type
   { TTestJSONConfig }
 
   TTestJSONConfig= class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   Private
     procedure AssertStrings(Msg: String; L: TStrings;
       const Values: array of string);
@@ -72,15 +77,15 @@ begin
   Co:=CreateConf('test.json');
   try
     Co.SetValue('a',a);
-    FContext.AssertTrue((a)=(Co.GetValue('a',0)), 'Integer read/Write');
+    TestContext.AssertTrue((a)=(Co.GetValue('a',0)), 'Integer read/Write');
     Co.SetValue('b',b);
-    FContext.AssertTrue((b)=(Co.GetValue('b','')), 'String read/Write');
+    TestContext.AssertTrue((b)=(Co.GetValue('b','')), 'String read/Write');
     Co.SetValue('c',C);
-    FContext.AssertTrue(Abs((c)-(Co.GetValue('c',0.0)))<=(0.01), 'Float read/Write');
+    TestContext.AssertTrue(Abs((c)-(Co.GetValue('c',0.0)))<=(0.01), 'Float read/Write');
     Co.SetValue('d',d);
-    FContext.AssertTrue((d)=(Co.GetValue('d',False)), 'Boolean read/Write');
+    TestContext.AssertTrue((d)=(Co.GetValue('d',False)), 'Boolean read/Write');
     Co.SetValue('e',E);
-    FContext.AssertTrue((e)=(Co.GetValue('e',Int64(0))), 'Int64 read/Write');
+    TestContext.AssertTrue((e)=(Co.GetValue('e',Int64(0))), 'Int64 read/Write');
     Co.Flush;
   finally
     DeleteConf(Co,True);
@@ -96,11 +101,11 @@ begin
   C:=CreateConf('test.json');
   try
     C.SetValue('a',1);
-    FContext.AssertTrue((1)=(C.GetValue('a',0)), 'Read at root');
+    TestContext.AssertTrue((1)=(C.GetValue('a',0)), 'Read at root');
     C.SetValue('b/a',2);
-    FContext.AssertTrue((2)=(C.GetValue('b/a',2)), 'Read at root');
+    TestContext.AssertTrue((2)=(C.GetValue('b/a',2)), 'Read at root');
     C.SetValue('b/c/a',3);
-    FContext.AssertTrue((3)=(C.GetValue('b/c/a',3)), 'Read at root');
+    TestContext.AssertTrue((3)=(C.GetValue('b/c/a',3)), 'Read at root');
   finally
     DeleteConf(C,True);
   end;
@@ -125,11 +130,11 @@ begin
     try
       C.EnumSubKeys('/',L);
       If (L.Count<>2) then
-        FContext.Fail('EnumSubkeys count');
+        TestContext.Fail('EnumSubkeys count');
       If (L[0]<>'b') then
-        FContext.Fail('EnumSubkeys first element');
+        TestContext.Fail('EnumSubkeys first element');
       If (L[1]<>'c') then
-        FContext.Fail('EnumSubkeys second element');
+        TestContext.Fail('EnumSubkeys second element');
     finally
       L.Free;
     end;
@@ -157,17 +162,17 @@ begin
     try
       C.EnumValues('/',L);
       If (L.Count<>1) then
-        FContext.Fail('EnumValues count');
+        TestContext.Fail('EnumValues count');
       If (L[0]<>'a') then
-        FContext.Fail('EnumValues first element');
+        TestContext.Fail('EnumValues first element');
       L.Clear;
       C.EnumValues('/b',L);
       If (L.Count<>2) then
-        FContext.Fail('EnumValues subkey count');
+        TestContext.Fail('EnumValues subkey count');
       If (L[0]<>'a') then
-        FContext.Fail('EnumValues subkey first element');
+        TestContext.Fail('EnumValues subkey first element');
       If (L[1]<>'b') then
-        FContext.Fail('EnumValues subkey second element');
+        TestContext.Fail('EnumValues subkey second element');
     finally
       L.Free;
     end;
@@ -187,21 +192,21 @@ begin
     C.SetValue('a',1);
     C.Flush;
     C.DeleteValue('a');
-    FContext.AssertTrue((True)=(C.Modified), 'Modified set');
-    FContext.AssertTrue((0)=(C.GetValue('a',0)), 'Delete value');
+    TestContext.AssertTrue((True)=(C.Modified), 'Modified set');
+    TestContext.AssertTrue((0)=(C.GetValue('a',0)), 'Delete value');
     C.SetValue('b/a',1);
     C.SetValue('b/c',2);
     C.DeleteValue('b/a');
-    FContext.AssertTrue((0)=(C.GetValue('a',0)), 'Delete value in subkey');
-    FContext.AssertTrue((2)=(C.GetValue('b/c',0)), 'Delete value only clears deleted value');
+    TestContext.AssertTrue((0)=(C.GetValue('a',0)), 'Delete value in subkey');
+    TestContext.AssertTrue((2)=(C.GetValue('b/c',0)), 'Delete value only clears deleted value');
     C.SetValue('b/a',1);
     C.Flush;
     C.DeletePath('b');
-    FContext.AssertTrue((True)=(C.Modified), 'Modified set');
-    FContext.AssertTrue((0)=(C.GetValue('b/a',0)), 'Delete path');
-    FContext.AssertTrue((0)=(C.GetValue('b/c',0)), 'Delete path deletes all values');
+    TestContext.AssertTrue((True)=(C.Modified), 'Modified set');
+    TestContext.AssertTrue((0)=(C.GetValue('b/a',0)), 'Delete path');
+    TestContext.AssertTrue((0)=(C.GetValue('b/c',0)), 'Delete path deletes all values');
     C.Clear;
-    FContext.AssertTrue((0)=(C.GetValue('/a',0)), 'Clear');
+    TestContext.AssertTrue((0)=(C.GetValue('/a',0)), 'Clear');
   finally
     DeleteConf(C,True);
   end;
@@ -222,44 +227,44 @@ begin
     C.SetValue('b/c/a',3);
     C.SetValue('b/c/b',3);
     C.OpenKey('/b',False);
-    FContext.AssertTrue((2)=(C.GetValue('a',0)), 'Read relative to key a');
-    FContext.AssertTrue((2)=(C.GetValue('b',0)), 'Read relative to key b');
-    FContext.AssertTrue((3)=(C.GetValue('c/a',0)), 'Read in subkey relative to key a');
-    FContext.AssertTrue((3)=(C.GetValue('c/b',0)), 'Read in subkey relative to key b');
-    FContext.AssertTrue((1)=(C.GetValue('/a',0)), 'Read absolute, disregarding key');
-    FContext.AssertTrue((2)=(C.GetValue('/b/a',0)), 'Read absolute in subkey, disregarding key');
-    FContext.AssertTrue((3)=(C.GetValue('/b/c/a',0)), 'Read absolute in subkeys, disregarding key');
+    TestContext.AssertTrue((2)=(C.GetValue('a',0)), 'Read relative to key a');
+    TestContext.AssertTrue((2)=(C.GetValue('b',0)), 'Read relative to key b');
+    TestContext.AssertTrue((3)=(C.GetValue('c/a',0)), 'Read in subkey relative to key a');
+    TestContext.AssertTrue((3)=(C.GetValue('c/b',0)), 'Read in subkey relative to key b');
+    TestContext.AssertTrue((1)=(C.GetValue('/a',0)), 'Read absolute, disregarding key');
+    TestContext.AssertTrue((2)=(C.GetValue('/b/a',0)), 'Read absolute in subkey, disregarding key');
+    TestContext.AssertTrue((3)=(C.GetValue('/b/c/a',0)), 'Read absolute in subkeys, disregarding key');
     C.CloseKey;
-    FContext.AssertTrue((1)=(C.GetValue('a',0)), 'Closekey');
+    TestContext.AssertTrue((1)=(C.GetValue('a',0)), 'Closekey');
     C.OpenKey('b',False);
     C.OpenKey('c',False);
-    FContext.AssertTrue((3)=(C.GetValue('a',0)), 'Open relative key');
+    TestContext.AssertTrue((3)=(C.GetValue('a',0)), 'Open relative key');
     C.ResetKey;
-    FContext.AssertTrue((1)=(C.GetValue('a',0)), 'ResetKey');
+    TestContext.AssertTrue((1)=(C.GetValue('a',0)), 'ResetKey');
     C.Clear;
     L:=TStringList.Create;
     try
       C.EnumSubKeys('/',L);
       If (L.Count<>0) then
-        FContext.Fail('clear failed');
+        TestContext.Fail('clear failed');
       C.OpenKey('/a/b/c/d',true);
       C.EnumSubKeys('/a',L);
       If (L.Count<>1) then
-        FContext.Fail('Open key with allowcreate, level 1');
+        TestContext.Fail('Open key with allowcreate, level 1');
       If (L[0]<>'b') then
-        FContext.Fail('Open key with allowcreate, level 1');
+        TestContext.Fail('Open key with allowcreate, level 1');
       L.Clear;
       C.EnumSubKeys('/a/b',L);
       If (L.Count<>1) then
-        FContext.Fail('Open key with allowcreate, level 2');
+        TestContext.Fail('Open key with allowcreate, level 2');
       If (L[0]<>'c') then
-        FContext.Fail('Open key with allowcreate, level 2');
+        TestContext.Fail('Open key with allowcreate, level 2');
       L.Clear;
       C.EnumSubKeys('/a/b/c',L);
       If (L.Count<>1) then
-        FContext.Fail('Open key with allowcreate, level 3');
+        TestContext.Fail('Open key with allowcreate, level 3');
       If (L[0]<>'d') then
-        FContext.Fail('Open key with allowcreate, level 3');
+        TestContext.Fail('Open key with allowcreate, level 3');
     finally
       L.Free;
     end;
@@ -275,10 +280,10 @@ Var
   I : Integer;
 begin
   Msg:=Msg+': ';
-  FContext.AssertTrue((L)<>nil, Msg+'Have strings');
-  FContext.AssertTrue((Length(Values))=(L.Count), Msg+'Correct element count');
+  TestContext.AssertTrue((L)<>nil, Msg+'Have strings');
+  TestContext.AssertTrue((Length(Values))=(L.Count), Msg+'Correct element count');
   For I:=0 to L.Count-1 do
-    FContext.AssertTrue((Values[i])=(l[i]), Msg+'element '+IntToStr(i));
+    TestContext.AssertTrue((Values[i])=(l[i]), Msg+'element '+IntToStr(i));
 end;
 
 procedure TTestJSONConfig.TestStrings;
@@ -354,8 +359,8 @@ begin
   end;
   Co:=CreateConf('test.json');
   try
-    FContext.AssertTrue((utf8str)=(utf8encode(Co.GetValue('a',''))), 'UTF8 string read/Write');
-    FContext.AssertTrue(('something')=(Co.GetValue(utf8path,'something')), 'UTF8 path read/Write');
+    TestContext.AssertTrue((utf8str)=(utf8encode(Co.GetValue('a',''))), 'UTF8 string read/Write');
+    TestContext.AssertTrue(('something')=(Co.GetValue(utf8path,'something')), 'UTF8 path read/Write');
   finally
     DeleteConf(Co,True);
   end;
@@ -382,8 +387,8 @@ begin
   end;
   Co:=CreateConf('test.json');
   try
-    FContext.AssertTrue((utf8str)=(utf8encode(Co.GetValue('/проверка',''))), 'UTF8 string read/Write');
-    FContext.AssertTrue(('something')=(Co.GetValue(utf8path,'something')), 'UTF8 path read/Write');
+    TestContext.AssertTrue((utf8str)=(utf8encode(Co.GetValue('/проверка',''))), 'UTF8 string read/Write');
+    TestContext.AssertTrue(('something')=(Co.GetValue(utf8path,'something')), 'UTF8 path read/Write');
   finally
     DeleteConf(Co,True);
   end;
@@ -391,13 +396,18 @@ end;
 
 
 
+constructor TTestJSONConfig.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestJSONConfigTestDataTypes(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestDataTypes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDataTypes';
     lFixture.TestDataTypes;
   finally lFixture.Free; end;
 end;
@@ -405,10 +415,8 @@ end;
 procedure RunTTestJSONConfigTestSubNodes(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestSubNodes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSubNodes';
     lFixture.TestSubNodes;
   finally lFixture.Free; end;
 end;
@@ -416,10 +424,8 @@ end;
 procedure RunTTestJSONConfigTestEnumSubkeys(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestEnumSubkeys');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnumSubkeys';
     lFixture.TestEnumSubkeys;
   finally lFixture.Free; end;
 end;
@@ -427,10 +433,8 @@ end;
 procedure RunTTestJSONConfigTestEnumValues(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestEnumValues');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEnumValues';
     lFixture.TestEnumValues;
   finally lFixture.Free; end;
 end;
@@ -438,10 +442,8 @@ end;
 procedure RunTTestJSONConfigTestClear(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestClear');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestClear';
     lFixture.TestClear;
   finally lFixture.Free; end;
 end;
@@ -449,10 +451,8 @@ end;
 procedure RunTTestJSONConfigTestKey(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestKey');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestKey';
     lFixture.TestKey;
   finally lFixture.Free; end;
 end;
@@ -460,10 +460,8 @@ end;
 procedure RunTTestJSONConfigTestStrings(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestStrings');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStrings';
     lFixture.TestStrings;
   finally lFixture.Free; end;
 end;
@@ -471,10 +469,8 @@ end;
 procedure RunTTestJSONConfigTestUnicodeStrings(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestUnicodeStrings');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnicodeStrings';
     lFixture.TestUnicodeStrings;
   finally lFixture.Free; end;
 end;
@@ -482,10 +478,8 @@ end;
 procedure RunTTestJSONConfigTestUnicodeStrings2(AContext: TNXTestContext);
 var lFixture: TTestJSONConfig;
 begin
-  lFixture:=TTestJSONConfig.Create;
+  lFixture:=TTestJSONConfig.Create(AContext, 'TestUnicodeStrings2');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnicodeStrings2';
     lFixture.TestUnicodeStrings2;
   finally lFixture.Free; end;
 end;

@@ -25,9 +25,14 @@ type
   TTestMethod = procedure(reader: TXMLReader) of object;
 
   TXMLReaderTestBase = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   protected
     procedure AssertStartDocument(r: TXMLReader);
     procedure AssertEndDocument(r: TXMLReader);
@@ -65,21 +70,21 @@ uses
 
 procedure TXMLReaderTestBase.AssertStartDocument(r: TXMLReader);
 begin
-  FContext.AssertTrue((r.ReadState)=(rsInitial), '');
-  FContext.AssertTrue((r.NodeType)=(ntNone), '');
-  FContext.AssertTrue((r.Depth)=(0), '');
-  FContext.AssertTrue(not (r.EOF), '');
+  TestContext.AssertTrue((r.ReadState)=(rsInitial), '');
+  TestContext.AssertTrue((r.NodeType)=(ntNone), '');
+  TestContext.AssertTrue((r.Depth)=(0), '');
+  TestContext.AssertTrue(not (r.EOF), '');
 end;
 
 procedure TXMLReaderTestBase.AssertEndDocument(r: TXMLReader);
 begin
-  FContext.AssertTrue(not (r.Read), 'could read');
-  FContext.AssertTrue((ntNone)=(r.NodeType), 'NodeType is not ntNone');
-  FContext.AssertTrue((0)=(r.Depth), 'Depth is not 0');
-  FContext.AssertTrue((rsEndOfFile)=(r.ReadState), 'ReadState is not rsEndOfFile');
-  FContext.AssertTrue(r.EOF, 'not EOF');
+  TestContext.AssertTrue(not (r.Read), 'could read');
+  TestContext.AssertTrue((ntNone)=(r.NodeType), 'NodeType is not ntNone');
+  TestContext.AssertTrue((0)=(r.Depth), 'Depth is not 0');
+  TestContext.AssertTrue((rsEndOfFile)=(r.ReadState), 'ReadState is not rsEndOfFile');
+  TestContext.AssertTrue(r.EOF, 'not EOF');
   r.Close;
-  FContext.AssertTrue((rsClosed)=(r.ReadState), 'ReadState is not rsClosed');
+  TestContext.AssertTrue((rsClosed)=(r.ReadState), 'ReadState is not rsClosed');
 end;
 
 procedure TXMLReaderTestBase.AssertNode(const id: string;
@@ -88,9 +93,9 @@ procedure TXMLReaderTestBase.AssertNode(const id: string;
   const Name, Prefix, LocalName, nsURI, Value: XMLString;
   attrCount: Integer);
 begin
-  FContext.AssertTrue(r.Read, id+' Read() return value');
-  FContext.AssertTrue((r.ReadState)=(rsInteractive), id+' ReadState');
-  FContext.AssertTrue(not (r.EOF), id+' not EOF');
+  TestContext.AssertTrue(r.Read, id+' Read() return value');
+  TestContext.AssertTrue((r.ReadState)=(rsInteractive), id+' ReadState');
+  TestContext.AssertTrue(not (r.EOF), id+' not EOF');
   AssertNodeValues(id, r,  nodeType, depth,
     Name, Prefix, localName,
     nsURI, Value, r.HasValue,
@@ -107,17 +112,17 @@ procedure TXMLReaderTestBase.AssertNodeValues(id: string;
   hasAttributes: Boolean);
 begin
   id := id + '(' + r.ClassName + ')';
-  FContext.AssertTrue((nodeType)=(r.NodeType), id+': NodeType');
+  TestContext.AssertTrue((nodeType)=(r.NodeType), id+': NodeType');
   AssertEqualsW(id+': name', name, r.Name);
 
   AssertEqualsW(id+': prefix', prefix, r.Prefix);
   AssertEqualsW(id+': localName', localName, r.LocalName);
   AssertEqualsW(id+': namespaceURI', nsURI, r.NamespaceURI);
-  FContext.AssertTrue((depth)=(r.Depth), id+': Depth');
-  FContext.AssertTrue((hasValue)=(r.HasValue), id+': hasValue');
+  TestContext.AssertTrue((depth)=(r.Depth), id+': Depth');
+  TestContext.AssertTrue((hasValue)=(r.HasValue), id+': hasValue');
   AssertEqualsW(id+': Value', value, r.Value);
 // TODO:  AssertEquals(id+': hasAttributes', hasAttributes, r.HasAttributes);
-  FContext.AssertTrue((attrCount)=(r.AttributeCount), id+': attributeCount');
+  TestContext.AssertTrue((attrCount)=(r.AttributeCount), id+': attributeCount');
 end;
 
 procedure TXMLReaderTestBase.AssertAttribute(r: TXMLReader; const Name, Prefix,
@@ -161,17 +166,17 @@ end;
 procedure TXMLReaderTestBase.AssertEquals(const id: string; exp, act: TXMLReadState);
 begin
   if exp <> act then
-    FContext.Fail(id);
+    TestContext.Fail(id);
 end;
 
 procedure TXMLReaderTestBase.AssertEquals(exp, act: TXMLReadState);
 begin
-  FContext.AssertTrue((exp)=(act), '');
+  TestContext.AssertTrue((exp)=(act), '');
 end;
 
 procedure TXMLReaderTestBase.AssertEqualsW(const id: string; const exp, act: XMLString);
 begin
-  FContext.AssertTrue(exp = act, id + ComparisonMsg(exp, act));
+  TestContext.AssertTrue(exp = act, id + ': expected <' + UTF8Encode(exp) + '>, actual <' + UTF8Encode(act) + '>');
 end;
 
 procedure TXMLReaderTestBase.AssertEqualsW(const exp, act: XMLString);
@@ -187,24 +192,33 @@ begin
   begin
     Str(exp, exps);
     Str(act, acts);
-    FContext.Fail(id+ComparisonMsg(exps,acts));
+    TestContext.Fail(id+': expected <'+exps+'>, actual <'+acts+'>');
   end;
 end;
 
 procedure TXMLReaderTestBase.AssertEquals(exp, act: TXMLNodeType);
 begin
-  FContext.AssertTrue((exp)=(act), '');
+  TestContext.AssertTrue((exp)=(act), '');
 end;
 
 procedure TXMLReaderTestBase.assertNull(const id: string; const ws: XMLString);
 begin
   if ws <> '' then
-    FContext.Fail(id);
+    TestContext.Fail(id);
 end;
 
 
-procedure RegisterreaderunitTests(ARegistry: TNXTestRegistry);
+constructor TXMLReaderTestBase.Create(AContext: TNXTestContext; const ACaseName: string);
 begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
+procedure RegisterreaderunitTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+
 end;
 
 end.

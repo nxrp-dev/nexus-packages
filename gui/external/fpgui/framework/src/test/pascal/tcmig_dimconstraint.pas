@@ -9,9 +9,14 @@ uses
 
 type
   TTestMigDimConstraint = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestCreate;
     procedure TestGrowPriority;
@@ -43,13 +48,13 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue((100)=(dc.GetGrowPriority), 'Default grow priority should be 100');
-    FContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight by default');
-    FContext.AssertTrue((100)=(dc.GetShrinkPriority), 'Default shrink priority should be 100');
-    FContext.AssertTrue(dc.HasShrinkWeight, 'Should have shrink weight by default');
-    FContext.AssertTrue(Abs((100.0)-(dc.GetShrinkWeight))<=(0.001), 'Default shrink weight should be 100');
-    FContext.AssertTrue(not (dc.IsFill), 'Fill should be false by default');
-    FContext.AssertTrue(not (dc.IsNoGrid), 'NoGrid should be false by default');
+    TestContext.AssertTrue((100)=(dc.GetGrowPriority), 'Default grow priority should be 100');
+    TestContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight by default');
+    TestContext.AssertTrue((100)=(dc.GetShrinkPriority), 'Default shrink priority should be 100');
+    TestContext.AssertTrue(dc.HasShrinkWeight, 'Should have shrink weight by default');
+    TestContext.AssertTrue(Abs((100.0)-(dc.GetShrinkWeight))<=(0.001), 'Default shrink weight should be 100');
+    TestContext.AssertTrue(not (dc.IsFill), 'Fill should be false by default');
+    TestContext.AssertTrue(not (dc.IsNoGrid), 'NoGrid should be false by default');
   finally
     dc.Free;
   end;
@@ -62,7 +67,7 @@ begin
   dc := TfpgMigDimConstraint.Create;
   try
     dc.SetGrowPriority(200);
-    FContext.AssertTrue((200)=(dc.GetGrowPriority), 'Grow priority should be 200');
+    TestContext.AssertTrue((200)=(dc.GetGrowPriority), 'Grow priority should be 200');
   finally
     dc.Free;
   end;
@@ -74,14 +79,14 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight initially');
+    TestContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight initially');
 
     dc.SetGrowWeight(1.5);
-    FContext.AssertTrue(dc.HasGrowWeight, 'Should have grow weight after setting');
-    FContext.AssertTrue(Abs((1.5)-(dc.GetGrowWeight))<=(0.001), 'Grow weight should be 1.5');
+    TestContext.AssertTrue(dc.HasGrowWeight, 'Should have grow weight after setting');
+    TestContext.AssertTrue(Abs((1.5)-(dc.GetGrowWeight))<=(0.001), 'Grow weight should be 1.5');
 
     dc.ClearGrowWeight;
-    FContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight after clearing');
+    TestContext.AssertTrue(not (dc.HasGrowWeight), 'Should not have grow weight after clearing');
   finally
     dc.Free;
   end;
@@ -94,7 +99,7 @@ begin
   dc := TfpgMigDimConstraint.Create;
   try
     dc.SetShrinkPriority(50);
-    FContext.AssertTrue((50)=(dc.GetShrinkPriority), 'Shrink priority should be 50');
+    TestContext.AssertTrue((50)=(dc.GetShrinkPriority), 'Shrink priority should be 50');
   finally
     dc.Free;
   end;
@@ -106,14 +111,14 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(dc.HasShrinkWeight, 'Should have shrink weight initially');
-    FContext.AssertTrue(Abs((100.0)-(dc.GetShrinkWeight))<=(0.001), 'Default shrink weight');
+    TestContext.AssertTrue(dc.HasShrinkWeight, 'Should have shrink weight initially');
+    TestContext.AssertTrue(Abs((100.0)-(dc.GetShrinkWeight))<=(0.001), 'Default shrink weight');
 
     dc.SetShrinkWeight(0.5);
-    FContext.AssertTrue(Abs((0.5)-(dc.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.5');
+    TestContext.AssertTrue(Abs((0.5)-(dc.GetShrinkWeight))<=(0.001), 'Shrink weight should be 0.5');
 
     dc.ClearShrinkWeight;
-    FContext.AssertTrue(not (dc.HasShrinkWeight), 'Should not have shrink weight after clearing');
+    TestContext.AssertTrue(not (dc.HasShrinkWeight), 'Should not have shrink weight after clearing');
   finally
     dc.Free;
   end;
@@ -127,10 +132,10 @@ begin
   dc := TfpgMigDimConstraint.Create;
   uv := TfpgMigUnitValue.Create(10, utPixel, '10px');
   try
-    FContext.AssertTrue((dc.GetAlign)=nil, 'Align should be nil by default');
+    TestContext.AssertTrue((dc.GetAlign)=nil, 'Align should be nil by default');
 
     dc.SetAlign(uv);
-    FContext.AssertTrue((uv)=(dc.GetAlign), 'Align should be set value');
+    TestContext.AssertTrue((uv)=(dc.GetAlign), 'Align should be set value');
   finally
     uv.Free;
     dc.Free;
@@ -145,7 +150,7 @@ begin
   dc := TfpgMigDimConstraint.Create;
   try
     align := dc.GetAlignOrDefault(True);  // True = columns
-    FContext.AssertTrue((UnitValueLeading)=(align), 'Column default alignment should be LEADING');
+    TestContext.AssertTrue((UnitValueLeading)=(align), 'Column default alignment should be LEADING');
   finally
     dc.Free;
   end;
@@ -160,7 +165,7 @@ begin
   try
     dc.SetFill(True);
     align := dc.GetAlignOrDefault(False);  // False = rows
-    FContext.AssertTrue((UnitValueCenter)=(align), 'Row alignment with fill should be CENTER');
+    TestContext.AssertTrue((UnitValueCenter)=(align), 'Row alignment with fill should be CENTER');
   finally
     dc.Free;
   end;
@@ -178,10 +183,10 @@ begin
   uv.Free; // Original uv is no longer needed
 
   try
-    FContext.AssertTrue((BoundSizeNullSize)=(dc.GetSize), 'Default size should be NULL_SIZE');
+    TestContext.AssertTrue((BoundSizeNullSize)=(dc.GetSize), 'Default size should be NULL_SIZE');
 
     dc.SetSize(bs); // dc takes ownership of bs
-    FContext.AssertTrue((bs)=(dc.GetSize), 'Size should be set value');
+    TestContext.AssertTrue((bs)=(dc.GetSize), 'Size should be set value');
   finally
     dc.Free;  // This will free bs and the cloned uv
   end;
@@ -205,7 +210,7 @@ begin
       on E: Exception do
         exceptionRaised := True;
     end;
-    FContext.AssertTrue(exceptionRaised, 'Should raise exception for linked size');
+    TestContext.AssertTrue(exceptionRaised, 'Should raise exception for linked size');
     // Since SetSize raised exception, bs was not transferred to dc
     // so test still owns it
   finally
@@ -227,12 +232,12 @@ begin
   uv.Free; // Original uv is no longer needed
 
   try
-    FContext.AssertTrue(not (dc.HasGapBefore), 'Should not have gap before initially');
-    FContext.AssertTrue(not (dc.IsGapBeforePush), 'Should not be push gap initially');
+    TestContext.AssertTrue(not (dc.HasGapBefore), 'Should not have gap before initially');
+    TestContext.AssertTrue(not (dc.IsGapBeforePush), 'Should not be push gap initially');
 
     dc.SetGapBefore(gap); // dc takes ownership of gap
-    FContext.AssertTrue(dc.HasGapBefore, 'Should have gap before after setting');
-    FContext.AssertTrue((gap)=(dc.GetGapBefore), 'Gap before should be set value');
+    TestContext.AssertTrue(dc.HasGapBefore, 'Should have gap before after setting');
+    TestContext.AssertTrue((gap)=(dc.GetGapBefore), 'Gap before should be set value');
   finally
     dc.Free;  // This will free gap and the cloned uv
   end;
@@ -250,12 +255,12 @@ begin
   uv.Free; // Original uv is no longer needed
 
   try
-    FContext.AssertTrue(not (dc.HasGapAfter), 'Should not have gap after initially');
+    TestContext.AssertTrue(not (dc.HasGapAfter), 'Should not have gap after initially');
 
     dc.SetGapAfter(gap); // dc takes ownership of gap
-    FContext.AssertTrue(dc.HasGapAfter, 'Should have gap after after setting');
-    FContext.AssertTrue(dc.IsGapAfterPush, 'Should be push gap');
-    FContext.AssertTrue((gap)=(dc.GetGapAfter), 'Gap after should be set value');
+    TestContext.AssertTrue(dc.HasGapAfter, 'Should have gap after after setting');
+    TestContext.AssertTrue(dc.IsGapAfterPush, 'Should be push gap');
+    TestContext.AssertTrue((gap)=(dc.GetGapAfter), 'Gap after should be set value');
   finally
     dc.Free;  // This will free gap and the cloned uv
   end;
@@ -267,10 +272,10 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(('')=(dc.GetSizeGroup), 'Size group should be empty by default');
+    TestContext.AssertTrue(('')=(dc.GetSizeGroup), 'Size group should be empty by default');
 
     dc.SetSizeGroup('group1');
-    FContext.AssertTrue(('group1')=(dc.GetSizeGroup), 'Size group should be "group1"');
+    TestContext.AssertTrue(('group1')=(dc.GetSizeGroup), 'Size group should be "group1"');
   finally
     dc.Free;
   end;
@@ -282,10 +287,10 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(('')=(dc.GetEndGroup), 'End group should be empty by default');
+    TestContext.AssertTrue(('')=(dc.GetEndGroup), 'End group should be empty by default');
 
     dc.SetEndGroup('endgroup1');
-    FContext.AssertTrue(('endgroup1')=(dc.GetEndGroup), 'End group should be "endgroup1"');
+    TestContext.AssertTrue(('endgroup1')=(dc.GetEndGroup), 'End group should be "endgroup1"');
   finally
     dc.Free;
   end;
@@ -297,10 +302,10 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(not (dc.IsFill), 'Fill should be false by default');
+    TestContext.AssertTrue(not (dc.IsFill), 'Fill should be false by default');
 
     dc.SetFill(True);
-    FContext.AssertTrue(dc.IsFill, 'Fill should be true after setting');
+    TestContext.AssertTrue(dc.IsFill, 'Fill should be true after setting');
   finally
     dc.Free;
   end;
@@ -312,23 +317,28 @@ var
 begin
   dc := TfpgMigDimConstraint.Create;
   try
-    FContext.AssertTrue(not (dc.IsNoGrid), 'NoGrid should be false by default');
+    TestContext.AssertTrue(not (dc.IsNoGrid), 'NoGrid should be false by default');
 
     dc.SetNoGrid(True);
-    FContext.AssertTrue(dc.IsNoGrid, 'NoGrid should be true after setting');
+    TestContext.AssertTrue(dc.IsNoGrid, 'NoGrid should be true after setting');
   finally
     dc.Free;
   end;
 end;
 
 
+constructor TTestMigDimConstraint.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigDimConstraintTestCreate(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestCreate');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCreate';
     lFixture.TestCreate;
   finally lFixture.Free; end;
 end;
@@ -336,10 +346,8 @@ end;
 procedure RunTTestMigDimConstraintTestGrowPriority(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestGrowPriority');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowPriority';
     lFixture.TestGrowPriority;
   finally lFixture.Free; end;
 end;
@@ -347,10 +355,8 @@ end;
 procedure RunTTestMigDimConstraintTestGrowWeight(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestGrowWeight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGrowWeight';
     lFixture.TestGrowWeight;
   finally lFixture.Free; end;
 end;
@@ -358,10 +364,8 @@ end;
 procedure RunTTestMigDimConstraintTestShrinkPriority(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestShrinkPriority');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkPriority';
     lFixture.TestShrinkPriority;
   finally lFixture.Free; end;
 end;
@@ -369,10 +373,8 @@ end;
 procedure RunTTestMigDimConstraintTestShrinkWeight(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestShrinkWeight');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkWeight';
     lFixture.TestShrinkWeight;
   finally lFixture.Free; end;
 end;
@@ -380,10 +382,8 @@ end;
 procedure RunTTestMigDimConstraintTestAlign(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestAlign');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlign';
     lFixture.TestAlign;
   finally lFixture.Free; end;
 end;
@@ -391,10 +391,8 @@ end;
 procedure RunTTestMigDimConstraintTestAlignOrDefault_Columns(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestAlignOrDefault_Columns');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlignOrDefault_Columns';
     lFixture.TestAlignOrDefault_Columns;
   finally lFixture.Free; end;
 end;
@@ -402,10 +400,8 @@ end;
 procedure RunTTestMigDimConstraintTestAlignOrDefault_RowsWithFill(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestAlignOrDefault_RowsWithFill');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAlignOrDefault_RowsWithFill';
     lFixture.TestAlignOrDefault_RowsWithFill;
   finally lFixture.Free; end;
 end;
@@ -413,10 +409,8 @@ end;
 procedure RunTTestMigDimConstraintTestSize(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSize';
     lFixture.TestSize;
   finally lFixture.Free; end;
 end;
@@ -424,10 +418,8 @@ end;
 procedure RunTTestMigDimConstraintTestSizeWithLinked(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestSizeWithLinked');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeWithLinked';
     lFixture.TestSizeWithLinked;
   finally lFixture.Free; end;
 end;
@@ -435,10 +427,8 @@ end;
 procedure RunTTestMigDimConstraintTestGapBefore(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestGapBefore');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapBefore';
     lFixture.TestGapBefore;
   finally lFixture.Free; end;
 end;
@@ -446,10 +436,8 @@ end;
 procedure RunTTestMigDimConstraintTestGapAfter(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestGapAfter');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGapAfter';
     lFixture.TestGapAfter;
   finally lFixture.Free; end;
 end;
@@ -457,10 +445,8 @@ end;
 procedure RunTTestMigDimConstraintTestSizeGroup(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestSizeGroup');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeGroup';
     lFixture.TestSizeGroup;
   finally lFixture.Free; end;
 end;
@@ -468,10 +454,8 @@ end;
 procedure RunTTestMigDimConstraintTestEndGroup(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestEndGroup');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEndGroup';
     lFixture.TestEndGroup;
   finally lFixture.Free; end;
 end;
@@ -479,10 +463,8 @@ end;
 procedure RunTTestMigDimConstraintTestFill(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestFill');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFill';
     lFixture.TestFill;
   finally lFixture.Free; end;
 end;
@@ -490,10 +472,8 @@ end;
 procedure RunTTestMigDimConstraintTestNoGrid(AContext: TNXTestContext);
 var lFixture: TTestMigDimConstraint;
 begin
-  lFixture:=TTestMigDimConstraint.Create;
+  lFixture:=TTestMigDimConstraint.Create(AContext, 'TestNoGrid');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoGrid';
     lFixture.TestNoGrid;
   finally lFixture.Free; end;
 end;

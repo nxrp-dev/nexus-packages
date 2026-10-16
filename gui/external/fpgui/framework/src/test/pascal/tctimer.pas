@@ -13,9 +13,14 @@ uses
 type
 
   TTestFPGTimer = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FSelfDestructTimer: TfpgTimer;
     FCallbackFired: Boolean;
@@ -26,18 +31,9 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 procedure RegistertctimerTests(ARegistry: TNXTestRegistry);
 
 implementation
-
-
-procedure RegisterTests;
-begin
-  
-end;
 
 
 { TTestFPGTimer }
@@ -79,16 +75,21 @@ begin
   // This should not raise an access violation
   fpgCheckTimers;
 
-  FContext.AssertTrue(FCallbackFired, 'Timer callback should have fired');
+  TestContext.AssertTrue(FCallbackFired, 'Timer callback should have fired');
+end;
+
+constructor TTestFPGTimer.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestFPGTimerTestResetAllTimers_WithNilEntry(AContext: TNXTestContext);
 var lFixture: TTestFPGTimer;
 begin
-  lFixture:=TTestFPGTimer.Create;
+  lFixture:=TTestFPGTimer.Create(AContext, 'TestResetAllTimers_WithNilEntry');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestResetAllTimers_WithNilEntry';
     lFixture.TestResetAllTimers_WithNilEntry;
   finally lFixture.Free; end;
 end;
@@ -96,10 +97,8 @@ end;
 procedure RunTTestFPGTimerTestCheckTimers_TimerSelfDestruct(AContext: TNXTestContext);
 var lFixture: TTestFPGTimer;
 begin
-  lFixture:=TTestFPGTimer.Create;
+  lFixture:=TTestFPGTimer.Create(AContext, 'TestCheckTimers_TimerSelfDestruct');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestCheckTimers_TimerSelfDestruct';
     lFixture.TestCheckTimers_TimerSelfDestruct;
   finally lFixture.Free; end;
 end;
@@ -112,8 +111,5 @@ begin
   lSuite.AddTest('TestCheckTimers_TimerSelfDestruct', @RunTTestFPGTimerTestCheckTimers_TimerSelfDestruct);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

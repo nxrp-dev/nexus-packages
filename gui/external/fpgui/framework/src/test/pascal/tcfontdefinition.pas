@@ -12,9 +12,14 @@ uses
 type
   { Test suite for TfpgFontDefinition parsing and normalization }
   TTestFontDefinition = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     { Basic parsing tests }
     procedure TestParseSimpleDescriptor;
@@ -42,8 +47,6 @@ type
     procedure TestAttributeFlags;
   end;
 
-procedure RegisterTests;
-
 procedure RegistertcfontdefinitionTests(ARegistry: TNXTestRegistry);
 
 implementation
@@ -56,11 +59,11 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12');
   try
-    FContext.AssertTrue(('Arial')=(fontDef.FaceName), 'Face name should be Arial');
-    FContext.AssertTrue((12)=(fontDef.Size), 'Size should be 12');
-    FContext.AssertTrue(not (fpgFontBold in fontDef.Attributes), 'Should not be bold');
-    FContext.AssertTrue(not (fpgFontItalic in fontDef.Attributes), 'Should not be italic');
-    FContext.AssertTrue(not (fpgFontUnderline in fontDef.Attributes), 'Should not be underline');
+    TestContext.AssertTrue(('Arial')=(fontDef.FaceName), 'Face name should be Arial');
+    TestContext.AssertTrue((12)=(fontDef.Size), 'Size should be 12');
+    TestContext.AssertTrue(not (fpgFontBold in fontDef.Attributes), 'Should not be bold');
+    TestContext.AssertTrue(not (fpgFontItalic in fontDef.Attributes), 'Should not be italic');
+    TestContext.AssertTrue(not (fpgFontUnderline in fontDef.Attributes), 'Should not be underline');
   finally
     fontDef.Free;
   end;
@@ -72,10 +75,10 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12:bold');
   try
-    FContext.AssertTrue(('Arial')=(fontDef.FaceName), '');
-    FContext.AssertTrue((12)=(fontDef.Size), '');
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
-    FContext.AssertTrue(not (fpgFontItalic in fontDef.Attributes), 'Should not be italic');
+    TestContext.AssertTrue(('Arial')=(fontDef.FaceName), '');
+    TestContext.AssertTrue((12)=(fontDef.Size), '');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
+    TestContext.AssertTrue(not (fpgFontItalic in fontDef.Attributes), 'Should not be italic');
   finally
     fontDef.Free;
   end;
@@ -87,8 +90,8 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12:italic');
   try
-    FContext.AssertTrue(not (fpgFontBold in fontDef.Attributes), 'Should not be bold');
-    FContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
+    TestContext.AssertTrue(not (fpgFontBold in fontDef.Attributes), 'Should not be bold');
+    TestContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
   finally
     fontDef.Free;
   end;
@@ -100,8 +103,8 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12:bold:italic');
   try
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
-    FContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
+    TestContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
   finally
     fontDef.Free;
   end;
@@ -113,7 +116,7 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12:underline');
   try
-    FContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Should be underline');
+    TestContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Should be underline');
   finally
     fontDef.Free;
   end;
@@ -125,11 +128,11 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Liberation Sans-14:bold:italic:underline');
   try
-    FContext.AssertTrue(('Liberation Sans')=(fontDef.FaceName), '');
-    FContext.AssertTrue((14)=(fontDef.Size), '');
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
-    FContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
-    FContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Should be underline');
+    TestContext.AssertTrue(('Liberation Sans')=(fontDef.FaceName), '');
+    TestContext.AssertTrue((14)=(fontDef.Size), '');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
+    TestContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
+    TestContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Should be underline');
   finally
     fontDef.Free;
   end;
@@ -142,7 +145,7 @@ begin
   fontDef1 := TfpgFontDefinition.Create('Arial-12:bold');
   fontDef2 := TfpgFontDefinition.Create('ARIAL-12:BOLD');
   try
-    FContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Normalized descriptors should be identical');
+    TestContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Normalized descriptors should be identical');
   finally
     fontDef1.Free;
     fontDef2.Free;
@@ -156,7 +159,7 @@ begin
   fontDef1 := TfpgFontDefinition.Create('Arial-12:bold');
   fontDef2 := TfpgFontDefinition.Create('arial-12:bold');
   try
-    FContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Normalized descriptors should be identical');
+    TestContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Normalized descriptors should be identical');
   finally
     fontDef1.Free;
     fontDef2.Free;
@@ -170,7 +173,7 @@ begin
   fontDef1 := TfpgFontDefinition.Create('Liberation Sans-12:bold:italic');
   fontDef2 := TfpgFontDefinition.Create('Liberation SANS-12:BOLD:italic');
   try
-    FContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Mixed case should normalize to same descriptor');
+    TestContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Mixed case should normalize to same descriptor');
   finally
     fontDef1.Free;
     fontDef2.Free;
@@ -184,7 +187,7 @@ begin
   fontDef1 := TfpgFontDefinition.Create('Arial-12:bold:italic');
   fontDef2 := TfpgFontDefinition.Create('Arial-12:italic:bold');
   try
-    FContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Attribute order should normalize to canonical form');
+    TestContext.AssertTrue((fontDef1.FontDesc)=(fontDef2.FontDesc), 'Attribute order should normalize to canonical form');
   finally
     fontDef1.Free;
     fontDef2.Free;
@@ -198,8 +201,8 @@ begin
   { Empty descriptor should use defaults }
   fontDef := TfpgFontDefinition.Create('');
   try
-    FContext.AssertTrue(fontDef.FaceName <> '', 'Should have default face name');
-    FContext.AssertTrue(fontDef.Size > 0, 'Should have default size');
+    TestContext.AssertTrue(fontDef.FaceName <> '', 'Should have default face name');
+    TestContext.AssertTrue(fontDef.Size > 0, 'Should have default size');
   finally
     fontDef.Free;
   end;
@@ -212,8 +215,8 @@ begin
   { Descriptor without size should use default }
   fontDef := TfpgFontDefinition.Create('Arial');
   try
-    FContext.AssertTrue(('Arial')=(fontDef.FaceName), '');
-    FContext.AssertTrue(fontDef.Size > 0, 'Should have default size');
+    TestContext.AssertTrue(('Arial')=(fontDef.FaceName), '');
+    TestContext.AssertTrue(fontDef.Size > 0, 'Should have default size');
   finally
     fontDef.Free;
   end;
@@ -226,9 +229,9 @@ begin
   { Font names with spaces should be handled correctly }
   fontDef := TfpgFontDefinition.Create('Liberation Sans-12:bold');
   try
-    FContext.AssertTrue(('Liberation Sans')=(fontDef.FaceName), 'Face name with spaces should be preserved');
-    FContext.AssertTrue((12)=(fontDef.Size), '');
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
+    TestContext.AssertTrue(('Liberation Sans')=(fontDef.FaceName), 'Face name with spaces should be preserved');
+    TestContext.AssertTrue((12)=(fontDef.Size), '');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
   finally
     fontDef.Free;
   end;
@@ -241,10 +244,10 @@ begin
   { Duplicate attributes should be deduplicated }
   fontDef := TfpgFontDefinition.Create('Arial-12:bold:bold:italic');
   try
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
-    FContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Should be bold');
+    TestContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Should be italic');
     { Normalized descriptor should not have duplicates }
-    FContext.AssertTrue(Pos(':bold:bold:', fontDef.FontDesc) = 0, 'Normalized descriptor should not contain duplicate :bold:');
+    TestContext.AssertTrue(Pos(':bold:bold:', fontDef.FontDesc) = 0, 'Normalized descriptor should not contain duplicate :bold:');
   finally
     fontDef.Free;
   end;
@@ -256,7 +259,7 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Courier New-10:bold');
   try
-    FContext.AssertTrue(('Courier New')=(fontDef.FaceName), 'Should extract face name with spaces correctly');
+    TestContext.AssertTrue(('Courier New')=(fontDef.FaceName), 'Should extract face name with spaces correctly');
   finally
     fontDef.Free;
   end;
@@ -268,7 +271,7 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-18');
   try
-    FContext.AssertTrue((18)=(fontDef.Size), 'Should extract size correctly');
+    TestContext.AssertTrue((18)=(fontDef.Size), 'Should extract size correctly');
   finally
     fontDef.Free;
   end;
@@ -280,26 +283,26 @@ var
 begin
   fontDef := TfpgFontDefinition.Create('Arial-12:bold:italic:underline');
   try
-    FContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Bold flag should be set');
-    FContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Italic flag should be set');
-    FContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Underline flag should be set');
+    TestContext.AssertTrue(fpgFontBold in fontDef.Attributes, 'Bold flag should be set');
+    TestContext.AssertTrue(fpgFontItalic in fontDef.Attributes, 'Italic flag should be set');
+    TestContext.AssertTrue(fpgFontUnderline in fontDef.Attributes, 'Underline flag should be set');
   finally
     fontDef.Free;
   end;
 end;
 
-procedure RegisterTests;
+constructor TTestFontDefinition.Create(AContext: TNXTestContext; const ACaseName: string);
 begin
-  
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestFontDefinitionTestParseSimpleDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseSimpleDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseSimpleDescriptor';
     lFixture.TestParseSimpleDescriptor;
   finally lFixture.Free; end;
 end;
@@ -307,10 +310,8 @@ end;
 procedure RunTTestFontDefinitionTestParseBoldDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseBoldDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseBoldDescriptor';
     lFixture.TestParseBoldDescriptor;
   finally lFixture.Free; end;
 end;
@@ -318,10 +319,8 @@ end;
 procedure RunTTestFontDefinitionTestParseItalicDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseItalicDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseItalicDescriptor';
     lFixture.TestParseItalicDescriptor;
   finally lFixture.Free; end;
 end;
@@ -329,10 +328,8 @@ end;
 procedure RunTTestFontDefinitionTestParseBoldItalicDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseBoldItalicDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseBoldItalicDescriptor';
     lFixture.TestParseBoldItalicDescriptor;
   finally lFixture.Free; end;
 end;
@@ -340,10 +337,8 @@ end;
 procedure RunTTestFontDefinitionTestParseUnderlineDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseUnderlineDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseUnderlineDescriptor';
     lFixture.TestParseUnderlineDescriptor;
   finally lFixture.Free; end;
 end;
@@ -351,10 +346,8 @@ end;
 procedure RunTTestFontDefinitionTestParseMultipleAttributes(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestParseMultipleAttributes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestParseMultipleAttributes';
     lFixture.TestParseMultipleAttributes;
   finally lFixture.Free; end;
 end;
@@ -362,10 +355,8 @@ end;
 procedure RunTTestFontDefinitionTestNormalizationUpperCase(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestNormalizationUpperCase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNormalizationUpperCase';
     lFixture.TestNormalizationUpperCase;
   finally lFixture.Free; end;
 end;
@@ -373,10 +364,8 @@ end;
 procedure RunTTestFontDefinitionTestNormalizationLowerCase(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestNormalizationLowerCase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNormalizationLowerCase';
     lFixture.TestNormalizationLowerCase;
   finally lFixture.Free; end;
 end;
@@ -384,10 +373,8 @@ end;
 procedure RunTTestFontDefinitionTestNormalizationMixedCase(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestNormalizationMixedCase');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNormalizationMixedCase';
     lFixture.TestNormalizationMixedCase;
   finally lFixture.Free; end;
 end;
@@ -395,10 +382,8 @@ end;
 procedure RunTTestFontDefinitionTestNormalizationAttributeOrder(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestNormalizationAttributeOrder');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNormalizationAttributeOrder';
     lFixture.TestNormalizationAttributeOrder;
   finally lFixture.Free; end;
 end;
@@ -406,10 +391,8 @@ end;
 procedure RunTTestFontDefinitionTestEmptyDescriptor(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestEmptyDescriptor');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEmptyDescriptor';
     lFixture.TestEmptyDescriptor;
   finally lFixture.Free; end;
 end;
@@ -417,10 +400,8 @@ end;
 procedure RunTTestFontDefinitionTestDescriptorWithoutSize(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestDescriptorWithoutSize');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDescriptorWithoutSize';
     lFixture.TestDescriptorWithoutSize;
   finally lFixture.Free; end;
 end;
@@ -428,10 +409,8 @@ end;
 procedure RunTTestFontDefinitionTestDescriptorWithSpaces(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestDescriptorWithSpaces');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDescriptorWithSpaces';
     lFixture.TestDescriptorWithSpaces;
   finally lFixture.Free; end;
 end;
@@ -439,10 +418,8 @@ end;
 procedure RunTTestFontDefinitionTestDescriptorWithDuplicateAttributes(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestDescriptorWithDuplicateAttributes');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDescriptorWithDuplicateAttributes';
     lFixture.TestDescriptorWithDuplicateAttributes;
   finally lFixture.Free; end;
 end;
@@ -450,10 +427,8 @@ end;
 procedure RunTTestFontDefinitionTestFaceNameExtraction(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestFaceNameExtraction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFaceNameExtraction';
     lFixture.TestFaceNameExtraction;
   finally lFixture.Free; end;
 end;
@@ -461,10 +436,8 @@ end;
 procedure RunTTestFontDefinitionTestSizeExtraction(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestSizeExtraction');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSizeExtraction';
     lFixture.TestSizeExtraction;
   finally lFixture.Free; end;
 end;
@@ -472,10 +445,8 @@ end;
 procedure RunTTestFontDefinitionTestAttributeFlags(AContext: TNXTestContext);
 var lFixture: TTestFontDefinition;
 begin
-  lFixture:=TTestFontDefinition.Create;
+  lFixture:=TTestFontDefinition.Create(AContext, 'TestAttributeFlags');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestAttributeFlags';
     lFixture.TestAttributeFlags;
   finally lFixture.Free; end;
 end;
@@ -503,8 +474,5 @@ begin
   lSuite.AddTest('TestAttributeFlags', @RunTTestFontDefinitionTestAttributeFlags);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

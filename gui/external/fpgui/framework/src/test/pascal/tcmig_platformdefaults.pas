@@ -9,9 +9,14 @@ uses
 
 type
   TTestMigPlatformDefaults = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   public
     procedure TestGetCurrentPlatform;
     procedure TestSetPlatform_Windows;
@@ -46,12 +51,12 @@ begin
   platform := TfpgMigPlatformDefaults.GetCurrentPlatform;
 
   {$IFDEF MSWINDOWS}
-  FContext.AssertTrue((PLATFORM_WINDOWS)=(platform), 'Platform should be Windows');
+  TestContext.AssertTrue((PLATFORM_WINDOWS)=(platform), 'Platform should be Windows');
   {$ELSE}
     {$IFDEF DARWIN}
-    FContext.AssertTrue((PLATFORM_MAC_OSX)=(platform), 'Platform should be Mac OSX');
+    TestContext.AssertTrue((PLATFORM_MAC_OSX)=(platform), 'Platform should be Mac OSX');
     {$ELSE}
-    FContext.AssertTrue((PLATFORM_GNOME)=(platform), 'Platform should be Gnome');
+    TestContext.AssertTrue((PLATFORM_GNOME)=(platform), 'Platform should be Gnome');
     {$ENDIF}
   {$ENDIF}
 end;
@@ -65,14 +70,14 @@ begin
   relX := TfpgMigPlatformDefaults.GetRelatedGapX;
   relY := TfpgMigPlatformDefaults.GetRelatedGapY;
 
-  FContext.AssertTrue((relX)<>nil, 'Related gap X should be set for Windows');
-  FContext.AssertTrue((relY)<>nil, 'Related gap Y should be set for Windows');
-  FContext.AssertTrue((relX.Min)<>nil, 'Related gap X min should be set');
-  FContext.AssertTrue((relY.Min)<>nil, 'Related gap Y min should be set');
+  TestContext.AssertTrue((relX)<>nil, 'Related gap X should be set for Windows');
+  TestContext.AssertTrue((relY)<>nil, 'Related gap Y should be set for Windows');
+  TestContext.AssertTrue((relX.Min)<>nil, 'Related gap X min should be set');
+  TestContext.AssertTrue((relY.Min)<>nil, 'Related gap Y min should be set');
 
   // Windows uses 7lpx/7lpy for related gaps
-  FContext.AssertTrue(Abs((7.0)-(relX.Min.Value))<=(0.001), 'Related gap X value should be 7');
-  FContext.AssertTrue(Abs((7.0)-(relY.Min.Value))<=(0.001), 'Related gap Y value should be 7');
+  TestContext.AssertTrue(Abs((7.0)-(relX.Min.Value))<=(0.001), 'Related gap X value should be 7');
+  TestContext.AssertTrue(Abs((7.0)-(relY.Min.Value))<=(0.001), 'Related gap Y value should be 7');
 end;
 
 procedure TTestMigPlatformDefaults.TestSetPlatform_MacOSX;
@@ -84,12 +89,12 @@ begin
   unrelX := TfpgMigPlatformDefaults.GetUnrelatedGapX;
   unrelY := TfpgMigPlatformDefaults.GetUnrelatedGapY;
 
-  FContext.AssertTrue((unrelX)<>nil, 'Unrelated gap X should be set for Mac');
-  FContext.AssertTrue((unrelY)<>nil, 'Unrelated gap Y should be set for Mac');
+  TestContext.AssertTrue((unrelX)<>nil, 'Unrelated gap X should be set for Mac');
+  TestContext.AssertTrue((unrelY)<>nil, 'Unrelated gap Y should be set for Mac');
 
   // Mac uses 12lpx/12lpy for unrelated gaps
-  FContext.AssertTrue(Abs((12.0)-(unrelX.Min.Value))<=(0.001), 'Unrelated gap X value should be 12');
-  FContext.AssertTrue(Abs((12.0)-(unrelY.Min.Value))<=(0.001), 'Unrelated gap Y value should be 12');
+  TestContext.AssertTrue(Abs((12.0)-(unrelX.Min.Value))<=(0.001), 'Unrelated gap X value should be 12');
+  TestContext.AssertTrue(Abs((12.0)-(unrelY.Min.Value))<=(0.001), 'Unrelated gap Y value should be 12');
 end;
 
 procedure TTestMigPlatformDefaults.TestSetPlatform_Gnome;
@@ -101,12 +106,12 @@ begin
   relX := TfpgMigPlatformDefaults.GetRelatedGapX;
   cellX := TfpgMigPlatformDefaults.GetDefaultHGap;
 
-  FContext.AssertTrue((relX)<>nil, 'Related gap X should be set for Gnome');
-  FContext.AssertTrue((cellX)<>nil, 'Grid cell gap X should be set for Gnome');
+  TestContext.AssertTrue((relX)<>nil, 'Related gap X should be set for Gnome');
+  TestContext.AssertTrue((cellX)<>nil, 'Grid cell gap X should be set for Gnome');
 
   // Gnome uses 6lpx for related and grid cell gaps
-  FContext.AssertTrue(Abs((6.0)-(relX.Min.Value))<=(0.001), 'Related gap X value should be 6');
-  FContext.AssertTrue(Abs((6.0)-(cellX.Min.Value))<=(0.001), 'Grid cell gap X value should be 6');
+  TestContext.AssertTrue(Abs((6.0)-(relX.Min.Value))<=(0.001), 'Related gap X value should be 6');
+  TestContext.AssertTrue(Abs((6.0)-(cellX.Min.Value))<=(0.001), 'Grid cell gap X value should be 6');
 end;
 
 procedure TTestMigPlatformDefaults.TestLogicalPixelBase_Default;
@@ -114,16 +119,16 @@ var
   base: Integer;
 begin
   base := TfpgMigPlatformDefaults.GetLogicalPixelBase;
-  FContext.AssertTrue((BASE_SCALE_FACTOR)=(base), 'Default logical pixel base should be BASE_SCALE_FACTOR');
+  TestContext.AssertTrue((BASE_SCALE_FACTOR)=(base), 'Default logical pixel base should be BASE_SCALE_FACTOR');
 end;
 
 procedure TTestMigPlatformDefaults.TestLogicalPixelBase_SetValid;
 begin
   TfpgMigPlatformDefaults.SetLogicalPixelBase(BASE_FONT_SIZE);
-  FContext.AssertTrue((BASE_FONT_SIZE)=(TfpgMigPlatformDefaults.GetLogicalPixelBase), 'Logical pixel base should be BASE_FONT_SIZE');
+  TestContext.AssertTrue((BASE_FONT_SIZE)=(TfpgMigPlatformDefaults.GetLogicalPixelBase), 'Logical pixel base should be BASE_FONT_SIZE');
 
   TfpgMigPlatformDefaults.SetLogicalPixelBase(BASE_REAL_PIXEL);
-  FContext.AssertTrue((BASE_REAL_PIXEL)=(TfpgMigPlatformDefaults.GetLogicalPixelBase), 'Logical pixel base should be BASE_REAL_PIXEL');
+  TestContext.AssertTrue((BASE_REAL_PIXEL)=(TfpgMigPlatformDefaults.GetLogicalPixelBase), 'Logical pixel base should be BASE_REAL_PIXEL');
 
   // Reset to default
   TfpgMigPlatformDefaults.SetLogicalPixelBase(BASE_SCALE_FACTOR);
@@ -140,7 +145,7 @@ begin
     on E: Exception do
       exceptionRaised := True;
   end;
-  FContext.AssertTrue(exceptionRaised, 'Should raise exception for invalid base');
+  TestContext.AssertTrue(exceptionRaised, 'Should raise exception for invalid base');
 end;
 
 procedure TTestMigPlatformDefaults.TestBaseDPI_Default;
@@ -148,13 +153,13 @@ var
   dpi: Integer;
 begin
   dpi := TfpgMigPlatformDefaults.GetBaseDPI;
-  FContext.AssertTrue((96)=(dpi), 'Default DPI should be 96');
+  TestContext.AssertTrue((96)=(dpi), 'Default DPI should be 96');
 end;
 
 procedure TTestMigPlatformDefaults.TestBaseDPI_SetCustom;
 begin
   TfpgMigPlatformDefaults.SetBaseDPI(120);
-  FContext.AssertTrue((120)=(TfpgMigPlatformDefaults.GetBaseDPI), 'DPI should be 120');
+  TestContext.AssertTrue((120)=(TfpgMigPlatformDefaults.GetBaseDPI), 'DPI should be 120');
 
   // Reset to default
   TfpgMigPlatformDefaults.SetBaseDPI(96);
@@ -167,8 +172,8 @@ begin
   horScale := TfpgMigPlatformDefaults.GetHorizontalScaleFactor;
   verScale := TfpgMigPlatformDefaults.GetVerticalScaleFactor;
 
-  FContext.AssertTrue(Abs((1.0)-(horScale))<=(0.001), 'Default horizontal scale should be 1.0');
-  FContext.AssertTrue(Abs((1.0)-(verScale))<=(0.001), 'Default vertical scale should be 1.0');
+  TestContext.AssertTrue(Abs((1.0)-(horScale))<=(0.001), 'Default horizontal scale should be 1.0');
+  TestContext.AssertTrue(Abs((1.0)-(verScale))<=(0.001), 'Default vertical scale should be 1.0');
 end;
 
 procedure TTestMigPlatformDefaults.TestScaleFactors_SetCustom;
@@ -176,8 +181,8 @@ begin
   TfpgMigPlatformDefaults.SetHorizontalScaleFactor(1.5);
   TfpgMigPlatformDefaults.SetVerticalScaleFactor(2.0);
 
-  FContext.AssertTrue(Abs((1.5)-(TfpgMigPlatformDefaults.GetHorizontalScaleFactor))<=(0.001), 'Horizontal scale should be 1.5');
-  FContext.AssertTrue(Abs((2.0)-(TfpgMigPlatformDefaults.GetVerticalScaleFactor))<=(0.001), 'Vertical scale should be 2.0');
+  TestContext.AssertTrue(Abs((1.5)-(TfpgMigPlatformDefaults.GetHorizontalScaleFactor))<=(0.001), 'Horizontal scale should be 1.5');
+  TestContext.AssertTrue(Abs((2.0)-(TfpgMigPlatformDefaults.GetVerticalScaleFactor))<=(0.001), 'Vertical scale should be 2.0');
 
   // Reset to default
   TfpgMigPlatformDefaults.SetHorizontalScaleFactor(1.0);
@@ -191,8 +196,8 @@ begin
   horUnit := TfpgMigPlatformDefaults.GetDefaultHorizontalUnit;
   verUnit := TfpgMigPlatformDefaults.GetDefaultVerticalUnit;
 
-  FContext.AssertTrue((Ord(utLPX))=(horUnit), 'Default horizontal unit should be LPX');
-  FContext.AssertTrue((Ord(utLPY))=(verUnit), 'Default vertical unit should be LPY');
+  TestContext.AssertTrue((Ord(utLPX))=(horUnit), 'Default horizontal unit should be LPX');
+  TestContext.AssertTrue((Ord(utLPY))=(verUnit), 'Default vertical unit should be LPY');
 end;
 
 procedure TTestMigPlatformDefaults.TestRelatedGaps;
@@ -207,10 +212,10 @@ begin
     gapX := TfpgMigPlatformDefaults.GetRelatedGapX;
     gapY := TfpgMigPlatformDefaults.GetRelatedGapY;
 
-    FContext.AssertTrue((gapX)<>nil, 'Related gap X should not be nil');
-    FContext.AssertTrue((gapY)<>nil, 'Related gap Y should not be nil');
-    FContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Related gap X min should have same content');
-    FContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Related gap Y min should have same content');
+    TestContext.AssertTrue((gapX)<>nil, 'Related gap X should not be nil');
+    TestContext.AssertTrue((gapY)<>nil, 'Related gap Y should not be nil');
+    TestContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Related gap X min should have same content');
+    TestContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Related gap Y min should have same content');
   finally
     uv.Free;
   end;
@@ -231,10 +236,10 @@ begin
     gapX := TfpgMigPlatformDefaults.GetUnrelatedGapX;
     gapY := TfpgMigPlatformDefaults.GetUnrelatedGapY;
 
-    FContext.AssertTrue((gapX)<>nil, 'Unrelated gap X should not be nil');
-    FContext.AssertTrue((gapY)<>nil, 'Unrelated gap Y should not be nil');
-    FContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Unrelated gap X min should have same content');
-    FContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Unrelated gap Y min should have same content');
+    TestContext.AssertTrue((gapX)<>nil, 'Unrelated gap X should not be nil');
+    TestContext.AssertTrue((gapY)<>nil, 'Unrelated gap Y should not be nil');
+    TestContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Unrelated gap X min should have same content');
+    TestContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Unrelated gap Y min should have same content');
   finally
     uv.Free;
   end;
@@ -255,10 +260,10 @@ begin
     gapX := TfpgMigPlatformDefaults.GetDefaultHGap;
     gapY := TfpgMigPlatformDefaults.GetDefaultVGap;
 
-    FContext.AssertTrue((gapX)<>nil, 'Grid cell gap X should not be nil');
-    FContext.AssertTrue((gapY)<>nil, 'Grid cell gap Y should not be nil');
-    FContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Grid cell gap X min should have same content');
-    FContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Grid cell gap Y min should have same content');
+    TestContext.AssertTrue((gapX)<>nil, 'Grid cell gap X should not be nil');
+    TestContext.AssertTrue((gapY)<>nil, 'Grid cell gap Y should not be nil');
+    TestContext.AssertTrue(gapX.Min.ContentEquals(uv), 'Grid cell gap X min should have same content');
+    TestContext.AssertTrue(gapY.Min.ContentEquals(uv), 'Grid cell gap Y min should have same content');
   finally
     uv.Free;
   end;
@@ -277,7 +282,7 @@ begin
     TfpgMigPlatformDefaults.SetMinimumButtonWidth(uv);
 
     width := TfpgMigPlatformDefaults.GetMinimumButtonWidth;
-    FContext.AssertTrue(width.ContentEquals(uv), 'Button width should have same content');
+    TestContext.AssertTrue(width.ContentEquals(uv), 'Button width should have same content');
   finally
     uv.Free;
   end;
@@ -296,7 +301,7 @@ begin
     TfpgMigPlatformDefaults.SetMinimumButtonPadding(uv);
 
     padding := TfpgMigPlatformDefaults.GetMinimumButtonPadding;
-    FContext.AssertTrue(padding.ContentEquals(uv), 'Button padding should have same content');
+    TestContext.AssertTrue(padding.ContentEquals(uv), 'Button padding should have same content');
   finally
     uv.Free;
   end;
@@ -315,20 +320,25 @@ begin
   TfpgMigPlatformDefaults.SetBaseDPI(120);
   count2 := TfpgMigPlatformDefaults.GetModCount;
 
-  FContext.AssertTrue(count2 > count1, 'ModCount should increment after change');
+  TestContext.AssertTrue(count2 > count1, 'ModCount should increment after change');
 
   // Reset
   TfpgMigPlatformDefaults.SetBaseDPI(96);
 end;
 
 
+constructor TTestMigPlatformDefaults.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestMigPlatformDefaultsTestGetCurrentPlatform(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestGetCurrentPlatform');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetCurrentPlatform';
     lFixture.TestGetCurrentPlatform;
   finally lFixture.Free; end;
 end;
@@ -336,10 +346,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestSetPlatform_Windows(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestSetPlatform_Windows');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetPlatform_Windows';
     lFixture.TestSetPlatform_Windows;
   finally lFixture.Free; end;
 end;
@@ -347,10 +355,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestSetPlatform_MacOSX(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestSetPlatform_MacOSX');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetPlatform_MacOSX';
     lFixture.TestSetPlatform_MacOSX;
   finally lFixture.Free; end;
 end;
@@ -358,10 +364,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestSetPlatform_Gnome(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestSetPlatform_Gnome');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSetPlatform_Gnome';
     lFixture.TestSetPlatform_Gnome;
   finally lFixture.Free; end;
 end;
@@ -369,10 +373,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestLogicalPixelBase_Default(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestLogicalPixelBase_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLogicalPixelBase_Default';
     lFixture.TestLogicalPixelBase_Default;
   finally lFixture.Free; end;
 end;
@@ -380,10 +382,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestLogicalPixelBase_SetValid(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestLogicalPixelBase_SetValid');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLogicalPixelBase_SetValid';
     lFixture.TestLogicalPixelBase_SetValid;
   finally lFixture.Free; end;
 end;
@@ -391,10 +391,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestLogicalPixelBase_SetInvalid(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestLogicalPixelBase_SetInvalid');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestLogicalPixelBase_SetInvalid';
     lFixture.TestLogicalPixelBase_SetInvalid;
   finally lFixture.Free; end;
 end;
@@ -402,10 +400,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestBaseDPI_Default(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestBaseDPI_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBaseDPI_Default';
     lFixture.TestBaseDPI_Default;
   finally lFixture.Free; end;
 end;
@@ -413,10 +409,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestBaseDPI_SetCustom(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestBaseDPI_SetCustom');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestBaseDPI_SetCustom';
     lFixture.TestBaseDPI_SetCustom;
   finally lFixture.Free; end;
 end;
@@ -424,10 +418,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestScaleFactors_Default(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestScaleFactors_Default');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestScaleFactors_Default';
     lFixture.TestScaleFactors_Default;
   finally lFixture.Free; end;
 end;
@@ -435,10 +427,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestScaleFactors_SetCustom(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestScaleFactors_SetCustom');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestScaleFactors_SetCustom';
     lFixture.TestScaleFactors_SetCustom;
   finally lFixture.Free; end;
 end;
@@ -446,10 +436,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestDefaultUnits(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestDefaultUnits');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestDefaultUnits';
     lFixture.TestDefaultUnits;
   finally lFixture.Free; end;
 end;
@@ -457,10 +445,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestRelatedGaps(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestRelatedGaps');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRelatedGaps';
     lFixture.TestRelatedGaps;
   finally lFixture.Free; end;
 end;
@@ -468,10 +454,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestUnrelatedGaps(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestUnrelatedGaps');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestUnrelatedGaps';
     lFixture.TestUnrelatedGaps;
   finally lFixture.Free; end;
 end;
@@ -479,10 +463,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestGridCellGaps(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestGridCellGaps');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGridCellGaps';
     lFixture.TestGridCellGaps;
   finally lFixture.Free; end;
 end;
@@ -490,10 +472,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestButtonWidth(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestButtonWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestButtonWidth';
     lFixture.TestButtonWidth;
   finally lFixture.Free; end;
 end;
@@ -501,10 +481,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestButtonPadding(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestButtonPadding');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestButtonPadding';
     lFixture.TestButtonPadding;
   finally lFixture.Free; end;
 end;
@@ -512,10 +490,8 @@ end;
 procedure RunTTestMigPlatformDefaultsTestModCount(AContext: TNXTestContext);
 var lFixture: TTestMigPlatformDefaults;
 begin
-  lFixture:=TTestMigPlatformDefaults.Create;
+  lFixture:=TTestMigPlatformDefaults.Create(AContext, 'TestModCount');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestModCount';
     lFixture.TestModCount;
   finally lFixture.Free; end;
 end;

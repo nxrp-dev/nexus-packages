@@ -11,13 +11,13 @@ From the Nexus root:
 ```sh
 nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBTests.nxproject /action=build
 output/fcl-db-tests/x86_64-linux/FCLDBTests
-nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBRetained.nxproject /action=build
-output/fcl-db-tests/x86_64-linux/retained/FCLDBRetained
+python3 projects/nxtest/retained/BuildRetained.py fcl-db --nxbuild output/nxbuild-next/x86_64-linux/nxbuild --run
 ```
 
-`FCLDBRetained.lpr` runs the unchanged scanner, parser, SQL generator, SQL script
-and dictionary-diff suites: 943 tests. Historical runners and standalone test
-programs remain available; the console wrapper needs no Lazarus or GUI resource.
+The retained scanner, parser, SQL generator, SQL script and dictionary-diff
+suites now register 943 native nxtest cases. The old FPCUnit runners were
+removed; their originals remain in the hashed retirement archive. See the
+[Nexus retained-test report](../../../../../projects/nxtest/retained/README.md).
 
 ## Compare with the untouched source
 

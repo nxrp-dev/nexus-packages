@@ -4,7 +4,6 @@
 dialect "nxpackage.Language.nxscript";
 
 // Requires NexusFPC's fcl-base and rtl-objpas sources, which have no catalog entries.
-// jsonfpcunit additionally requires fcl-fpcunit and is excluded from FCLJSON.nxpackage.
 Package FCLJSON {
     Id: "NXRP.Serialization.FCLJSON";
     Author: "Michael van Canneyt";

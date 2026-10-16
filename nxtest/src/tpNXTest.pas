@@ -17,6 +17,10 @@ unit tpNXTest;
 
 interface
 
+type
+  TNXTestAction = procedure of object;
+  TNXTestRoutine = procedure;
+
 const
   cNXTestSuccess = 0;
   cNXTestErrorNotInitialized = -1;

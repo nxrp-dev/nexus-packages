@@ -23,9 +23,14 @@ uses
 type
 
   TTestGridStretch = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FGrid: TfpgStringGrid;
     procedure SetupColumns(ACount: integer; AWidth: integer);
@@ -46,16 +51,9 @@ type
     procedure TestHasStretchColumns;
   end;
 
-procedure RegisterTests;
-
 procedure RegistertcgridstretchTests(ARegistry: TNXTestRegistry);
 
 implementation
-
-procedure RegisterTests;
-begin
-  
-end;
 
 { TTestGridStretch }
 
@@ -83,22 +81,22 @@ end;
 procedure TTestGridStretch.TestColumnStretchDefaultsToZero;
 begin
   SetupColumns(2, 50);
-  FContext.AssertTrue((0)=(FGrid.ColumnStretch[0]), 'Column 0 stretch default');
-  FContext.AssertTrue((0)=(FGrid.ColumnStretch[1]), 'Column 1 stretch default');
+  TestContext.AssertTrue((0)=(FGrid.ColumnStretch[0]), 'Column 0 stretch default');
+  TestContext.AssertTrue((0)=(FGrid.ColumnStretch[1]), 'Column 1 stretch default');
 end;
 
 procedure TTestGridStretch.TestColumnMinWidthDefault;
 begin
   SetupColumns(1, 50);
-  FContext.AssertTrue((8)=(FGrid.ColumnMinWidth[0]), 'Column MinWidth default');
+  TestContext.AssertTrue((8)=(FGrid.ColumnMinWidth[0]), 'Column MinWidth default');
 end;
 
 procedure TTestGridStretch.TestNoStretchLeavesWidthsAlone;
 begin
   SetupColumns(2, 50);
   FGrid.DistributeStretchWidths(400);
-  FContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Column 0 unchanged');
-  FContext.AssertTrue((50)=(FGrid.ColumnWidth[1]), 'Column 1 unchanged');
+  TestContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Column 0 unchanged');
+  TestContext.AssertTrue((50)=(FGrid.ColumnWidth[1]), 'Column 1 unchanged');
 end;
 
 procedure TTestGridStretch.TestSingleStretchColumnAbsorbsSlack;
@@ -106,8 +104,8 @@ begin
   SetupColumns(2, 50);
   FGrid.ColumnStretch[1] := 1;
   FGrid.DistributeStretchWidths(300);
-  FContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Fixed column keeps width');
-  FContext.AssertTrue((250)=(FGrid.ColumnWidth[1]), 'Stretch column absorbs the rest');
+  TestContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Fixed column keeps width');
+  TestContext.AssertTrue((250)=(FGrid.ColumnWidth[1]), 'Stretch column absorbs the rest');
 end;
 
 procedure TTestGridStretch.TestFixedColumnsKeepTheirWidth;
@@ -117,9 +115,9 @@ begin
   FGrid.ColumnWidth[1] := 70;
   FGrid.ColumnStretch[2] := 1;
   FGrid.DistributeStretchWidths(300);
-  FContext.AssertTrue((60)=(FGrid.ColumnWidth[0]), 'Column 0 fixed');
-  FContext.AssertTrue((70)=(FGrid.ColumnWidth[1]), 'Column 1 fixed');
-  FContext.AssertTrue((170)=(FGrid.ColumnWidth[2]), 'Column 2 takes 300-60-70');
+  TestContext.AssertTrue((60)=(FGrid.ColumnWidth[0]), 'Column 0 fixed');
+  TestContext.AssertTrue((70)=(FGrid.ColumnWidth[1]), 'Column 1 fixed');
+  TestContext.AssertTrue((170)=(FGrid.ColumnWidth[2]), 'Column 2 takes 300-60-70');
 end;
 
 procedure TTestGridStretch.TestWeightsDistributeProportionally;
@@ -129,8 +127,8 @@ begin
   FGrid.ColumnStretch[1] := 1;
   FGrid.DistributeStretchWidths(300);
   { 300 shared 2:1 }
-  FContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'Weight 2 gets two thirds');
-  FContext.AssertTrue((100)=(FGrid.ColumnWidth[1]), 'Weight 1 gets one third');
+  TestContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'Weight 2 gets two thirds');
+  TestContext.AssertTrue((100)=(FGrid.ColumnWidth[1]), 'Weight 1 gets one third');
 end;
 
 procedure TTestGridStretch.TestEqualWeightsSplitEvenly;
@@ -139,8 +137,8 @@ begin
   FGrid.ColumnStretch[0] := 1;
   FGrid.ColumnStretch[1] := 1;
   FGrid.DistributeStretchWidths(400);
-  FContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'Even split, column 0');
-  FContext.AssertTrue((200)=(FGrid.ColumnWidth[1]), 'Even split, column 1');
+  TestContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'Even split, column 0');
+  TestContext.AssertTrue((200)=(FGrid.ColumnWidth[1]), 'Even split, column 1');
 end;
 
 procedure TTestGridStretch.TestRemainderGoesToLastStretchColumn;
@@ -151,10 +149,10 @@ begin
   FGrid.ColumnStretch[2] := 1;
   { 100 / 3 = 33 remainder 1 }
   FGrid.DistributeStretchWidths(100);
-  FContext.AssertTrue((33)=(FGrid.ColumnWidth[0]), 'Column 0 base share');
-  FContext.AssertTrue((33)=(FGrid.ColumnWidth[1]), 'Column 1 base share');
-  FContext.AssertTrue((34)=(FGrid.ColumnWidth[2]), 'Last stretch column takes remainder');
-  FContext.AssertTrue((100)=(FGrid.ColumnWidth[0] + FGrid.ColumnWidth[1] + FGrid.ColumnWidth[2]), 'Widths sum exactly to available width');
+  TestContext.AssertTrue((33)=(FGrid.ColumnWidth[0]), 'Column 0 base share');
+  TestContext.AssertTrue((33)=(FGrid.ColumnWidth[1]), 'Column 1 base share');
+  TestContext.AssertTrue((34)=(FGrid.ColumnWidth[2]), 'Last stretch column takes remainder');
+  TestContext.AssertTrue((100)=(FGrid.ColumnWidth[0] + FGrid.ColumnWidth[1] + FGrid.ColumnWidth[2]), 'Widths sum exactly to available width');
 end;
 
 procedure TTestGridStretch.TestShrinkRespectsMinWidth;
@@ -165,8 +163,8 @@ begin
   FGrid.ColumnStretch[0] := 1;
   FGrid.ColumnStretch[1] := 1;
   FGrid.DistributeStretchWidths(80);
-  FContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Column 0 clamped at MinWidth');
-  FContext.AssertTrue((50)=(FGrid.ColumnWidth[1]), 'Column 1 clamped at MinWidth');
+  TestContext.AssertTrue((50)=(FGrid.ColumnWidth[0]), 'Column 0 clamped at MinWidth');
+  TestContext.AssertTrue((50)=(FGrid.ColumnWidth[1]), 'Column 1 clamped at MinWidth');
 end;
 
 procedure TTestGridStretch.TestStretchGrowsFromBelowMinWidth;
@@ -175,26 +173,31 @@ begin
   FGrid.ColumnMinWidth[0] := 20;
   FGrid.ColumnStretch[0] := 1;
   FGrid.DistributeStretchWidths(200);
-  FContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'MinWidth is a floor, not a cap');
+  TestContext.AssertTrue((200)=(FGrid.ColumnWidth[0]), 'MinWidth is a floor, not a cap');
 end;
 
 procedure TTestGridStretch.TestHasStretchColumns;
 begin
   SetupColumns(2, 50);
-  FContext.AssertTrue(not (FGrid.HasStretchColumns), 'No weights set');
+  TestContext.AssertTrue(not (FGrid.HasStretchColumns), 'No weights set');
   FGrid.ColumnStretch[1] := 1;
-  FContext.AssertTrue(FGrid.HasStretchColumns, 'Weight set on column 1');
+  TestContext.AssertTrue(FGrid.HasStretchColumns, 'Weight set on column 1');
   FGrid.ColumnStretch[1] := 0;
-  FContext.AssertTrue(not (FGrid.HasStretchColumns), 'Weight cleared again');
+  TestContext.AssertTrue(not (FGrid.HasStretchColumns), 'Weight cleared again');
+end;
+
+constructor TTestGridStretch.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestGridStretchTestColumnStretchDefaultsToZero(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestColumnStretchDefaultsToZero');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestColumnStretchDefaultsToZero';
     lFixture.SetUp;
     try lFixture.TestColumnStretchDefaultsToZero; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -203,10 +206,8 @@ end;
 procedure RunTTestGridStretchTestColumnMinWidthDefault(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestColumnMinWidthDefault');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestColumnMinWidthDefault';
     lFixture.SetUp;
     try lFixture.TestColumnMinWidthDefault; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -215,10 +216,8 @@ end;
 procedure RunTTestGridStretchTestNoStretchLeavesWidthsAlone(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestNoStretchLeavesWidthsAlone');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestNoStretchLeavesWidthsAlone';
     lFixture.SetUp;
     try lFixture.TestNoStretchLeavesWidthsAlone; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -227,10 +226,8 @@ end;
 procedure RunTTestGridStretchTestSingleStretchColumnAbsorbsSlack(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestSingleStretchColumnAbsorbsSlack');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestSingleStretchColumnAbsorbsSlack';
     lFixture.SetUp;
     try lFixture.TestSingleStretchColumnAbsorbsSlack; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -239,10 +236,8 @@ end;
 procedure RunTTestGridStretchTestFixedColumnsKeepTheirWidth(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestFixedColumnsKeepTheirWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFixedColumnsKeepTheirWidth';
     lFixture.SetUp;
     try lFixture.TestFixedColumnsKeepTheirWidth; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -251,10 +246,8 @@ end;
 procedure RunTTestGridStretchTestWeightsDistributeProportionally(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestWeightsDistributeProportionally');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestWeightsDistributeProportionally';
     lFixture.SetUp;
     try lFixture.TestWeightsDistributeProportionally; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -263,10 +256,8 @@ end;
 procedure RunTTestGridStretchTestEqualWeightsSplitEvenly(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestEqualWeightsSplitEvenly');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestEqualWeightsSplitEvenly';
     lFixture.SetUp;
     try lFixture.TestEqualWeightsSplitEvenly; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -275,10 +266,8 @@ end;
 procedure RunTTestGridStretchTestRemainderGoesToLastStretchColumn(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestRemainderGoesToLastStretchColumn');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestRemainderGoesToLastStretchColumn';
     lFixture.SetUp;
     try lFixture.TestRemainderGoesToLastStretchColumn; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -287,10 +276,8 @@ end;
 procedure RunTTestGridStretchTestShrinkRespectsMinWidth(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestShrinkRespectsMinWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestShrinkRespectsMinWidth';
     lFixture.SetUp;
     try lFixture.TestShrinkRespectsMinWidth; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -299,10 +286,8 @@ end;
 procedure RunTTestGridStretchTestStretchGrowsFromBelowMinWidth(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestStretchGrowsFromBelowMinWidth');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestStretchGrowsFromBelowMinWidth';
     lFixture.SetUp;
     try lFixture.TestStretchGrowsFromBelowMinWidth; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -311,10 +296,8 @@ end;
 procedure RunTTestGridStretchTestHasStretchColumns(AContext: TNXTestContext);
 var lFixture: TTestGridStretch;
 begin
-  lFixture:=TTestGridStretch.Create;
+  lFixture:=TTestGridStretch.Create(AContext, 'TestHasStretchColumns');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestHasStretchColumns';
     lFixture.SetUp;
     try lFixture.TestHasStretchColumns; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -337,8 +320,5 @@ begin
   lSuite.AddTest('TestHasStretchColumns', @RunTTestGridStretchTestHasStretchColumns);
 end;
 
-
-initialization
-  RegisterTests;
 
 end.

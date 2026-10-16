@@ -26,9 +26,14 @@ type
   { TTestProcessMessages }
 
   TTestProcessMessages = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FProbe: TMessageProbe;
     procedure PostPaint(ADest: TObject);
@@ -49,18 +54,9 @@ type
   end;
 
 
-procedure RegisterTests;
-
-
 procedure RegistertcprocessmessagesTests(ARegistry: TNXTestRegistry);
 
 implementation
-
-
-procedure RegisterTests;
-begin
-  
-end;
 
 
 { TMessageProbe }
@@ -104,11 +100,11 @@ end;
 procedure TTestProcessMessages.TestProcessMessages_DeliversQueuedPaint;
 begin
   PostPaint(FProbe);
-  FContext.AssertTrue((0)=(FProbe.PaintCount), 'Precondition: paint not yet delivered');
+  TestContext.AssertTrue((0)=(FProbe.PaintCount), 'Precondition: paint not yet delivered');
 
   fpgApplication.ProcessMessages;
 
-  FContext.AssertTrue((1)=(FProbe.PaintCount), 'ProcessMessages must deliver a queued paint with no pending '
+  TestContext.AssertTrue((1)=(FProbe.PaintCount), 'ProcessMessages must deliver a queued paint with no pending '
       + 'platform events');
 end;
 
@@ -124,8 +120,8 @@ begin
 
   fpgApplication.ProcessMessages;
 
-  FContext.AssertTrue((1)=(FProbe.PaintCount), 'Queued paint should be delivered');
-  FContext.AssertTrue((1)=(FProbe.ResizeCount), 'Queued resize should be delivered');
+  TestContext.AssertTrue((1)=(FProbe.PaintCount), 'Queued paint should be delivered');
+  TestContext.AssertTrue((1)=(FProbe.ResizeCount), 'Queued resize should be delivered');
 end;
 
 procedure TTestProcessMessages.TestProcessMessages_ReturnsPromptlyWhenIdle;
@@ -139,17 +135,22 @@ begin
   fpgApplication.ProcessMessages;
   elapsed := fpgGetTickCount - startTick;
 
-  FContext.AssertTrue(elapsed < 200, Format('ProcessMessages should return promptly when idle, '
+  TestContext.AssertTrue(elapsed < 200, Format('ProcessMessages should return promptly when idle, '
       + 'took %d ms', [elapsed]));
+end;
+
+constructor TTestProcessMessages.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
 end;
 
 procedure RunTTestProcessMessagesTestProcessMessages_DeliversQueuedPaint(AContext: TNXTestContext);
 var lFixture: TTestProcessMessages;
 begin
-  lFixture:=TTestProcessMessages.Create;
+  lFixture:=TTestProcessMessages.Create(AContext, 'TestProcessMessages_DeliversQueuedPaint');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestProcessMessages_DeliversQueuedPaint';
     lFixture.SetUp;
     try lFixture.TestProcessMessages_DeliversQueuedPaint; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -158,10 +159,8 @@ end;
 procedure RunTTestProcessMessagesTestProcessMessages_DeliversCascadedMessages(AContext: TNXTestContext);
 var lFixture: TTestProcessMessages;
 begin
-  lFixture:=TTestProcessMessages.Create;
+  lFixture:=TTestProcessMessages.Create(AContext, 'TestProcessMessages_DeliversCascadedMessages');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestProcessMessages_DeliversCascadedMessages';
     lFixture.SetUp;
     try lFixture.TestProcessMessages_DeliversCascadedMessages; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -170,10 +169,8 @@ end;
 procedure RunTTestProcessMessagesTestProcessMessages_ReturnsPromptlyWhenIdle(AContext: TNXTestContext);
 var lFixture: TTestProcessMessages;
 begin
-  lFixture:=TTestProcessMessages.Create;
+  lFixture:=TTestProcessMessages.Create(AContext, 'TestProcessMessages_ReturnsPromptlyWhenIdle');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestProcessMessages_ReturnsPromptlyWhenIdle';
     lFixture.SetUp;
     try lFixture.TestProcessMessages_ReturnsPromptlyWhenIdle; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -189,8 +186,5 @@ begin
 end;
 
 
-
-initialization
-  RegisterTests;
 
 end.

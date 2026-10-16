@@ -20,9 +20,14 @@ type
   { TTestDeclaration }
 
   TTestDeclaration = class(TObject)
-  protected
+  private
     FContext: TNXTestContext;
     FCaseName: string;
+  protected
+    property TestContext: TNXTestContext read FContext;
+    property CaseName: string read FCaseName;
+  public
+    constructor Create(AContext: TNXTestContext; const ACaseName: string);
   private
     FHL: TPascalHighlighter;
     FLines: TStringList;
@@ -238,35 +243,35 @@ procedure TTestDeclaration.TestGetIdentAtCursor_OnIdentifier;
 begin
   SetSource(cSimpleProgram);
   // Line 2: '  WriteLn(''hello'');'  -- WriteLn starts at column 2
-  FContext.AssertTrue(('WriteLn')=(GetIdentifierAtCursor(FHL, FLines, 2, 4)), 'Cursor in middle of WriteLn should return WriteLn');
+  TestContext.AssertTrue(('WriteLn')=(GetIdentifierAtCursor(FHL, FLines, 2, 4)), 'Cursor in middle of WriteLn should return WriteLn');
 end;
 
 procedure TTestDeclaration.TestGetIdentAtCursor_OnKeyword;
 begin
   SetSource(cSimpleProgram);
   // Line 1: 'begin' -- keyword, not an identifier
-  FContext.AssertTrue(('')=(GetIdentifierAtCursor(FHL, FLines, 1, 2)), 'Cursor on keyword begin should return empty');
+  TestContext.AssertTrue(('')=(GetIdentifierAtCursor(FHL, FLines, 1, 2)), 'Cursor on keyword begin should return empty');
 end;
 
 procedure TTestDeclaration.TestGetIdentAtCursor_OnWhitespace;
 begin
   SetSource(cSimpleProgram);
   // Line 2: '  WriteLn(''hello'');' -- column 0 is whitespace
-  FContext.AssertTrue(('')=(GetIdentifierAtCursor(FHL, FLines, 2, 0)), 'Cursor on whitespace should return empty');
+  TestContext.AssertTrue(('')=(GetIdentifierAtCursor(FHL, FLines, 2, 0)), 'Cursor on whitespace should return empty');
 end;
 
 procedure TTestDeclaration.TestGetIdentAtCursor_StartOfIdent;
 begin
   SetSource(cVarProgram);
   // Line 4: '  MyCounter := 1;'  -- MyCounter starts at column 2
-  FContext.AssertTrue(('MyCounter')=(GetIdentifierAtCursor(FHL, FLines, 4, 2)), 'Cursor at first char of MyCounter should return MyCounter');
+  TestContext.AssertTrue(('MyCounter')=(GetIdentifierAtCursor(FHL, FLines, 4, 2)), 'Cursor at first char of MyCounter should return MyCounter');
 end;
 
 procedure TTestDeclaration.TestGetIdentAtCursor_EndOfIdent;
 begin
   SetSource(cVarProgram);
   // Line 4: '  MyCounter := 1;'  -- MyCounter ends at column 10
-  FContext.AssertTrue(('MyCounter')=(GetIdentifierAtCursor(FHL, FLines, 4, 10)), 'Cursor at last char of MyCounter should return MyCounter');
+  TestContext.AssertTrue(('MyCounter')=(GetIdentifierAtCursor(FHL, FLines, 4, 10)), 'Cursor at last char of MyCounter should return MyCounter');
 end;
 
 
@@ -279,8 +284,8 @@ begin
   SetSource(cLocalVar);
   // Line 5: '  x := 1;' -- x at col 2, declared on line 3 (0-based) = line 4 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 5, 2, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find local var declaration');
-  FContext.AssertTrue((4)=(decl.DeclLine), 'x declared on 1-based line 4');
+  TestContext.AssertTrue(decl.Found, 'Should find local var declaration');
+  TestContext.AssertTrue((4)=(decl.DeclLine), 'x declared on 1-based line 4');
 end;
 
 procedure TTestDeclaration.TestFindDecl_ProcParam;
@@ -290,8 +295,8 @@ begin
   SetSource(cProcParam);
   // Line 4: '  AValue := 0;' -- AValue at col 2, declared on line 2 (0-based) = line 3 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 2, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find proc param declaration');
-  FContext.AssertTrue((3)=(decl.DeclLine), 'AValue declared on 1-based line 3');
+  TestContext.AssertTrue(decl.Found, 'Should find proc param declaration');
+  TestContext.AssertTrue((3)=(decl.DeclLine), 'AValue declared on 1-based line 3');
 end;
 
 procedure TTestDeclaration.TestFindDecl_TypeName;
@@ -301,8 +306,8 @@ begin
   SetSource(cTypeName);
   // Line 9: '  r.Value := 42;' -- Value at col 4, declared on line 4 (0-based) = line 5 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 4, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find record field declaration');
-  FContext.AssertTrue((5)=(decl.DeclLine), 'Value declared on 1-based line 5');
+  TestContext.AssertTrue(decl.Found, 'Should find record field declaration');
+  TestContext.AssertTrue((5)=(decl.DeclLine), 'Value declared on 1-based line 5');
 end;
 
 procedure TTestDeclaration.TestFindDecl_ClassMethod;
@@ -312,8 +317,8 @@ begin
   SetSource(cClassMethod);
   // Line 12: '  f.DoWork;' -- DoWork at col 4, declared on line 4 (0-based) = line 5 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 12, 4, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find class method declaration');
-  FContext.AssertTrue((5)=(decl.DeclLine), 'DoWork declared on 1-based line 5');
+  TestContext.AssertTrue(decl.Found, 'Should find class method declaration');
+  TestContext.AssertTrue((5)=(decl.DeclLine), 'DoWork declared on 1-based line 5');
 end;
 
 procedure TTestDeclaration.TestFindDecl_OverloadedProc;
@@ -323,8 +328,8 @@ begin
   SetSource(cOverloaded);
   // Line 9: '  Calc(42);' -- Calc at col 2, should resolve to Integer overload (line 2, 0-based) = line 3 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 2, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find overloaded proc (Integer)');
-  FContext.AssertTrue((3)=(decl.DeclLine), 'Calc(Integer) declared on 1-based line 3');
+  TestContext.AssertTrue(decl.Found, 'Should find overloaded proc (Integer)');
+  TestContext.AssertTrue((3)=(decl.DeclLine), 'Calc(Integer) declared on 1-based line 3');
 end;
 
 procedure TTestDeclaration.TestFindDecl_DottedExpr;
@@ -334,8 +339,8 @@ begin
   SetSource(cDottedExpr);
   // Line 9: '  Self.FField := 1;' -- FField at col 7, declared on line 4 (0-based) = line 5 (1-based)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 9, 7, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find field declaration via Self.FField');
-  FContext.AssertTrue((5)=(decl.DeclLine), 'FField declared on 1-based line 5');
+  TestContext.AssertTrue(decl.Found, 'Should find field declaration via Self.FField');
+  TestContext.AssertTrue((5)=(decl.DeclLine), 'FField declared on 1-based line 5');
 end;
 
 procedure TTestDeclaration.TestFindDecl_SameIdentTwiceOnLine;
@@ -346,10 +351,10 @@ begin
   // Line 5: '  x := x + 1;' -- first x at col 2, second x at col 7
   decl1 := FindDeclaration(FHL, FLines, 'test.pas', 5, 2, nil, nil);
   decl2 := FindDeclaration(FHL, FLines, 'test.pas', 5, 7, nil, nil);
-  FContext.AssertTrue(decl1.Found, 'First x should resolve');
-  FContext.AssertTrue(decl2.Found, 'Second x should resolve');
-  FContext.AssertTrue((decl1.DeclLine)=(decl2.DeclLine), 'Both x should resolve to same decl line');
-  FContext.AssertTrue((4)=(decl1.DeclLine), 'x declared on 1-based line 4');
+  TestContext.AssertTrue(decl1.Found, 'First x should resolve');
+  TestContext.AssertTrue(decl2.Found, 'Second x should resolve');
+  TestContext.AssertTrue((decl1.DeclLine)=(decl2.DeclLine), 'Both x should resolve to same decl line');
+  TestContext.AssertTrue((4)=(decl1.DeclLine), 'x declared on 1-based line 4');
 end;
 
 procedure TTestDeclaration.TestFindDecl_NotAnIdent;
@@ -359,7 +364,7 @@ begin
   SetSource(cLocalVar);
   // Line 4: 'begin' -- keyword, not an identifier
   decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 2, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Cursor on keyword should not find declaration');
+  TestContext.AssertTrue(not (decl.Found), 'Cursor on keyword should not find declaration');
 end;
 
 procedure TTestDeclaration.TestFindDecl_ParseError;
@@ -369,7 +374,7 @@ begin
   SetSource(cBrokenSyntax);
   // Line 2: '  x := ;' -- broken syntax, should not crash
   decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 2, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Broken syntax should return Found=False, no exception');
+  TestContext.AssertTrue(not (decl.Found), 'Broken syntax should return Found=False, no exception');
 end;
 
 
@@ -409,9 +414,9 @@ begin
   try
     unitPaths.Add(FTempDir);
     decl := FindDeclaration(FHL, FLines, 'test.pas', 6, 4, unitPaths, nil);
-    FContext.AssertTrue(decl.Found, 'Should find type member from cross-unit');
-    FContext.AssertTrue((6)=(decl.DeclLine), 'Value declared on 1-based line 6 of HelperUnit');
-    FContext.AssertTrue(Pos('HelperUnit', decl.DeclFile) > 0, 'DeclFile should reference HelperUnit');
+    TestContext.AssertTrue(decl.Found, 'Should find type member from cross-unit');
+    TestContext.AssertTrue((6)=(decl.DeclLine), 'Value declared on 1-based line 6 of HelperUnit');
+    TestContext.AssertTrue(Pos('HelperUnit', decl.DeclFile) > 0, 'DeclFile should reference HelperUnit');
   finally
     unitPaths.Free;
   end;
@@ -452,9 +457,9 @@ begin
   try
     unitPaths.Add(FTempDir);
     decl := FindDeclaration(FHL, FLines, 'test.pas', 6, 7, unitPaths, nil);
-    FContext.AssertTrue(decl.Found, 'Should find proc from cross-unit');
-    FContext.AssertTrue((4)=(decl.DeclLine), 'AddTwo declared on 1-based line 4 of MathUtils');
-    FContext.AssertTrue(Pos('MathUtils', decl.DeclFile) > 0, 'DeclFile should reference MathUtils');
+    TestContext.AssertTrue(decl.Found, 'Should find proc from cross-unit');
+    TestContext.AssertTrue((4)=(decl.DeclLine), 'AddTwo declared on 1-based line 4 of MathUtils');
+    TestContext.AssertTrue(Pos('MathUtils', decl.DeclFile) > 0, 'DeclFile should reference MathUtils');
   finally
     unitPaths.Free;
   end;
@@ -475,7 +480,7 @@ begin
   SetSource(mainSrc);
 
   decl := FindDeclaration(FHL, FLines, 'test.pas', 3, 2, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Missing unit should return Found=False gracefully');
+  TestContext.AssertTrue(not (decl.Found), 'Missing unit should return Found=False gracefully');
 end;
 
 
@@ -487,7 +492,7 @@ var
 begin
   SetSource('');
   decl := FindDeclaration(FHL, FLines, 'test.pas', 0, 0, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Empty source should return Found=False gracefully');
+  TestContext.AssertTrue(not (decl.Found), 'Empty source should return Found=False gracefully');
 end;
 
 procedure TTestDeclaration.TestFindDecl_ConstRef;
@@ -507,9 +512,9 @@ var
 begin
   SetSource(cConstSrc);
   decl := FindDeclaration(FHL, FLines, 'test.pas', 7, 7, nil, nil);
-  FContext.AssertTrue(decl.Found, 'Should find const declaration');
-  FContext.AssertTrue((4)=(decl.DeclLine), 'MaxItems declared on 1-based line 4');
-  FContext.AssertTrue(('MaxItems')=(decl.DeclName), 'DeclName should be MaxItems');
+  TestContext.AssertTrue(decl.Found, 'Should find const declaration');
+  TestContext.AssertTrue((4)=(decl.DeclLine), 'MaxItems declared on 1-based line 4');
+  TestContext.AssertTrue(('MaxItems')=(decl.DeclName), 'DeclName should be MaxItems');
 end;
 
 procedure TTestDeclaration.TestFindDecl_ProgramName;
@@ -526,7 +531,7 @@ begin
   { Cursor on 'MyApp' in program declaration -- this is the declaration itself,
     not a reference, so there is no resolved reference to follow }
   decl := FindDeclaration(FHL, FLines, 'test.pas', 0, 10, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Program name is not a reference -- should return Found=False');
+  TestContext.AssertTrue(not (decl.Found), 'Program name is not a reference -- should return Found=False');
 end;
 
 procedure TTestDeclaration.TestFindDecl_CircularUses;
@@ -577,7 +582,7 @@ begin
     decl := FindDeclaration(FHL, FLines, 'test.pas', 4, 5, unitPaths, nil);
     { Result may or may not be Found depending on how deep resolution gets,
       but the key assertion is that we reach this point without hanging. }
-    FContext.AssertTrue(True, 'Circular uses did not hang or crash');
+    TestContext.AssertTrue(True, 'Circular uses did not hang or crash');
   finally
     unitPaths.Free;
   end;
@@ -611,9 +616,9 @@ begin
   try
     unitPaths.Add(FTempDir);
     decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 7, unitPaths, nil);
-    FContext.AssertTrue(decl.Found, 'Should find unit file for HelperUnit');
-    FContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1 of the unit');
-    FContext.AssertTrue(Pos('HelperUnit', decl.DeclFile) > 0, 'DeclFile should reference HelperUnit');
+    TestContext.AssertTrue(decl.Found, 'Should find unit file for HelperUnit');
+    TestContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1 of the unit');
+    TestContext.AssertTrue(Pos('HelperUnit', decl.DeclFile) > 0, 'DeclFile should reference HelperUnit');
   finally
     unitPaths.Free;
   end;
@@ -645,9 +650,9 @@ begin
     unitPaths.Add(FTempDir);
     // Cursor on middle part 'helper' of the dotted name
     decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 8, unitPaths, nil);
-    FContext.AssertTrue(decl.Found, 'Should find unit file for dotted unit name');
-    FContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1 of the unit');
-    FContext.AssertTrue(Pos('my.helper.utils', decl.DeclFile) > 0, 'DeclFile should reference my.helper.utils');
+    TestContext.AssertTrue(decl.Found, 'Should find unit file for dotted unit name');
+    TestContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1 of the unit');
+    TestContext.AssertTrue(Pos('my.helper.utils', decl.DeclFile) > 0, 'DeclFile should reference my.helper.utils');
   finally
     unitPaths.Free;
   end;
@@ -684,9 +689,9 @@ begin
   try
     unitPaths.Add(FTempDir);
     decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 18, unitPaths, nil);
-    FContext.AssertTrue(decl.Found, 'Should find second unit in uses list');
-    FContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1');
-    FContext.AssertTrue(Pos('UnitBeta', decl.DeclFile) > 0, 'DeclFile should reference UnitBeta');
+    TestContext.AssertTrue(decl.Found, 'Should find second unit in uses list');
+    TestContext.AssertTrue((1)=(decl.DeclLine), 'Should navigate to line 1');
+    TestContext.AssertTrue(Pos('UnitBeta', decl.DeclFile) > 0, 'DeclFile should reference UnitBeta');
   finally
     unitPaths.Free;
   end;
@@ -707,18 +712,23 @@ begin
 
   // Unit not on disk — should fall through gracefully (Found=False)
   decl := FindDeclaration(FHL, FLines, 'test.pas', 2, 7, nil, nil);
-  FContext.AssertTrue(not (decl.Found), 'Uses unit not on disk should return Found=False');
+  TestContext.AssertTrue(not (decl.Found), 'Uses unit not on disk should return Found=False');
 end;
 
 
 
+constructor TTestDeclaration.Create(AContext: TNXTestContext; const ACaseName: string);
+begin
+  inherited Create;
+  FContext:=AContext;
+  FCaseName:=ACaseName;
+end;
+
 procedure RunTTestDeclarationTestGetIdentAtCursor_OnIdentifier(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestGetIdentAtCursor_OnIdentifier');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetIdentAtCursor_OnIdentifier';
     lFixture.SetUp;
     try lFixture.TestGetIdentAtCursor_OnIdentifier; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -727,10 +737,8 @@ end;
 procedure RunTTestDeclarationTestGetIdentAtCursor_OnKeyword(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestGetIdentAtCursor_OnKeyword');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetIdentAtCursor_OnKeyword';
     lFixture.SetUp;
     try lFixture.TestGetIdentAtCursor_OnKeyword; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -739,10 +747,8 @@ end;
 procedure RunTTestDeclarationTestGetIdentAtCursor_OnWhitespace(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestGetIdentAtCursor_OnWhitespace');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetIdentAtCursor_OnWhitespace';
     lFixture.SetUp;
     try lFixture.TestGetIdentAtCursor_OnWhitespace; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -751,10 +757,8 @@ end;
 procedure RunTTestDeclarationTestGetIdentAtCursor_StartOfIdent(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestGetIdentAtCursor_StartOfIdent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetIdentAtCursor_StartOfIdent';
     lFixture.SetUp;
     try lFixture.TestGetIdentAtCursor_StartOfIdent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -763,10 +767,8 @@ end;
 procedure RunTTestDeclarationTestGetIdentAtCursor_EndOfIdent(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestGetIdentAtCursor_EndOfIdent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestGetIdentAtCursor_EndOfIdent';
     lFixture.SetUp;
     try lFixture.TestGetIdentAtCursor_EndOfIdent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -775,10 +777,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_LocalVar(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_LocalVar');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_LocalVar';
     lFixture.SetUp;
     try lFixture.TestFindDecl_LocalVar; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -787,10 +787,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_ProcParam(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_ProcParam');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_ProcParam';
     lFixture.SetUp;
     try lFixture.TestFindDecl_ProcParam; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -799,10 +797,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_TypeName(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_TypeName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_TypeName';
     lFixture.SetUp;
     try lFixture.TestFindDecl_TypeName; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -811,10 +807,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_ClassMethod(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_ClassMethod');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_ClassMethod';
     lFixture.SetUp;
     try lFixture.TestFindDecl_ClassMethod; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -823,10 +817,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_OverloadedProc(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_OverloadedProc');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_OverloadedProc';
     lFixture.SetUp;
     try lFixture.TestFindDecl_OverloadedProc; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -835,10 +827,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_DottedExpr(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_DottedExpr');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_DottedExpr';
     lFixture.SetUp;
     try lFixture.TestFindDecl_DottedExpr; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -847,10 +837,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_SameIdentTwiceOnLine(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_SameIdentTwiceOnLine');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_SameIdentTwiceOnLine';
     lFixture.SetUp;
     try lFixture.TestFindDecl_SameIdentTwiceOnLine; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -859,10 +847,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_NotAnIdent(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_NotAnIdent');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_NotAnIdent';
     lFixture.SetUp;
     try lFixture.TestFindDecl_NotAnIdent; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -871,10 +857,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_ParseError(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_ParseError');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_ParseError';
     lFixture.SetUp;
     try lFixture.TestFindDecl_ParseError; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -883,10 +867,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_CrossUnit_Type(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_CrossUnit_Type');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_CrossUnit_Type';
     lFixture.SetUp;
     try lFixture.TestFindDecl_CrossUnit_Type; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -895,10 +877,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_CrossUnit_Proc(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_CrossUnit_Proc');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_CrossUnit_Proc';
     lFixture.SetUp;
     try lFixture.TestFindDecl_CrossUnit_Proc; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -907,10 +887,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_UnitNotFound(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_UnitNotFound');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_UnitNotFound';
     lFixture.SetUp;
     try lFixture.TestFindDecl_UnitNotFound; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -919,10 +897,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_EmptySource(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_EmptySource');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_EmptySource';
     lFixture.SetUp;
     try lFixture.TestFindDecl_EmptySource; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -931,10 +907,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_ConstRef(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_ConstRef');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_ConstRef';
     lFixture.SetUp;
     try lFixture.TestFindDecl_ConstRef; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -943,10 +917,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_ProgramName(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_ProgramName');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_ProgramName';
     lFixture.SetUp;
     try lFixture.TestFindDecl_ProgramName; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -955,10 +927,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_CircularUses(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_CircularUses');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_CircularUses';
     lFixture.SetUp;
     try lFixture.TestFindDecl_CircularUses; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -967,10 +937,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_UsesUnit_Simple(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_UsesUnit_Simple');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_UsesUnit_Simple';
     lFixture.SetUp;
     try lFixture.TestFindDecl_UsesUnit_Simple; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -979,10 +947,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_UsesUnit_Dotted(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_UsesUnit_Dotted');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_UsesUnit_Dotted';
     lFixture.SetUp;
     try lFixture.TestFindDecl_UsesUnit_Dotted; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -991,10 +957,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_UsesUnit_SecondInList(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_UsesUnit_SecondInList');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_UsesUnit_SecondInList';
     lFixture.SetUp;
     try lFixture.TestFindDecl_UsesUnit_SecondInList; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
@@ -1003,10 +967,8 @@ end;
 procedure RunTTestDeclarationTestFindDecl_UsesUnit_NotFound(AContext: TNXTestContext);
 var lFixture: TTestDeclaration;
 begin
-  lFixture:=TTestDeclaration.Create;
+  lFixture:=TTestDeclaration.Create(AContext, 'TestFindDecl_UsesUnit_NotFound');
   try
-    lFixture.FContext:=AContext;
-    lFixture.FCaseName:='TestFindDecl_UsesUnit_NotFound';
     lFixture.SetUp;
     try lFixture.TestFindDecl_UsesUnit_NotFound; finally lFixture.TearDown; end;
   finally lFixture.Free; end;
