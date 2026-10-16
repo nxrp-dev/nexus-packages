@@ -1,0 +1,103 @@
+failed FCLImage.Review.01InitialQOIIndex Fixture heap/process failure: failed
+ENXTestFailure: Alpha
+expected: 0; actual: 65535
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.02QOIModuloArithmetic Fixture heap/process failure: failed
+ERangeError: Range check error
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.03MalformedQOI Fixture heap/process failure: failed
+ENXTestFailure: Truncated RGB chunk accepted
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.04PNMSampleOrder Fixture heap/process failure: failed
+ENXTestFailure: Red
+expected: 4660; actual: 13330
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.05PNMAutomaticDepth Fixture heap/process failure: failed
+ENXTestFailure: Values are not equal.
+expected: 3; actual: 1
+  
+  expected: 0; actual: 256
+Runtime error 204 at $000000000028C304
+  $000000000028C304
+  $000000000028D10D
+  $000000000028A3BC
+  $000000000028A703
+  $000000000027ACF8
+  $000000000032610E
+  $0000000000321526
+  $0000000000307848
+  $0000000000309CAC
+  $00000000002616E9
+  $000000000028503C
+
+failed FCLImage.Review.06PNMAsciiBoundaries Probe exited without a result; process status 52224  
+failed FCLImage.Review.07PCXPaletteRange Fixture heap/process failure: failed
+ENXTestFailure: Red
+expected: 65535; actual: 65280
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.08PCXMalformedRows Fixture heap/process failure: failed
+ENXTestFailure: Undersized PCX row accepted
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.09TGAPixelPrecision Fixture heap/process failure: failed
+ENXTestFailure: Red
+expected: 7710; actual: 7680
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.10TGAReaderReuse Fixture heap/process failure: failed
+ENXTestFailure: Green
+expected: 0; actual: 65535
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.11ShortOutputWrites Fixture heap/process failure: failed
+ENXTestFailure: Writers silently accepted short output
+expected: ; actual: TFPWriterBMP stage 0; TFPWriterBMP stage 1; TFPWriterPCX stage 1; TFPWriterPNM stage 0; TFPWriterPNM stage 1; TFPWriterQoi stage 0; TFPWriterQoi stage 1; TFPWriterTarga stage 1; 
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.12PCXEvenStride Fixture heap/process failure: failed
+ENXTestFailure: PCX requires an even plane stride
+expected: 2; actual: 1
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.13TGAMalformedInput Fixture heap/process failure: failed
+ENXTestFailure: Out-of-range TGA index accepted
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.14PNMReaderReuse Fixture heap/process failure: failed
+FPImageException: Wrong image format
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.15TGAHorizontalOrigin Fixture heap/process failure: failed
+ENXTestFailure: Red
+expected: 0; actual: 65535
+  
+  expected: 0; actual: 256
+Runtime error 204 at $000000000028C304
+  $000000000028C304
+  $000000000028D10D
+  $000000000028A3BC
+  $000000000028A6C2
+  $0000000000337936
+  $0000000000338707
+  $000000000032610E
+  $0000000000321526
+  $0000000000309A1A
+  $0000000000309D20
+  $00000000002616E9
+  $000000000028503C
+
+failed FCLImage.Review.16BMPOddWidthRLE4 Probe exited without a result; process status 52224  
+failed FCLImage.Review.17BMPRLE4Padding Fixture heap/process failure: failed
+ERangeError: Range check error
+  
+  expected: 0; actual: 256
+failed FCLImage.Review.18LinuxFreeTypeRuntime Fixture heap/process failure: failed
+EInOutError: Can not load Freetype library "libfreetype.so". Check your installation.
+  
+  expected: 0; actual: 256
+0 passed; 18 failed; 0 errors; 0 skipped

@@ -1,0 +1,19 @@
+passed FCLImage.Review.01InitialQOIIndex   
+passed FCLImage.Review.02QOIModuloArithmetic   
+passed FCLImage.Review.03MalformedQOI   
+passed FCLImage.Review.04PNMSampleOrder   
+passed FCLImage.Review.05PNMAutomaticDepth   
+passed FCLImage.Review.06PNMAsciiBoundaries   
+passed FCLImage.Review.07PCXPaletteRange   
+passed FCLImage.Review.08PCXMalformedRows   
+passed FCLImage.Review.09TGAPixelPrecision   
+passed FCLImage.Review.10TGAReaderReuse   
+passed FCLImage.Review.11ShortOutputWrites   
+passed FCLImage.Review.12PCXEvenStride   
+passed FCLImage.Review.13TGAMalformedInput   
+passed FCLImage.Review.14PNMReaderReuse   
+passed FCLImage.Review.15TGAHorizontalOrigin   
+passed FCLImage.Review.16BMPOddWidthRLE4   
+passed FCLImage.Review.17BMPRLE4Padding   
+passed FCLImage.Review.18LinuxFreeTypeRuntime   
+18 passed; 0 failed; 0 errors; 0 skipped

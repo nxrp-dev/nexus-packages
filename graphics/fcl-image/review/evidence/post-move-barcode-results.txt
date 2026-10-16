@@ -1,0 +1,26 @@
+ Time:00.001 N:17 E:0 F:0 I:0
+  TTestBarcodes Time:00.001 N:17 E:0 F:0 I:0
+    00.000  TestEan8
+    00.000  TestEan13
+    00.000  TestCode39
+    00.000  TestCode39Extended
+    00.000  TestCode128A
+    00.000  TestCode128B
+    00.000  TestCode128C
+    00.001  Testbe2of5industrial
+    00.000  Testbe2of5interleaved
+    00.000  Testbe2of5matrix
+    00.000  TestCode93
+    00.000  TestCode93Extended
+    00.000  TestCodeCodabar
+    00.000  TestCodeMSI
+    00.000  TestCodePostNet
+    00.000  CheckParamsType
+    00.000  CheckNumerictypes
+
+Number of run tests: 17
+Number of errors:    0
+Number of failures:  0
+
+
+

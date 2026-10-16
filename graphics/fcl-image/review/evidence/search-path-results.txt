@@ -1,0 +1,29 @@
+Unit paths: /media/kcollins/dev/source/nexus/packages/nexus-packages/serialization/fcl-xml/src
+/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/src
+
+Missing paths: /media/kcollins/dev/source/nexus-fpc/packages/chm/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-base/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-db/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-json/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-net/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-process/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-registry/src
+/media/kcollins/dev/source/nexus-fpc/packages/fcl-web/src/base
+/media/kcollins/dev/source/nexus-fpc/packages/hash/src
+/media/kcollins/dev/source/nexus-fpc/packages/ibase/src
+/media/kcollins/dev/source/nexus-fpc/packages/mysql/src
+/media/kcollins/dev/source/nexus-fpc/packages/pasjpeg/src
+/media/kcollins/dev/source/nexus-fpc/packages/postgres/src
+/media/kcollins/dev/source/nexus-fpc/packages/regexpr/src
+/media/kcollins/dev/source/nexus-fpc/packages/rtl-extra/src
+/media/kcollins/dev/source/nexus-fpc/packages/sqlite/src
+/media/kcollins/dev/source/nexus-fpc/rtl
+/media/kcollins/dev/source/nexus-fpc/rtl/inc
+/media/kcollins/dev/source/nexus-fpc/rtl/linux
+/media/kcollins/dev/source/nexus-fpc/rtl/objpas
+/media/kcollins/dev/source/nexus-fpc/rtl/objpas/classes
+/media/kcollins/dev/source/nexus-fpc/rtl/objpas/sysutils
+/media/kcollins/dev/source/nexus-fpc/rtl/unix
+/media/kcollins/dev/source/nexus-fpc/rtl/win
+
+Relocated image search path resolved.

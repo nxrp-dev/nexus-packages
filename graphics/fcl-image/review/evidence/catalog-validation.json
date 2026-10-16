@@ -1,0 +1,14 @@
+[
+  {
+    "file": "packages/nexus-packages/graphics/fcl-image/Package.nxscript",
+    "exit": 0
+  },
+  {
+    "file": "packages/Packages.PackageIndex.nxscript",
+    "exit": 0
+  },
+  {
+    "file": "packages/nexus-packages/Packages.RepositoryIndex.nxscript",
+    "exit": 0
+  }
+]

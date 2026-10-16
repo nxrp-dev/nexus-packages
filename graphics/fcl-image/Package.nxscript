@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package FCLImage {
+    Id: "NXRP.Graphics.FCLImage";
+    Author: "Michael Van Canneyt and Free Pascal contributors";
+    Description: "Image storage, drawing, image codecs, barcodes, QR codes and FreeType adapters.";
+    License: "(LGPL-2.1-only WITH Independent-modules-exception) AND LGPL-2.0-or-later AND MIT AND X11 AND Bitstream-Vera";
+}

@@ -1,0 +1,69 @@
+/media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/FCLImageFixture --probe 6 /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6/result.txt /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6
+Marked memory at $000070921435C610 invalid
+
+Tail must be all CCs:
+20 CC CC CC| ...
+
+Allocated at:
+  $000000000027282E
+  $000000000031D4CE
+  $00000000003188E6
+  $00000000002FF328
+  $00000000003010DC
+  $0000000000259249
+
+Detected by:
+  $000000000031D4CE
+  $00000000003188E6
+  $00000000002FF328
+  $00000000003010DC
+  $0000000000259249
+
+No heap dump by heaptrc unit
+Exitcode = 204
+/media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/FCLImageFixture --probe 6 /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6/result.txt /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6
+Marked memory at $00007738A2DF1610 invalid
+
+Tail must be all CCs:
+20 CC CC CC| ...
+
+Allocated at:
+  $0000000000272D2E
+  $000000000031E08E
+  $00000000003194A6
+  $00000000002FF8A8
+  $0000000000301C3C
+  $0000000000259749
+
+Detected by:
+  $000000000031E08E
+  $00000000003194A6
+  $00000000002FF8A8
+  $0000000000301C3C
+  $0000000000259749
+
+No heap dump by heaptrc unit
+Exitcode = 204
+/media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/FCLImageFixture --probe 6 /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6/result.txt /media/kcollins/dev/source/nexus/output/fcl-image-tests/baseline/probes/6
+Marked memory at $00007C129937F610 invalid
+
+Tail must be all CCs:
+20 CC CC CC| ...
+
+Allocated at:
+  $000000000027ACCE
+  $000000000032610E
+  $0000000000321526
+  $0000000000307848
+  $0000000000309CAC
+  $00000000002616E9
+
+Detected by:
+  $000000000032610E
+  $0000000000321526
+  $0000000000307848
+  $0000000000309CAC
+  $00000000002616E9
+
+No heap dump by heaptrc unit
+Exitcode = 204

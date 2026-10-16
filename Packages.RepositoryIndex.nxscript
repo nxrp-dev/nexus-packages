@@ -60,6 +60,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "fcl-process/Package.nxscript";
         Description: "External process execution, pipes, local IPC and Windows service support.";
     }
+    LocalPackage FCLImage {
+        Id: "NXRP.Graphics.FCLImage";
+        Descriptor: "graphics/fcl-image/Package.nxscript";
+        Description: "Image storage, drawing, codecs, barcodes, QR codes and FreeType adapters.";
+    }
     LocalPackage GUI {
         Id: "NXRP.GUI";
         Descriptor: "gui/Package.nxscript";

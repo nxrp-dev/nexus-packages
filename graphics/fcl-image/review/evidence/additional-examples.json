@@ -1,0 +1,8 @@
+{
+  "qoi_independent_pixels": "passed",
+  "default_freetype_rendering": "passed",
+  "font_image_size": [
+    256,
+    256
+  ]
+}

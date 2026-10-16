@@ -1,0 +1,67 @@
+[
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/createqrcode.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/demogradient.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/drawing.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/fpcanvasalphadraw.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/imgconv.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/interpoldemo.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/qrdemo.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/textout.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/transformdemo.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/wrpngf.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/wrqoif.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/xwdtobmp.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/createbarcode.lpr",
+    "build_exit": 0
+  },
+  {
+    "source": "/tmp/FCLImageSearchPaths.lpr",
+    "build_exit": 0,
+    "run_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/fpg_imgfmt_png.pas",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/fpg_imgfmt_jpg.pas",
+    "build_exit": 1
+  }
+]

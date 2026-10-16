@@ -1,0 +1,36 @@
+{
+  "original_files": 148,
+  "original_archive_hashes": "all match",
+  "preserved_original_files": 148,
+  "implementation_files_changed": [
+    "src/fpreadqoi.pas",
+    "src/fpreadpcx.pas",
+    "src/fpwritebmp.pas",
+    "src/fpreadtga.pas",
+    "src/fpwritetga.pas",
+    "src/libfreetype.inc",
+    "src/fpwritepnm.pas",
+    "src/fpwritepcx.pas",
+    "src/fpreadpnm.pas",
+    "src/fpreadbmp.pas",
+    "src/fpwriteqoi.pas"
+  ],
+  "original_fpc_directory_removed": true,
+  "patch_scope": "148 package deletions and relocation checklist only; no overlap with pre-existing changed files",
+  "concurrent_fpc_files_changed_since_preparation": [
+    "compiler/resourceartifacts.pas",
+    "compiler/resourcemetadata.pas",
+    "compiler/resourcetools.pas"
+  ],
+  "baseline_nxtest": "0 passed, 18 failed",
+  "fixed_nxtest": "18 passed, 0 failed/errors/skipped",
+  "plain_nxtest": "18 passed, 0 failed/errors/skipped",
+  "retained_barcode": "17 passed before and after",
+  "runtime_units": 56,
+  "compiled_examples": 13,
+  "gui_image_adapters": "PNG and JPEG compiled",
+  "default_freetype": "font rendering passed",
+  "independent_pixel_comparisons": 11,
+  "platform": "NexusFPC 3.3.1, x86_64-linux",
+  "unverified": "Windows execution, namespaced builds, exhaustive format variants and full bootstrap/cross builds"
+}

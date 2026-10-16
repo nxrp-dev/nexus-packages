@@ -1,0 +1,147 @@
+{
+  "runs": [
+    {
+      "program": "drawing",
+      "args": [],
+      "exit": 0
+    },
+    {
+      "program": "createqrcode",
+      "args": [
+        "-t",
+        "Nexus FCL Image",
+        "-o",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/qrcode.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "createbarcode",
+      "args": [
+        "-e",
+        "128A",
+        "-t",
+        "1234567890",
+        "-o",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/barcode.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/reference.png",
+        "B",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.bmp"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "B",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.bmp",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/roundtrip-bmp.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/reference.png",
+        "T",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.tga"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "T",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.tga",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/roundtrip-tga.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/reference.png",
+        "N",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.ppm"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "N",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.ppm",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/roundtrip-ppm.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/reference.png",
+        "F",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.tiff"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "F",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.tiff",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/roundtrip-tiff.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/reference.png",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "imgconv",
+      "args": [
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/converted.png",
+        "P",
+        "/media/kcollins/dev/source/nexus/output/fcl-image-tests/consumer/runs/roundtrip-png.png"
+      ],
+      "exit": 0
+    },
+    {
+      "program": "textout",
+      "args": [
+        "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/DejaVuLGCSans.ttf",
+        "/media/kcollins/dev/source/nexus/packages/nexus-packages/graphics/fcl-image/examples/DejaVuLGCSans.ttf"
+      ],
+      "exit": 217
+    }
+  ],
+  "independent_pixel_comparisons": 10,
+  "drawing_size": [
+    100,
+    100
+  ],
+  "qr_and_barcode_images": true,
+  "font_exit": 217,
+  "font_runtime_limit": "libfreetype.so is not installed"
+}

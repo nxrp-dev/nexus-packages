@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Alpha\nexpected: 0; actual: 65535\n"
+  },
+  {
+    "id": 2,
+    "exit": 1,
+    "result": "failed\nERangeError: Range check error\n"
+  },
+  {
+    "id": 3,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Truncated RGB chunk accepted\n"
+  },
+  {
+    "id": 4,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Red\nexpected: 4660; actual: 13330\n"
+  },
+  {
+    "id": 5,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Values are not equal.\nexpected: 3; actual: 1\n"
+  },
+  {
+    "id": 6,
+    "exit": 204,
+    "result": "Heap corruption: see preserved heap evidence"
+  },
+  {
+    "id": 7,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Red\nexpected: 65535; actual: 65280\n"
+  },
+  {
+    "id": 8,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Undersized PCX row accepted\n"
+  },
+  {
+    "id": 9,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Red\nexpected: 7710; actual: 7680\n"
+  },
+  {
+    "id": 10,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Green\nexpected: 0; actual: 65535\n"
+  },
+  {
+    "id": 11,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Writers silently accepted short output\nexpected: ; actual: TFPWriterBMP stage 0; TFPWriterBMP stage 1; TFPWriterPCX stage 1; TFPWriterPNM stage 0; TFPWriterPNM stage 1; TFPWriterQoi stage 0; TFPWriterQoi stage 1; TFPWriterTarga stage 1; \n"
+  },
+  {
+    "id": 12,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: PCX requires an even plane stride\nexpected: 2; actual: 1\n"
+  },
+  {
+    "id": 13,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Out-of-range TGA index accepted\n"
+  },
+  {
+    "id": 14,
+    "exit": 1,
+    "result": "failed\nFPImageException: Wrong image format\n"
+  },
+  {
+    "id": 15,
+    "exit": 1,
+    "result": "failed\nENXTestFailure: Red\nexpected: 0; actual: 65535\n"
+  },
+  {
+    "id": 16,
+    "exit": 204,
+    "result": "Heap corruption: see preserved heap evidence"
+  },
+  {
+    "id": 17,
+    "exit": 1,
+    "result": "failed\nERangeError: Range check error\n"
+  },
+  {
+    "id": 18,
+    "exit": 1,
+    "result": "failed\nEInOutError: Can not load Freetype library \"libfreetype.so\". Check your installation.\n"
+  }
+]

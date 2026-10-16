@@ -1,0 +1,15 @@
+[
+  {
+    "source": "/tmp/FCLImageSearchPaths.lpr",
+    "build_exit": 0,
+    "run_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/fpg_imgfmt_png.pas",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/fpg_imgfmt_jpg.pas",
+    "build_exit": 0
+  }
+]

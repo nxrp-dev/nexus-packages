@@ -1,0 +1,102 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLImage {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/graphics/fcl-image";
+    OutputRoot: "output/nxbuild-fcl-image/" + @Tools.Native.Name;
+
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLImage.SourceRoot + "/src/bmpcomn.pas",
+            @FCLImage.SourceRoot + "/src/clipping.pas",
+            @FCLImage.SourceRoot + "/src/ellipses.pas",
+            @FCLImage.SourceRoot + "/src/extinterpolation.pas",
+            @FCLImage.SourceRoot + "/src/fpbarcode.pas",
+            @FCLImage.SourceRoot + "/src/fpcanvas.pas",
+            @FCLImage.SourceRoot + "/src/fpcolhash.pas",
+            @FCLImage.SourceRoot + "/src/fpcolorspace.pas",
+            @FCLImage.SourceRoot + "/src/fpditherer.pas",
+            @FCLImage.SourceRoot + "/src/fpimage.pas",
+            @FCLImage.SourceRoot + "/src/fpimgbarcode.pas",
+            @FCLImage.SourceRoot + "/src/fpimgcanv.pas",
+            @FCLImage.SourceRoot + "/src/fpimgcmn.pas",
+            @FCLImage.SourceRoot + "/src/fpimggauss.pas",
+            @FCLImage.SourceRoot + "/src/fpimgqrcode.pas",
+            @FCLImage.SourceRoot + "/src/fppapers.pas",
+            @FCLImage.SourceRoot + "/src/fppixlcanv.pas",
+            @FCLImage.SourceRoot + "/src/fpqrcodegen.pas",
+            @FCLImage.SourceRoot + "/src/fpquantizer.pas",
+            @FCLImage.SourceRoot + "/src/fpreadbmp.pas",
+            @FCLImage.SourceRoot + "/src/fpreadgif.pas",
+            @FCLImage.SourceRoot + "/src/fpreadjpeg.pas",
+            @FCLImage.SourceRoot + "/src/fpreadpcx.pas",
+            @FCLImage.SourceRoot + "/src/fpreadpng.pas",
+            @FCLImage.SourceRoot + "/src/fpreadpnm.pas",
+            @FCLImage.SourceRoot + "/src/fpreadpsd.pas",
+            @FCLImage.SourceRoot + "/src/fpreadqoi.pas",
+            @FCLImage.SourceRoot + "/src/fpreadtga.pas",
+            @FCLImage.SourceRoot + "/src/fpreadtiff.pas",
+            @FCLImage.SourceRoot + "/src/fpreadxpm.pas",
+            @FCLImage.SourceRoot + "/src/fpreadxwd.pas",
+            @FCLImage.SourceRoot + "/src/fptiffcmn.pas",
+            @FCLImage.SourceRoot + "/src/fpunitofmeasure.pas",
+            @FCLImage.SourceRoot + "/src/fpwritebmp.pas",
+            @FCLImage.SourceRoot + "/src/fpwritejpeg.pas",
+            @FCLImage.SourceRoot + "/src/fpwritepcx.pas",
+            @FCLImage.SourceRoot + "/src/fpwritepng.pas",
+            @FCLImage.SourceRoot + "/src/fpwritepnm.pas",
+            @FCLImage.SourceRoot + "/src/fpwriteqoi.pas",
+            @FCLImage.SourceRoot + "/src/fpwritetga.pas",
+            @FCLImage.SourceRoot + "/src/fpwritetiff.pas",
+            @FCLImage.SourceRoot + "/src/fpwritexpm.pas",
+            @FCLImage.SourceRoot + "/src/freetype.pas",
+            @FCLImage.SourceRoot + "/src/freetypeh.pas",
+            @FCLImage.SourceRoot + "/src/freetypehdyn.pas",
+            @FCLImage.SourceRoot + "/src/ftfont.pas",
+            @FCLImage.SourceRoot + "/src/jpegcomn.pas",
+            @FCLImage.SourceRoot + "/src/pcxcomn.pas",
+            @FCLImage.SourceRoot + "/src/pixtools.pas",
+            @FCLImage.SourceRoot + "/src/pngcomn.pas",
+            @FCLImage.SourceRoot + "/src/polygonfilltools.pas",
+            @FCLImage.SourceRoot + "/src/pscanvas.pas",
+            @FCLImage.SourceRoot + "/src/psdcomn.pas",
+            @FCLImage.SourceRoot + "/src/qoicomn.pas",
+            @FCLImage.SourceRoot + "/src/targacmn.pas",
+            @FCLImage.SourceRoot + "/src/xwdfile.pas"
+        ];
+        OutputPath: @FCLImage.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/pasjpeg/src",
+                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/packages/hash/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @FCLImage.OutputRoot,
+                @FCLImage.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+            ];
+            IncludePaths: [
+                @FCLImage.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pasjpeg/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+}

@@ -1,0 +1,3 @@
+failed
+ENXTestFailure: Writers silently accepted short output
+expected: ; actual: TFPWriterBMP stage 0; TFPWriterBMP stage 1; TFPWriterPCX stage 1; TFPWriterPNM stage 0; TFPWriterPNM stage 1; TFPWriterQoi stage 0; TFPWriterQoi stage 1; TFPWriterTarga stage 1; 
