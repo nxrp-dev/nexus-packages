@@ -5,13 +5,16 @@ unit utcprocess;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testutils, testregistry, pipes, process;
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, pipes, process;
 
 type
 
   { TTestProcess }
 
-  TTestProcess= class(TTestCase)
+  TTestProcess= class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FProc: TProcess;
     FProc2: TProcess;
@@ -27,12 +30,12 @@ type
     procedure WaitForFile(const aFileName: String);
   protected
     procedure CheckHelper(const aHelper : string);
-    procedure SetUp; override;
-    procedure TearDown; override;
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
     property Proc : TProcess read FProc;
     property Proc2 : TProcess read FProc2;
     property Proc3 : TProcess read FProc3;
-  published
+  public
     procedure TestHookUp;
     procedure TestSimple;
     procedure TestSimpleParam;
@@ -57,6 +60,8 @@ type
     Procedure TestPipeInOutToFile;
     Procedure TestPipeRestart;
   end;
+
+procedure RegisterutcprocessTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -90,9 +95,9 @@ begin
   L:=TStringList.Create;
   try
     L.LoadFromFile(aFileName);
-    AssertEquals('Line count',Length(aContent),L.Count);
+    FContext.AssertTrue((Length(aContent))=(L.Count), 'Line count');
     for I:=0 to L.Count-1 do
-      AssertEquals('Line '+Inttostr(i)+'content',aContent[I],L[i]);
+      FContext.AssertTrue((aContent[I])=(L[i]), 'Line '+Inttostr(i)+'content');
   finally
     L.Free;
   end;
@@ -114,7 +119,7 @@ begin
     Inc(aCount);
     Exists:=FileExists(FN);
   Until (aCount>=50) or Exists;
-  AssertTrue('File did not appear: '+FN,Exists);
+  FContext.AssertTrue(Exists, 'File did not appear: '+FN);
   Sleep(20);
 end;
 
@@ -122,13 +127,13 @@ procedure TTestProcess.TestHookUp;
 
   procedure AssertNoFile(const FN :string);
   begin
-    AssertFalse('File '+FN+' does not exist',FileExists(FN));
+    FContext.AssertTrue(not (FileExists(FN)), 'File '+FN+' does not exist');
   end;
 
 begin
-  AssertNotNull('Have process 1',Proc);
-  AssertNotNull('Have process 2',Proc2);
-  AssertNotNull('Have process 3',Proc3);
+  FContext.AssertTrue((Proc)<>nil, 'Have process 1');
+  FContext.AssertTrue((Proc2)<>nil, 'Have process 2');
+  FContext.AssertTrue((Proc3)<>nil, 'Have process 3');
   AssertNoFile(fntouch);
   AssertNoFile(GetTestFile(fnTouch));
   AssertNoFile(GetTestFile(fntestoutput));
@@ -139,9 +144,9 @@ procedure TTestProcess.TestSimple;
 begin
   Proc.Executable:=GetHelper(dotouch);
   Proc.Execute;
-  AssertNull('no input stream',Proc.Input);
-  AssertNull('no output stream',Proc.Output);
-  AssertNull('no error stream',Proc.Stderr);
+  FContext.AssertTrue((Proc.Input)=nil, 'no input stream');
+  FContext.AssertTrue((Proc.Output)=nil, 'no output stream');
+  FContext.AssertTrue((Proc.Stderr)=nil, 'no error stream');
   WaitForFile(fntouch);
   AssertFileContent(fntouch,fntouch);
 end;
@@ -166,7 +171,7 @@ begin
   Proc.Parameters.Add('23');
   Proc.Execute;
   Proc.WaitOnExit;
-  AssertEquals('Exit code',23,Proc.ExitStatus);
+  FContext.AssertTrue((23)=(Proc.ExitStatus), 'Exit code');
 end;
 
 procedure TTestProcess.TestWaitFor;
@@ -183,8 +188,8 @@ begin
   Proc.Execute;
   Proc.WaitOnExit;
   ms:=MilliSecondsBetween(Now,N);
-  AssertEquals('Exit code',0,Proc.ExitStatus);
-  AssertTrue('Wait time',ms>900);
+  FContext.AssertTrue((0)=(Proc.ExitStatus), 'Exit code');
+  FContext.AssertTrue(ms>900, 'Wait time');
 
 end;
 
@@ -201,8 +206,8 @@ begin
   Proc.Options:=Proc.Options+[poWaitOnExit];
   Proc.Execute;
   ms:=MilliSecondsBetween(Now,N);
-  AssertEquals('Exit code',0,Proc.ExitStatus);
-  AssertTrue('Wait time',ms>900);
+  FContext.AssertTrue((0)=(Proc.ExitStatus), 'Exit code');
+  FContext.AssertTrue(ms>900, 'Wait time');
 end;
 
 procedure TTestProcess.TestTerminate;
@@ -220,14 +225,14 @@ begin
   Sleep(500);
   Proc.Terminate(23);
   ms:=MilliSecondsBetween(Now,N);
-  AssertTrue('Process exits at once',ms<1000);
+  FContext.AssertTrue(ms<1000, 'Process exits at once');
 {$IFDEF UNIX}
   // Also check Kill if term will not work
-  AssertTrue('Exit status',(15=Proc.ExitStatus) or (9=Proc.ExitStatus));
+  FContext.AssertTrue((15=Proc.ExitStatus) or (9=Proc.ExitStatus), 'Exit status');
 {$ENDIF}
 {$IFDEF WINDOWS}
   // Check exit status provided to terminate.
-  AssertTrue('Exit status',(23=Proc.ExitCode));
+  FContext.AssertTrue((23=Proc.ExitCode), 'Exit status');
 {$ENDIF}
 end;
 
@@ -243,9 +248,9 @@ begin
   L:=TStringList.Create;
   try
     L.Text:=S;
-    AssertEquals('Count',aCount,L.Count);
+    FContext.AssertTrue((aCount)=(L.Count), 'Count');
     For I:=1 to aCount do
-      AssertEquals('Content Line '+IntToStr(I),'Line '+IntToStr(I),L[I-1]);
+      FContext.AssertTrue(('Line '+IntToStr(I))=(L[I-1]), 'Content Line '+IntToStr(I));
   finally
     L.Free;
   end;
@@ -262,9 +267,9 @@ begin
   L:=TStringList.Create;
   try
     L.LoadFromFile(aFileName);
-    AssertEquals('Count',aCount,L.Count);
+    FContext.AssertTrue((aCount)=(L.Count), 'Count');
     For I:=1 to aCount do
-      AssertEquals('Content Line '+IntToStr(I),'Line '+IntToStr(I),L[I-1]);
+      FContext.AssertTrue(('Line '+IntToStr(I))=(L[I-1]), 'Content Line '+IntToStr(I));
   finally
     L.Free;
   end;
@@ -302,8 +307,8 @@ begin
     st:=aProc.StdErr
   else
     st:=aProc.Output;
-  AssertNotNull('Have stream to read output from',St);
-  AssertTrue('Read input',aProc.ReadInputStream(St,aRead,aLen,S,100));
+  FContext.AssertTrue((St)<>nil, 'Have stream to read output from');
+  FContext.AssertTrue(aProc.ReadInputStream(St,aRead,aLen,S,100), 'Read input');
   SetLength(S,aRead);
 //  Writeln('>>>',S,'<<<');
   Result:=S;
@@ -318,9 +323,9 @@ begin
   Proc.Executable:=GetHelper(genout);
   Proc.Options:=[poUsePipes];
   Proc.Execute;
-  AssertNotNull('input stream',Proc.Input);
-  AssertNotNull('output stream',Proc.Output);
-  AssertNotNull('error stream',Proc.Stderr);
+  FContext.AssertTrue((Proc.Input)<>nil, 'input stream');
+  FContext.AssertTrue((Proc.Output)<>nil, 'output stream');
+  FContext.AssertTrue((Proc.Stderr)<>nil, 'error stream');
   S:=ReadProcessOutput(Proc);
   AssertGenOutLines(S,3);
 end;
@@ -338,7 +343,7 @@ begin
   Proc.Input.Write(Sin[1],Length(Sin));
   Proc.CloseInput;
   SOut:=ReadProcessOutput(Proc);
-  AssertEquals('Out equals in',SIn,Sout);
+  FContext.AssertTrue((SIn)=(Sout), 'Out equals in');
 end;
 
 procedure TTestProcess.TestStdErr;
@@ -376,12 +381,12 @@ begin
   CreateInputLinesFile(GetTestFile(fntestinput),3);
   Proc.Executable:=GetHelper(docat);
   Proc.InputDescriptor.FileName:=GetTestFile(fntestinput);
-  AssertTrue('Descriptor IOType', Proc.InputDescriptor.IOType=iotFile);
+  FContext.AssertTrue(Proc.InputDescriptor.IOType=iotFile, 'Descriptor IOType');
   Proc.OutputDescriptor.IOType:=iotPipe;
   Proc.Execute;
-  AssertNull('input stream',Proc.Input);
-  AssertNotNull('output stream',Proc.Output);
-  AssertNull('error stream',Proc.Stderr);
+  FContext.AssertTrue((Proc.Input)=nil, 'input stream');
+  FContext.AssertTrue((Proc.Output)<>nil, 'output stream');
+  FContext.AssertTrue((Proc.Stderr)=nil, 'error stream');
   S:=ReadProcessOutput(Proc);
   AssertGenOutLines(S,3);
 end;
@@ -426,7 +431,7 @@ begin
   Proc.Execute;
   Sleep(100);
   B:=Sysutils.GetFileContents(GetTestFile(fntestoutput));
-  AssertEquals('Empty file',0,Length(B));
+  FContext.AssertTrue((0)=(Length(B)), 'Empty file');
 end;
 
 procedure TTestProcess.TestOutputFileExistingAppend;
@@ -476,11 +481,11 @@ begin
   L:=TStringList.Create;
   try
     L.LoadFromFile(GetTestFile(fntestoutput));
-    AssertEquals('Count',6,L.Count);
+    FContext.AssertTrue((6)=(L.Count), 'Count');
     For I:=1 to 3 do
-      AssertEquals('Content Line '+IntToStr(I),'Line '+IntToStr(I+6),L[I-1]);
+      FContext.AssertTrue(('Line '+IntToStr(I+6))=(L[I-1]), 'Content Line '+IntToStr(I));
     For I:=4 to 6 do
-      AssertEquals('Content Line '+IntToStr(I),'Line '+IntToStr(I),L[I-1]);
+      FContext.AssertTrue(('Line '+IntToStr(I))=(L[I-1]), 'Content Line '+IntToStr(I));
   finally
     L.Free;
   end;
@@ -500,7 +505,7 @@ begin
   Proc2.Executable:=GetHelper(docat);
   Proc2.OutputDescriptor.IOType:=iotPipe;
   Proc.OutputDescriptor.Process:=Proc2;
-  AssertTrue('Proc2 input is pipe',Proc2.InputDescriptor.IOType=iotPipe);
+  FContext.AssertTrue(Proc2.InputDescriptor.IOType=iotPipe, 'Proc2 input is pipe');
   Proc2.Execute;
   Proc.execute;
   S:=ReadProcessOutput(Proc2);
@@ -521,7 +526,7 @@ begin
   Proc2.Executable:=GetHelper(docat);
   Proc2.OutputDescriptor.FileName:=GetTestFile(fntestoutput);
   Proc.OutputDescriptor.Process:=Proc2;
-  AssertTrue('Proc2 input is pipe',Proc2.InputDescriptor.IOType=iotPipe);
+  FContext.AssertTrue(Proc2.InputDescriptor.IOType=iotPipe, 'Proc2 input is pipe');
   Proc2.Execute;
   Proc.execute;
   AssertGenOutLinesFile(GetTestFile(fntestoutput),3);
@@ -542,7 +547,7 @@ begin
   Proc2.Executable:=GetHelper(docat);
   Proc2.OutputDescriptor.FileName:=GetTestFile(fntestoutput);
   Proc.OutputDescriptor.Process:=Proc2;
-  AssertTrue('Proc2 input is pipe',Proc2.InputDescriptor.IOType=iotPipe);
+  FContext.AssertTrue(Proc2.InputDescriptor.IOType=iotPipe, 'Proc2 input is pipe');
   Proc2.Execute;
   Proc.execute;
   AssertGenOutLinesFile(GetTestFile(fntestoutput),3);
@@ -576,7 +581,7 @@ var
   F : String;
 begin
   F:=GetHelper(aHelper);
-  AssertTrue('No helper '+F+' please compile '+aHelper+'.pas',FileExists(F));
+  FContext.AssertTrue(FileExists(F), 'No helper '+F+' please compile '+aHelper+'.pas');
 end;
 
 procedure TTestProcess.SetUp;
@@ -599,7 +604,310 @@ begin
   FreeAndNil(FProc);
 end;
 
-initialization
-  RegisterTest(TTestProcess);
-end.
 
+procedure RunTTestProcessTestHookUp(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHookUp';
+    lFixture.SetUp;
+    try lFixture.TestHookUp; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestSimple(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSimple';
+    lFixture.SetUp;
+    try lFixture.TestSimple; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestSimpleParam(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSimpleParam';
+    lFixture.SetUp;
+    try lFixture.TestSimpleParam; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestExitStatus(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExitStatus';
+    lFixture.SetUp;
+    try lFixture.TestExitStatus; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestWaitFor(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWaitFor';
+    lFixture.SetUp;
+    try lFixture.TestWaitFor; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestOptionWaitOnExit(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOptionWaitOnExit';
+    lFixture.SetUp;
+    try lFixture.TestOptionWaitOnExit; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestTerminate(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTerminate';
+    lFixture.SetUp;
+    try lFixture.TestTerminate; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestPipes(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPipes';
+    lFixture.SetUp;
+    try lFixture.TestPipes; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestWritePipes(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWritePipes';
+    lFixture.SetUp;
+    try lFixture.TestWritePipes; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestStdErr(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStdErr';
+    lFixture.SetUp;
+    try lFixture.TestStdErr; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestStdErrToOutput(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStdErrToOutput';
+    lFixture.SetUp;
+    try lFixture.TestStdErrToOutput; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestInputFile(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInputFile';
+    lFixture.SetUp;
+    try lFixture.TestInputFile; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestOutputFile(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOutputFile';
+    lFixture.SetUp;
+    try lFixture.TestOutputFile; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestStdErrFile(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStdErrFile';
+    lFixture.SetUp;
+    try lFixture.TestStdErrFile; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestStdErrToStdOut(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStdErrToStdOut';
+    lFixture.SetUp;
+    try lFixture.TestStdErrToStdOut; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestInputNull(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInputNull';
+    lFixture.SetUp;
+    try lFixture.TestInputNull; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestOutputFileExistingAppend(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOutputFileExistingAppend';
+    lFixture.SetUp;
+    try lFixture.TestOutputFileExistingAppend; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestOutputFileExistingTruncate(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOutputFileExistingTruncate';
+    lFixture.SetUp;
+    try lFixture.TestOutputFileExistingTruncate; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestOutputFileExistingAtStart(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOutputFileExistingAtStart';
+    lFixture.SetUp;
+    try lFixture.TestOutputFileExistingAtStart; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestPipeOut(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPipeOut';
+    lFixture.SetUp;
+    try lFixture.TestPipeOut; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestPipeOutToFile(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPipeOutToFile';
+    lFixture.SetUp;
+    try lFixture.TestPipeOutToFile; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestPipeInOutToFile(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPipeInOutToFile';
+    lFixture.SetUp;
+    try lFixture.TestPipeInOutToFile; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProcessTestPipeRestart(AContext: TNXTestContext);
+var lFixture: TTestProcess;
+begin
+  lFixture:=TTestProcess.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPipeRestart';
+    lFixture.SetUp;
+    try lFixture.TestPipeRestart; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisterutcprocessTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('utcprocess.TTestProcess');
+  lSuite.AddTest('TestHookUp', @RunTTestProcessTestHookUp);
+  lSuite.AddTest('TestSimple', @RunTTestProcessTestSimple);
+  lSuite.AddTest('TestSimpleParam', @RunTTestProcessTestSimpleParam);
+  lSuite.AddTest('TestExitStatus', @RunTTestProcessTestExitStatus);
+  lSuite.AddTest('TestWaitFor', @RunTTestProcessTestWaitFor);
+  lSuite.AddTest('TestOptionWaitOnExit', @RunTTestProcessTestOptionWaitOnExit);
+  lSuite.AddTest('TestTerminate', @RunTTestProcessTestTerminate);
+  lSuite.AddTest('TestPipes', @RunTTestProcessTestPipes);
+  lSuite.AddTest('TestWritePipes', @RunTTestProcessTestWritePipes);
+  lSuite.AddTest('TestStdErr', @RunTTestProcessTestStdErr);
+  lSuite.AddTest('TestStdErrToOutput', @RunTTestProcessTestStdErrToOutput);
+  lSuite.AddTest('TestInputFile', @RunTTestProcessTestInputFile);
+  lSuite.AddTest('TestOutputFile', @RunTTestProcessTestOutputFile);
+  lSuite.AddTest('TestStdErrFile', @RunTTestProcessTestStdErrFile);
+  lSuite.AddTest('TestStdErrToStdOut', @RunTTestProcessTestStdErrToStdOut);
+  lSuite.AddTest('TestInputNull', @RunTTestProcessTestInputNull);
+  lSuite.AddTest('TestOutputFileExistingAppend', @RunTTestProcessTestOutputFileExistingAppend);
+  lSuite.AddTest('TestOutputFileExistingTruncate', @RunTTestProcessTestOutputFileExistingTruncate);
+  lSuite.AddTest('TestOutputFileExistingAtStart', @RunTTestProcessTestOutputFileExistingAtStart);
+  lSuite.AddTest('TestPipeOut', @RunTTestProcessTestPipeOut);
+  lSuite.AddTest('TestPipeOutToFile', @RunTTestProcessTestPipeOutToFile);
+  lSuite.AddTest('TestPipeInOutToFile', @RunTTestProcessTestPipeInOutToFile);
+  lSuite.AddTest('TestPipeRestart', @RunTTestProcessTestPipeRestart);
+end;
+
+end.

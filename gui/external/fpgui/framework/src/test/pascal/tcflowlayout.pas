@@ -6,11 +6,8 @@ unit tcflowlayout;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testutils,
-  testregistry,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -19,8 +16,11 @@ uses
 
 type
 
-  TTestFlowLayout = class(TTestCase)
-  published
+  TTestFlowLayout = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestDefaults;
     procedure TestSimpleFlow;
     procedure TestWrappingFlow;
@@ -30,11 +30,13 @@ type
 
 procedure RegisterTests;
 
+procedure RegistertcflowlayoutTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestFlowLayout);
+  
 end;
 
 { TTestFlowLayout }
@@ -45,8 +47,8 @@ var
 begin
   lm := TfpgFlowLayoutManager.Create;
   try
-    CheckEquals(5, lm.HGap, 'HGap default');
-    CheckEquals(5, lm.VGap, 'VGap default');
+    FContext.AssertTrue((5)=(lm.HGap), 'HGap default');
+    FContext.AssertTrue((5)=(lm.VGap), 'VGap default');
   finally
     FreeAndNil(lm);
   end;
@@ -86,14 +88,14 @@ begin
 
   container.Realign;
 
-  CheckEquals(5, w1.Left, 'w1.Left');
-  CheckEquals(5, w1.Top, 'w1.Top');
+  FContext.AssertTrue((5)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((5)=(w1.Top), 'w1.Top');
 
-  CheckEquals(60, w2.Left, 'w2.Left');
-  CheckEquals(5, w2.Top, 'w2.Top');
+  FContext.AssertTrue((60)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((5)=(w2.Top), 'w2.Top');
 
-  CheckEquals(115, w3.Left, 'w3.Left');
-  CheckEquals(5, w3.Top, 'w3.Top');
+  FContext.AssertTrue((115)=(w3.Left), 'w3.Left');
+  FContext.AssertTrue((5)=(w3.Top), 'w3.Top');
 
   container.Free;
 end;
@@ -133,14 +135,14 @@ begin
   container.Realign;
 
   // w1 and w2 should be on the first row
-  CheckEquals(0, w1.Left, 'w1.Left');
-  CheckEquals(0, w1.Top, 'w1.Top');
-  CheckEquals(50, w2.Left, 'w2.Left');
-  CheckEquals(0, w2.Top, 'w2.Top');
+  FContext.AssertTrue((0)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((0)=(w1.Top), 'w1.Top');
+  FContext.AssertTrue((50)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((0)=(w2.Top), 'w2.Top');
 
   // w3 should wrap to the second row
-  CheckEquals(0, w3.Left, 'w3.Left after wrap');
-  CheckEquals(20, w3.Top, 'w3.Top after wrap');
+  FContext.AssertTrue((0)=(w3.Left), 'w3.Left after wrap');
+  FContext.AssertTrue((20)=(w3.Top), 'w3.Top after wrap');
 
   container.Free;
 end;
@@ -212,13 +214,13 @@ begin
 
     // The preferred width should be reasonable (close to container width of 300)
     // not the sum of all widget widths (~875)
-    CheckTrue(prefSize.W < 500, Format('Preferred width should be < 500, got %d', [prefSize.W]));
+    FContext.AssertTrue(prefSize.W < 500, Format('Preferred width should be < 500, got %d', [prefSize.W]));
 
     // The preferred height should account for multiple rows
     // With 300px width and varying widget widths, we should have 3-4 rows
     // Each row is 30px + 5px gap = 35px per row
     // So height should be around 105-140px (3-4 rows)
-    CheckTrue(prefSize.H > 80, Format('Preferred height should be > 80 (multiple rows), got %d', [prefSize.H]));
+    FContext.AssertTrue(prefSize.H > 80, Format('Preferred height should be > 80 (multiple rows), got %d', [prefSize.H]));
 
   finally
     container.Free;
@@ -261,43 +263,110 @@ begin
 
     // Initial layout - all in one row
     container.Realign;
-    CheckEquals(5, w1.Left, 'w1.Left initial');
-    CheckEquals(5, w1.Top, 'w1.Top initial');
-    CheckEquals(60, w2.Left, 'w2.Left initial');
-    CheckEquals(5, w2.Top, 'w2.Top initial');
-    CheckEquals(115, w3.Left, 'w3.Left initial');
-    CheckEquals(5, w3.Top, 'w3.Top initial - all in one row');
+    FContext.AssertTrue((5)=(w1.Left), 'w1.Left initial');
+    FContext.AssertTrue((5)=(w1.Top), 'w1.Top initial');
+    FContext.AssertTrue((60)=(w2.Left), 'w2.Left initial');
+    FContext.AssertTrue((5)=(w2.Top), 'w2.Top initial');
+    FContext.AssertTrue((115)=(w3.Left), 'w3.Left initial');
+    FContext.AssertTrue((5)=(w3.Top), 'w3.Top initial - all in one row');
 
     // Resize container to be narrower - should cause wrapping
     container.Width := 120;  // Only wide enough for 2 widgets
     container.Realign;
 
     // After resize, w1 and w2 should still be on first row
-    CheckEquals(5, w1.Left, 'w1.Left after resize');
-    CheckEquals(5, w1.Top, 'w1.Top after resize');
-    CheckEquals(60, w2.Left, 'w2.Left after resize');
-    CheckEquals(5, w2.Top, 'w2.Top after resize');
+    FContext.AssertTrue((5)=(w1.Left), 'w1.Left after resize');
+    FContext.AssertTrue((5)=(w1.Top), 'w1.Top after resize');
+    FContext.AssertTrue((60)=(w2.Left), 'w2.Left after resize');
+    FContext.AssertTrue((5)=(w2.Top), 'w2.Top after resize');
 
     // w3 should wrap to second row
-    CheckEquals(5, w3.Left, 'w3.Left after resize - should wrap');
-    CheckEquals(30, w3.Top, 'w3.Top after resize - should wrap');
+    FContext.AssertTrue((5)=(w3.Left), 'w3.Left after resize - should wrap');
+    FContext.AssertTrue((30)=(w3.Top), 'w3.Top after resize - should wrap');
 
     // Resize back to wider - should unwrap
     container.Width := 200;
     container.Realign;
 
     // All widgets should be back on one row
-    CheckEquals(5, w1.Left, 'w1.Left after expand');
-    CheckEquals(5, w1.Top, 'w1.Top after expand');
-    CheckEquals(60, w2.Left, 'w2.Left after expand');
-    CheckEquals(5, w2.Top, 'w2.Top after expand');
-    CheckEquals(115, w3.Left, 'w3.Left after expand');
-    CheckEquals(5, w3.Top, 'w3.Top after expand - should unwrap');
+    FContext.AssertTrue((5)=(w1.Left), 'w1.Left after expand');
+    FContext.AssertTrue((5)=(w1.Top), 'w1.Top after expand');
+    FContext.AssertTrue((60)=(w2.Left), 'w2.Left after expand');
+    FContext.AssertTrue((5)=(w2.Top), 'w2.Top after expand');
+    FContext.AssertTrue((115)=(w3.Left), 'w3.Left after expand');
+    FContext.AssertTrue((5)=(w3.Top), 'w3.Top after expand - should unwrap');
 
   finally
     container.Free;
   end;
 end;
+
+procedure RunTTestFlowLayoutTestDefaults(AContext: TNXTestContext);
+var lFixture: TTestFlowLayout;
+begin
+  lFixture:=TTestFlowLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDefaults';
+    lFixture.TestDefaults;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFlowLayoutTestSimpleFlow(AContext: TNXTestContext);
+var lFixture: TTestFlowLayout;
+begin
+  lFixture:=TTestFlowLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSimpleFlow';
+    lFixture.TestSimpleFlow;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFlowLayoutTestWrappingFlow(AContext: TNXTestContext);
+var lFixture: TTestFlowLayout;
+begin
+  lFixture:=TTestFlowLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWrappingFlow';
+    lFixture.TestWrappingFlow;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFlowLayoutTestPreferredSizeWithWrapping(AContext: TNXTestContext);
+var lFixture: TTestFlowLayout;
+begin
+  lFixture:=TTestFlowLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPreferredSizeWithWrapping';
+    lFixture.TestPreferredSizeWithWrapping;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFlowLayoutTestDynamicResize(AContext: TNXTestContext);
+var lFixture: TTestFlowLayout;
+begin
+  lFixture:=TTestFlowLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDynamicResize';
+    lFixture.TestDynamicResize;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcflowlayoutTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcflowlayout.TTestFlowLayout');
+  lSuite.AddTest('TestDefaults', @RunTTestFlowLayoutTestDefaults);
+  lSuite.AddTest('TestSimpleFlow', @RunTTestFlowLayoutTestSimpleFlow);
+  lSuite.AddTest('TestWrappingFlow', @RunTTestFlowLayoutTestWrappingFlow);
+  lSuite.AddTest('TestPreferredSizeWithWrapping', @RunTTestFlowLayoutTestPreferredSizeWithWrapping);
+  lSuite.AddTest('TestDynamicResize', @RunTTestFlowLayoutTestDynamicResize);
+end;
+
 
 initialization
   RegisterTests;

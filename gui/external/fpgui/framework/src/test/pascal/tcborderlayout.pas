@@ -5,14 +5,16 @@ unit tcborderlayout;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testutils, testregistry,
-  fpg_base, fpg_main, fpg_widget, fpg_panel, fpg_button,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpg_base, fpg_main, fpg_widget, fpg_panel, fpg_button,
   fpg_layouttypes, fpg_borderlayout;
 
 type
 
-  TTestBorderLayout = class(TTestCase)
-  published
+  TTestBorderLayout = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestLayout;
     procedure TestGaps;
     procedure TestPreferredSize;
@@ -21,6 +23,8 @@ type
 
 procedure RegisterTests;
 
+procedure RegistertcborderlayoutTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 uses
@@ -28,7 +32,7 @@ uses
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestBorderLayout);
+  
 end;
 
 { TTestBorderLayout }
@@ -83,30 +87,30 @@ begin
 
   container.Realign;
 
-  CheckEquals(0, wNorth.Top, 'wNorth.Top');
-  CheckEquals(0, wNorth.Left, 'wNorth.Left');
-  CheckEquals(200, wNorth.ActualWidth, 'wNorth.ActualWidth');
-  CheckEquals(20, wNorth.ActualHeight, 'wNorth.ActualHeight');
+  FContext.AssertTrue((0)=(wNorth.Top), 'wNorth.Top');
+  FContext.AssertTrue((0)=(wNorth.Left), 'wNorth.Left');
+  FContext.AssertTrue((200)=(wNorth.ActualWidth), 'wNorth.ActualWidth');
+  FContext.AssertTrue((20)=(wNorth.ActualHeight), 'wNorth.ActualHeight');
 
-  CheckEquals(180, wSouth.Top, 'wSouth.Top');
-  CheckEquals(0, wSouth.Left, 'wSouth.Left');
-  CheckEquals(200, wSouth.ActualWidth, 'wSouth.ActualWidth');
-  CheckEquals(20, wSouth.ActualHeight, 'wSouth.ActualHeight');
+  FContext.AssertTrue((180)=(wSouth.Top), 'wSouth.Top');
+  FContext.AssertTrue((0)=(wSouth.Left), 'wSouth.Left');
+  FContext.AssertTrue((200)=(wSouth.ActualWidth), 'wSouth.ActualWidth');
+  FContext.AssertTrue((20)=(wSouth.ActualHeight), 'wSouth.ActualHeight');
 
-  CheckEquals(20, wWest.Top, 'wWest.Top');
-  CheckEquals(0, wWest.Left, 'wWest.Left');
-  CheckEquals(20, wWest.ActualWidth, 'wWest.ActualWidth');
-  CheckEquals(160, wWest.ActualHeight, 'wWest.ActualHeight');
+  FContext.AssertTrue((20)=(wWest.Top), 'wWest.Top');
+  FContext.AssertTrue((0)=(wWest.Left), 'wWest.Left');
+  FContext.AssertTrue((20)=(wWest.ActualWidth), 'wWest.ActualWidth');
+  FContext.AssertTrue((160)=(wWest.ActualHeight), 'wWest.ActualHeight');
 
-  CheckEquals(20, wEast.Top, 'wEast.Top');
-  CheckEquals(180, wEast.Left, 'wEast.Left');
-  CheckEquals(20, wEast.ActualWidth, 'wEast.ActualWidth');
-  CheckEquals(160, wEast.ActualHeight, 'wEast.ActualHeight');
+  FContext.AssertTrue((20)=(wEast.Top), 'wEast.Top');
+  FContext.AssertTrue((180)=(wEast.Left), 'wEast.Left');
+  FContext.AssertTrue((20)=(wEast.ActualWidth), 'wEast.ActualWidth');
+  FContext.AssertTrue((160)=(wEast.ActualHeight), 'wEast.ActualHeight');
 
-  CheckEquals(20, wCenter.Top, 'wCenter.Top');
-  CheckEquals(20, wCenter.Left, 'wCenter.Left');
-  CheckEquals(160, wCenter.ActualWidth, 'wCenter.ActualWidth');
-  CheckEquals(160, wCenter.ActualHeight, 'wCenter.ActualHeight');
+  FContext.AssertTrue((20)=(wCenter.Top), 'wCenter.Top');
+  FContext.AssertTrue((20)=(wCenter.Left), 'wCenter.Left');
+  FContext.AssertTrue((160)=(wCenter.ActualWidth), 'wCenter.ActualWidth');
+  FContext.AssertTrue((160)=(wCenter.ActualHeight), 'wCenter.ActualHeight');
 
   container.Free;
 end;
@@ -148,10 +152,10 @@ begin
 
   container.Realign;
 
-  CheckEquals(12, wNorth.Top, 'wNorth.Top with gap');
-  CheckEquals(42, wWest.Top, 'wWest.Top with gap');
-  CheckEquals(168, wSouth.Top, 'wSouth.Top with gap');
-  CheckEquals(7, wWest.Left, 'wWest.Left with gap');
+  FContext.AssertTrue((12)=(wNorth.Top), 'wNorth.Top with gap');
+  FContext.AssertTrue((42)=(wWest.Top), 'wWest.Top with gap');
+  FContext.AssertTrue((168)=(wSouth.Top), 'wSouth.Top with gap');
+  FContext.AssertTrue((7)=(wWest.Left), 'wWest.Left with gap');
 
   container.Free;
 end;
@@ -182,8 +186,8 @@ begin
 
   pref := lm.GetPreferredSize(container);
 
-  CheckEquals(100, pref.W, 'PreferredWidth');
-  CheckEquals(70, pref.H, 'PreferredHeight');
+  FContext.AssertTrue((100)=(pref.W), 'PreferredWidth');
+  FContext.AssertTrue((70)=(pref.H), 'PreferredHeight');
 
   container.Free;
 end;
@@ -216,11 +220,66 @@ begin
 
   min := lm.GetMinimumSize(container);
 
-  CheckEquals(80, min.W, 'MinimumWidth');
-  CheckEquals(55, min.H, 'MinimumHeight');
+  FContext.AssertTrue((80)=(min.W), 'MinimumWidth');
+  FContext.AssertTrue((55)=(min.H), 'MinimumHeight');
 
   container.Free;
 end;
+
+procedure RunTTestBorderLayoutTestLayout(AContext: TNXTestContext);
+var lFixture: TTestBorderLayout;
+begin
+  lFixture:=TTestBorderLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLayout';
+    lFixture.TestLayout;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBorderLayoutTestGaps(AContext: TNXTestContext);
+var lFixture: TTestBorderLayout;
+begin
+  lFixture:=TTestBorderLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGaps';
+    lFixture.TestGaps;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBorderLayoutTestPreferredSize(AContext: TNXTestContext);
+var lFixture: TTestBorderLayout;
+begin
+  lFixture:=TTestBorderLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPreferredSize';
+    lFixture.TestPreferredSize;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBorderLayoutTestMinimumSize(AContext: TNXTestContext);
+var lFixture: TTestBorderLayout;
+begin
+  lFixture:=TTestBorderLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMinimumSize';
+    lFixture.TestMinimumSize;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcborderlayoutTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcborderlayout.TTestBorderLayout');
+  lSuite.AddTest('TestLayout', @RunTTestBorderLayoutTestLayout);
+  lSuite.AddTest('TestGaps', @RunTTestBorderLayoutTestGaps);
+  lSuite.AddTest('TestPreferredSize', @RunTTestBorderLayoutTestPreferredSize);
+  lSuite.AddTest('TestMinimumSize', @RunTTestBorderLayoutTestMinimumSize);
+end;
+
 
 initialization
   RegisterTests;

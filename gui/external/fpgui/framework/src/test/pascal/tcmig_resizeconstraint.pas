@@ -5,15 +5,20 @@ unit tcmig_resizeconstraint;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, Math,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, Math,
   fpg_mig_resizeconstraint;
 
 type
-  TTestMigResizeConstraint = class(TTestCase)
-  published
+  TTestMigResizeConstraint = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestDefaultConstructor;
     procedure TestParameterizedConstructor;
   end;
+
+procedure RegistertcmigresizeconstraintTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -25,10 +30,10 @@ var
 begin
   rc := TfpgMigResizeConstraint.Create;
   try
-    AssertTrue('Default Grow should be NaN', IsNaN(rc.Grow));
-    AssertEquals('Default GrowPrio should be 100', 100, rc.GrowPrio);
-    AssertEquals('Default Shrink should be 100.0', 100.0, rc.Shrink, 0.001);
-    AssertEquals('Default ShrinkPrio should be 100', 100, rc.ShrinkPrio);
+    FContext.AssertTrue(IsNaN(rc.Grow), 'Default Grow should be NaN');
+    FContext.AssertTrue((100)=(rc.GrowPrio), 'Default GrowPrio should be 100');
+    FContext.AssertTrue(Abs((100.0)-(rc.Shrink))<=(0.001), 'Default Shrink should be 100.0');
+    FContext.AssertTrue((100)=(rc.ShrinkPrio), 'Default ShrinkPrio should be 100');
   finally
     rc.Free;
   end;
@@ -42,16 +47,44 @@ begin
   nanFloat := NaN;
   rc := TfpgMigResizeConstraint.Create(50, 50.0, 150, nanFloat);
   try
-    AssertTrue('Grow should be NaN', IsNaN(rc.Grow));
-    AssertEquals('GrowPrio should be 150', 150, rc.GrowPrio);
-    AssertEquals('Shrink should be 50.0', 50.0, rc.Shrink, 0.001);
-    AssertEquals('ShrinkPrio should be 50', 50, rc.ShrinkPrio);
+    FContext.AssertTrue(IsNaN(rc.Grow), 'Grow should be NaN');
+    FContext.AssertTrue((150)=(rc.GrowPrio), 'GrowPrio should be 150');
+    FContext.AssertTrue(Abs((50.0)-(rc.Shrink))<=(0.001), 'Shrink should be 50.0');
+    FContext.AssertTrue((50)=(rc.ShrinkPrio), 'ShrinkPrio should be 50');
   finally
     rc.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestMigResizeConstraint);
+
+procedure RunTTestMigResizeConstraintTestDefaultConstructor(AContext: TNXTestContext);
+var lFixture: TTestMigResizeConstraint;
+begin
+  lFixture:=TTestMigResizeConstraint.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDefaultConstructor';
+    lFixture.TestDefaultConstructor;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigResizeConstraintTestParameterizedConstructor(AContext: TNXTestContext);
+var lFixture: TTestMigResizeConstraint;
+begin
+  lFixture:=TTestMigResizeConstraint.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParameterizedConstructor';
+    lFixture.TestParameterizedConstructor;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcmigresizeconstraintTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcmig_resizeconstraint.TTestMigResizeConstraint');
+  lSuite.AddTest('TestDefaultConstructor', @RunTTestMigResizeConstraintTestDefaultConstructor);
+  lSuite.AddTest('TestParameterizedConstructor', @RunTTestMigResizeConstraintTestParameterizedConstructor);
+end;
 
 end.

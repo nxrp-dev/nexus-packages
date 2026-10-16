@@ -11,18 +11,19 @@ unit ide.test.editor.tabs;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   ide.editor.tabs;
 
 type
 
   { TTestHighlightKindForExtension }
 
-  TTestHighlightKindForExtension = class(TTestCase)
-  published
+  TTestHighlightKindForExtension = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestPascalExtensions;
     procedure TestPatchExtensions;
     procedure TestINIExtensions;
@@ -31,57 +32,135 @@ type
     procedure TestEmptyExtension;
   end;
 
+procedure RegisteridetesteditortabsTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure TTestHighlightKindForExtension.TestPascalExtensions;
 begin
-  AssertTrue('.pas', HighlightKindForExtension('.pas') = hkPascal);
-  AssertTrue('.pp', HighlightKindForExtension('.pp') = hkPascal);
-  AssertTrue('.inc', HighlightKindForExtension('.inc') = hkPascal);
-  AssertTrue('.lpr', HighlightKindForExtension('.lpr') = hkPascal);
-  AssertTrue('.dpr', HighlightKindForExtension('.dpr') = hkPascal);
+  FContext.AssertTrue(HighlightKindForExtension('.pas') = hkPascal, '.pas');
+  FContext.AssertTrue(HighlightKindForExtension('.pp') = hkPascal, '.pp');
+  FContext.AssertTrue(HighlightKindForExtension('.inc') = hkPascal, '.inc');
+  FContext.AssertTrue(HighlightKindForExtension('.lpr') = hkPascal, '.lpr');
+  FContext.AssertTrue(HighlightKindForExtension('.dpr') = hkPascal, '.dpr');
 end;
 
 procedure TTestHighlightKindForExtension.TestPatchExtensions;
 begin
-  AssertTrue('.patch', HighlightKindForExtension('.patch') = hkPatch);
-  AssertTrue('.diff', HighlightKindForExtension('.diff') = hkPatch);
+  FContext.AssertTrue(HighlightKindForExtension('.patch') = hkPatch, '.patch');
+  FContext.AssertTrue(HighlightKindForExtension('.diff') = hkPatch, '.diff');
 end;
 
 procedure TTestHighlightKindForExtension.TestINIExtensions;
 begin
-  AssertTrue('.ini', HighlightKindForExtension('.ini') = hkINI);
-  AssertTrue('.cfg', HighlightKindForExtension('.cfg') = hkINI);
-  AssertTrue('.conf', HighlightKindForExtension('.conf') = hkINI);
+  FContext.AssertTrue(HighlightKindForExtension('.ini') = hkINI, '.ini');
+  FContext.AssertTrue(HighlightKindForExtension('.cfg') = hkINI, '.cfg');
+  FContext.AssertTrue(HighlightKindForExtension('.conf') = hkINI, '.conf');
 end;
 
 procedure TTestHighlightKindForExtension.TestXMLExtensions;
 begin
-  AssertTrue('.xml', HighlightKindForExtension('.xml') = hkXML);
-  AssertTrue('.html', HighlightKindForExtension('.html') = hkXML);
-  AssertTrue('.htm', HighlightKindForExtension('.htm') = hkXML);
-  AssertTrue('.xhtml', HighlightKindForExtension('.xhtml') = hkXML);
-  AssertTrue('.svg', HighlightKindForExtension('.svg') = hkXML);
-  AssertTrue('.xsd', HighlightKindForExtension('.xsd') = hkXML);
-  AssertTrue('.xsl', HighlightKindForExtension('.xsl') = hkXML);
-  AssertTrue('.xslt', HighlightKindForExtension('.xslt') = hkXML);
-  AssertTrue('.lpi', HighlightKindForExtension('.lpi') = hkXML);
-  AssertTrue('.lpk', HighlightKindForExtension('.lpk') = hkXML);
+  FContext.AssertTrue(HighlightKindForExtension('.xml') = hkXML, '.xml');
+  FContext.AssertTrue(HighlightKindForExtension('.html') = hkXML, '.html');
+  FContext.AssertTrue(HighlightKindForExtension('.htm') = hkXML, '.htm');
+  FContext.AssertTrue(HighlightKindForExtension('.xhtml') = hkXML, '.xhtml');
+  FContext.AssertTrue(HighlightKindForExtension('.svg') = hkXML, '.svg');
+  FContext.AssertTrue(HighlightKindForExtension('.xsd') = hkXML, '.xsd');
+  FContext.AssertTrue(HighlightKindForExtension('.xsl') = hkXML, '.xsl');
+  FContext.AssertTrue(HighlightKindForExtension('.xslt') = hkXML, '.xslt');
+  FContext.AssertTrue(HighlightKindForExtension('.lpi') = hkXML, '.lpi');
+  FContext.AssertTrue(HighlightKindForExtension('.lpk') = hkXML, '.lpk');
 end;
 
 procedure TTestHighlightKindForExtension.TestUnknownExtension;
 begin
-  AssertTrue('.txt', HighlightKindForExtension('.txt') = hkNone);
-  AssertTrue('.md', HighlightKindForExtension('.md') = hkNone);
-  AssertTrue('.log', HighlightKindForExtension('.log') = hkNone);
+  FContext.AssertTrue(HighlightKindForExtension('.txt') = hkNone, '.txt');
+  FContext.AssertTrue(HighlightKindForExtension('.md') = hkNone, '.md');
+  FContext.AssertTrue(HighlightKindForExtension('.log') = hkNone, '.log');
 end;
 
 procedure TTestHighlightKindForExtension.TestEmptyExtension;
 begin
-  AssertTrue('empty', HighlightKindForExtension('') = hkNone);
+  FContext.AssertTrue(HighlightKindForExtension('') = hkNone, 'empty');
 end;
 
-initialization
-  RegisterTest(TTestHighlightKindForExtension);
+
+procedure RunTTestHighlightKindForExtensionTestPascalExtensions(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPascalExtensions';
+    lFixture.TestPascalExtensions;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlightKindForExtensionTestPatchExtensions(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPatchExtensions';
+    lFixture.TestPatchExtensions;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlightKindForExtensionTestINIExtensions(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestINIExtensions';
+    lFixture.TestINIExtensions;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlightKindForExtensionTestXMLExtensions(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestXMLExtensions';
+    lFixture.TestXMLExtensions;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlightKindForExtensionTestUnknownExtension(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnknownExtension';
+    lFixture.TestUnknownExtension;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlightKindForExtensionTestEmptyExtension(AContext: TNXTestContext);
+var lFixture: TTestHighlightKindForExtension;
+begin
+  lFixture:=TTestHighlightKindForExtension.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyExtension';
+    lFixture.TestEmptyExtension;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetesteditortabsTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.editor.tabs.TTestHighlightKindForExtension');
+  lSuite.AddTest('TestPascalExtensions', @RunTTestHighlightKindForExtensionTestPascalExtensions);
+  lSuite.AddTest('TestPatchExtensions', @RunTTestHighlightKindForExtensionTestPatchExtensions);
+  lSuite.AddTest('TestINIExtensions', @RunTTestHighlightKindForExtensionTestINIExtensions);
+  lSuite.AddTest('TestXMLExtensions', @RunTTestHighlightKindForExtensionTestXMLExtensions);
+  lSuite.AddTest('TestUnknownExtension', @RunTTestHighlightKindForExtensionTestUnknownExtension);
+  lSuite.AddTest('TestEmptyExtension', @RunTTestHighlightKindForExtensionTestEmptyExtension);
+end;
 
 end.

@@ -18,13 +18,15 @@ unit extras;
 interface
 
 uses
-  SysUtils, Classes, DOM, xmlread, xmlwrite, domunit, testregistry;
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, SysUtils, Classes, DOM, xmlread, xmlwrite, domunit;
+
+procedure RegisterextrasTests(ARegistry: TNXTestRegistry);
 
 implementation
 
 type
   TDOMTestExtra = class(TDOMTestBase)
-  published
+  public
     procedure attr_ownership01;
     procedure attr_ownership02;
     procedure attr_ownership03;
@@ -52,10 +54,10 @@ begin
   el := doc.CreateElement('element1');
   el.SetAttribute('newAttr', 'newValue');
   attr := el.GetAttributeNode('newAttr');
-  AssertNotNull('attribute', attr);
+  FContext.AssertTrue((attr)<>nil, 'attribute');
   attrOwner := attr.OwnerElement;
-  AssertEquals('ownerElement', el, attrOwner);
-  AssertTrue('specified', attr.Specified);
+  FContext.AssertTrue((el)=(attrOwner), 'ownerElement');
+  FContext.AssertTrue(attr.Specified, 'specified');
 end;
 
 // verify that an attribute created by Element.SetAttributeNS()
@@ -71,10 +73,10 @@ begin
   el := doc.CreateElement('element1');
   el.SetAttributeNS('http://www.freepascal.org', 'fpc:newAttr', 'newValue');
   attr := el.GetAttributeNodeNS('http://www.freepascal.org', 'newAttr');
-  AssertNotNull('attribute', attr);
+  FContext.AssertTrue((attr)<>nil, 'attribute');
   attrOwner := attr.OwnerElement;
-  AssertEquals('ownerElement', el, attrOwner);
-  AssertTrue('specified', attr.Specified);
+  FContext.AssertTrue((el)=(attrOwner), 'ownerElement');
+  FContext.AssertTrue(attr.Specified, 'specified');
 end;
 
 // verify that NamedNodeMap.SetNamedItem() resets OwnerElement
@@ -90,12 +92,12 @@ begin
   el := doc.CreateElement('element1');
   attr := doc.CreateAttribute('newAttr');
   el.SetAttributeNode(attr);
-  AssertEquals('ownerElement_before', el, attr.OwnerElement);
+  FContext.AssertTrue((el)=(attr.OwnerElement), 'ownerElement_before');
   attr2 := doc.CreateAttribute('newAttr');
   retNode := el.Attributes.SetNamedItem(attr2);
-  AssertSame('retNode', attr, retNode);
-  AssertNull('ownerElement_after', attr.OwnerElement);
-  AssertEquals('ownerElement2', el, attr2.OwnerElement);
+  FContext.AssertTrue((attr)=(retNode), 'retNode');
+  FContext.AssertTrue((attr.OwnerElement)=nil, 'ownerElement_after');
+  FContext.AssertTrue((el)=(attr2.OwnerElement), 'ownerElement2');
 end;
 
 // verify that NamedNodeMap.SetNamedItemNS() resets OwnerElement
@@ -111,12 +113,12 @@ begin
   el := doc.CreateElement('element1');
   attr := doc.CreateAttributeNS('http://www.freepascal.org', 'fpc:newAttr');
   el.SetAttributeNodeNS(attr);
-  AssertEquals('ownerElement_before', el, attr.OwnerElement);
+  FContext.AssertTrue((el)=(attr.OwnerElement), 'ownerElement_before');
   attr2 := doc.CreateAttributeNS('http://www.freepascal.org', 'fpc:newAttr');
   retNode := el.Attributes.SetNamedItemNS(attr2);
-  AssertSame('retNode', attr, retNode);
-  AssertNull('ownerElement_after', attr.OwnerElement);
-  AssertEquals('ownerElement2', el, attr2.OwnerElement);
+  FContext.AssertTrue((attr)=(retNode), 'retNode');
+  FContext.AssertTrue((attr.OwnerElement)=nil, 'ownerElement_after');
+  FContext.AssertTrue((el)=(attr2.OwnerElement), 'ownerElement2');
 end;
 
 
@@ -132,9 +134,9 @@ begin
   el := doc.CreateElement('element1');
   attr := doc.CreateAttributeNS('http://www.freepascal.org', 'fpc:newAttr');
   el.SetAttributeNodeNS(attr);
-  AssertEquals('ownerElement_before', el, attr.OwnerElement);
+  FContext.AssertTrue((el)=(attr.OwnerElement), 'ownerElement_before');
   el.RemoveAttributeNode(attr);
-  AssertNull('ownerElement_after', attr.ownerElement);
+  FContext.AssertTrue((attr.ownerElement)=nil, 'ownerElement_after');
 end;
 
 // verify that replacing a node by itself does not remove it from the tree
@@ -155,8 +157,8 @@ begin
   root.replaceChild(el, el);
   prev := el.PreviousSibling;
   next := el.NextSibling;
-  AssertNotNull('prev_after', prev);
-  AssertNotNull('prev_after', next);
+  FContext.AssertTrue((prev)<>nil, 'prev_after');
+  FContext.AssertTrue((next)<>nil, 'prev_after');
   AssertEqualsW('prev_name_after', 'child1', prev.NodeName);
   AssertEqualsW('next_name_after', 'child3', next.NodeName);
 end;
@@ -173,9 +175,9 @@ begin
   refchild := root.FirstChild;
   newchild := doc.CreateElement('new');
   root.insertbefore(newchild, refchild);
-  AssertEquals('prev', refchild.previoussibling, newchild);
-  AssertEquals('next', newchild.nextsibling, refchild);
-  AssertEquals('child', root.firstchild, newchild);
+  FContext.AssertTrue((refchild.previoussibling)=(newchild), 'prev');
+  FContext.AssertTrue((newchild.nextsibling)=(refchild), 'next');
+  FContext.AssertTrue((root.firstchild)=(newchild), 'child');
 end;
 
 const
@@ -212,7 +214,7 @@ begin
   assertEqualsW('docElemNS', nsURI1, docElem.namespaceURI);
 
   list := docElem.GetElementsByTagNameNS(nsURI2, '*');
-  assertEquals('ns2_elementCount', 1, list.Length);
+  FContext.AssertTrue((1)=(list.Length), 'ns2_elementCount');
   el := TDOMElement(list[0]);
   assertEqualsW('ns2_nodeName', 'test', el.nodeName);
 end;
@@ -247,7 +249,7 @@ begin
   assertEqualsW('docElemNS', nsURI1, docElem.namespaceURI);
 
   list := docElem.GetElementsByTagNameNS(nsURI2, '*');
-  assertEquals('ns2_elementCount', 1, list.Length);
+  FContext.AssertTrue((1)=(list.Length), 'ns2_elementCount');
   el := TDOMElement(list[0]);
   assertEqualsW('ns2_nodeName', 'b:test', el.nodeName);
 end;
@@ -284,15 +286,148 @@ begin
   assertEqualsW('docElemNS', nsURI1, docElem.namespaceURI);
 
   list := docElem.GetElementsByTagNameNS(nsURI2, '*');
-  assertEquals('ns2_elementCount', 1, list.Length);
+  FContext.AssertTrue((1)=(list.Length), 'ns2_elementCount');
   el := TDOMElement(list[0]);
   attr := el.GetAttributeNodeNS(nsURI1, 'attr');
   assertEqualsW('attr_nodeName', 'a:attr', attr.nodeName);
 end;
 
 
-initialization
-  RegisterTest(TDOMTestExtra);
+
+procedure RunTDOMTestExtraattr_ownership01(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='attr_ownership01';
+    lFixture.SetUp;
+    try lFixture.attr_ownership01; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtraattr_ownership02(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='attr_ownership02';
+    lFixture.SetUp;
+    try lFixture.attr_ownership02; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtraattr_ownership03(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='attr_ownership03';
+    lFixture.SetUp;
+    try lFixture.attr_ownership03; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtraattr_ownership04(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='attr_ownership04';
+    lFixture.SetUp;
+    try lFixture.attr_ownership04; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtraattr_ownership05(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='attr_ownership05';
+    lFixture.SetUp;
+    try lFixture.attr_ownership05; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtrareplacesamechild(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='replacesamechild';
+    lFixture.SetUp;
+    try lFixture.replacesamechild; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtrainsertbeforefirst(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='insertbeforefirst';
+    lFixture.SetUp;
+    try lFixture.insertbeforefirst; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtransFixup1(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='nsFixup1';
+    lFixture.SetUp;
+    try lFixture.nsFixup1; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtransFixup2(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='nsFixup2';
+    lFixture.SetUp;
+    try lFixture.nsFixup2; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTDOMTestExtransFixup3(AContext: TNXTestContext);
+var lFixture: TDOMTestExtra;
+begin
+  lFixture:=TDOMTestExtra.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='nsFixup3';
+    lFixture.SetUp;
+    try lFixture.nsFixup3; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisterextrasTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('extras.TDOMTestExtra');
+  lSuite.AddTest('attr_ownership01', @RunTDOMTestExtraattr_ownership01);
+  lSuite.AddTest('attr_ownership02', @RunTDOMTestExtraattr_ownership02);
+  lSuite.AddTest('attr_ownership03', @RunTDOMTestExtraattr_ownership03);
+  lSuite.AddTest('attr_ownership04', @RunTDOMTestExtraattr_ownership04);
+  lSuite.AddTest('attr_ownership05', @RunTDOMTestExtraattr_ownership05);
+  lSuite.AddTest('replacesamechild', @RunTDOMTestExtrareplacesamechild);
+  lSuite.AddTest('insertbeforefirst', @RunTDOMTestExtrainsertbeforefirst);
+  lSuite.AddTest('nsFixup1', @RunTDOMTestExtransFixup1);
+  lSuite.AddTest('nsFixup2', @RunTDOMTestExtransFixup2);
+  lSuite.AddTest('nsFixup3', @RunTDOMTestExtransFixup3);
+end;
 
 end.
-

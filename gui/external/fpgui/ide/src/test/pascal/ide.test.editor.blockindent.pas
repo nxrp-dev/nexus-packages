@@ -12,25 +12,26 @@ unit ide.test.editor.blockindent;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   ide.editor.undo;
 
 type
 
   { TTestBlockIndent }
 
-  TTestBlockIndent = class(TTestCase)
+  TTestBlockIndent = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FLines: TStringList;
     FManager: TUndoManager;
     procedure IndentLines(AStartLine, AEndLine, AIndentSize: Integer);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     procedure TestIndentSingleLine;
     procedure TestIndentMultipleLines;
     procedure TestIndentPreservesExistingIndent;
@@ -44,15 +45,18 @@ type
 
   { TTestBlockUnindent }
 
-  TTestBlockUnindent = class(TTestCase)
+  TTestBlockUnindent = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FLines: TStringList;
     FManager: TUndoManager;
     procedure UnindentLines(AStartLine, AEndLine, AIndentSize: Integer);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     procedure TestUnindentSingleLine;
     procedure TestUnindentMultipleLines;
     procedure TestUnindentRemovesPartialIndent;
@@ -67,22 +71,27 @@ type
 
   { TTestBlockIndentRoundTrip }
 
-  TTestBlockIndentRoundTrip = class(TTestCase)
+  TTestBlockIndentRoundTrip = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FLines: TStringList;
     FManager: TUndoManager;
     procedure IndentLines(AStartLine, AEndLine, AIndentSize: Integer);
     procedure UnindentLines(AStartLine, AEndLine, AIndentSize: Integer);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     procedure TestIndentThenUnindentRestoresOriginal;
     procedure TestMultipleIndentsThenUnindents;
     procedure TestIndentUndoIsSingleStep;
     procedure TestUnindentUndoIsSingleStep;
   end;
 
+
+procedure RegisteridetesteditorblockindentTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -180,7 +189,7 @@ procedure TTestBlockIndent.TestIndentSingleLine;
 begin
   FLines.Add('hello');
   IndentLines(0, 0, 2);
-  AssertEquals('Indented line', '  hello', FLines[0]);
+  FContext.AssertTrue(('  hello')=(FLines[0]), 'Indented line');
 end;
 
 procedure TTestBlockIndent.TestIndentMultipleLines;
@@ -189,23 +198,23 @@ begin
   FLines.Add('line two');
   FLines.Add('line three');
   IndentLines(0, 2, 2);
-  AssertEquals('Line 0', '  line one', FLines[0]);
-  AssertEquals('Line 1', '  line two', FLines[1]);
-  AssertEquals('Line 2', '  line three', FLines[2]);
+  FContext.AssertTrue(('  line one')=(FLines[0]), 'Line 0');
+  FContext.AssertTrue(('  line two')=(FLines[1]), 'Line 1');
+  FContext.AssertTrue(('  line three')=(FLines[2]), 'Line 2');
 end;
 
 procedure TTestBlockIndent.TestIndentPreservesExistingIndent;
 begin
   FLines.Add('  already indented');
   IndentLines(0, 0, 2);
-  AssertEquals('Double indented', '    already indented', FLines[0]);
+  FContext.AssertTrue(('    already indented')=(FLines[0]), 'Double indented');
 end;
 
 procedure TTestBlockIndent.TestIndentEmptyLine;
 begin
   FLines.Add('');
   IndentLines(0, 0, 2);
-  AssertEquals('Indented empty line', '  ', FLines[0]);
+  FContext.AssertTrue(('  ')=(FLines[0]), 'Indented empty line');
 end;
 
 procedure TTestBlockIndent.TestIndentMixedContentWithEmptyLines;
@@ -214,16 +223,16 @@ begin
   FLines.Add('');
   FLines.Add('third');
   IndentLines(0, 2, 2);
-  AssertEquals('Line 0', '  first', FLines[0]);
-  AssertEquals('Line 1 (empty)', '  ', FLines[1]);
-  AssertEquals('Line 2', '  third', FLines[2]);
+  FContext.AssertTrue(('  first')=(FLines[0]), 'Line 0');
+  FContext.AssertTrue(('  ')=(FLines[1]), 'Line 1 (empty)');
+  FContext.AssertTrue(('  third')=(FLines[2]), 'Line 2');
 end;
 
 procedure TTestBlockIndent.TestIndentCustomSize;
 begin
   FLines.Add('hello');
   IndentLines(0, 0, 4);
-  AssertEquals('4-space indent', '    hello', FLines[0]);
+  FContext.AssertTrue(('    hello')=(FLines[0]), '4-space indent');
 end;
 
 procedure TTestBlockIndent.TestIndentUndo;
@@ -231,11 +240,11 @@ begin
   FLines.Add('hello');
   FLines.Add('world');
   IndentLines(0, 1, 2);
-  AssertEquals('Before undo line 0', '  hello', FLines[0]);
-  AssertEquals('Before undo line 1', '  world', FLines[1]);
+  FContext.AssertTrue(('  hello')=(FLines[0]), 'Before undo line 0');
+  FContext.AssertTrue(('  world')=(FLines[1]), 'Before undo line 1');
   FManager.Undo;
-  AssertEquals('After undo line 0', 'hello', FLines[0]);
-  AssertEquals('After undo line 1', 'world', FLines[1]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'After undo line 0');
+  FContext.AssertTrue(('world')=(FLines[1]), 'After undo line 1');
 end;
 
 procedure TTestBlockIndent.TestIndentUndoRedo;
@@ -243,9 +252,9 @@ begin
   FLines.Add('hello');
   IndentLines(0, 0, 2);
   FManager.Undo;
-  AssertEquals('After undo', 'hello', FLines[0]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'After undo');
   FManager.Redo;
-  AssertEquals('After redo', '  hello', FLines[0]);
+  FContext.AssertTrue(('  hello')=(FLines[0]), 'After redo');
 end;
 
 
@@ -272,7 +281,7 @@ procedure TTestBlockUnindent.TestUnindentSingleLine;
 begin
   FLines.Add('  hello');
   UnindentLines(0, 0, 2);
-  AssertEquals('Unindented line', 'hello', FLines[0]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'Unindented line');
 end;
 
 procedure TTestBlockUnindent.TestUnindentMultipleLines;
@@ -281,30 +290,30 @@ begin
   FLines.Add('  line two');
   FLines.Add('  line three');
   UnindentLines(0, 2, 2);
-  AssertEquals('Line 0', 'line one', FLines[0]);
-  AssertEquals('Line 1', 'line two', FLines[1]);
-  AssertEquals('Line 2', 'line three', FLines[2]);
+  FContext.AssertTrue(('line one')=(FLines[0]), 'Line 0');
+  FContext.AssertTrue(('line two')=(FLines[1]), 'Line 1');
+  FContext.AssertTrue(('line three')=(FLines[2]), 'Line 2');
 end;
 
 procedure TTestBlockUnindent.TestUnindentRemovesPartialIndent;
 begin
   FLines.Add(' hello');  { only 1 space, indent size is 2 }
   UnindentLines(0, 0, 2);
-  AssertEquals('Partial unindent', 'hello', FLines[0]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'Partial unindent');
 end;
 
 procedure TTestBlockUnindent.TestUnindentNoLeadingSpaces;
 begin
   FLines.Add('hello');
   UnindentLines(0, 0, 2);
-  AssertEquals('No change', 'hello', FLines[0]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'No change');
 end;
 
 procedure TTestBlockUnindent.TestUnindentEmptyLine;
 begin
   FLines.Add('');
   UnindentLines(0, 0, 2);
-  AssertEquals('Empty stays empty', '', FLines[0]);
+  FContext.AssertTrue(('')=(FLines[0]), 'Empty stays empty');
 end;
 
 procedure TTestBlockUnindent.TestUnindentMixedIndentLevels;
@@ -314,17 +323,17 @@ begin
   FLines.Add(' one space');
   FLines.Add('no spaces');
   UnindentLines(0, 3, 2);
-  AssertEquals('Line 0', '  four spaces', FLines[0]);
-  AssertEquals('Line 1', 'two spaces', FLines[1]);
-  AssertEquals('Line 2', 'one space', FLines[2]);  { only 1 space removed }
-  AssertEquals('Line 3', 'no spaces', FLines[3]);
+  FContext.AssertTrue(('  four spaces')=(FLines[0]), 'Line 0');
+  FContext.AssertTrue(('two spaces')=(FLines[1]), 'Line 1');
+  FContext.AssertTrue(('one space')=(FLines[2]), 'Line 2');  { only 1 space removed }
+  FContext.AssertTrue(('no spaces')=(FLines[3]), 'Line 3');
 end;
 
 procedure TTestBlockUnindent.TestUnindentWithTabs;
 begin
   FLines.Add(#9 + 'tabbed line');
   UnindentLines(0, 0, 2);
-  AssertEquals('Tab removed', 'tabbed line', FLines[0]);
+  FContext.AssertTrue(('tabbed line')=(FLines[0]), 'Tab removed');
 end;
 
 procedure TTestBlockUnindent.TestUnindentUndo;
@@ -332,11 +341,11 @@ begin
   FLines.Add('  hello');
   FLines.Add('  world');
   UnindentLines(0, 1, 2);
-  AssertEquals('Before undo line 0', 'hello', FLines[0]);
-  AssertEquals('Before undo line 1', 'world', FLines[1]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'Before undo line 0');
+  FContext.AssertTrue(('world')=(FLines[1]), 'Before undo line 1');
   FManager.Undo;
-  AssertEquals('After undo line 0', '  hello', FLines[0]);
-  AssertEquals('After undo line 1', '  world', FLines[1]);
+  FContext.AssertTrue(('  hello')=(FLines[0]), 'After undo line 0');
+  FContext.AssertTrue(('  world')=(FLines[1]), 'After undo line 1');
 end;
 
 procedure TTestBlockUnindent.TestUnindentUndoRedo;
@@ -344,9 +353,9 @@ begin
   FLines.Add('  hello');
   UnindentLines(0, 0, 2);
   FManager.Undo;
-  AssertEquals('After undo', '  hello', FLines[0]);
+  FContext.AssertTrue(('  hello')=(FLines[0]), 'After undo');
   FManager.Redo;
-  AssertEquals('After redo', 'hello', FLines[0]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'After redo');
 end;
 
 
@@ -380,8 +389,8 @@ begin
   FLines.Add('world');
   IndentLines(0, 1, 2);
   UnindentLines(0, 1, 2);
-  AssertEquals('Line 0 restored', 'hello', FLines[0]);
-  AssertEquals('Line 1 restored', 'world', FLines[1]);
+  FContext.AssertTrue(('hello')=(FLines[0]), 'Line 0 restored');
+  FContext.AssertTrue(('world')=(FLines[1]), 'Line 1 restored');
 end;
 
 procedure TTestBlockIndentRoundTrip.TestMultipleIndentsThenUnindents;
@@ -389,11 +398,11 @@ begin
   FLines.Add('code');
   IndentLines(0, 0, 2);
   IndentLines(0, 0, 2);
-  AssertEquals('Double indented', '    code', FLines[0]);
+  FContext.AssertTrue(('    code')=(FLines[0]), 'Double indented');
   UnindentLines(0, 0, 2);
-  AssertEquals('Single indented', '  code', FLines[0]);
+  FContext.AssertTrue(('  code')=(FLines[0]), 'Single indented');
   UnindentLines(0, 0, 2);
-  AssertEquals('Restored', 'code', FLines[0]);
+  FContext.AssertTrue(('code')=(FLines[0]), 'Restored');
 end;
 
 procedure TTestBlockIndentRoundTrip.TestIndentUndoIsSingleStep;
@@ -402,11 +411,11 @@ begin
   FLines.Add('line two');
   FLines.Add('line three');
   IndentLines(0, 2, 2);
-  AssertEquals('Undo count after indent', 1, FManager.UndoCount);
+  FContext.AssertTrue((1)=(FManager.UndoCount), 'Undo count after indent');
   FManager.Undo;
-  AssertEquals('Line 0 after undo', 'line one', FLines[0]);
-  AssertEquals('Line 1 after undo', 'line two', FLines[1]);
-  AssertEquals('Line 2 after undo', 'line three', FLines[2]);
+  FContext.AssertTrue(('line one')=(FLines[0]), 'Line 0 after undo');
+  FContext.AssertTrue(('line two')=(FLines[1]), 'Line 1 after undo');
+  FContext.AssertTrue(('line three')=(FLines[2]), 'Line 2 after undo');
 end;
 
 procedure TTestBlockIndentRoundTrip.TestUnindentUndoIsSingleStep;
@@ -415,17 +424,294 @@ begin
   FLines.Add('  line two');
   FLines.Add('  line three');
   UnindentLines(0, 2, 2);
-  AssertEquals('Undo count after unindent', 1, FManager.UndoCount);
+  FContext.AssertTrue((1)=(FManager.UndoCount), 'Undo count after unindent');
   FManager.Undo;
-  AssertEquals('Line 0 after undo', '  line one', FLines[0]);
-  AssertEquals('Line 1 after undo', '  line two', FLines[1]);
-  AssertEquals('Line 2 after undo', '  line three', FLines[2]);
+  FContext.AssertTrue(('  line one')=(FLines[0]), 'Line 0 after undo');
+  FContext.AssertTrue(('  line two')=(FLines[1]), 'Line 1 after undo');
+  FContext.AssertTrue(('  line three')=(FLines[2]), 'Line 2 after undo');
 end;
 
 
-initialization
-  RegisterTest(TTestBlockIndent);
-  RegisterTest(TTestBlockUnindent);
-  RegisterTest(TTestBlockIndentRoundTrip);
+
+procedure RunTTestBlockIndentTestIndentSingleLine(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentSingleLine';
+    lFixture.SetUp;
+    try lFixture.TestIndentSingleLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentMultipleLines(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentMultipleLines';
+    lFixture.SetUp;
+    try lFixture.TestIndentMultipleLines; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentPreservesExistingIndent(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentPreservesExistingIndent';
+    lFixture.SetUp;
+    try lFixture.TestIndentPreservesExistingIndent; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentEmptyLine';
+    lFixture.SetUp;
+    try lFixture.TestIndentEmptyLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentMixedContentWithEmptyLines(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentMixedContentWithEmptyLines';
+    lFixture.SetUp;
+    try lFixture.TestIndentMixedContentWithEmptyLines; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentCustomSize(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentCustomSize';
+    lFixture.SetUp;
+    try lFixture.TestIndentCustomSize; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentUndo(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentUndo';
+    lFixture.SetUp;
+    try lFixture.TestIndentUndo; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentTestIndentUndoRedo(AContext: TNXTestContext);
+var lFixture: TTestBlockIndent;
+begin
+  lFixture:=TTestBlockIndent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentUndoRedo';
+    lFixture.SetUp;
+    try lFixture.TestIndentUndoRedo; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentSingleLine(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentSingleLine';
+    lFixture.SetUp;
+    try lFixture.TestUnindentSingleLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentMultipleLines(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentMultipleLines';
+    lFixture.SetUp;
+    try lFixture.TestUnindentMultipleLines; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentRemovesPartialIndent(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentRemovesPartialIndent';
+    lFixture.SetUp;
+    try lFixture.TestUnindentRemovesPartialIndent; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentNoLeadingSpaces(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentNoLeadingSpaces';
+    lFixture.SetUp;
+    try lFixture.TestUnindentNoLeadingSpaces; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentEmptyLine';
+    lFixture.SetUp;
+    try lFixture.TestUnindentEmptyLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentMixedIndentLevels(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentMixedIndentLevels';
+    lFixture.SetUp;
+    try lFixture.TestUnindentMixedIndentLevels; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentWithTabs(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentWithTabs';
+    lFixture.SetUp;
+    try lFixture.TestUnindentWithTabs; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentUndo(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentUndo';
+    lFixture.SetUp;
+    try lFixture.TestUnindentUndo; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockUnindentTestUnindentUndoRedo(AContext: TNXTestContext);
+var lFixture: TTestBlockUnindent;
+begin
+  lFixture:=TTestBlockUnindent.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentUndoRedo';
+    lFixture.SetUp;
+    try lFixture.TestUnindentUndoRedo; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentRoundTripTestIndentThenUnindentRestoresOriginal(AContext: TNXTestContext);
+var lFixture: TTestBlockIndentRoundTrip;
+begin
+  lFixture:=TTestBlockIndentRoundTrip.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentThenUnindentRestoresOriginal';
+    lFixture.SetUp;
+    try lFixture.TestIndentThenUnindentRestoresOriginal; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentRoundTripTestMultipleIndentsThenUnindents(AContext: TNXTestContext);
+var lFixture: TTestBlockIndentRoundTrip;
+begin
+  lFixture:=TTestBlockIndentRoundTrip.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMultipleIndentsThenUnindents';
+    lFixture.SetUp;
+    try lFixture.TestMultipleIndentsThenUnindents; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentRoundTripTestIndentUndoIsSingleStep(AContext: TNXTestContext);
+var lFixture: TTestBlockIndentRoundTrip;
+begin
+  lFixture:=TTestBlockIndentRoundTrip.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIndentUndoIsSingleStep';
+    lFixture.SetUp;
+    try lFixture.TestIndentUndoIsSingleStep; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBlockIndentRoundTripTestUnindentUndoIsSingleStep(AContext: TNXTestContext);
+var lFixture: TTestBlockIndentRoundTrip;
+begin
+  lFixture:=TTestBlockIndentRoundTrip.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnindentUndoIsSingleStep';
+    lFixture.SetUp;
+    try lFixture.TestUnindentUndoIsSingleStep; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetesteditorblockindentTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.editor.blockindent.TTestBlockIndent');
+  lSuite.AddTest('TestIndentSingleLine', @RunTTestBlockIndentTestIndentSingleLine);
+  lSuite.AddTest('TestIndentMultipleLines', @RunTTestBlockIndentTestIndentMultipleLines);
+  lSuite.AddTest('TestIndentPreservesExistingIndent', @RunTTestBlockIndentTestIndentPreservesExistingIndent);
+  lSuite.AddTest('TestIndentEmptyLine', @RunTTestBlockIndentTestIndentEmptyLine);
+  lSuite.AddTest('TestIndentMixedContentWithEmptyLines', @RunTTestBlockIndentTestIndentMixedContentWithEmptyLines);
+  lSuite.AddTest('TestIndentCustomSize', @RunTTestBlockIndentTestIndentCustomSize);
+  lSuite.AddTest('TestIndentUndo', @RunTTestBlockIndentTestIndentUndo);
+  lSuite.AddTest('TestIndentUndoRedo', @RunTTestBlockIndentTestIndentUndoRedo);
+  lSuite:=ARegistry.AddSuite('ide.test.editor.blockindent.TTestBlockUnindent');
+  lSuite.AddTest('TestUnindentSingleLine', @RunTTestBlockUnindentTestUnindentSingleLine);
+  lSuite.AddTest('TestUnindentMultipleLines', @RunTTestBlockUnindentTestUnindentMultipleLines);
+  lSuite.AddTest('TestUnindentRemovesPartialIndent', @RunTTestBlockUnindentTestUnindentRemovesPartialIndent);
+  lSuite.AddTest('TestUnindentNoLeadingSpaces', @RunTTestBlockUnindentTestUnindentNoLeadingSpaces);
+  lSuite.AddTest('TestUnindentEmptyLine', @RunTTestBlockUnindentTestUnindentEmptyLine);
+  lSuite.AddTest('TestUnindentMixedIndentLevels', @RunTTestBlockUnindentTestUnindentMixedIndentLevels);
+  lSuite.AddTest('TestUnindentWithTabs', @RunTTestBlockUnindentTestUnindentWithTabs);
+  lSuite.AddTest('TestUnindentUndo', @RunTTestBlockUnindentTestUnindentUndo);
+  lSuite.AddTest('TestUnindentUndoRedo', @RunTTestBlockUnindentTestUnindentUndoRedo);
+  lSuite:=ARegistry.AddSuite('ide.test.editor.blockindent.TTestBlockIndentRoundTrip');
+  lSuite.AddTest('TestIndentThenUnindentRestoresOriginal', @RunTTestBlockIndentRoundTripTestIndentThenUnindentRestoresOriginal);
+  lSuite.AddTest('TestMultipleIndentsThenUnindents', @RunTTestBlockIndentRoundTripTestMultipleIndentsThenUnindents);
+  lSuite.AddTest('TestIndentUndoIsSingleStep', @RunTTestBlockIndentRoundTripTestIndentUndoIsSingleStep);
+  lSuite.AddTest('TestUnindentUndoIsSingleStep', @RunTTestBlockIndentRoundTripTestUnindentUndoIsSingleStep);
+end;
 
 end.

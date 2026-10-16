@@ -10,18 +10,19 @@ unit ide.test.debug.adapter;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   ide.debug.adapter;
 
 type
 
   { TTestDebugAdapterState }
 
-  TTestDebugAdapterState = class(TTestCase)
-  published
+  TTestDebugAdapterState = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestInitialStateIsIdle;
     procedure TestStartSessionWithInvalidBinary;
     procedure TestEndSessionResetsState;
@@ -29,6 +30,8 @@ type
     procedure TestContinueRequiresPaused;
     procedure TestStepRequiresPaused;
   end;
+
+procedure RegisteridetestdebugadapterTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -40,8 +43,8 @@ var
 begin
   adapter := TIDEDebugAdapter.Create;
   try
-    AssertTrue('initial state should be idsIdle', adapter.State = idsIdle);
-    AssertTrue('engine should be nil before session', adapter.Engine = nil);
+    FContext.AssertTrue(adapter.State = idsIdle, 'initial state should be idsIdle');
+    FContext.AssertTrue(adapter.Engine = nil, 'engine should be nil before session');
   finally
     adapter.Free;
   end;
@@ -55,9 +58,9 @@ begin
   adapter := TIDEDebugAdapter.Create;
   try
     ok := adapter.StartSession('/nonexistent/binary');
-    AssertFalse('should fail for nonexistent binary', ok);
-    AssertTrue('state should remain idle', adapter.State = idsIdle);
-    AssertTrue('engine should be nil after failed start', adapter.Engine = nil);
+    FContext.AssertTrue(not (ok), 'should fail for nonexistent binary');
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle');
+    FContext.AssertTrue(adapter.Engine = nil, 'engine should be nil after failed start');
   finally
     adapter.Free;
   end;
@@ -71,7 +74,7 @@ begin
   try
     { Even without a session, EndSession should not crash }
     adapter.EndSession;
-    AssertTrue('state should be idle after EndSession', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should be idle after EndSession');
   finally
     adapter.Free;
   end;
@@ -85,7 +88,7 @@ begin
   try
     { Run from idle should be a no-op (no crash) }
     adapter.Run;
-    AssertTrue('state should remain idle', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle');
   finally
     adapter.Free;
   end;
@@ -98,7 +101,7 @@ begin
   adapter := TIDEDebugAdapter.Create;
   try
     adapter.Continue;
-    AssertTrue('state should remain idle', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle');
   finally
     adapter.Free;
   end;
@@ -111,18 +114,94 @@ begin
   adapter := TIDEDebugAdapter.Create;
   try
     adapter.StepInto;
-    AssertTrue('state should remain idle after StepInto', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle after StepInto');
     adapter.StepOver;
-    AssertTrue('state should remain idle after StepOver', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle after StepOver');
     adapter.StepLine;
-    AssertTrue('state should remain idle after StepLine', adapter.State = idsIdle);
+    FContext.AssertTrue(adapter.State = idsIdle, 'state should remain idle after StepLine');
   finally
     adapter.Free;
   end;
 end;
 
 
-initialization
-  RegisterTest(TTestDebugAdapterState);
+
+procedure RunTTestDebugAdapterStateTestInitialStateIsIdle(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInitialStateIsIdle';
+    lFixture.TestInitialStateIsIdle;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDebugAdapterStateTestStartSessionWithInvalidBinary(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStartSessionWithInvalidBinary';
+    lFixture.TestStartSessionWithInvalidBinary;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDebugAdapterStateTestEndSessionResetsState(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEndSessionResetsState';
+    lFixture.TestEndSessionResetsState;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDebugAdapterStateTestRunRequiresStartingOrPaused(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRunRequiresStartingOrPaused';
+    lFixture.TestRunRequiresStartingOrPaused;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDebugAdapterStateTestContinueRequiresPaused(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestContinueRequiresPaused';
+    lFixture.TestContinueRequiresPaused;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDebugAdapterStateTestStepRequiresPaused(AContext: TNXTestContext);
+var lFixture: TTestDebugAdapterState;
+begin
+  lFixture:=TTestDebugAdapterState.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStepRequiresPaused';
+    lFixture.TestStepRequiresPaused;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetestdebugadapterTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.debug.adapter.TTestDebugAdapterState');
+  lSuite.AddTest('TestInitialStateIsIdle', @RunTTestDebugAdapterStateTestInitialStateIsIdle);
+  lSuite.AddTest('TestStartSessionWithInvalidBinary', @RunTTestDebugAdapterStateTestStartSessionWithInvalidBinary);
+  lSuite.AddTest('TestEndSessionResetsState', @RunTTestDebugAdapterStateTestEndSessionResetsState);
+  lSuite.AddTest('TestRunRequiresStartingOrPaused', @RunTTestDebugAdapterStateTestRunRequiresStartingOrPaused);
+  lSuite.AddTest('TestContinueRequiresPaused', @RunTTestDebugAdapterStateTestContinueRequiresPaused);
+  lSuite.AddTest('TestStepRequiresPaused', @RunTTestDebugAdapterStateTestStepRequiresPaused);
+end;
 
 end.

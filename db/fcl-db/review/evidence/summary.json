@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-16",
+  "source_revision": "ca6b3976bf5417fd73251dcb9f39d9edcf48ea07",
+  "original_files": 199,
+  "archive_sha256": "f148cf7652d9783fa79aa3ba6a3f38726fceb8164cd0013be627a3cd5b6c6734",
+  "modified_original_files": [
+    "src/base/bufdataset.pas",
+    "src/base/fieldmap.pas",
+    "src/export/fpcsvexport.pas",
+    "src/export/fpfixedexport.pas",
+    "src/export/fpsimplejsonexport.pas",
+    "src/export/fpsqlexport.pas",
+    "src/json/fpjsondataset.pas",
+    "src/memds/memds.pas",
+    "src/sqldb/sqldbpool.pas"
+  ],
+  "disproved_candidate": "03IntegerExportWidth",
+  "proven_findings": 15,
+  "regression_cases": 16,
+  "runtime_units": 66,
+  "target": "x86_64-linux",
+  "source_removal": "complete",
+  "original_directory_absent": true,
+  "postmove_nxbuilds": "all passed",
+  "postmove_regressions": "16 passed; 0 failed/errors/skipped",
+  "postmove_retained": "943 tests; 0 errors/failures",
+  "sqlite_consumer": "28 passed; 0 failed/errors/skipped",
+  "compiler_database_consumers": "6 built and ran; 0 failures",
+  "built_runtime_artifacts": 66,
+  "completion_notification": "Unavailable: pwsh is not installed (exit 127).",
+  "source_patch_sha256": "cb0b4d030f594580da8c2c895e774b5353074ef0d1e700ecf43f0f12257b9505"
+}

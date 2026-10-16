@@ -1,0 +1,14 @@
+[
+  {
+    "mode": "baseline",
+    "source": "base/bufdataset.pas",
+    "exit": 204,
+    "result": "Fixture terminated on heap corruption; see heap.txt/process.txt"
+  },
+  {
+    "mode": "fixed",
+    "source": "base/bufdataset.pas",
+    "exit": 0,
+    "result": "passed\n"
+  }
+]

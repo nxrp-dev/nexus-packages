@@ -5,13 +5,16 @@ unit tcjsontocode;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, fpjsontopas;
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpjsontopas;
 
 type
 
   { TTestGenCode }
 
-  TTestGenCode= class(TTestCase)
+  TTestGenCode= class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FPos : Integer;
     FGen: TJSONToPascal;
@@ -24,8 +27,8 @@ type
     function NextLine: String;
     function Pos(const What, Where: String): Integer;
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
     procedure AssertArrayCreator(const ArrayTypeName, AElementType: String; IsDelphi: Boolean=False);
     procedure AssertArraySaver(const ArrayTypeName, AElementType: String; IsDelphi: Boolean=False);
     procedure AssertArrayCreatorImplementation(const ArrayTypeName, AElementType: String; AObjectName: String=''; IsDelphi: Boolean=False);
@@ -59,7 +62,7 @@ type
     Procedure AssertArrayType(Const AName,AItemType : String);
     Procedure AssertPropertyMap(Const APath,ATypeName,APropertyName,AParentTypeName : String);
     Property Gen : TJSONToPascal Read FGen;
-  published
+  public
     procedure TestEmpty;
     Procedure TestSimple;
     Procedure TestClassName;
@@ -147,6 +150,8 @@ type
 Var
   TestUnitDir : String;
 
+procedure RegistertcjsontocodeTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure TTestGenCode.SetUp;
@@ -166,7 +171,7 @@ begin
   While (Result='') do
     begin
     Inc(FPos);
-    AssertTrue('In scope',FPos<FGen.Code.Count);
+    FContext.AssertTrue(FPos<FGen.Code.Count, 'In scope');
     Result:=Trim(FGen.Code[FPos]);
     end;
 end;
@@ -178,33 +183,33 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('Have unit',Pos('unit ',S)=1);
+  FContext.AssertTrue(Pos('unit ',S)=1, 'Have unit');
   S:=NextLine;
-  AssertTrue('Have interface',Pos('interface',S)=1);
+  FContext.AssertTrue(Pos('interface',S)=1, 'Have interface');
   S:=NextLine;
-  AssertTrue('Have uses',Pos('uses ',S)=1);
+  FContext.AssertTrue(Pos('uses ',S)=1, 'Have uses');
   S:=NextLine;
-  AssertTrue('Type line',Pos('Type',S)=1);
+  FContext.AssertTrue(Pos('Type',S)=1, 'Type line');
 end;
 
 procedure TTestGenCode.AssertBegin;
 begin
-  AssertTrue('Have begin',pos('begin',nextline)>0);
+  FContext.AssertTrue(pos('begin',nextline)>0, 'Have begin');
 end;
 
 procedure TTestGenCode.AssertEnd(const Msg: String);
 begin
-  AssertTrue('Have end:'+Msg,pos('end;',nextline)>0);
+  FContext.AssertTrue(pos('end;',nextline)>0, 'Have end:'+Msg);
 end;
 
 procedure TTestGenCode.AssertUnitEnd;
 begin
-  AssertTrue('Have end.',pos('end.',nextline)>0);
+  FContext.AssertTrue(pos('end.',nextline)>0, 'Have end.');
 end;
 
 procedure TTestGenCode.AssertImplementation;
 begin
-  AssertTrue('Have implementation',CompareText(NextLine,'implementation')=0);
+  FContext.AssertTrue(CompareText(NextLine,'implementation')=0, 'Have implementation');
 end;
 
 function TTestGenCode.Pos(const What, Where: String): Integer;
@@ -220,11 +225,11 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue(Msg+' ('+AName+'): Class header comment start',Pos('{ --',S)>0);
+  FContext.AssertTrue(Pos('{ --',S)>0, Msg+' ('+AName+'): Class header comment start');
   S:=NextLine;
-  AssertTrue(Msg+' ('+AName+'): Class header comment class nam',Pos(AName,S)>0);
+  FContext.AssertTrue(Pos(AName,S)>0, Msg+' ('+AName+'): Class header comment class nam');
   S:=NextLine;
-  AssertTrue(Msg+' ('+AName+'): Class header comment end',Pos('}',S)>0);
+  FContext.AssertTrue(Pos('}',S)>0, Msg+' ('+AName+'): Class header comment end');
 end;
 
 procedure TTestGenCode.AssertClassHeader(const AName: String; AParentName: String);
@@ -237,9 +242,9 @@ begin
   AssertClassComment('Class declarationheader for '+AName,AName);
   S:=NextLine;
   P:=Pos(AName+' = class(',S);
-  AssertTrue('class type ',P>0);
+  FContext.AssertTrue(P>0, 'class type ');
   P:=Pos(AParentName+')',S);
-  AssertTrue('Class parent type ',P>0);
+  FContext.AssertTrue(P>0, 'Class parent type ');
   AssertVisibility('private');
 end;
 
@@ -253,31 +258,31 @@ Var
 begin
   S:=NextLine;
   PS:='Procedure '+AClassType+'.Set'+Aname+'(AValue';
-  AssertTrue('Have declaration start',Pos(PS,S)>0);
+  FContext.AssertTrue(Pos(PS,S)>0, 'Have declaration start');
   Delete(S,1,Length(PS));
   P:=Pos(':',S);
-  AssertTrue('Have colon' ,p>0);
+  FContext.AssertTrue(p>0, 'Have colon');
   Delete(S,1,P);
-  AssertTrue('Have type',Pos(AType,S)>0);
-  AssertTrue('Have );',Pos(');',S)>0);
-  AssertTrue('Terminated on semicolon',S[Length(S)]=';');
+  FContext.AssertTrue(Pos(AType,S)>0, 'Have type');
+  FContext.AssertTrue(Pos(');',S)>0, 'Have );');
+  FContext.AssertTrue(S[Length(S)]=';', 'Terminated on semicolon');
   AssertBegin;
-  AssertTrue('Have change check',Pos('if ('+Gen.FieldPrefix+AName+'=AValue) then exit;',NextLine)>0);
+  FContext.AssertTrue(Pos('if ('+Gen.FieldPrefix+AName+'=AValue) then exit;',NextLine)>0, 'Have change check');
   if IsObject then
-    AssertTrue('Have free of previous value',Pos('FreeAndNil('+Gen.FieldPrefix+AName+');',NextLine)>0);
-  AssertTrue('Have Assignment',Pos(Gen.FieldPrefix+AName+':=AValue;',NextLine)>0);
+    FContext.AssertTrue(Pos('FreeAndNil('+Gen.FieldPrefix+AName+');',NextLine)>0, 'Have free of previous value');
+  FContext.AssertTrue(Pos(Gen.FieldPrefix+AName+':=AValue;',NextLine)>0, 'Have Assignment');
   AssertEnd;
 end;
 
 procedure TTestGenCode.AssertVisibility(const AVisibility: String);
 
 begin
-  AssertTrue('Have visibility section '+AVisibility,Pos(AVisibility,NextLine)>0);
+  FContext.AssertTrue(Pos(AVisibility,NextLine)>0, 'Have visibility section '+AVisibility);
 end;
 
 procedure TTestGenCode.AssertDestructor;
 begin
-  AssertTrue('Have destructor declaration',Pos('Destructor Destroy; override;',NextLine)>0);
+  FContext.AssertTrue(Pos('Destructor Destroy; override;',NextLine)>0, 'Have destructor declaration');
 end;
 
 
@@ -288,11 +293,11 @@ Var
   F : String;
 
 begin
-  AssertTrue('Have destructor implementation',Pos(Format('Destructor %s.Destroy;',[AClassName]),NextLine)>0);
+  FContext.AssertTrue(Pos(Format('Destructor %s.Destroy;',[AClassName]),NextLine)>0, 'Have destructor implementation');
   AssertBegin;
   For F in ObjectFields do
-    AssertTrue('Have destructor for F'+F,Pos('FreeAndNil(F'+F+');',NextLine)>0);
-  AssertTrue('Have inherited call'+F,Pos('Inherited;',NextLine)>0);
+    FContext.AssertTrue(Pos('FreeAndNil(F'+F+');',NextLine)>0, 'Have destructor for F'+F);
+  FContext.AssertTrue(Pos('Inherited;',NextLine)>0, 'Have inherited call'+F);
   AssertEnd;
 end;
 
@@ -307,11 +312,11 @@ begin
   if F='' then
     F:='F';
   S:=NextLine;
-  AssertTrue('Field Name',Pos(F+AName,S)=1);
+  FContext.AssertTrue(Pos(F+AName,S)=1, 'Field Name');
   P:=Pos(':',S);
-  AssertTrue('Colon after field name',P>Length(F+AName));
-  AssertTrue('Field type after colon',Pos(AType,S)>P);
-  AssertTrue('Terminated on semicolon',S[Length(S)]=';');
+  FContext.AssertTrue(P>Length(F+AName), 'Colon after field name');
+  FContext.AssertTrue(Pos(AType,S)>P, 'Field type after colon');
+  FContext.AssertTrue(S[Length(S)]=';', 'Terminated on semicolon');
 end;
 
 procedure TTestGenCode.AssertSetter(const AName, AType: String);
@@ -324,19 +329,19 @@ begin
   S:=NextLine;
   N:='Setter declaration for '+AName+' : ';
   PD:='Procedure Set'+AName;
-  AssertTrue(N+'Setter name',Pos(PD,S)=1);
+  FContext.AssertTrue(Pos(PD,S)=1, N+'Setter name');
   P:=Pos('(',S);
-  AssertTrue(N+'( after parameter name',P>Length(PD));
+  FContext.AssertTrue(P>Length(PD), N+'( after parameter name');
   P:=Pos(':',S);
-  AssertTrue(N+'Colon after parameter name',P>Length(PD));
+  FContext.AssertTrue(P>Length(PD), N+'Colon after parameter name');
   Delete(S,1,P);
   P2:=Pos(AType,S);
-  AssertTrue(N+'Field type after colon '+AType+' : '+S,P2>0);
+  FContext.AssertTrue(P2>0, N+'Field type after colon '+AType+' : '+S);
   P:=Pos(');',S);
-  AssertTrue(N+'); type after parameter type',P>P2);
+  FContext.AssertTrue(P>P2, N+'); type after parameter type');
   P2:=Pos('virtual',S);
-  AssertTrue(N+'virtual after ); ',P2>P);
-  AssertTrue(N+'Terminated on semicolon',S[Length(S)]=';');
+  FContext.AssertTrue(P2>P, N+'virtual after ); ');
+  FContext.AssertTrue(S[Length(S)]=';', N+'Terminated on semicolon');
 end;
 
 procedure TTestGenCode.AssertArrayType(const AName, AItemType: String);
@@ -347,14 +352,14 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('Type Name',Pos(AName,S)=1);
+  FContext.AssertTrue(Pos(AName,S)=1, 'Type Name');
   P:=Pos('=',S);
-  AssertTrue('Equal token after type Name',P>Pos(AName,S));
+  FContext.AssertTrue(P>Pos(AName,S), 'Equal token after type Name');
   P2:=Pos('Array of',S);
-  AssertTrue('Array of after Equal token after type Name',P2>P);
+  FContext.AssertTrue(P2>P, 'Array of after Equal token after type Name');
   P:=Pos(AItemType,S);
-  AssertTrue('Item type name after array of',P>P2);
-  AssertTrue('Terminated on semicolon',S[Length(S)]=';');
+  FContext.AssertTrue(P>P2, 'Item type name after array of');
+  FContext.AssertTrue(S[Length(S)]=';', 'Terminated on semicolon');
 end;
 
 procedure TTestGenCode.AssertPropertyMap(const APath, ATypeName, APropertyName,
@@ -365,10 +370,10 @@ Var
 
 begin
   M:=Gen.PropertyMap.FindPath(APath);
-  AssertNotNull('Have property map "'+APath+'"',M);
-  AssertEquals('Have type name ',ATypeName,M.TypeName);
-  AssertEquals('Have property name ',APropertyName,M.PropertyName);
-  AssertEquals('Have parent type name ',AParentTypeName,M.ParentTypeName);
+  FContext.AssertTrue((M)<>nil, 'Have property map "'+APath+'"');
+  FContext.AssertTrue((ATypeName)=(M.TypeName), 'Have type name ');
+  FContext.AssertTrue((APropertyName)=(M.PropertyName), 'Have property name ');
+  FContext.AssertTrue((AParentTypeName)=(M.ParentTypeName), 'Have parent type name ');
 end;
 
 procedure TTestGenCode.AssertProperty(const AName, AType: String; Setter : Boolean = False);
@@ -379,24 +384,24 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('Property Name',Pos('Property '+AName,S)=1);
+  FContext.AssertTrue(Pos('Property '+AName,S)=1, 'Property Name');
   P:=Pos(':',S);
-  AssertTrue('Colon after property name',P>Length('Property '+AName));
+  FContext.AssertTrue(P>Length('Property '+AName), 'Colon after property name');
   P2:=Pos(AType,S);
-  AssertTrue('Field type after colon',P2>P);
+  FContext.AssertTrue(P2>P, 'Field type after colon');
   P:=pos(' read ',S);
-  AssertTrue('Read specifier after type ',P>P2);
+  FContext.AssertTrue(P>P2, 'Read specifier after type ');
   P2:=Pos('F'+AName,S);
-  AssertTrue('Field name for read specifier',P2>P);
+  FContext.AssertTrue(P2>P, 'Field name for read specifier');
   P:=pos(' write ',S);
-  AssertTrue('Write specifier after type ',P>P2);
+  FContext.AssertTrue(P>P2, 'Write specifier after type ');
   if Setter Then
     P2:=Pos('write Set'+AName,S)
   else
     P2:=Pos('write F'+AName,S);
-  AssertTrue('Field name for write specifier',P2>P);
+  FContext.AssertTrue(P2>P, 'Field name for write specifier');
 
-  AssertTrue('Terminated on semicolon',S[Length(S)]=';');
+  FContext.AssertTrue(S[Length(S)]=';', 'Terminated on semicolon');
 end;
 
 
@@ -407,13 +412,13 @@ Var
 
 begin
   Gen.JSON:=AJSON;
-  Gen.DestUnitName:='u'+TestName;
+  Gen.DestUnitName:='u'+FCaseName;
   Gen.Execute;
   if (TestUnitDir<>'') then
     begin
     Assign(F,IncludeTrailingPathDelimiter(TestUnitDir)+Gen.DestUnitName+'.pas');
     Rewrite(F);
-    Writeln(F,'// ',Self.TestName);
+    Writeln(F,'// ',Self.FCaseName);
     Writeln(F,Gen.Code.Text);
     Close(F);
     Assign(F,IncludeTrailingPathDelimiter(TestUnitDir)+Gen.DestUnitName+'.json');
@@ -423,7 +428,7 @@ begin
     end
   else
     begin
-    Writeln('// ',Self.TestName);
+    Writeln('// ',Self.FCaseName);
     Writeln('(* JSON: '+AJSON+' *)');
     Writeln(Gen.Code.Text);
     end;
@@ -433,13 +438,13 @@ end;
 
 procedure TTestGenCode.TestEmpty;
 begin
-  AssertNotNull('Have generator',Gen);
-  AssertNotNull('Generator property map exists',Gen.PropertyMap);
-  AssertNotNull('Generator property code exists',Gen.Code);
-  AssertNull('Generator JSON empty',Gen.JSONData);
-  AssertNull('Generator JSON stream empty',Gen.JSONStream);
-  AssertEquals('Generator JSON empty','',Gen.JSON);
-  AssertEquals('Generator property map empty',0,Gen.PropertyMap.Count);
+  FContext.AssertTrue((Gen)<>nil, 'Have generator');
+  FContext.AssertTrue((Gen.PropertyMap)<>nil, 'Generator property map exists');
+  FContext.AssertTrue((Gen.Code)<>nil, 'Generator property code exists');
+  FContext.AssertTrue((Gen.JSONData)=nil, 'Generator JSON empty');
+  FContext.AssertTrue((Gen.JSONStream)=nil, 'Generator JSON stream empty');
+  FContext.AssertTrue(('')=(Gen.JSON), 'Generator JSON empty');
+  FContext.AssertTrue((0)=(Gen.PropertyMap.Count), 'Generator property map empty');
 end;
 
 procedure TTestGenCode.TestSimple;
@@ -841,7 +846,7 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('Load Constructor declaration in '+S,Pos('Constructor CreateFromJSON(AJSON : '+AType+'); virtual;',S)>0);
+  FContext.AssertTrue(Pos('Constructor CreateFromJSON(AJSON : '+AType+'); virtual;',S)>0, 'Load Constructor declaration in '+S);
 end;
 
 procedure TTestGenCode.AssertLoaderDeclaration(AType : String);
@@ -851,7 +856,7 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('LoadFromJSON declaration in '+S,Pos('Procedure LoadFromJSON(AJSON : '+AType+'); virtual;',S)>0);
+  FContext.AssertTrue(Pos('Procedure LoadFromJSON(AJSON : '+AType+'); virtual;',S)>0, 'LoadFromJSON declaration in '+S);
 end;
 
 procedure TTestGenCode.AssertSaverDeclaration;
@@ -861,9 +866,9 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('SaveToJSON function declaration in '+S,Pos('Function SaveToJSON : TJSONObject;',S)>0);
+  FContext.AssertTrue(Pos('Function SaveToJSON : TJSONObject;',S)>0, 'SaveToJSON function declaration in '+S);
   S:=NextLine;
-  AssertTrue('SaveToJSON procedure declaration in '+S,Pos('Procedure SaveToJSON(AJSON : TJSONObject)',S)>0);
+  FContext.AssertTrue(Pos('Procedure SaveToJSON(AJSON : TJSONObject)',S)>0, 'SaveToJSON procedure declaration in '+S);
 end;
 
 procedure TTestGenCode.AssertLoaderImplementationEnd(IsDelphi : Boolean = False);
@@ -882,7 +887,7 @@ Var
   S : String;
 begin
   S:=NextLine;
-  AssertTrue('Have loader start: '+ATypeName+','+ADataName,Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',S)>0);
+  FContext.AssertTrue(Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',S)>0, 'Have loader start: '+ATypeName+','+ADataName);
   if isDelphi then
     AssertDelphiPropertyAssignmentLoop
   else
@@ -892,15 +897,15 @@ end;
 procedure TTestGenCode.AssertPropertyAssignmentLoop;
 
 begin
-  AssertTrue('Have var',Pos('var',NextLine)>0);
-  AssertTrue('Have P enum',Pos('E : TJSONEnum;',NextLine)>0);
+  FContext.AssertTrue(Pos('var',NextLine)>0, 'Have var');
+  FContext.AssertTrue(Pos('E : TJSONEnum;',NextLine)>0, 'Have P enum');
   AssertBegin;
-  AssertTrue('Have E for enum',Pos('For E in AJSON do',NextLine)>0);
+  FContext.AssertTrue(Pos('For E in AJSON do',NextLine)>0, 'Have E for enum');
   AssertBegin;
   if (jpoLoadCaseInsensitive in Gen.Options) then
-    AssertTrue('Have E for enum',Pos('case LowerCase(E.key) of',NextLine)>0)
+    FContext.AssertTrue(Pos('case LowerCase(E.key) of',NextLine)>0, 'Have E for enum')
   else
-    AssertTrue('Have E for enum',Pos('case E.key of',NextLine)>0);
+    FContext.AssertTrue(Pos('case E.key of',NextLine)>0, 'Have E for enum');
 end;
 
 procedure TTestGenCode.AssertDelphiPropertyAssignmentLoop;
@@ -909,22 +914,22 @@ Var
   S : String;
 
 begin
-  AssertTrue('Have var',Pos('var',NextLine)>0);
-  AssertTrue('Have pair',Pos('P : TJSONPair;',NextLine)>0);
-  AssertTrue('Have obj',Pos('O : TJSONObject;',NextLine)>0);
-  AssertTrue('Have Propertyname var',Pos('PN : String;',NextLine)>0);
+  FContext.AssertTrue(Pos('var',NextLine)>0, 'Have var');
+  FContext.AssertTrue(Pos('P : TJSONPair;',NextLine)>0, 'Have pair');
+  FContext.AssertTrue(Pos('O : TJSONObject;',NextLine)>0, 'Have obj');
+  FContext.AssertTrue(Pos('PN : String;',NextLine)>0, 'Have Propertyname var');
   AssertBegin;
   S:=NextLine;
-  AssertTrue('Have JSONObject check in '+S,Pos('not (AJSON is TJSONObject)',S)>0);
+  FContext.AssertTrue(Pos('not (AJSON is TJSONObject)',S)>0, 'Have JSONObject check in '+S);
   if jpoUnknownLoadPropsError in gen.Options then
-    AssertTrue('Have raise statement',Pos('Raise EJSONException',NextLine)>0);
-  AssertTrue('Have typecast',Pos('O:=AJSON as TJSONObject',NextLine)>0);
-  AssertTrue('Have P for enum',Pos('For P in O do',NextLine)>0);
+    FContext.AssertTrue(Pos('Raise EJSONException',NextLine)>0, 'Have raise statement');
+  FContext.AssertTrue(Pos('O:=AJSON as TJSONObject',NextLine)>0, 'Have typecast');
+  FContext.AssertTrue(Pos('For P in O do',NextLine)>0, 'Have P for enum');
   AssertBegin;
   if jpoLoadCaseInsensitive in Gen.Options then
-    AssertTrue('Have case insensitive propertyname assign',Pos('PN:=LowerCase(P.JSONString.Value)',NextLine)>0)
+    FContext.AssertTrue(Pos('PN:=LowerCase(P.JSONString.Value)',NextLine)>0, 'Have case insensitive propertyname assign')
   else
-    AssertTrue('Have propertyname assign',Pos('PN:=P.JSONString.Value',NextLine)>0);
+    FContext.AssertTrue(Pos('PN:=P.JSONString.Value',NextLine)>0, 'Have propertyname assign');
 end;
 
 procedure TTestGenCode.AssertObjectLoaderImplementationStart(const ATypeName,
@@ -933,7 +938,7 @@ Var
   S : String;
 begin
   S:=NextLine;
-  AssertTrue('Have loader start: '+ATypeName+','+ADataName,Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',S)>0);
+  FContext.AssertTrue(Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',S)>0, 'Have loader start: '+ATypeName+','+ADataName);
   if isDelphi then
     AssertDelphiPropertyAssignmentLoop
   else
@@ -949,17 +954,17 @@ Var
 begin
   N:='SaveToJSONFunction '+ATypeName+' : ';
   S:=NextLine;
-  AssertTrue(N+'header',Pos('Function  '+ATypeName+'.SaveToJSON : TJSONObject;',S)>0);
+  FContext.AssertTrue(Pos('Function  '+ATypeName+'.SaveToJSON : TJSONObject;',S)>0, N+'header');
   AssertBegin;
-  AssertTrue(N+'Create',Pos('Result:=TJSONObject.Create',NextLine)>0);
-  AssertTrue(N+'Try',Pos('Try',NextLine)>0);
-  AssertTrue(N+'Save',Pos('SaveToJSON(Result);',NextLine)>0);
-  AssertTrue(N+'except',Pos('except',NextLine)>0);
-  AssertTrue(N+'FreeAndNil',Pos('FreeAndNil(Result);',NextLine)>0);
-  AssertTrue(N+'Reraise',Pos('Raise;',NextLine)>0);
-  AssertTrue(N+'end;',Pos('End;',NextLine)>0);
-  AssertTrue(N+'end;',Pos('End;',NextLine)>0);
-  AssertTrue(N+'proc header',Pos('Procedure '+ATypeName+'.SaveToJSON(AJSON : TJSONObject);',NextLine)>0);
+  FContext.AssertTrue(Pos('Result:=TJSONObject.Create',NextLine)>0, N+'Create');
+  FContext.AssertTrue(Pos('Try',NextLine)>0, N+'Try');
+  FContext.AssertTrue(Pos('SaveToJSON(Result);',NextLine)>0, N+'Save');
+  FContext.AssertTrue(Pos('except',NextLine)>0, N+'except');
+  FContext.AssertTrue(Pos('FreeAndNil(Result);',NextLine)>0, N+'FreeAndNil');
+  FContext.AssertTrue(Pos('Raise;',NextLine)>0, N+'Reraise');
+  FContext.AssertTrue(Pos('End;',NextLine)>0, N+'end;');
+  FContext.AssertTrue(Pos('End;',NextLine)>0, N+'end;');
+  FContext.AssertTrue(Pos('Procedure '+ATypeName+'.SaveToJSON(AJSON : TJSONObject);',NextLine)>0, N+'proc header');
   AssertBegin;
 end;
 
@@ -968,7 +973,7 @@ procedure TTestGenCode.AssertLoaderImplementationStart(const ATypeName,
   ADataName: String; IsDelphi : Boolean = False);
 
 begin
-  AssertTrue(Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',NextLine)>0);
+  FContext.AssertTrue(Pos('Procedure '+ATypeName+'.LoadFromJSON(AJSON : '+ADataName+');',NextLine)>0, '');
   if isDelphi then
     AssertDelphiPropertyAssignmentLoop
   else
@@ -979,10 +984,10 @@ procedure TTestGenCode.AssertLoadConstructorImplementationStart(const ATypeName,
   ADataName: String);
 
 begin
-  AssertTrue('Have constructor call',Pos('Constructor '+ATypeName+'.CreateFromJSON(AJSON : '+ADataName+');',NextLine)>0);
+  FContext.AssertTrue(Pos('Constructor '+ATypeName+'.CreateFromJSON(AJSON : '+ADataName+');',NextLine)>0, 'Have constructor call');
   AssertBegin;
-  AssertTrue('Call create constructor',Pos('create();',NextLine)>0);
-  AssertTrue('Call LoadFromJSON',Pos('LoadFromJSON(AJSON);',NextLine)>0);
+  FContext.AssertTrue(Pos('create();',NextLine)>0, 'Call create constructor');
+  FContext.AssertTrue(Pos('LoadFromJSON(AJSON);',NextLine)>0, 'Call LoadFromJSON');
   AssertEnd;
 end;
 
@@ -1002,8 +1007,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" integer property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('a:=E.Value.AsInteger;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsInteger;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1028,10 +1033,10 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" integer property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('a:=E.Value.AsInteger;',NextLine)>0);
-  AssertTrue('Have "b" integer property case',Pos('''b'':',NextLine)>0);
-  AssertTrue('Have "b" integer property set', Pos('b:=E.Value.AsInteger;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsInteger;',NextLine)>0, 'Have "a" integer property set');
+  FContext.AssertTrue(Pos('''b'':',NextLine)>0, 'Have "b" integer property case');
+  FContext.AssertTrue(Pos('b:=E.Value.AsInteger;',NextLine)>0, 'Have "b" integer property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1057,12 +1062,12 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" integer property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('a:=E.Value.AsInteger;',NextLine)>0);
-  AssertTrue('Have "b" integer property case',Pos('''b'':',NextLine)>0);
-  AssertTrue('Have "b" integer property set', Pos('b:=E.Value.AsInteger;',NextLine)>0);
-  AssertTrue('Have case else',Pos('else',NextLine)>0);
-  AssertTrue('Have raise statement', Pos('Raise EJSON.CreateFmt',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsInteger;',NextLine)>0, 'Have "a" integer property set');
+  FContext.AssertTrue(Pos('''b'':',NextLine)>0, 'Have "b" integer property case');
+  FContext.AssertTrue(Pos('b:=E.Value.AsInteger;',NextLine)>0, 'Have "b" integer property set');
+  FContext.AssertTrue(Pos('else',NextLine)>0, 'Have case else');
+  FContext.AssertTrue(Pos('Raise EJSON.CreateFmt',NextLine)>0, 'Have raise statement');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1086,8 +1091,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData',False);
-  AssertTrue('Have "a" integer property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('A:=E.Value.AsInteger;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('A:=E.Value.AsInteger;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1110,8 +1115,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" string property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" string property set', Pos('a:=E.Value.AsString;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" string property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsString;',NextLine)>0, 'Have "a" string property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1134,8 +1139,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" boolean property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" boolean property set', Pos('a:=E.Value.AsBoolean;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" boolean property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsBoolean;',NextLine)>0, 'Have "a" boolean property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1158,8 +1163,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" Int64 property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" Int64 property set', Pos('a:=E.Value.AsInt64;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" Int64 property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsInt64;',NextLine)>0, 'Have "a" Int64 property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1182,8 +1187,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertLoaderImplementationStart('TMyObject','TJSONData');
-  AssertTrue('Have "a" Double property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" Double property set', Pos('a:=E.Value.AsFloat;',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" Double property case');
+  FContext.AssertTrue(Pos('a:=E.Value.AsFloat;',NextLine)>0, 'Have "a" Double property set');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1214,15 +1219,15 @@ begin
   AssertClassComment('Object Implementation','Ta');
   AssertLoadConstructorImplementationStart('Ta','TJSONData');
   AssertLoaderImplementationStart('Ta','TJSONData');
-  AssertTrue('Have "b" string property case',Pos('''b'':',NextLine)>0);
-  AssertTrue('Have "b" string property set', Pos('b:=E.Value.AsString;',NextLine)>0);
+  FContext.AssertTrue(Pos('''b'':',NextLine)>0, 'Have "b" string property case');
+  FContext.AssertTrue(Pos('b:=E.Value.AsString;',NextLine)>0, 'Have "b" string property set');
   AssertLoaderImplementationEnd;
   AssertClassComment('Object Implementation','TMyObject');
   AssertDestructorImplementation('TMyObject',['a']);
   AssertLoadConstructorImplementationStart('TMyObject','TJSONData');
   AssertObjectLoaderImplementationStart('TMyObject','TJSONData','a','Ta','');
-  AssertTrue('Have "a" object property case',Pos('''a'':',NextLine)>0);
-  AssertTrue('Have "a" object create createfromjson', Pos('a:=ta.CreateFromJSON(E.Value);',NextLine)>0);
+  FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" object property case');
+  FContext.AssertTrue(Pos('a:=ta.CreateFromJSON(E.Value);',NextLine)>0, 'Have "a" object create createfromjson');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1237,7 +1242,7 @@ Var
 
 begin
   S:=NextLine;
-  AssertTrue('Have array creator in '+S,Pos('Function Create'+ArrayTypeName+'(AJSON : '+GetDataName(IsDelphi)+') : '+ArrayTypeName,S)>0);
+  FContext.AssertTrue(Pos('Function Create'+ArrayTypeName+'(AJSON : '+GetDataName(IsDelphi)+') : '+ArrayTypeName,S)>0, 'Have array creator in '+S);
 end;
 
 procedure TTestGenCode.AssertArraySaver(const ArrayTypeName,
@@ -1249,10 +1254,10 @@ Var
 begin
   S:=NextLine;
   E:='Procedure Save'+ArrayTypeName+'ToJSON(AnArray : '+ArrayTypeName+'; AJSONArray : TJSONArray);';
-  AssertTrue('Have proc array saver in '+S,Pos(E,S)>0);
+  FContext.AssertTrue(Pos(E,S)>0, 'Have proc array saver in '+S);
   S:=NextLine;
   E:='Function Save'+ArrayTypeName+'ToJSON(AnArray : '+ArrayTypeName+') : TJSONArray;';
-  AssertTrue('Have func array saver in '+S,Pos(E,S)>0);
+  FContext.AssertTrue(Pos(E,S)>0, 'Have func array saver in '+S);
 end;
 
 procedure TTestGenCode.AssertArrayCreatorImplementation(const ArrayTypeName,
@@ -1264,30 +1269,30 @@ Var
 begin
   S:=NextLine;
   E:='Function Create'+ARrayTypeName+'(AJSON : '+GetDataName(IsDelphi)+') : '+ArrayTypeName;
-  AssertTrue('Have array creator header '+S+'Expected : '+E ,Pos(E,S)>0);
-  AssertTrue('Have var',Pos('var',NextLine)>0);
-  AssertTrue('Have loop var',Pos('I : Integer;',NextLine)>0);
+  FContext.AssertTrue(Pos(E,S)>0, 'Have array creator header '+S+'Expected : '+E);
+  FContext.AssertTrue(Pos('var',NextLine)>0, 'Have var');
+  FContext.AssertTrue(Pos('I : Integer;',NextLine)>0, 'Have loop var');
   if IsDelphi then
     begin
-    AssertTrue('Have Array var',Pos('A : TJSONArray;',NextLine)>0);
+    FContext.AssertTrue(Pos('A : TJSONArray;',NextLine)>0, 'Have Array var');
     AN:='A'
     end
   else
     AN:='AJSON';
   AssertBegin;
   if IsDelphi then
-    AssertTrue('Have Array assignnment',Pos('A:=AJSON as TJSONArray;',NextLine)>0);
-  AssertTrue('Have array setlength ',Pos('SetLength(Result,'+AN+'.Count);',NextLine)>0);
-  AssertTrue('Have loop ',Pos('for i:=0 to '+AN+'.Count-1 do',NextLine)>0);
+    FContext.AssertTrue(Pos('A:=AJSON as TJSONArray;',NextLine)>0, 'Have Array assignnment');
+  FContext.AssertTrue(Pos('SetLength(Result,'+AN+'.Count);',NextLine)>0, 'Have array setlength ');
+  FContext.AssertTrue(Pos('for i:=0 to '+AN+'.Count-1 do',NextLine)>0, 'Have loop ');
   if AObjectName='' then
     begin
     if IsDelphi then
-      AssertTrue('Have element assignment : '+AElementType,Pos('Result[i]:='+AN+'.Items[i].GetValue<'+AElementType+'>;',NextLine)>0)
+      FContext.AssertTrue(Pos('Result[i]:='+AN+'.Items[i].GetValue<'+AElementType+'>;',NextLine)>0, 'Have element assignment : '+AElementType)
     else
-      AssertTrue('Have element assignment : '+AElementType,Pos('Result[i]:='+AN+'.Items[i].'+AElementType+';',NextLine)>0)
+      FContext.AssertTrue(Pos('Result[i]:='+AN+'.Items[i].'+AElementType+';',NextLine)>0, 'Have element assignment : '+AElementType)
     end
   else
-    AssertTrue('Have element assignment : '+AElementType,Pos('Result[i]:='+AObjectName+'.CreateFromJSON('+AN+'.Items[i]);',NextLine)>0);
+    FContext.AssertTrue(Pos('Result[i]:='+AObjectName+'.CreateFromJSON('+AN+'.Items[i]);',NextLine)>0, 'Have element assignment : '+AElementType);
   AssertEnd;
 end;
 
@@ -1299,7 +1304,7 @@ Var
 begin
   N:=NextLine;
   DMsg:=Msg+', Expected: "'+AExpected+'", Actual: "'+N+'"';
-  AssertTrue(Dmsg,Pos(AExpected,N)>0);
+  FContext.AssertTrue(Pos(AExpected,N)>0, Dmsg);
 end;
 
 procedure TTestGenCode.AssertArraySaverImplementation(const ArrayTypeName,
@@ -1311,38 +1316,38 @@ begin
   N:=ArrayTypeName+'Saver : ';
   S:=NextLine;
   E:='Function Save'+ArrayTypeName+'ToJSON(AnArray : '+ArrayTypeName+') : TJSONArray;';
-  AssertTrue(N+'header',Pos(E,S)>0);
+  FContext.AssertTrue(Pos(E,S)>0, N+'header');
   AssertBegin;
-  AssertTrue(N+'Create',Pos('Result:=TJSONArray.Create',NextLine)>0);
-  AssertTrue(N+'Try',Pos('Try',NextLine)>0);
+  FContext.AssertTrue(Pos('Result:=TJSONArray.Create',NextLine)>0, N+'Create');
+  FContext.AssertTrue(Pos('Try',NextLine)>0, N+'Try');
   S:=NextLine;
   E:='Save'+ArrayTypeName+'ToJSON(AnArray,Result);';
-  AssertTrue(N+'Save',Pos(E,S)>0);
-  AssertTrue(N+'except',Pos('except',NextLine)>0);
-  AssertTrue(N+'FreeAndNil',Pos('FreeAndNil(Result);',NextLine)>0);
-  AssertTrue(N+'Reraise',Pos('Raise;',NextLine)>0);
-  AssertTrue(N+'end;',Pos('End;',NextLine)>0);
-  AssertTrue(N+'end;',Pos('End;',NextLine)>0);
+  FContext.AssertTrue(Pos(E,S)>0, N+'Save');
+  FContext.AssertTrue(Pos('except',NextLine)>0, N+'except');
+  FContext.AssertTrue(Pos('FreeAndNil(Result);',NextLine)>0, N+'FreeAndNil');
+  FContext.AssertTrue(Pos('Raise;',NextLine)>0, N+'Reraise');
+  FContext.AssertTrue(Pos('End;',NextLine)>0, N+'end;');
+  FContext.AssertTrue(Pos('End;',NextLine)>0, N+'end;');
   S:=NextLine;
   E:='Procedure Save'+ArrayTypeName+'ToJSON(AnArray : '+ArrayTypeName+'; AJSONArray : TJSONArray);';
-  AssertTrue('Have array saver header '+S+'Expected : '+E ,Pos(E,S)>0);
-  AssertTrue('Have var',Pos('var',NextLine)>0);
-  AssertTrue('Have loop var',Pos('I : Integer;',NextLine)>0);
+  FContext.AssertTrue(Pos(E,S)>0, 'Have array saver header '+S+'Expected : '+E);
+  FContext.AssertTrue(Pos('var',NextLine)>0, 'Have var');
+  FContext.AssertTrue(Pos('I : Integer;',NextLine)>0, 'Have loop var');
   AssertBegin;
-  AssertTrue('Have loop ',Pos('for i:=0 to Length(AnArray)-1 do',NextLine)>0);
+  FContext.AssertTrue(Pos('for i:=0 to Length(AnArray)-1 do',NextLine)>0, 'Have loop ');
   if AObjectName='' then
     AssertLine('Have element assignment : '+AElementType,'AJSONArray.Add(AnArray[i]);')
 {  else if AObjectName='' then
     AssertLine('Have element assignment : '+AElementType,'AJSONArray.Add('+AN+'[i]);')}
   else
-     AssertTrue('Have element assignment : '+AElementType,Pos('AJSONArray.Add(AnArray[i].SaveToJSON);',NextLine)>0);
+     FContext.AssertTrue(Pos('AJSONArray.Add(AnArray[i].SaveToJSON);',NextLine)>0, 'Have element assignment : '+AElementType);
   AssertEnd;
 end;
 
 procedure TTestGenCode.AssertType;
 
 begin
-  AssertTrue('Have Type keyword',Pos('Type',NextLine)>0);
+  FContext.AssertTrue(Pos('Type',NextLine)>0, 'Have Type keyword');
 end;
 
 procedure TTestGenCode.AssertDelphiLoadArray(AElementType, AJSONtype : String);
@@ -1364,8 +1369,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertArrayLoaderImplementationStart('TMyObject','TJSONValue','a','Ta',AJSONType);
-  AssertTrue('Have "a" property if',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" property set with createarray', Pos('a:=CreateTa(P.Value);',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" property if');
+  FContext.AssertTrue(Pos('a:=CreateTa(P.Value);',NextLine)>0, 'Have "a" property set with createarray');
   AssertLoaderImplementationEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1407,13 +1412,13 @@ begin
   AssertArrayLoaderImplementationStart('TMyObject',DN,'a','Ta',AJSONType,isDelphi);
   if IsDelphi then
     begin
-    AssertTrue('Have "a" property if',Pos('If (PN=''a'') then',NextLine)>0);
-    AssertTrue('Have "a" property set with createarray', Pos('a:=CreateTa(P.JSONValue);',NextLine)>0);
+    FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" property if');
+    FContext.AssertTrue(Pos('a:=CreateTa(P.JSONValue);',NextLine)>0, 'Have "a" property set with createarray');
     end
   else
     begin
-    AssertTrue('Have "a" array property case',Pos('''a'':',NextLine)>0);
-    AssertTrue('Have "a" property set with createarray', Pos('a:=CreateTa(E.Value);',NextLine)>0);
+    FContext.AssertTrue(Pos('''a'':',NextLine)>0, 'Have "a" array property case');
+    FContext.AssertTrue(Pos('a:=CreateTa(E.Value);',NextLine)>0, 'Have "a" property set with createarray');
     end;
   AssertLoaderImplementationEnd(IsDelphi);
   AssertUnitEnd;
@@ -1438,9 +1443,9 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
   if IsDelphi then
-    AssertTrue('Array save statement', Pos('AJSON.AddPair(''a'',SaveTaToJSON(a));',NextLine)>0)
+    FContext.AssertTrue(Pos('AJSON.AddPair(''a'',SaveTaToJSON(a));',NextLine)>0, 'Array save statement')
   else
-    AssertTrue('Array save statement', Pos('AJSON.Add(''a'',SaveTaToJSON(a));',NextLine)>0);
+    FContext.AssertTrue(Pos('AJSON.Add(''a'',SaveTaToJSON(a));',NextLine)>0, 'Array save statement');
   AssertEnd('Saver');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1499,8 +1504,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case ',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('a:=P.JSONValue.GetValue<Integer>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case ');
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Integer>;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1529,12 +1534,12 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case ',Pos('If (PN=''a'') then',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case ');
   S:=NextLine;
-  AssertTrue('Have "a" integer property set', Pos('a:=P.JSONValue.GetValue<Integer>',S)>0);
-  AssertTrue('Have no semicolon', Pos(';',S)=0);
-  AssertTrue('Have else  "b" integer property case ',Pos('Else If (PN=''b'') then',NextLine)>0);
-  AssertTrue('Have "b" integer property set', Pos('b:=P.JSONValue.GetValue<Integer>;',NextLine)>0);
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Integer>',S)>0, 'Have "a" integer property set');
+  FContext.AssertTrue(Pos(';',S)=0, 'Have no semicolon');
+  FContext.AssertTrue(Pos('Else If (PN=''b'') then',NextLine)>0, 'Have else  "b" integer property case ');
+  FContext.AssertTrue(Pos('b:=P.JSONValue.GetValue<Integer>;',NextLine)>0, 'Have "b" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1564,16 +1569,16 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case ',Pos('If (PN=''a'') then',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case ');
   S:=NextLine;
-  AssertTrue('Have "a" integer property set', Pos('a:=P.JSONValue.GetValue<Integer>',S)>0);
-  AssertTrue('Have no semicolon for a', Pos(';',S)=0);
-  AssertTrue('Have "b" integer property case ',Pos('If (PN=''b'') then',NextLine)>0);
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Integer>',S)>0, 'Have "a" integer property set');
+  FContext.AssertTrue(Pos(';',S)=0, 'Have no semicolon for a');
+  FContext.AssertTrue(Pos('If (PN=''b'') then',NextLine)>0, 'Have "b" integer property case ');
   S:=NextLine;
-  AssertTrue('Have "b" integer property set', Pos('b:=P.JSONValue.GetValue<Integer>',S)>0);
-  AssertTrue('Have no semicolon for b', Pos(';',S)=0);
-  AssertTrue('Have case else',Pos('else',NextLine)>0);
-  AssertTrue('Have raise statement', Pos('Raise EJSONException.CreateFmt',NextLine)>0);
+  FContext.AssertTrue(Pos('b:=P.JSONValue.GetValue<Integer>',S)>0, 'Have "b" integer property set');
+  FContext.AssertTrue(Pos(';',S)=0, 'Have no semicolon for b');
+  FContext.AssertTrue(Pos('else',NextLine)>0, 'Have case else');
+  FContext.AssertTrue(Pos('Raise EJSONException.CreateFmt',NextLine)>0, 'Have raise statement');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1597,8 +1602,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "A" integer property set', Pos('A:=P.JSONValue.GetValue<Integer>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('A:=P.JSONValue.GetValue<Integer>;',NextLine)>0, 'Have "A" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1621,8 +1626,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" integer property set', Pos('a:=P.JSONValue.GetValue<String>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<String>;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1645,8 +1650,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" integer property set',Pos('a:=P.JSONValue.GetValue<Boolean>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Boolean>;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1669,8 +1674,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" integer property set',Pos('a:=P.JSONValue.GetValue<Int64>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Int64>;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1693,8 +1698,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertLoaderImplementationStart('TMyObject','TJSONValue',True);
-  AssertTrue('Have "a" integer property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" integer property set',Pos('a:=P.JSONValue.GetValue<Double>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" integer property case');
+  FContext.AssertTrue(Pos('a:=P.JSONValue.GetValue<Double>;',NextLine)>0, 'Have "a" integer property set');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1725,15 +1730,15 @@ begin
   AssertClassComment('Object Implementation','Ta');
   AssertLoadConstructorImplementationStart('Ta','TJSONValue');
   AssertLoaderImplementationStart('Ta','TJSONValue',True);
-  AssertTrue('Have "b" string property case',Pos('If (PN=''b'') then',NextLine)>0);
-  AssertTrue('Have "b" string property set', Pos('b:=P.JSONValue.GetValue<String>;',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''b'') then',NextLine)>0, 'Have "b" string property case');
+  FContext.AssertTrue(Pos('b:=P.JSONValue.GetValue<String>;',NextLine)>0, 'Have "b" string property set');
   AssertLoaderImplementationEnd(True);
   AssertClassComment('Object Implementation','TMyObject');
   AssertDestructorImplementation('TMyObject',['a']);
   AssertLoadConstructorImplementationStart('TMyObject','TJSONValue');
   AssertObjectLoaderImplementationStart('TMyObject','TJSONValue','a','Ta','',True);
-  AssertTrue('Have "a" object property case',Pos('If (PN=''a'') then',NextLine)>0);
-  AssertTrue('Have "a" object create createfromjson', Pos('a:=ta.CreateFromJSON(P.JSONValue);',NextLine)>0);
+  FContext.AssertTrue(Pos('If (PN=''a'') then',NextLine)>0, 'Have "a" object property case');
+  FContext.AssertTrue(Pos('a:=ta.CreateFromJSON(P.JSONValue);',NextLine)>0, 'Have "a" object create createfromjson');
   AssertLoaderImplementationEnd(True);
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1754,8 +1759,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Integer','a','');
@@ -1777,9 +1782,9 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('Have "b" integer property save', Pos('AJSON.Add(''b'',b);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('AJSON.Add(''b'',b);',NextLine)>0, 'Have "b" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Integer','a','');
@@ -1800,8 +1805,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','String','a','');
@@ -1821,8 +1826,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" boolean property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" boolean property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Boolean','a','');
@@ -1842,8 +1847,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" int64 property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" int64 property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Int64','a','');
@@ -1863,8 +1868,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.Add(''a'',a);',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a);',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Double','a','');
@@ -1892,13 +1897,13 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','Ta');
   AssertSaverImplementationStart('Ta');
-  AssertTrue('Have "b" property save', Pos('AJSON.Add(''b'',b);',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.Add(''b'',b);',NextLine)>0, 'Have "b" property save');
   AssertEnd;
   AssertClassComment('Object Implementation','TMyObject');
   AssertDestructorImplementation('TMyObject',['a']);
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have check for assigned object property save', Pos('if Assigned(a) then',NextLine)>0);
-  AssertTrue('Have "a" object property save', Pos('AJSON.Add(''a'',a.SaveToJSON);',NextLine)>0);
+  FContext.AssertTrue(Pos('if Assigned(a) then',NextLine)>0, 'Have check for assigned object property save');
+  FContext.AssertTrue(Pos('AJSON.Add(''a'',a.SaveToJSON);',NextLine)>0, 'Have "a" object property save');
   AssertEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -1954,8 +1959,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Integer','a','');
@@ -1977,9 +1982,9 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" integer property save', Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0);
-  AssertTrue('Have "b" integer property save', Pos('AJSON.AddPair(''b'',TJSONNumber.Create(b));',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0, 'Have "a" integer property save');
+  FContext.AssertTrue(Pos('AJSON.AddPair(''b'',TJSONNumber.Create(b));',NextLine)>0, 'Have "b" integer property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Integer','a','');
@@ -2000,8 +2005,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" string property save', Pos('AJSON.AddPair(''a'',TJSONString.Create(a));',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONString.Create(a));',NextLine)>0, 'Have "a" string property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','String','a','');
@@ -2021,8 +2026,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" Boolean property save', Pos('AJSON.AddPair(''a'',TJSONBoolean.Create(a));',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONBoolean.Create(a));',NextLine)>0, 'Have "a" Boolean property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Boolean','a','');
@@ -2042,8 +2047,8 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have "a" int64 property save', Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',NextLine)>0, 'Have "a" int64 property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Int64','a','');
@@ -2066,8 +2071,8 @@ begin
   AssertClassComment('Object Implementation','TMyObject');
   AssertSaverImplementationStart('TMyObject');
   S:=NextLine;
-  AssertTrue('Have "a" float property save', Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',S)>0);
-  AssertTrue('end',Pos('end;',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',TJSONNumber.Create(a));',S)>0, 'Have "a" float property save');
+  FContext.AssertTrue(Pos('end;',NextLine)>0, 'end');
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
   AssertPropertyMap('a','Double','a','');
@@ -2096,14 +2101,14 @@ begin
   AssertImplementation;
   AssertClassComment('Object Implementation','Ta');
   AssertSaverImplementationStart('Ta');
-  AssertTrue('Have "b" string property save', Pos('AJSON.AddPair(''b'',TJSONString.Create(b));',NextLine)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''b'',TJSONString.Create(b));',NextLine)>0, 'Have "b" string property save');
   AssertEnd;
   AssertClassComment('Object Implementation','TMyObject');
   AssertDestructorImplementation('TMyObject',['a']);
   AssertSaverImplementationStart('TMyObject');
-  AssertTrue('Have check for assigned object property save', Pos('if Assigned(a) then',NextLine)>0);
+  FContext.AssertTrue(Pos('if Assigned(a) then',NextLine)>0, 'Have check for assigned object property save');
   S:=NextLine;
-  AssertTrue('Have "a" object property save', Pos('AJSON.AddPair(''a'',a.SaveToJSON);',S)>0);
+  FContext.AssertTrue(Pos('AJSON.AddPair(''a'',a.SaveToJSON);',S)>0, 'Have "a" object property save');
   AssertEnd;
   AssertUnitEnd;
   AssertPropertyMap('','TMyObject','','TObject');
@@ -2181,8 +2186,1012 @@ begin
 end;
 
 
-initialization
 
-  RegisterTest(TTestGenCode);
+procedure RunTTestGenCodeTestEmpty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmpty';
+    lFixture.SetUp;
+    try lFixture.TestEmpty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSimple(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSimple';
+    lFixture.SetUp;
+    try lFixture.TestSimple; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestClassName(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClassName';
+    lFixture.SetUp;
+    try lFixture.TestClassName; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestParentClassName(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParentClassName';
+    lFixture.SetUp;
+    try lFixture.TestParentClassName; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestIntegerProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIntegerProperty';
+    lFixture.SetUp;
+    try lFixture.TestIntegerProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTest2IntegersProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='Test2IntegersProperty';
+    lFixture.SetUp;
+    try lFixture.Test2IntegersProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestBooleanProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBooleanProperty';
+    lFixture.SetUp;
+    try lFixture.TestBooleanProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestStringProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStringProperty';
+    lFixture.SetUp;
+    try lFixture.TestStringProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestFloatProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFloatProperty';
+    lFixture.SetUp;
+    try lFixture.TestFloatProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestInt64Property(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInt64Property';
+    lFixture.SetUp;
+    try lFixture.TestInt64Property; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestPropertySetter(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPropertySetter';
+    lFixture.SetUp;
+    try lFixture.TestPropertySetter; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectProperty';
+    lFixture.SetUp;
+    try lFixture.TestObjectProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertySetter(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertySetter';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertySetter; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertySuffix(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertySuffix';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertySuffix; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertySkip(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertySkip';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertySkip; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertyRecurse(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertyRecurse';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertyRecurse; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertyRecurseSuffix(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertyRecurseSuffix';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertyRecurseSuffix; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertyRecurseSkip(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertyRecurseSkip';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertyRecurseSkip; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestObjectPropertyRecurseSkipB(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectPropertyRecurseSkipB';
+    lFixture.SetUp;
+    try lFixture.TestObjectPropertyRecurseSkipB; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestStringArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStringArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestStringArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestIntegerArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIntegerArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestIntegerArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestBooleanArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBooleanArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestBooleanArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestFloatArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFloatArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestFloatArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestInt64ArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInt64ArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestInt64ArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestStringArrayPropertySuffix(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStringArrayPropertySuffix';
+    lFixture.SetUp;
+    try lFixture.TestStringArrayPropertySuffix; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadIntegerProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadIntegerProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadIntegerProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoad2IntegersProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoad2IntegersProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoad2IntegersProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadIntegerWithErrorProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadIntegerWithErrorProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadIntegerWithErrorProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadIntegerCaseInsensitiveProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadIntegerCaseInsensitiveProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadIntegerCaseInsensitiveProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadStringProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadStringProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadStringProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadBooleanProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadBooleanProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadBooleanProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadInt64Property(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadInt64Property';
+    lFixture.SetUp;
+    try lFixture.TestLoadInt64Property; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadFloatProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadFloatProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadFloatProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadObjectProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadObjectProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadObjectProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadStringArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadStringArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadStringArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadBooleanArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadBooleanArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadBooleanArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadIntegerArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadIntegerArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadIntegerArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadInt64ArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadInt64ArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadInt64ArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadFloatArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadFloatArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadFloatArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiIntegerProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiIntegerProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiIntegerProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphi2IntegersProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphi2IntegersProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphi2IntegersProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiIntegerWithErrorProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiIntegerWithErrorProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiIntegerWithErrorProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiIntegerCaseInsensitiveProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiIntegerCaseInsensitiveProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiIntegerCaseInsensitiveProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiStringProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiStringProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiStringProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiBooleanProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiBooleanProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiBooleanProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiInt64Property(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiInt64Property';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiInt64Property; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiFloatProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiFloatProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiFloatProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiObjectProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiObjectProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiObjectProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiStringArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiStringArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiStringArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiBooleanArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiBooleanArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiBooleanArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiIntegerArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiIntegerArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiIntegerArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiInt64ArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiInt64ArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiInt64ArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestLoadDelphiFloatArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoadDelphiFloatArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestLoadDelphiFloatArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveIntegerProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveIntegerProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveIntegerProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSave2IntegersProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSave2IntegersProperty';
+    lFixture.SetUp;
+    try lFixture.TestSave2IntegersProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveStringProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveStringProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveStringProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveBooleanProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveBooleanProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveBooleanProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveInt64Property(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveInt64Property';
+    lFixture.SetUp;
+    try lFixture.TestSaveInt64Property; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveFloatProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveFloatProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveFloatProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveObjectProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveObjectProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveObjectProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveStringArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveStringArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveStringArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveBooleanArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveBooleanArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveBooleanArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveIntegerArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveIntegerArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveIntegerArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveInt64ArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveInt64ArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveInt64ArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveFloatArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveFloatArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveFloatArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiIntegerProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiIntegerProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiIntegerProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphi2IntegersProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphi2IntegersProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphi2IntegersProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiStringProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiStringProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiStringProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiBooleanProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiBooleanProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiBooleanProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiInt64Property(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiInt64Property';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiInt64Property; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiFloatProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiFloatProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiFloatProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiObjectProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiObjectProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiObjectProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiStringArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiStringArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiStringArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiBooleanArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiBooleanArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiBooleanArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiIntegerArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiIntegerArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiIntegerArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiInt64ArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiInt64ArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiInt64ArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestGenCodeTestSaveDelphiFloatArrayProperty(AContext: TNXTestContext);
+var lFixture: TTestGenCode;
+begin
+  lFixture:=TTestGenCode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSaveDelphiFloatArrayProperty';
+    lFixture.SetUp;
+    try lFixture.TestSaveDelphiFloatArrayProperty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcjsontocodeTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcjsontocode.TTestGenCode');
+  lSuite.AddTest('TestEmpty', @RunTTestGenCodeTestEmpty);
+  lSuite.AddTest('TestSimple', @RunTTestGenCodeTestSimple);
+  lSuite.AddTest('TestClassName', @RunTTestGenCodeTestClassName);
+  lSuite.AddTest('TestParentClassName', @RunTTestGenCodeTestParentClassName);
+  lSuite.AddTest('TestIntegerProperty', @RunTTestGenCodeTestIntegerProperty);
+  lSuite.AddTest('Test2IntegersProperty', @RunTTestGenCodeTest2IntegersProperty);
+  lSuite.AddTest('TestBooleanProperty', @RunTTestGenCodeTestBooleanProperty);
+  lSuite.AddTest('TestStringProperty', @RunTTestGenCodeTestStringProperty);
+  lSuite.AddTest('TestFloatProperty', @RunTTestGenCodeTestFloatProperty);
+  lSuite.AddTest('TestInt64Property', @RunTTestGenCodeTestInt64Property);
+  lSuite.AddTest('TestPropertySetter', @RunTTestGenCodeTestPropertySetter);
+  lSuite.AddTest('TestObjectProperty', @RunTTestGenCodeTestObjectProperty);
+  lSuite.AddTest('TestObjectPropertySetter', @RunTTestGenCodeTestObjectPropertySetter);
+  lSuite.AddTest('TestObjectPropertySuffix', @RunTTestGenCodeTestObjectPropertySuffix);
+  lSuite.AddTest('TestObjectPropertySkip', @RunTTestGenCodeTestObjectPropertySkip);
+  lSuite.AddTest('TestObjectPropertyRecurse', @RunTTestGenCodeTestObjectPropertyRecurse);
+  lSuite.AddTest('TestObjectPropertyRecurseSuffix', @RunTTestGenCodeTestObjectPropertyRecurseSuffix);
+  lSuite.AddTest('TestObjectPropertyRecurseSkip', @RunTTestGenCodeTestObjectPropertyRecurseSkip);
+  lSuite.AddTest('TestObjectPropertyRecurseSkipB', @RunTTestGenCodeTestObjectPropertyRecurseSkipB);
+  lSuite.AddTest('TestStringArrayProperty', @RunTTestGenCodeTestStringArrayProperty);
+  lSuite.AddTest('TestIntegerArrayProperty', @RunTTestGenCodeTestIntegerArrayProperty);
+  lSuite.AddTest('TestBooleanArrayProperty', @RunTTestGenCodeTestBooleanArrayProperty);
+  lSuite.AddTest('TestFloatArrayProperty', @RunTTestGenCodeTestFloatArrayProperty);
+  lSuite.AddTest('TestInt64ArrayProperty', @RunTTestGenCodeTestInt64ArrayProperty);
+  lSuite.AddTest('TestStringArrayPropertySuffix', @RunTTestGenCodeTestStringArrayPropertySuffix);
+  lSuite.AddTest('TestLoadIntegerProperty', @RunTTestGenCodeTestLoadIntegerProperty);
+  lSuite.AddTest('TestLoad2IntegersProperty', @RunTTestGenCodeTestLoad2IntegersProperty);
+  lSuite.AddTest('TestLoadIntegerWithErrorProperty', @RunTTestGenCodeTestLoadIntegerWithErrorProperty);
+  lSuite.AddTest('TestLoadIntegerCaseInsensitiveProperty', @RunTTestGenCodeTestLoadIntegerCaseInsensitiveProperty);
+  lSuite.AddTest('TestLoadStringProperty', @RunTTestGenCodeTestLoadStringProperty);
+  lSuite.AddTest('TestLoadBooleanProperty', @RunTTestGenCodeTestLoadBooleanProperty);
+  lSuite.AddTest('TestLoadInt64Property', @RunTTestGenCodeTestLoadInt64Property);
+  lSuite.AddTest('TestLoadFloatProperty', @RunTTestGenCodeTestLoadFloatProperty);
+  lSuite.AddTest('TestLoadObjectProperty', @RunTTestGenCodeTestLoadObjectProperty);
+  lSuite.AddTest('TestLoadStringArrayProperty', @RunTTestGenCodeTestLoadStringArrayProperty);
+  lSuite.AddTest('TestLoadBooleanArrayProperty', @RunTTestGenCodeTestLoadBooleanArrayProperty);
+  lSuite.AddTest('TestLoadIntegerArrayProperty', @RunTTestGenCodeTestLoadIntegerArrayProperty);
+  lSuite.AddTest('TestLoadInt64ArrayProperty', @RunTTestGenCodeTestLoadInt64ArrayProperty);
+  lSuite.AddTest('TestLoadFloatArrayProperty', @RunTTestGenCodeTestLoadFloatArrayProperty);
+  lSuite.AddTest('TestLoadDelphiIntegerProperty', @RunTTestGenCodeTestLoadDelphiIntegerProperty);
+  lSuite.AddTest('TestLoadDelphi2IntegersProperty', @RunTTestGenCodeTestLoadDelphi2IntegersProperty);
+  lSuite.AddTest('TestLoadDelphiIntegerWithErrorProperty', @RunTTestGenCodeTestLoadDelphiIntegerWithErrorProperty);
+  lSuite.AddTest('TestLoadDelphiIntegerCaseInsensitiveProperty', @RunTTestGenCodeTestLoadDelphiIntegerCaseInsensitiveProperty);
+  lSuite.AddTest('TestLoadDelphiStringProperty', @RunTTestGenCodeTestLoadDelphiStringProperty);
+  lSuite.AddTest('TestLoadDelphiBooleanProperty', @RunTTestGenCodeTestLoadDelphiBooleanProperty);
+  lSuite.AddTest('TestLoadDelphiInt64Property', @RunTTestGenCodeTestLoadDelphiInt64Property);
+  lSuite.AddTest('TestLoadDelphiFloatProperty', @RunTTestGenCodeTestLoadDelphiFloatProperty);
+  lSuite.AddTest('TestLoadDelphiObjectProperty', @RunTTestGenCodeTestLoadDelphiObjectProperty);
+  lSuite.AddTest('TestLoadDelphiStringArrayProperty', @RunTTestGenCodeTestLoadDelphiStringArrayProperty);
+  lSuite.AddTest('TestLoadDelphiBooleanArrayProperty', @RunTTestGenCodeTestLoadDelphiBooleanArrayProperty);
+  lSuite.AddTest('TestLoadDelphiIntegerArrayProperty', @RunTTestGenCodeTestLoadDelphiIntegerArrayProperty);
+  lSuite.AddTest('TestLoadDelphiInt64ArrayProperty', @RunTTestGenCodeTestLoadDelphiInt64ArrayProperty);
+  lSuite.AddTest('TestLoadDelphiFloatArrayProperty', @RunTTestGenCodeTestLoadDelphiFloatArrayProperty);
+  lSuite.AddTest('TestSaveIntegerProperty', @RunTTestGenCodeTestSaveIntegerProperty);
+  lSuite.AddTest('TestSave2IntegersProperty', @RunTTestGenCodeTestSave2IntegersProperty);
+  lSuite.AddTest('TestSaveStringProperty', @RunTTestGenCodeTestSaveStringProperty);
+  lSuite.AddTest('TestSaveBooleanProperty', @RunTTestGenCodeTestSaveBooleanProperty);
+  lSuite.AddTest('TestSaveInt64Property', @RunTTestGenCodeTestSaveInt64Property);
+  lSuite.AddTest('TestSaveFloatProperty', @RunTTestGenCodeTestSaveFloatProperty);
+  lSuite.AddTest('TestSaveObjectProperty', @RunTTestGenCodeTestSaveObjectProperty);
+  lSuite.AddTest('TestSaveStringArrayProperty', @RunTTestGenCodeTestSaveStringArrayProperty);
+  lSuite.AddTest('TestSaveBooleanArrayProperty', @RunTTestGenCodeTestSaveBooleanArrayProperty);
+  lSuite.AddTest('TestSaveIntegerArrayProperty', @RunTTestGenCodeTestSaveIntegerArrayProperty);
+  lSuite.AddTest('TestSaveInt64ArrayProperty', @RunTTestGenCodeTestSaveInt64ArrayProperty);
+  lSuite.AddTest('TestSaveFloatArrayProperty', @RunTTestGenCodeTestSaveFloatArrayProperty);
+  lSuite.AddTest('TestSaveDelphiIntegerProperty', @RunTTestGenCodeTestSaveDelphiIntegerProperty);
+  lSuite.AddTest('TestSaveDelphi2IntegersProperty', @RunTTestGenCodeTestSaveDelphi2IntegersProperty);
+  lSuite.AddTest('TestSaveDelphiStringProperty', @RunTTestGenCodeTestSaveDelphiStringProperty);
+  lSuite.AddTest('TestSaveDelphiBooleanProperty', @RunTTestGenCodeTestSaveDelphiBooleanProperty);
+  lSuite.AddTest('TestSaveDelphiInt64Property', @RunTTestGenCodeTestSaveDelphiInt64Property);
+  lSuite.AddTest('TestSaveDelphiFloatProperty', @RunTTestGenCodeTestSaveDelphiFloatProperty);
+  lSuite.AddTest('TestSaveDelphiObjectProperty', @RunTTestGenCodeTestSaveDelphiObjectProperty);
+  lSuite.AddTest('TestSaveDelphiStringArrayProperty', @RunTTestGenCodeTestSaveDelphiStringArrayProperty);
+  lSuite.AddTest('TestSaveDelphiBooleanArrayProperty', @RunTTestGenCodeTestSaveDelphiBooleanArrayProperty);
+  lSuite.AddTest('TestSaveDelphiIntegerArrayProperty', @RunTTestGenCodeTestSaveDelphiIntegerArrayProperty);
+  lSuite.AddTest('TestSaveDelphiInt64ArrayProperty', @RunTTestGenCodeTestSaveDelphiInt64ArrayProperty);
+  lSuite.AddTest('TestSaveDelphiFloatArrayProperty', @RunTTestGenCodeTestSaveDelphiFloatArrayProperty);
+end;
+
 end.
-

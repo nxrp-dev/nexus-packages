@@ -11,18 +11,19 @@ unit ide.test.profiles;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   ide.profiles;
 
 type
 
   { TTestToggleProfileInList }
 
-  TTestToggleProfileInList = class(TTestCase)
-  published
+  TTestToggleProfileInList = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestAddProfile;
     procedure TestRemoveProfile;
     procedure TestToggleTwiceRestores;
@@ -30,12 +31,17 @@ type
 
   { TTestProfilesDisplayText }
 
-  TTestProfilesDisplayText = class(TTestCase)
-  published
+  TTestProfilesDisplayText = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestEmptyList;
     procedure TestSingleProfile;
     procedure TestMultipleProfiles;
   end;
+
+procedure RegisteridetestprofilesTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -48,8 +54,8 @@ begin
   list := TStringList.Create;
   try
     ToggleProfileInList(list, 'unix');
-    AssertEquals('should have one item', 1, list.Count);
-    AssertEquals('should contain unix', 'unix', list[0]);
+    FContext.AssertTrue((1)=(list.Count), 'should have one item');
+    FContext.AssertTrue(('unix')=(list[0]), 'should contain unix');
   finally
     list.Free;
   end;
@@ -64,8 +70,8 @@ begin
     list.Add('unix');
     list.Add('debug');
     ToggleProfileInList(list, 'unix');
-    AssertEquals('should have one item', 1, list.Count);
-    AssertEquals('remaining should be debug', 'debug', list[0]);
+    FContext.AssertTrue((1)=(list.Count), 'should have one item');
+    FContext.AssertTrue(('debug')=(list[0]), 'remaining should be debug');
   finally
     list.Free;
   end;
@@ -79,7 +85,7 @@ begin
   try
     ToggleProfileInList(list, 'agg');
     ToggleProfileInList(list, 'agg');
-    AssertEquals('toggling twice should leave list empty', 0, list.Count);
+    FContext.AssertTrue((0)=(list.Count), 'toggling twice should leave list empty');
   finally
     list.Free;
   end;
@@ -93,8 +99,7 @@ var
 begin
   list := TStringList.Create;
   try
-    AssertEquals('empty list should show placeholder',
-      '(no profiles)', ProfilesDisplayText(list));
+    FContext.AssertTrue(('(no profiles)')=(ProfilesDisplayText(list)), 'empty list should show placeholder');
   finally
     list.Free;
   end;
@@ -107,7 +112,7 @@ begin
   list := TStringList.Create;
   try
     list.Add('unix');
-    AssertEquals('single profile', 'unix', ProfilesDisplayText(list));
+    FContext.AssertTrue(('unix')=(ProfilesDisplayText(list)), 'single profile');
   finally
     list.Free;
   end;
@@ -121,14 +126,90 @@ begin
   try
     list.Add('unix');
     list.Add('debug');
-    AssertEquals('multiple profiles', 'unix,debug', ProfilesDisplayText(list));
+    FContext.AssertTrue(('unix,debug')=(ProfilesDisplayText(list)), 'multiple profiles');
   finally
     list.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestToggleProfileInList);
-  RegisterTest(TTestProfilesDisplayText);
+
+procedure RunTTestToggleProfileInListTestAddProfile(AContext: TNXTestContext);
+var lFixture: TTestToggleProfileInList;
+begin
+  lFixture:=TTestToggleProfileInList.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAddProfile';
+    lFixture.TestAddProfile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestToggleProfileInListTestRemoveProfile(AContext: TNXTestContext);
+var lFixture: TTestToggleProfileInList;
+begin
+  lFixture:=TTestToggleProfileInList.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRemoveProfile';
+    lFixture.TestRemoveProfile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestToggleProfileInListTestToggleTwiceRestores(AContext: TNXTestContext);
+var lFixture: TTestToggleProfileInList;
+begin
+  lFixture:=TTestToggleProfileInList.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestToggleTwiceRestores';
+    lFixture.TestToggleTwiceRestores;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProfilesDisplayTextTestEmptyList(AContext: TNXTestContext);
+var lFixture: TTestProfilesDisplayText;
+begin
+  lFixture:=TTestProfilesDisplayText.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyList';
+    lFixture.TestEmptyList;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProfilesDisplayTextTestSingleProfile(AContext: TNXTestContext);
+var lFixture: TTestProfilesDisplayText;
+begin
+  lFixture:=TTestProfilesDisplayText.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSingleProfile';
+    lFixture.TestSingleProfile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestProfilesDisplayTextTestMultipleProfiles(AContext: TNXTestContext);
+var lFixture: TTestProfilesDisplayText;
+begin
+  lFixture:=TTestProfilesDisplayText.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMultipleProfiles';
+    lFixture.TestMultipleProfiles;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetestprofilesTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.profiles.TTestToggleProfileInList');
+  lSuite.AddTest('TestAddProfile', @RunTTestToggleProfileInListTestAddProfile);
+  lSuite.AddTest('TestRemoveProfile', @RunTTestToggleProfileInListTestRemoveProfile);
+  lSuite.AddTest('TestToggleTwiceRestores', @RunTTestToggleProfileInListTestToggleTwiceRestores);
+  lSuite:=ARegistry.AddSuite('ide.test.profiles.TTestProfilesDisplayText');
+  lSuite.AddTest('TestEmptyList', @RunTTestProfilesDisplayTextTestEmptyList);
+  lSuite.AddTest('TestSingleProfile', @RunTTestProfilesDisplayTextTestSingleProfile);
+  lSuite.AddTest('TestMultipleProfiles', @RunTTestProfilesDisplayTextTestMultipleProfiles);
+end;
 
 end.

@@ -17,11 +17,13 @@ unit tcspinedit;
 interface
 
 uses
-  fpcunit, testregistry,
-  fpg_spinedit, fpg_edit;
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, fpg_spinedit, fpg_edit;
 
 type
-  TTestSpinEditExit = class(TTestCase)
+  TTestSpinEditExit = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FSpin: TfpgSpinEdit;
     FChangeCount: integer;
@@ -30,9 +32,9 @@ type
     procedure TypeTextAndExit(const AText: string);
     procedure TypeTextAndPressEnter(const AText: string);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     { In-range typed text is accepted as the new value. }
     procedure TestInRangeValueAccepted;
     { Empty text must clamp into the range, not blindly become 0. }
@@ -57,7 +59,10 @@ type
     procedure TestEnterKeyClampsToMax;
   end;
 
-  TTestSpinEditFloatExit = class(TTestCase)
+  TTestSpinEditFloatExit = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FSpin: TfpgSpinEditFloat;
     FChangeCount: integer;
@@ -65,9 +70,9 @@ type
     function InnerEdit: TfpgEditFloat;
     procedure TypeTextAndExit(const AText: string);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     { In-range typed text is accepted as the new value. }
     procedure TestInRangeValueAccepted;
     { Empty text must clamp into the range, not blindly become 0. }
@@ -79,6 +84,8 @@ type
     { OnChange fires once when the value is clamped to a bound. }
     procedure TestOnChangeFiresWhenValueClamped;
   end;
+
+procedure RegistertcspineditTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -122,7 +129,7 @@ begin
       Result := TfpgEditInteger(FSpin.Components[i]);
       Exit;
     end;
-  Fail('TfpgSpinEdit has no internal TfpgEditInteger');
+  FContext.Fail('TfpgSpinEdit has no internal TfpgEditInteger');
 end;
 
 procedure TTestSpinEditExit.TypeTextAndExit(const AText: string);
@@ -147,30 +154,30 @@ end;
 procedure TTestSpinEditExit.TestInRangeValueAccepted;
 begin
   TypeTextAndExit('42');
-  AssertEquals('value', 42, FSpin.Value);
+  FContext.AssertTrue((42)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestEmptyTextClampsIntoRange;
 begin
   FSpin.MinValue := 10;
   TypeTextAndExit('');
-  AssertEquals('value', 10, FSpin.Value);
-  AssertEquals('edit text', '10', InnerEdit.Text);
+  FContext.AssertTrue((10)=(FSpin.Value), 'value');
+  FContext.AssertTrue(('10')=(InnerEdit.Text), 'edit text');
 end;
 
 procedure TTestSpinEditExit.TestEmptyTextBecomesZeroWhenZeroInRange;
 begin
   FSpin.Value := 50;
   TypeTextAndExit('');
-  AssertEquals('value', 0, FSpin.Value);
+  FContext.AssertTrue((0)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestValueAboveMaxClampsToMax;
 begin
   FSpin.Value := 50;
   TypeTextAndExit('150');
-  AssertEquals('value', 100, FSpin.Value);
-  AssertEquals('edit text', '100', InnerEdit.Text);
+  FContext.AssertTrue((100)=(FSpin.Value), 'value');
+  FContext.AssertTrue(('100')=(InnerEdit.Text), 'edit text');
 end;
 
 procedure TTestSpinEditExit.TestValueBelowMinClampsToMin;
@@ -178,7 +185,7 @@ begin
   FSpin.MinValue := 10;
   FSpin.Value := 50;
   TypeTextAndExit('5');
-  AssertEquals('value', 10, FSpin.Value);
+  FContext.AssertTrue((10)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestEmptyTextNegativeOnlyRangeClampsToMax;
@@ -186,7 +193,7 @@ begin
   FSpin.MinValue := -20;
   FSpin.MaxValue := -5;
   TypeTextAndExit('');
-  AssertEquals('value', -5, FSpin.Value);
+  FContext.AssertTrue((-5)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestOnChangeFiresWhenValueClamped;
@@ -194,7 +201,7 @@ begin
   FSpin.Value := 50;
   FSpin.OnChange := @ChangeHandler;
   TypeTextAndExit('150');
-  AssertEquals('change count', 1, FChangeCount);
+  FContext.AssertTrue((1)=(FChangeCount), 'change count');
 end;
 
 procedure TTestSpinEditExit.TestOnChangeFiresWhenInRangeValueChanges;
@@ -202,7 +209,7 @@ begin
   FSpin.Value := 50;
   FSpin.OnChange := @ChangeHandler;
   TypeTextAndExit('60');
-  AssertEquals('change count', 1, FChangeCount);
+  FContext.AssertTrue((1)=(FChangeCount), 'change count');
 end;
 
 procedure TTestSpinEditExit.TestNoOnChangeWhenValueUnchanged;
@@ -210,8 +217,8 @@ begin
   FSpin.Value := 42;
   FSpin.OnChange := @ChangeHandler;
   TypeTextAndExit('42');
-  AssertEquals('change count', 0, FChangeCount);
-  AssertEquals('value', 42, FSpin.Value);
+  FContext.AssertTrue((0)=(FChangeCount), 'change count');
+  FContext.AssertTrue((42)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestLoneMinusSignDoesNotRaise;
@@ -219,14 +226,14 @@ begin
   FSpin.Value := 50;
   TypeTextAndExit('-');
   { a lone '-' parses as 0, which lies inside the default 0..100 range }
-  AssertEquals('value', 0, FSpin.Value);
+  FContext.AssertTrue((0)=(FSpin.Value), 'value');
 end;
 
 procedure TTestSpinEditExit.TestEnterKeyClampsToMax;
 begin
   FSpin.Value := 50;
   TypeTextAndPressEnter('150');
-  AssertEquals('value', 100, FSpin.Value);
+  FContext.AssertTrue((100)=(FSpin.Value), 'value');
 end;
 
 
@@ -262,7 +269,7 @@ begin
       Result := TfpgEditFloat(FSpin.Components[i]);
       Exit;
     end;
-  Fail('TfpgSpinEditFloat has no internal TfpgEditFloat');
+  FContext.Fail('TfpgSpinEditFloat has no internal TfpgEditFloat');
 end;
 
 procedure TTestSpinEditFloatExit.TypeTextAndExit(const AText: string);
@@ -274,21 +281,21 @@ end;
 procedure TTestSpinEditFloatExit.TestInRangeValueAccepted;
 begin
   TypeTextAndExit('42');
-  AssertEquals('value', 42.0, FSpin.Value, 0.001);
+  FContext.AssertTrue(Abs((42.0)-(FSpin.Value))<=(0.001), 'value');
 end;
 
 procedure TTestSpinEditFloatExit.TestEmptyTextClampsIntoRange;
 begin
   FSpin.MinValue := 10;
   TypeTextAndExit('');
-  AssertEquals('value', 10.0, FSpin.Value, 0.001);
+  FContext.AssertTrue(Abs((10.0)-(FSpin.Value))<=(0.001), 'value');
 end;
 
 procedure TTestSpinEditFloatExit.TestValueAboveMaxClampsToMax;
 begin
   FSpin.Value := 50;
   TypeTextAndExit('150');
-  AssertEquals('value', 100.0, FSpin.Value, 0.001);
+  FContext.AssertTrue(Abs((100.0)-(FSpin.Value))<=(0.001), 'value');
 end;
 
 procedure TTestSpinEditFloatExit.TestValueBelowMinClampsToMin;
@@ -296,7 +303,7 @@ begin
   FSpin.MinValue := 10;
   FSpin.Value := 50;
   TypeTextAndExit('5');
-  AssertEquals('value', 10.0, FSpin.Value, 0.001);
+  FContext.AssertTrue(Abs((10.0)-(FSpin.Value))<=(0.001), 'value');
 end;
 
 procedure TTestSpinEditFloatExit.TestOnChangeFiresWhenValueClamped;
@@ -304,12 +311,224 @@ begin
   FSpin.Value := 50;
   FSpin.OnChange := @ChangeHandler;
   TypeTextAndExit('150');
-  AssertEquals('change count', 1, FChangeCount);
+  FContext.AssertTrue((1)=(FChangeCount), 'change count');
 end;
 
 
-initialization
-  RegisterTest(TTestSpinEditExit);
-  RegisterTest(TTestSpinEditFloatExit);
+
+procedure RunTTestSpinEditExitTestInRangeValueAccepted(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInRangeValueAccepted';
+    lFixture.SetUp;
+    try lFixture.TestInRangeValueAccepted; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestEmptyTextClampsIntoRange(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyTextClampsIntoRange';
+    lFixture.SetUp;
+    try lFixture.TestEmptyTextClampsIntoRange; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestEmptyTextBecomesZeroWhenZeroInRange(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyTextBecomesZeroWhenZeroInRange';
+    lFixture.SetUp;
+    try lFixture.TestEmptyTextBecomesZeroWhenZeroInRange; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestValueAboveMaxClampsToMax(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestValueAboveMaxClampsToMax';
+    lFixture.SetUp;
+    try lFixture.TestValueAboveMaxClampsToMax; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestValueBelowMinClampsToMin(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestValueBelowMinClampsToMin';
+    lFixture.SetUp;
+    try lFixture.TestValueBelowMinClampsToMin; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestEmptyTextNegativeOnlyRangeClampsToMax(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyTextNegativeOnlyRangeClampsToMax';
+    lFixture.SetUp;
+    try lFixture.TestEmptyTextNegativeOnlyRangeClampsToMax; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestOnChangeFiresWhenValueClamped(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOnChangeFiresWhenValueClamped';
+    lFixture.SetUp;
+    try lFixture.TestOnChangeFiresWhenValueClamped; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestOnChangeFiresWhenInRangeValueChanges(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOnChangeFiresWhenInRangeValueChanges';
+    lFixture.SetUp;
+    try lFixture.TestOnChangeFiresWhenInRangeValueChanges; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestNoOnChangeWhenValueUnchanged(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoOnChangeWhenValueUnchanged';
+    lFixture.SetUp;
+    try lFixture.TestNoOnChangeWhenValueUnchanged; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestLoneMinusSignDoesNotRaise(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLoneMinusSignDoesNotRaise';
+    lFixture.SetUp;
+    try lFixture.TestLoneMinusSignDoesNotRaise; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditExitTestEnterKeyClampsToMax(AContext: TNXTestContext);
+var lFixture: TTestSpinEditExit;
+begin
+  lFixture:=TTestSpinEditExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEnterKeyClampsToMax';
+    lFixture.SetUp;
+    try lFixture.TestEnterKeyClampsToMax; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditFloatExitTestInRangeValueAccepted(AContext: TNXTestContext);
+var lFixture: TTestSpinEditFloatExit;
+begin
+  lFixture:=TTestSpinEditFloatExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInRangeValueAccepted';
+    lFixture.SetUp;
+    try lFixture.TestInRangeValueAccepted; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditFloatExitTestEmptyTextClampsIntoRange(AContext: TNXTestContext);
+var lFixture: TTestSpinEditFloatExit;
+begin
+  lFixture:=TTestSpinEditFloatExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyTextClampsIntoRange';
+    lFixture.SetUp;
+    try lFixture.TestEmptyTextClampsIntoRange; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditFloatExitTestValueAboveMaxClampsToMax(AContext: TNXTestContext);
+var lFixture: TTestSpinEditFloatExit;
+begin
+  lFixture:=TTestSpinEditFloatExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestValueAboveMaxClampsToMax';
+    lFixture.SetUp;
+    try lFixture.TestValueAboveMaxClampsToMax; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditFloatExitTestValueBelowMinClampsToMin(AContext: TNXTestContext);
+var lFixture: TTestSpinEditFloatExit;
+begin
+  lFixture:=TTestSpinEditFloatExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestValueBelowMinClampsToMin';
+    lFixture.SetUp;
+    try lFixture.TestValueBelowMinClampsToMin; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSpinEditFloatExitTestOnChangeFiresWhenValueClamped(AContext: TNXTestContext);
+var lFixture: TTestSpinEditFloatExit;
+begin
+  lFixture:=TTestSpinEditFloatExit.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestOnChangeFiresWhenValueClamped';
+    lFixture.SetUp;
+    try lFixture.TestOnChangeFiresWhenValueClamped; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcspineditTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcspinedit.TTestSpinEditExit');
+  lSuite.AddTest('TestInRangeValueAccepted', @RunTTestSpinEditExitTestInRangeValueAccepted);
+  lSuite.AddTest('TestEmptyTextClampsIntoRange', @RunTTestSpinEditExitTestEmptyTextClampsIntoRange);
+  lSuite.AddTest('TestEmptyTextBecomesZeroWhenZeroInRange', @RunTTestSpinEditExitTestEmptyTextBecomesZeroWhenZeroInRange);
+  lSuite.AddTest('TestValueAboveMaxClampsToMax', @RunTTestSpinEditExitTestValueAboveMaxClampsToMax);
+  lSuite.AddTest('TestValueBelowMinClampsToMin', @RunTTestSpinEditExitTestValueBelowMinClampsToMin);
+  lSuite.AddTest('TestEmptyTextNegativeOnlyRangeClampsToMax', @RunTTestSpinEditExitTestEmptyTextNegativeOnlyRangeClampsToMax);
+  lSuite.AddTest('TestOnChangeFiresWhenValueClamped', @RunTTestSpinEditExitTestOnChangeFiresWhenValueClamped);
+  lSuite.AddTest('TestOnChangeFiresWhenInRangeValueChanges', @RunTTestSpinEditExitTestOnChangeFiresWhenInRangeValueChanges);
+  lSuite.AddTest('TestNoOnChangeWhenValueUnchanged', @RunTTestSpinEditExitTestNoOnChangeWhenValueUnchanged);
+  lSuite.AddTest('TestLoneMinusSignDoesNotRaise', @RunTTestSpinEditExitTestLoneMinusSignDoesNotRaise);
+  lSuite.AddTest('TestEnterKeyClampsToMax', @RunTTestSpinEditExitTestEnterKeyClampsToMax);
+  lSuite:=ARegistry.AddSuite('tcspinedit.TTestSpinEditFloatExit');
+  lSuite.AddTest('TestInRangeValueAccepted', @RunTTestSpinEditFloatExitTestInRangeValueAccepted);
+  lSuite.AddTest('TestEmptyTextClampsIntoRange', @RunTTestSpinEditFloatExitTestEmptyTextClampsIntoRange);
+  lSuite.AddTest('TestValueAboveMaxClampsToMax', @RunTTestSpinEditFloatExitTestValueAboveMaxClampsToMax);
+  lSuite.AddTest('TestValueBelowMinClampsToMin', @RunTTestSpinEditFloatExitTestValueBelowMinClampsToMin);
+  lSuite.AddTest('TestOnChangeFiresWhenValueClamped', @RunTTestSpinEditFloatExitTestOnChangeFiresWhenValueClamped);
+end;
 
 end.

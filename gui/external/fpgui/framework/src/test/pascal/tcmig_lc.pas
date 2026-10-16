@@ -9,13 +9,15 @@ unit tcmig_lc;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry,
-  fpg_mig_lc, fpg_mig_unitvalue, fpg_mig_boundsize, fpg_mig_hidemode,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpg_mig_lc, fpg_mig_unitvalue, fpg_mig_boundsize, fpg_mig_hidemode,
   fpg_mig_constraintparser;
 
 type
-  TTestMigLC = class(TTestCase)
-  published
+  TTestMigLC = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     { Basic creation and defaults }
     procedure TestCreate;
     procedure TestDefaults;
@@ -87,6 +89,8 @@ type
     procedure TestGetProperties;
   end;
 
+procedure RegistertcmiglcTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 { TTestMigLC }
@@ -97,7 +101,7 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    AssertNotNull('LC should be created', lc);
+    FContext.AssertTrue((lc)<>nil, 'LC should be created');
   finally
     lc.Free;
   end;
@@ -109,17 +113,17 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    AssertEquals('Default wrap should be INF_SIZE', INF_SIZE, lc.GetWrapAfter);
-    AssertTrue('Default flow should be horizontal', lc.IsFlowX);
-    AssertFalse('Default fillX should be false', lc.IsFillX);
-    AssertFalse('Default fillY should be false', lc.IsFillY);
-    AssertTrue('Default top-to-bottom should be true', lc.IsTopToBottom);
-    AssertFalse('Default noGrid should be false', lc.IsNoGrid);
-    AssertTrue('Default visual padding should be true', lc.IsVisualPadding);
-    AssertFalse('Default debug should be false', lc.GetDebug);
-    AssertEquals('Default hide mode should be 0', 0, lc.GetHideMode);
-    AssertEquals('Default pack width align should be 0.5', 0.5, lc.GetPackWidthAlign, 0.01);
-    AssertEquals('Default pack height align should be 1.0', 1.0, lc.GetPackHeightAlign, 0.01);
+    FContext.AssertTrue((INF_SIZE)=(lc.GetWrapAfter), 'Default wrap should be INF_SIZE');
+    FContext.AssertTrue(lc.IsFlowX, 'Default flow should be horizontal');
+    FContext.AssertTrue(not (lc.IsFillX), 'Default fillX should be false');
+    FContext.AssertTrue(not (lc.IsFillY), 'Default fillY should be false');
+    FContext.AssertTrue(lc.IsTopToBottom, 'Default top-to-bottom should be true');
+    FContext.AssertTrue(not (lc.IsNoGrid), 'Default noGrid should be false');
+    FContext.AssertTrue(lc.IsVisualPadding, 'Default visual padding should be true');
+    FContext.AssertTrue(not (lc.GetDebug), 'Default debug should be false');
+    FContext.AssertTrue((0)=(lc.GetHideMode), 'Default hide mode should be 0');
+    FContext.AssertTrue(Abs((0.5)-(lc.GetPackWidthAlign))<=(0.01), 'Default pack width align should be 0.5');
+    FContext.AssertTrue(Abs((1.0)-(lc.GetPackHeightAlign))<=(0.01), 'Default pack height align should be 1.0');
   finally
     lc.Free;
   end;
@@ -131,7 +135,7 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    AssertTrue('Default flow should be horizontal', lc.IsFlowX);
+    FContext.AssertTrue(lc.IsFlowX, 'Default flow should be horizontal');
   finally
     lc.Free;
   end;
@@ -144,7 +148,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.FlowX;
-    AssertTrue('FlowX should set horizontal flow', lc.IsFlowX);
+    FContext.AssertTrue(lc.IsFlowX, 'FlowX should set horizontal flow');
   finally
     lc.Free;
   end;
@@ -157,7 +161,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.FlowY;
-    AssertFalse('FlowY should set vertical flow', lc.IsFlowX);
+    FContext.AssertTrue(not (lc.IsFlowX), 'FlowY should set vertical flow');
   finally
     lc.Free;
   end;
@@ -170,7 +174,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.Wrap;
-    AssertEquals('Wrap should set wrap after to 0', 0, lc.GetWrapAfter);
+    FContext.AssertTrue((0)=(lc.GetWrapAfter), 'Wrap should set wrap after to 0');
   finally
     lc.Free;
   end;
@@ -183,7 +187,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.WrapAfter(5);
-    AssertEquals('WrapAfter should set wrap count', 5, lc.GetWrapAfter);
+    FContext.AssertTrue((5)=(lc.GetWrapAfter), 'WrapAfter should set wrap count');
   finally
     lc.Free;
   end;
@@ -196,8 +200,8 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.Fill;
-    AssertTrue('Fill should set fillX', lc.IsFillX);
-    AssertTrue('Fill should set fillY', lc.IsFillY);
+    FContext.AssertTrue(lc.IsFillX, 'Fill should set fillX');
+    FContext.AssertTrue(lc.IsFillY, 'Fill should set fillY');
   finally
     lc.Free;
   end;
@@ -210,8 +214,8 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.FillX;
-    AssertTrue('FillX should set fillX', lc.IsFillX);
-    AssertFalse('FillX should not set fillY', lc.IsFillY);
+    FContext.AssertTrue(lc.IsFillX, 'FillX should set fillX');
+    FContext.AssertTrue(not (lc.IsFillY), 'FillX should not set fillY');
   finally
     lc.Free;
   end;
@@ -224,8 +228,8 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.FillY;
-    AssertFalse('FillY should not set fillX', lc.IsFillX);
-    AssertTrue('FillY should set fillY', lc.IsFillY);
+    FContext.AssertTrue(not (lc.IsFillX), 'FillY should not set fillX');
+    FContext.AssertTrue(lc.IsFillY, 'FillY should set fillY');
   finally
     lc.Free;
   end;
@@ -240,7 +244,7 @@ begin
   try
     lc.InsetsAll('10');
     insets := lc.GetInsets;
-    AssertEquals('Should have 4 insets', 4, Length(insets));
+    FContext.AssertTrue((4)=(Length(insets)), 'Should have 4 insets');
     // All insets should be set (non-nil)
     // Note: Parser stubs return nil for now, so we just verify the call succeeds
   finally
@@ -257,7 +261,7 @@ begin
   try
     lc.Insets('10 20 30 40');
     insets := lc.GetInsets;
-    AssertEquals('Should have 4 insets', 4, Length(insets));
+    FContext.AssertTrue((4)=(Length(insets)), 'Should have 4 insets');
   finally
     lc.Free;
   end;
@@ -272,7 +276,7 @@ begin
   try
     lc.Insets('10', '20', '30', '40');
     insets := lc.GetInsets;
-    AssertEquals('Should have 4 insets', 4, Length(insets));
+    FContext.AssertTrue((4)=(Length(insets)), 'Should have 4 insets');
   finally
     lc.Free;
   end;
@@ -287,8 +291,8 @@ begin
   try
     lc.AlignX('center');
     align := lc.GetAlignX;
-    AssertNotNull('AlignX should be set', align);
-    AssertSame('Should be center alignment', UnitValueCenter, align);
+    FContext.AssertTrue((align)<>nil, 'AlignX should be set');
+    FContext.AssertTrue((UnitValueCenter)=(align), 'Should be center alignment');
   finally
     lc.Free;
   end;
@@ -303,8 +307,8 @@ begin
   try
     lc.AlignY('center');
     align := lc.GetAlignY;
-    AssertNotNull('AlignY should be set', align);
-    AssertSame('Should be center alignment', UnitValueCenter, align);
+    FContext.AssertTrue((align)<>nil, 'AlignY should be set');
+    FContext.AssertTrue((UnitValueCenter)=(align), 'Should be center alignment');
   finally
     lc.Free;
   end;
@@ -317,8 +321,8 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.Align('center', 'center');
-    AssertNotNull('AlignX should be set', lc.GetAlignX);
-    AssertNotNull('AlignY should be set', lc.GetAlignY);
+    FContext.AssertTrue((lc.GetAlignX)<>nil, 'AlignX should be set');
+    FContext.AssertTrue((lc.GetAlignY)<>nil, 'AlignY should be set');
   finally
     lc.Free;
   end;
@@ -334,7 +338,7 @@ begin
     // We'll test the method exists and can be called
     try
       lc.GridGapX('10px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected - parser not implemented yet
@@ -352,7 +356,7 @@ begin
   try
     try
       lc.GridGapY('10px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected - parser not implemented yet
@@ -370,7 +374,7 @@ begin
   try
     try
       lc.GridGap('10px', '10px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected - parser not implemented yet
@@ -388,7 +392,7 @@ begin
   try
     try
       lc.Width('100px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -405,7 +409,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.MinWidth('100px');
-    AssertNotNull('Width should be set', lc.GetWidth);
+    FContext.AssertTrue((lc.GetWidth)<>nil, 'Width should be set');
   finally
     lc.Free;
   end;
@@ -418,7 +422,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.MaxWidth('200px');
-    AssertNotNull('Width should be set', lc.GetWidth);
+    FContext.AssertTrue((lc.GetWidth)<>nil, 'Width should be set');
   finally
     lc.Free;
   end;
@@ -432,7 +436,7 @@ begin
   try
     try
       lc.Height('100px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -449,7 +453,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.MinHeight('100px');
-    AssertNotNull('Height should be set', lc.GetHeight);
+    FContext.AssertTrue((lc.GetHeight)<>nil, 'Height should be set');
   finally
     lc.Free;
   end;
@@ -462,7 +466,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.MaxHeight('200px');
-    AssertNotNull('Height should be set', lc.GetHeight);
+    FContext.AssertTrue((lc.GetHeight)<>nil, 'Height should be set');
   finally
     lc.Free;
   end;
@@ -476,7 +480,7 @@ begin
   try
     try
       lc.Pack;
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -494,7 +498,7 @@ begin
   try
     try
       lc.Pack('100px', '100px');
-      Fail('Should raise exception - parser not implemented');
+      FContext.Fail('Should raise exception - parser not implemented');
     except
       on E: Exception do
         ; // Expected
@@ -511,8 +515,8 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.PackAlign(0.3, 0.7);
-    AssertEquals('Pack width align should be 0.3', 0.3, lc.GetPackWidthAlign, 0.01);
-    AssertEquals('Pack height align should be 0.7', 0.7, lc.GetPackHeightAlign, 0.01);
+    FContext.AssertTrue(Abs((0.3)-(lc.GetPackWidthAlign))<=(0.01), 'Pack width align should be 0.3');
+    FContext.AssertTrue(Abs((0.7)-(lc.GetPackHeightAlign))<=(0.01), 'Pack height align should be 0.7');
   finally
     lc.Free;
   end;
@@ -525,7 +529,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.LeftToRight(True);
-    AssertEquals('LeftToRight(true) should set value to 2', 2, lc.GetLeftToRight);
+    FContext.AssertTrue((2)=(lc.GetLeftToRight), 'LeftToRight(true) should set value to 2');
   finally
     lc.Free;
   end;
@@ -538,7 +542,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.LeftToRight(False);
-    AssertEquals('LeftToRight(false) should set value to 1', 1, lc.GetLeftToRight);
+    FContext.AssertTrue((1)=(lc.GetLeftToRight), 'LeftToRight(false) should set value to 1');
   finally
     lc.Free;
   end;
@@ -551,7 +555,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.RightToLeft;
-    AssertEquals('RightToLeft should set value to 1', 1, lc.GetLeftToRight);
+    FContext.AssertTrue((1)=(lc.GetLeftToRight), 'RightToLeft should set value to 1');
   finally
     lc.Free;
   end;
@@ -563,7 +567,7 @@ var
 begin
   lc := TfpgMigLC.Create;
   try
-    AssertTrue('Default should be top-to-bottom', lc.IsTopToBottom);
+    FContext.AssertTrue(lc.IsTopToBottom, 'Default should be top-to-bottom');
   finally
     lc.Free;
   end;
@@ -576,7 +580,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.TopToBottom;
-    AssertTrue('TopToBottom should set value', lc.IsTopToBottom);
+    FContext.AssertTrue(lc.IsTopToBottom, 'TopToBottom should set value');
   finally
     lc.Free;
   end;
@@ -589,7 +593,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.BottomToTop;
-    AssertFalse('BottomToTop should clear value', lc.IsTopToBottom);
+    FContext.AssertTrue(not (lc.IsTopToBottom), 'BottomToTop should clear value');
   finally
     lc.Free;
   end;
@@ -602,7 +606,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.NoGrid;
-    AssertTrue('NoGrid should set flag', lc.IsNoGrid);
+    FContext.AssertTrue(lc.IsNoGrid, 'NoGrid should set flag');
   finally
     lc.Free;
   end;
@@ -615,7 +619,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.NoCache;
-    AssertTrue('NoCache should set flag', lc.IsNoCache);
+    FContext.AssertTrue(lc.IsNoCache, 'NoCache should set flag');
   finally
     lc.Free;
   end;
@@ -628,7 +632,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.NoVisualPadding;
-    AssertFalse('NoVisualPadding should clear flag', lc.IsVisualPadding);
+    FContext.AssertTrue(not (lc.IsVisualPadding), 'NoVisualPadding should clear flag');
   finally
     lc.Free;
   end;
@@ -641,7 +645,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.Debug;
-    AssertTrue('Debug should enable debug mode', lc.GetDebug);
+    FContext.AssertTrue(lc.GetDebug, 'Debug should enable debug mode');
   finally
     lc.Free;
   end;
@@ -654,7 +658,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.HideMode(2);
-    AssertEquals('HideMode should be set', 2, lc.GetHideMode);
+    FContext.AssertTrue((2)=(lc.GetHideMode), 'HideMode should be set');
   finally
     lc.Free;
   end;
@@ -667,7 +671,7 @@ begin
   lc := TfpgMigLC.Create;
   try
     lc.HideMode(hmSize0Gaps0);
-    AssertEquals('HideMode should be set to 2', 2, lc.GetHideMode);
+    FContext.AssertTrue((2)=(lc.GetHideMode), 'HideMode should be set to 2');
   finally
     lc.Free;
   end;
@@ -681,12 +685,12 @@ begin
   try
     lc.FlowX.Fill.Wrap.Debug.NoGrid;
 
-    AssertTrue('FlowX should be set', lc.IsFlowX);
-    AssertTrue('FillX should be set', lc.IsFillX);
-    AssertTrue('FillY should be set', lc.IsFillY);
-    AssertEquals('Wrap should be set to 0', 0, lc.GetWrapAfter);
-    AssertTrue('Debug should be set', lc.GetDebug);
-    AssertTrue('NoGrid should be set', lc.IsNoGrid);
+    FContext.AssertTrue(lc.IsFlowX, 'FlowX should be set');
+    FContext.AssertTrue(lc.IsFillX, 'FillX should be set');
+    FContext.AssertTrue(lc.IsFillY, 'FillY should be set');
+    FContext.AssertTrue((0)=(lc.GetWrapAfter), 'Wrap should be set to 0');
+    FContext.AssertTrue(lc.GetDebug, 'Debug should be set');
+    FContext.AssertTrue(lc.IsNoGrid, 'NoGrid should be set');
   finally
     lc.Free;
   end;
@@ -704,17 +708,525 @@ begin
     lc.FillX;
     lc.FlowY; // FlowY and FlowX are mutually exclusive. Setting one to True, makes the other one False.
 
-    AssertEquals('GetWrapAfter should return value', 5, lc.GetWrapAfter);
-    AssertTrue('GetDebug should return value', lc.GetDebug);
-    AssertEquals('GetHideMode should return value', 1, lc.GetHideMode);
-    AssertTrue('IsFillX should return value', lc.IsFillX);
-    AssertFalse('IsFlowX should return value', lc.IsFlowX);
+    FContext.AssertTrue((5)=(lc.GetWrapAfter), 'GetWrapAfter should return value');
+    FContext.AssertTrue(lc.GetDebug, 'GetDebug should return value');
+    FContext.AssertTrue((1)=(lc.GetHideMode), 'GetHideMode should return value');
+    FContext.AssertTrue(lc.IsFillX, 'IsFillX should return value');
+    FContext.AssertTrue(not (lc.IsFlowX), 'IsFlowX should return value');
   finally
     lc.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestMigLC);
+
+procedure RunTTestMigLCTestCreate(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCreate';
+    lFixture.TestCreate;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestDefaults(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDefaults';
+    lFixture.TestDefaults;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFlowX_Default(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFlowX_Default';
+    lFixture.TestFlowX_Default;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFlowX_Set(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFlowX_Set';
+    lFixture.TestFlowX_Set;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFlowY_Set(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFlowY_Set';
+    lFixture.TestFlowY_Set;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestWrap_Default(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWrap_Default';
+    lFixture.TestWrap_Default;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestWrap_AfterCount(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWrap_AfterCount';
+    lFixture.TestWrap_AfterCount;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFill_Both(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFill_Both';
+    lFixture.TestFill_Both;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFillX_Only(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFillX_Only';
+    lFixture.TestFillX_Only;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFillY_Only(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFillY_Only';
+    lFixture.TestFillY_Only;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestInsetsAll(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInsetsAll';
+    lFixture.TestInsetsAll;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestInsets_String(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInsets_String';
+    lFixture.TestInsets_String;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestInsets_Individual(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInsets_Individual';
+    lFixture.TestInsets_Individual;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestAlignX(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAlignX';
+    lFixture.TestAlignX;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestAlignY(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAlignY';
+    lFixture.TestAlignY;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestAlign_Both(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAlign_Both';
+    lFixture.TestAlign_Both;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestGridGapX(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGridGapX';
+    lFixture.TestGridGapX;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestGridGapY(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGridGapY';
+    lFixture.TestGridGapY;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestGridGap_Both(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGridGap_Both';
+    lFixture.TestGridGap_Both;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestWidth(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWidth';
+    lFixture.TestWidth;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestMinWidth(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMinWidth';
+    lFixture.TestMinWidth;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestMaxWidth(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMaxWidth';
+    lFixture.TestMaxWidth;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestHeight(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHeight';
+    lFixture.TestHeight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestMinHeight(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMinHeight';
+    lFixture.TestMinHeight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestMaxHeight(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMaxHeight';
+    lFixture.TestMaxHeight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestPack_Default(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPack_Default';
+    lFixture.TestPack_Default;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestPack_Sizes(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPack_Sizes';
+    lFixture.TestPack_Sizes;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestPackAlign(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPackAlign';
+    lFixture.TestPackAlign;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestLeftToRight_True(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLeftToRight_True';
+    lFixture.TestLeftToRight_True;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestLeftToRight_False(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLeftToRight_False';
+    lFixture.TestLeftToRight_False;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestRightToLeft(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRightToLeft';
+    lFixture.TestRightToLeft;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestTopToBottom_Default(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTopToBottom_Default';
+    lFixture.TestTopToBottom_Default;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestTopToBottom_Explicit(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTopToBottom_Explicit';
+    lFixture.TestTopToBottom_Explicit;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestBottomToTop(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBottomToTop';
+    lFixture.TestBottomToTop;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestNoGrid(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoGrid';
+    lFixture.TestNoGrid;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestNoCache(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoCache';
+    lFixture.TestNoCache;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestNoVisualPadding(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoVisualPadding';
+    lFixture.TestNoVisualPadding;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestDebug_Default(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDebug_Default';
+    lFixture.TestDebug_Default;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestHideMode_Integer(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHideMode_Integer';
+    lFixture.TestHideMode_Integer;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestHideMode_Enum(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHideMode_Enum';
+    lFixture.TestHideMode_Enum;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestFluentChaining(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFluentChaining';
+    lFixture.TestFluentChaining;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLCTestGetProperties(AContext: TNXTestContext);
+var lFixture: TTestMigLC;
+begin
+  lFixture:=TTestMigLC.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetProperties';
+    lFixture.TestGetProperties;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcmiglcTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcmig_lc.TTestMigLC');
+  lSuite.AddTest('TestCreate', @RunTTestMigLCTestCreate);
+  lSuite.AddTest('TestDefaults', @RunTTestMigLCTestDefaults);
+  lSuite.AddTest('TestFlowX_Default', @RunTTestMigLCTestFlowX_Default);
+  lSuite.AddTest('TestFlowX_Set', @RunTTestMigLCTestFlowX_Set);
+  lSuite.AddTest('TestFlowY_Set', @RunTTestMigLCTestFlowY_Set);
+  lSuite.AddTest('TestWrap_Default', @RunTTestMigLCTestWrap_Default);
+  lSuite.AddTest('TestWrap_AfterCount', @RunTTestMigLCTestWrap_AfterCount);
+  lSuite.AddTest('TestFill_Both', @RunTTestMigLCTestFill_Both);
+  lSuite.AddTest('TestFillX_Only', @RunTTestMigLCTestFillX_Only);
+  lSuite.AddTest('TestFillY_Only', @RunTTestMigLCTestFillY_Only);
+  lSuite.AddTest('TestInsetsAll', @RunTTestMigLCTestInsetsAll);
+  lSuite.AddTest('TestInsets_String', @RunTTestMigLCTestInsets_String);
+  lSuite.AddTest('TestInsets_Individual', @RunTTestMigLCTestInsets_Individual);
+  lSuite.AddTest('TestAlignX', @RunTTestMigLCTestAlignX);
+  lSuite.AddTest('TestAlignY', @RunTTestMigLCTestAlignY);
+  lSuite.AddTest('TestAlign_Both', @RunTTestMigLCTestAlign_Both);
+  lSuite.AddTest('TestGridGapX', @RunTTestMigLCTestGridGapX);
+  lSuite.AddTest('TestGridGapY', @RunTTestMigLCTestGridGapY);
+  lSuite.AddTest('TestGridGap_Both', @RunTTestMigLCTestGridGap_Both);
+  lSuite.AddTest('TestWidth', @RunTTestMigLCTestWidth);
+  lSuite.AddTest('TestMinWidth', @RunTTestMigLCTestMinWidth);
+  lSuite.AddTest('TestMaxWidth', @RunTTestMigLCTestMaxWidth);
+  lSuite.AddTest('TestHeight', @RunTTestMigLCTestHeight);
+  lSuite.AddTest('TestMinHeight', @RunTTestMigLCTestMinHeight);
+  lSuite.AddTest('TestMaxHeight', @RunTTestMigLCTestMaxHeight);
+  lSuite.AddTest('TestPack_Default', @RunTTestMigLCTestPack_Default);
+  lSuite.AddTest('TestPack_Sizes', @RunTTestMigLCTestPack_Sizes);
+  lSuite.AddTest('TestPackAlign', @RunTTestMigLCTestPackAlign);
+  lSuite.AddTest('TestLeftToRight_True', @RunTTestMigLCTestLeftToRight_True);
+  lSuite.AddTest('TestLeftToRight_False', @RunTTestMigLCTestLeftToRight_False);
+  lSuite.AddTest('TestRightToLeft', @RunTTestMigLCTestRightToLeft);
+  lSuite.AddTest('TestTopToBottom_Default', @RunTTestMigLCTestTopToBottom_Default);
+  lSuite.AddTest('TestTopToBottom_Explicit', @RunTTestMigLCTestTopToBottom_Explicit);
+  lSuite.AddTest('TestBottomToTop', @RunTTestMigLCTestBottomToTop);
+  lSuite.AddTest('TestNoGrid', @RunTTestMigLCTestNoGrid);
+  lSuite.AddTest('TestNoCache', @RunTTestMigLCTestNoCache);
+  lSuite.AddTest('TestNoVisualPadding', @RunTTestMigLCTestNoVisualPadding);
+  lSuite.AddTest('TestDebug_Default', @RunTTestMigLCTestDebug_Default);
+  lSuite.AddTest('TestHideMode_Integer', @RunTTestMigLCTestHideMode_Integer);
+  lSuite.AddTest('TestHideMode_Enum', @RunTTestMigLCTestHideMode_Enum);
+  lSuite.AddTest('TestFluentChaining', @RunTTestMigLCTestFluentChaining);
+  lSuite.AddTest('TestGetProperties', @RunTTestMigLCTestGetProperties);
+end;
 
 end.

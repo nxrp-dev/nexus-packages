@@ -5,20 +5,22 @@ unit tctimer;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit, testutils, testregistry,
   fpg_base,
   fpg_main;
 
 type
 
-  TTestFPGTimer = class(TTestCase)
+  TTestFPGTimer = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FSelfDestructTimer: TfpgTimer;
     FCallbackFired: Boolean;
     procedure SelfDestructCallback(Sender: TObject);
-  published
+  public
     procedure TestResetAllTimers_WithNilEntry;
     procedure TestCheckTimers_TimerSelfDestruct;
   end;
@@ -27,12 +29,14 @@ type
 procedure RegisterTests;
 
 
+procedure RegistertctimerTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestFPGTimer);
+  
 end;
 
 
@@ -75,8 +79,39 @@ begin
   // This should not raise an access violation
   fpgCheckTimers;
 
-  AssertTrue('Timer callback should have fired', FCallbackFired);
+  FContext.AssertTrue(FCallbackFired, 'Timer callback should have fired');
 end;
+
+procedure RunTTestFPGTimerTestResetAllTimers_WithNilEntry(AContext: TNXTestContext);
+var lFixture: TTestFPGTimer;
+begin
+  lFixture:=TTestFPGTimer.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestResetAllTimers_WithNilEntry';
+    lFixture.TestResetAllTimers_WithNilEntry;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGTimerTestCheckTimers_TimerSelfDestruct(AContext: TNXTestContext);
+var lFixture: TTestFPGTimer;
+begin
+  lFixture:=TTestFPGTimer.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCheckTimers_TimerSelfDestruct';
+    lFixture.TestCheckTimers_TimerSelfDestruct;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertctimerTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tctimer.TTestFPGTimer');
+  lSuite.AddTest('TestResetAllTimers_WithNilEntry', @RunTTestFPGTimerTestResetAllTimers_WithNilEntry);
+  lSuite.AddTest('TestCheckTimers_TimerSelfDestruct', @RunTTestFPGTimerTestCheckTimers_TimerSelfDestruct);
+end;
+
 
 initialization
   RegisterTests;

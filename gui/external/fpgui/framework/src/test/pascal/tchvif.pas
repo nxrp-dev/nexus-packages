@@ -10,7 +10,7 @@
     7. Real-file parse: Alert_Idea.hvif from Haiku source tree
     8. Image rendering: GetImage returns a TfpgImage of correct size
 
-  All stream building uses the exact byte encoding documented in
+  All stream building uses obNXTestContext, obNXTestRegistry, obNXTestSuite, the exact byte encoding documented in
   FlatIconFormat.cpp — this means tests also serve as format regression tests.
 }
 unit tchvif;
@@ -21,14 +21,16 @@ interface
 
 uses
   Classes, SysUtils,
-  fpcunit, testregistry,
   fpg_hvif,
   fpg_hvif_model;
 
 type
 
-  TTestHvifEncoding = class(TTestCase)
-  published
+  TTestHvifEncoding = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     { --- magic --- }
     procedure TestMagicAccepted;
     procedure TestWrongMagicRaisesFormatError;
@@ -80,6 +82,8 @@ type
 
 procedure RegisterTests;
 
+
+procedure RegistertchvifTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -236,9 +240,9 @@ var
 begin
   icon := LoadHvifFromBytes(MinimalHvif);
   try
-    CheckEquals(0, icon.StyleCount, 'style count');
-    CheckEquals(0, icon.PathCount,  'path count');
-    CheckEquals(0, icon.ShapeCount, 'shape count');
+    FContext.AssertTrue((0)=(icon.StyleCount), 'style count');
+    FContext.AssertTrue((0)=(icon.PathCount), 'path count');
+    FContext.AssertTrue((0)=(icon.ShapeCount), 'shape count');
   finally
     icon.Free;
   end;
@@ -252,7 +256,7 @@ begin
   data[0] := $FF;  { corrupt first magic byte }
   try
     LoadHvifFromBytes(data).Free;
-    Fail('Expected EHvifFormatError was not raised');
+    FContext.Fail('Expected EHvifFormatError was not raised');
   except
     on EHvifFormatError do
       begin end; { expected - pass }
@@ -270,7 +274,7 @@ begin
   Move(data[0], truncated[0], 4);
   try
     LoadHvifFromBytes(truncated).Free;
-    Fail('Expected EHvifParseError was not raised');
+    FContext.Fail('Expected EHvifParseError was not raised');
   except
     on EHvifFormatError do
       begin end; { acceptable - format / parse error hierarchy }
@@ -321,7 +325,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count');
     finally
       icon.Free;
     end;
@@ -350,7 +354,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count');
     finally
       icon.Free;
     end;
@@ -379,7 +383,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count');
     finally
       icon.Free;
     end;
@@ -413,7 +417,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count for extended coord');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count for extended coord');
     finally
       icon.Free;
     end;
@@ -445,7 +449,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count for extended negative coord');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count for extended negative coord');
     finally
       icon.Free;
     end;
@@ -470,9 +474,9 @@ var
   b0, b1, b2: Byte;
 begin
   EncodeFloat24(0.0, b0, b1, b2);
-  CheckEquals(0, b0, 'zero: b0');
-  CheckEquals(0, b1, 'zero: b1');
-  CheckEquals(0, b2, 'zero: b2');
+  FContext.AssertTrue((0)=(b0), 'zero: b0');
+  FContext.AssertTrue((0)=(b1), 'zero: b1');
+  FContext.AssertTrue((0)=(b2), 'zero: b2');
 end;
 
 procedure TTestHvifEncoding.TestReadFloat24_One;
@@ -483,9 +487,9 @@ var
   b0, b1, b2: Byte;
 begin
   EncodeFloat24(1.0, b0, b1, b2);
-  CheckEquals($40, b0, 'one: b0');
-  CheckEquals($00, b1, 'one: b1');
-  CheckEquals($00, b2, 'one: b2');
+  FContext.AssertTrue(($40)=(b0), 'one: b0');
+  FContext.AssertTrue(($00)=(b1), 'one: b1');
+  FContext.AssertTrue(($00)=(b2), 'one: b2');
 end;
 
 procedure TTestHvifEncoding.TestReadFloat24_Negative;
@@ -496,9 +500,9 @@ var
   b0, b1, b2: Byte;
 begin
   EncodeFloat24(-1.0, b0, b1, b2);
-  CheckEquals($C0, b0, 'neg-one: b0');
-  CheckEquals($00, b1, 'neg-one: b1');
-  CheckEquals($00, b2, 'neg-one: b2');
+  FContext.AssertTrue(($C0)=(b0), 'neg-one: b0');
+  FContext.AssertTrue(($00)=(b1), 'neg-one: b1');
+  FContext.AssertTrue(($00)=(b2), 'neg-one: b2');
 end;
 
 procedure TTestHvifEncoding.TestReadFloat24_ThirtyTwo;
@@ -510,9 +514,9 @@ var
   b0, b1, b2: Byte;
 begin
   EncodeFloat24(32.0, b0, b1, b2);
-  CheckEquals($4A, b0, '32.0: b0');
-  CheckEquals($00, b1, '32.0: b1');
-  CheckEquals($00, b2, '32.0: b2');
+  FContext.AssertTrue(($4A)=(b0), '32.0: b0');
+  FContext.AssertTrue(($00)=(b1), '32.0: b1');
+  FContext.AssertTrue(($00)=(b2), '32.0: b2');
 end;
 
 procedure TTestHvifEncoding.TestReadFloat24_Half;
@@ -523,9 +527,9 @@ var
   b0, b1, b2: Byte;
 begin
   EncodeFloat24(0.5, b0, b1, b2);
-  CheckEquals($3E, b0, '0.5: b0');
-  CheckEquals($00, b1, '0.5: b1');
-  CheckEquals($00, b2, '0.5: b2');
+  FContext.AssertTrue(($3E)=(b0), '0.5: b0');
+  FContext.AssertTrue(($00)=(b1), '0.5: b1');
+  FContext.AssertTrue(($00)=(b2), '0.5: b2');
 end;
 
 
@@ -552,7 +556,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.StyleCount, 'style count');
+      FContext.AssertTrue((1)=(icon.StyleCount), 'style count');
     finally
       icon.Free;
     end;
@@ -581,7 +585,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.StyleCount, 'style count');
+      FContext.AssertTrue((1)=(icon.StyleCount), 'style count');
     finally
       icon.Free;
     end;
@@ -609,7 +613,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.StyleCount, 'style count');
+      FContext.AssertTrue((1)=(icon.StyleCount), 'style count');
     finally
       icon.Free;
     end;
@@ -636,7 +640,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.StyleCount, 'style count');
+      FContext.AssertTrue((1)=(icon.StyleCount), 'style count');
     finally
       icon.Free;
     end;
@@ -706,7 +710,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.StyleCount, 'gradient style count');
+      FContext.AssertTrue((1)=(icon.StyleCount), 'gradient style count');
     finally
       icon.Free;
     end;
@@ -740,7 +744,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count');
     finally
       icon.Free;
     end;
@@ -782,7 +786,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count');
     finally
       icon.Free;
     end;
@@ -822,7 +826,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count for HV command path');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count for HV command path');
     finally
       icon.Free;
     end;
@@ -859,7 +863,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.PathCount, 'path count for CURVE command');
+      FContext.AssertTrue((1)=(icon.PathCount), 'path count for CURVE command');
     finally
       icon.Free;
     end;
@@ -920,7 +924,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.ShapeCount, 'shape count');
+      FContext.AssertTrue((1)=(icon.ShapeCount), 'shape count');
     finally
       icon.Free;
     end;
@@ -948,7 +952,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.ShapeCount, 'shape count with translation');
+      FContext.AssertTrue((1)=(icon.ShapeCount), 'shape count with translation');
     finally
       icon.Free;
     end;
@@ -984,7 +988,7 @@ begin
     ms.Position := 0;
     icon := THvifIcon.CreateFromStream(ms);
     try
-      CheckEquals(1, icon.ShapeCount, 'shape count with transform');
+      FContext.AssertTrue((1)=(icon.ShapeCount), 'shape count with transform');
     finally
       icon.Free;
     end;
@@ -1014,11 +1018,11 @@ begin
 
   icon := THvifIcon.CreateFromFile(HvifPath);
   try
-    CheckTrue(icon.StyleCount > 0,  'Alert_Idea: must have styles');
-    CheckTrue(icon.PathCount  > 0,  'Alert_Idea: must have paths');
-    CheckTrue(icon.ShapeCount > 0,  'Alert_Idea: must have shapes');
+    FContext.AssertTrue(icon.StyleCount > 0, 'Alert_Idea: must have styles');
+    FContext.AssertTrue(icon.PathCount  > 0, 'Alert_Idea: must have paths');
+    FContext.AssertTrue(icon.ShapeCount > 0, 'Alert_Idea: must have shapes');
     { From hex analysis: 5 styles in the file }
-    CheckEquals(5, icon.StyleCount, 'Alert_Idea: expected 5 styles');
+    FContext.AssertTrue((5)=(icon.StyleCount), 'Alert_Idea: expected 5 styles');
   finally
     icon.Free;
   end;
@@ -1043,9 +1047,9 @@ begin
     icon := THvifIcon.CreateFromStream(ms);
     try
       img := icon.GetImage(32, 32);
-      CheckNotNull(img, 'GetImage must return non-nil');
-      CheckEquals(32, img.Width,  'image width');
-      CheckEquals(32, img.Height, 'image height');
+      FContext.AssertTrue((img)<>nil, 'GetImage must return non-nil');
+      FContext.AssertTrue((32)=(img.Width), 'image width');
+      FContext.AssertTrue((32)=(img.Height), 'image height');
     finally
       icon.Free;
     end;
@@ -1071,9 +1075,9 @@ begin
     try
       img1 := icon.GetImage(24, 24);
       img2 := icon.GetImage(24, 24);
-      CheckSame(img1, img2, 'GetImage(24,24) should return cached instance');
+      FContext.AssertTrue((img1)=(img2), 'GetImage(24,24) should return cached instance');
       { Different size must produce a different image }
-      CheckTrue(icon.GetImage(48, 48) <> img1, 'different size must not be cached');
+      FContext.AssertTrue(icon.GetImage(48, 48) <> img1, 'different size must not be cached');
     finally
       icon.Free;
     end;
@@ -1089,8 +1093,351 @@ end;
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestHvifEncoding);
+  
 end;
+
+procedure RunTTestHvifEncodingTestMagicAccepted(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMagicAccepted';
+    lFixture.TestMagicAccepted;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestWrongMagicRaisesFormatError(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWrongMagicRaisesFormatError';
+    lFixture.TestWrongMagicRaisesFormatError;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestTruncatedStreamRaisesParseError(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTruncatedStreamRaisesParseError';
+    lFixture.TestTruncatedStreamRaisesParseError;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadCoord_Simple_Zero(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadCoord_Simple_Zero';
+    lFixture.TestReadCoord_Simple_Zero;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadCoord_Simple_Negative(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadCoord_Simple_Negative';
+    lFixture.TestReadCoord_Simple_Negative;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadCoord_Simple_Positive(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadCoord_Simple_Positive';
+    lFixture.TestReadCoord_Simple_Positive;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadCoord_Extended_Center(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadCoord_Extended_Center';
+    lFixture.TestReadCoord_Extended_Center;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadCoord_Extended_Negative(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadCoord_Extended_Negative';
+    lFixture.TestReadCoord_Extended_Negative;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadFloat24_Zero(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat24_Zero';
+    lFixture.TestReadFloat24_Zero;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadFloat24_One(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat24_One';
+    lFixture.TestReadFloat24_One;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadFloat24_Negative(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat24_Negative';
+    lFixture.TestReadFloat24_Negative;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadFloat24_ThirtyTwo(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat24_ThirtyTwo';
+    lFixture.TestReadFloat24_ThirtyTwo;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestReadFloat24_Half(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat24_Half';
+    lFixture.TestReadFloat24_Half;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseSolidColor(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseSolidColor';
+    lFixture.TestParseSolidColor;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseSolidColorNoAlpha(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseSolidColorNoAlpha';
+    lFixture.TestParseSolidColorNoAlpha;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseSolidGray(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseSolidGray';
+    lFixture.TestParseSolidGray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseSolidGrayNoAlpha(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseSolidGrayNoAlpha';
+    lFixture.TestParseSolidGrayNoAlpha;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseGradientStyle(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseGradientStyle';
+    lFixture.TestParseGradientStyle;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseNoCurvesPath(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseNoCurvesPath';
+    lFixture.TestParseNoCurvesPath;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseCurvesPath(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseCurvesPath';
+    lFixture.TestParseCurvesPath;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseCommandPath_HVLines(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseCommandPath_HVLines';
+    lFixture.TestParseCommandPath_HVLines;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseCommandPath_Curve(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseCommandPath_Curve';
+    lFixture.TestParseCommandPath_Curve;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseShape_NoTransform(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseShape_NoTransform';
+    lFixture.TestParseShape_NoTransform;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseShape_WithTranslation(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseShape_WithTranslation';
+    lFixture.TestParseShape_WithTranslation;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseShape_WithTransform(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseShape_WithTransform';
+    lFixture.TestParseShape_WithTransform;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestParseAlertIdeaHvif(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestParseAlertIdeaHvif';
+    lFixture.TestParseAlertIdeaHvif;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestGetImageSize(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetImageSize';
+    lFixture.TestGetImageSize;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHvifEncodingTestGetImageCached(AContext: TNXTestContext);
+var lFixture: TTestHvifEncoding;
+begin
+  lFixture:=TTestHvifEncoding.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetImageCached';
+    lFixture.TestGetImageCached;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertchvifTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tchvif.TTestHvifEncoding');
+  lSuite.AddTest('TestMagicAccepted', @RunTTestHvifEncodingTestMagicAccepted);
+  lSuite.AddTest('TestWrongMagicRaisesFormatError', @RunTTestHvifEncodingTestWrongMagicRaisesFormatError);
+  lSuite.AddTest('TestTruncatedStreamRaisesParseError', @RunTTestHvifEncodingTestTruncatedStreamRaisesParseError);
+  lSuite.AddTest('TestReadCoord_Simple_Zero', @RunTTestHvifEncodingTestReadCoord_Simple_Zero);
+  lSuite.AddTest('TestReadCoord_Simple_Negative', @RunTTestHvifEncodingTestReadCoord_Simple_Negative);
+  lSuite.AddTest('TestReadCoord_Simple_Positive', @RunTTestHvifEncodingTestReadCoord_Simple_Positive);
+  lSuite.AddTest('TestReadCoord_Extended_Center', @RunTTestHvifEncodingTestReadCoord_Extended_Center);
+  lSuite.AddTest('TestReadCoord_Extended_Negative', @RunTTestHvifEncodingTestReadCoord_Extended_Negative);
+  lSuite.AddTest('TestReadFloat24_Zero', @RunTTestHvifEncodingTestReadFloat24_Zero);
+  lSuite.AddTest('TestReadFloat24_One', @RunTTestHvifEncodingTestReadFloat24_One);
+  lSuite.AddTest('TestReadFloat24_Negative', @RunTTestHvifEncodingTestReadFloat24_Negative);
+  lSuite.AddTest('TestReadFloat24_ThirtyTwo', @RunTTestHvifEncodingTestReadFloat24_ThirtyTwo);
+  lSuite.AddTest('TestReadFloat24_Half', @RunTTestHvifEncodingTestReadFloat24_Half);
+  lSuite.AddTest('TestParseSolidColor', @RunTTestHvifEncodingTestParseSolidColor);
+  lSuite.AddTest('TestParseSolidColorNoAlpha', @RunTTestHvifEncodingTestParseSolidColorNoAlpha);
+  lSuite.AddTest('TestParseSolidGray', @RunTTestHvifEncodingTestParseSolidGray);
+  lSuite.AddTest('TestParseSolidGrayNoAlpha', @RunTTestHvifEncodingTestParseSolidGrayNoAlpha);
+  lSuite.AddTest('TestParseGradientStyle', @RunTTestHvifEncodingTestParseGradientStyle);
+  lSuite.AddTest('TestParseNoCurvesPath', @RunTTestHvifEncodingTestParseNoCurvesPath);
+  lSuite.AddTest('TestParseCurvesPath', @RunTTestHvifEncodingTestParseCurvesPath);
+  lSuite.AddTest('TestParseCommandPath_HVLines', @RunTTestHvifEncodingTestParseCommandPath_HVLines);
+  lSuite.AddTest('TestParseCommandPath_Curve', @RunTTestHvifEncodingTestParseCommandPath_Curve);
+  lSuite.AddTest('TestParseShape_NoTransform', @RunTTestHvifEncodingTestParseShape_NoTransform);
+  lSuite.AddTest('TestParseShape_WithTranslation', @RunTTestHvifEncodingTestParseShape_WithTranslation);
+  lSuite.AddTest('TestParseShape_WithTransform', @RunTTestHvifEncodingTestParseShape_WithTransform);
+  lSuite.AddTest('TestParseAlertIdeaHvif', @RunTTestHvifEncodingTestParseAlertIdeaHvif);
+  lSuite.AddTest('TestGetImageSize', @RunTTestHvifEncodingTestGetImageSize);
+  lSuite.AddTest('TestGetImageCached', @RunTTestHvifEncodingTestGetImageCached);
+end;
+
 
 
 initialization

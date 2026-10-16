@@ -13,10 +13,8 @@ unit ide.test.highlight.renderer;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   fpg_base,
   ide.highlighter,
   ide.editor.theme,
@@ -27,16 +25,19 @@ type
 
   { TTestBuildRenderSegments }
 
-  TTestBuildRenderSegments = class(TTestCase)
+  TTestBuildRenderSegments = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FHL: TPascalHighlighter;
     FTheme: TEditorTheme;
     FNoMatch: TBracketMatchResult;
     procedure SetupSource(const ASource: string);
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     procedure TestEmptyLine;
     procedure TestNilTokensDrawsPlain;
     procedure TestSingleKeyword;
@@ -51,12 +52,15 @@ type
 
   { TTestBuildPatchSegments }
 
-  TTestBuildPatchSegments = class(TTestCase)
+  TTestBuildPatchSegments = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FTheme: TEditorTheme;
   protected
-    procedure SetUp; override;
-  published
+    procedure SetUp; virtual;
+  public
     procedure TestAddedLine;
     procedure TestRemovedLine;
     procedure TestHunkHeader;
@@ -68,11 +72,16 @@ type
 
   { TTestHighlighterCache }
 
-  TTestHighlighterCache = class(TTestCase)
-  published
+  TTestHighlighterCache = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestCreateDestroy;
     procedure TestInvalidateEditor;
   end;
+
+procedure RegisteridetesthighlightrendererTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -101,7 +110,7 @@ var
 begin
   SetupSource('');
   segs := BuildRenderSegments(FHL, '', 0, FTheme, FNoMatch, False);
-  AssertEquals('empty line should produce no segments', 0, Length(segs));
+  FContext.AssertTrue((0)=(Length(segs)), 'empty line should produce no segments');
 end;
 
 procedure TTestBuildRenderSegments.TestNilTokensDrawsPlain;
@@ -112,13 +121,11 @@ begin
   SetupSource('program test;');
   segs := BuildRenderSegments(FHL, 'some text', 999, FTheme, FNoMatch, False);
   { Should return a single plain-text segment }
-  AssertEquals('nil tokens should produce one plain segment', 1, Length(segs));
-  AssertEquals('plain segment column', 0, segs[0].Column);
-  AssertEquals('plain segment text', 'some text', segs[0].Text);
-  AssertTrue('plain segment uses default foreground',
-    segs[0].Foreground = FTheme.Chrome.Foreground);
-  AssertTrue('plain segment uses default background',
-    segs[0].Background = FTheme.Chrome.Background);
+  FContext.AssertTrue((1)=(Length(segs)), 'nil tokens should produce one plain segment');
+  FContext.AssertTrue((0)=(segs[0].Column), 'plain segment column');
+  FContext.AssertTrue(('some text')=(segs[0].Text), 'plain segment text');
+  FContext.AssertTrue(segs[0].Foreground = FTheme.Chrome.Foreground, 'plain segment uses default foreground');
+  FContext.AssertTrue(segs[0].Background = FTheme.Chrome.Background, 'plain segment uses default background');
 end;
 
 procedure TTestBuildRenderSegments.TestSingleKeyword;
@@ -129,17 +136,16 @@ var
 begin
   SetupSource('begin' + LineEnding + 'end.');
   segs := BuildRenderSegments(FHL, 'begin', 0, FTheme, FNoMatch, False);
-  AssertTrue('should have at least one segment', Length(segs) > 0);
+  FContext.AssertTrue(Length(segs) > 0, 'should have at least one segment');
   { Find the keyword segment }
   foundKw := False;
   for i := 0 to High(segs) do
     if segs[i].Text = 'begin' then
     begin
       foundKw := True;
-      AssertTrue('keyword should use keyword1 foreground',
-        segs[i].Foreground = FTheme.TokenStyles[hcKeyword1].Foreground);
+      FContext.AssertTrue(segs[i].Foreground = FTheme.TokenStyles[hcKeyword1].Foreground, 'keyword should use keyword1 foreground');
     end;
-  AssertTrue('should contain a begin keyword segment', foundKw);
+  FContext.AssertTrue(foundKw, 'should contain a begin keyword segment');
 end;
 
 procedure TTestBuildRenderSegments.TestGapBeforeToken;
@@ -149,10 +155,10 @@ begin
   { "  begin" — two spaces gap before keyword }
   SetupSource('  begin' + LineEnding + '  end.');
   segs := BuildRenderSegments(FHL, '  begin', 0, FTheme, FNoMatch, False);
-  AssertTrue('should have segments', Length(segs) > 0);
+  FContext.AssertTrue(Length(segs) > 0, 'should have segments');
   { First segment should be the gap (spaces) at column 0 }
-  AssertEquals('first segment should start at column 0', 0, segs[0].Column);
-  AssertEquals('gap text should be two spaces', '  ', segs[0].Text);
+  FContext.AssertTrue((0)=(segs[0].Column), 'first segment should start at column 0');
+  FContext.AssertTrue(('  ')=(segs[0].Text), 'gap text should be two spaces');
 end;
 
 procedure TTestBuildRenderSegments.TestMultipleTokens;
@@ -161,7 +167,7 @@ var
 begin
   SetupSource('var x: integer;');
   segs := BuildRenderSegments(FHL, 'var x: integer;', 0, FTheme, FNoMatch, False);
-  AssertTrue('should have multiple segments', Length(segs) > 2);
+  FContext.AssertTrue(Length(segs) > 2, 'should have multiple segments');
 end;
 
 procedure TTestBuildRenderSegments.TestBracketMatchHighlight;
@@ -186,7 +192,7 @@ begin
   for i := 0 to High(segs) do
     if (segs[i].Column = 0) and (segs[i].Background = FTheme.Chrome.BracketMatch) then
       foundHighlight := True;
-  AssertTrue('source bracket should have BracketMatch background', foundHighlight);
+  FContext.AssertTrue(foundHighlight, 'source bracket should have BracketMatch background');
 end;
 
 procedure TTestBuildRenderSegments.TestBracketMatchOnMatchLine;
@@ -210,7 +216,7 @@ begin
   for i := 0 to High(segs) do
     if (segs[i].Column = 2) and (segs[i].Background = FTheme.Chrome.BracketMatch) then
       foundHighlight := True;
-  AssertTrue('match bracket should have BracketMatch background', foundHighlight);
+  FContext.AssertTrue(foundHighlight, 'match bracket should have BracketMatch background');
 end;
 
 procedure TTestBuildRenderSegments.TestNoBracketMatchWhenDisabled;
@@ -230,8 +236,7 @@ begin
   { Pass AShowBracketMatch = False }
   segs := BuildRenderSegments(FHL, '(x)', 0, FTheme, match, False);
   for i := 0 to High(segs) do
-    AssertFalse('no segment should have BracketMatch bg when disabled',
-      segs[i].Background = FTheme.Chrome.BracketMatch);
+    FContext.AssertTrue(not (segs[i].Background = FTheme.Chrome.BracketMatch), 'no segment should have BracketMatch bg when disabled');
 end;
 
 procedure TTestBuildRenderSegments.TestTokenStyleForegroundFallback;
@@ -245,8 +250,7 @@ begin
   segs := BuildRenderSegments(FHL, '  begin', 0, FTheme, FNoMatch, False);
   { The gap/whitespace segment should use Chrome.Foreground }
   for i := 0 to High(segs) do
-    AssertFalse('no segment should have clNone foreground',
-      segs[i].Foreground = clNone);
+    FContext.AssertTrue(not (segs[i].Foreground = clNone), 'no segment should have clNone foreground');
 end;
 
 procedure TTestBuildRenderSegments.TestTokenStyleBackgroundFallback;
@@ -257,8 +261,7 @@ begin
   SetupSource('begin' + LineEnding + 'end.');
   segs := BuildRenderSegments(FHL, 'begin', 0, FTheme, FNoMatch, False);
   for i := 0 to High(segs) do
-    AssertFalse('no segment should have clNone background',
-      segs[i].Background = clNone);
+    FContext.AssertTrue(not (segs[i].Background = clNone), 'no segment should have clNone background');
 end;
 
 { TTestBuildPatchSegments }
@@ -273,8 +276,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('+added line', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('added line should be green', segs[0].Foreground = clGreen);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Foreground = clGreen, 'added line should be green');
 end;
 
 procedure TTestBuildPatchSegments.TestRemovedLine;
@@ -282,8 +285,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('-removed line', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('removed line should be red', segs[0].Foreground = clRed);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Foreground = clRed, 'removed line should be red');
 end;
 
 procedure TTestBuildPatchSegments.TestHunkHeader;
@@ -291,8 +294,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('@@ -1,5 +1,6 @@', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('hunk header should be blue', segs[0].Foreground = clBlue);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Foreground = clBlue, 'hunk header should be blue');
 end;
 
 procedure TTestBuildPatchSegments.TestLeftFile;
@@ -300,8 +303,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('--- a/file.pas', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('left file should be magenta', segs[0].Foreground = clMagenta);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Foreground = clMagenta, 'left file should be magenta');
 end;
 
 procedure TTestBuildPatchSegments.TestRightFile;
@@ -309,8 +312,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('+++ b/file.pas', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('right file should be magenta', segs[0].Foreground = clMagenta);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Foreground = clMagenta, 'right file should be magenta');
 end;
 
 procedure TTestBuildPatchSegments.TestStartOfFile;
@@ -318,9 +321,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments('diff --git a/file.pas b/file.pas', FTheme);
-  AssertTrue('should produce segments', Length(segs) > 0);
-  AssertTrue('start-of-file background should be clSilver',
-    segs[0].Background = clSilver);
+  FContext.AssertTrue(Length(segs) > 0, 'should produce segments');
+  FContext.AssertTrue(segs[0].Background = clSilver, 'start-of-file background should be clSilver');
 end;
 
 procedure TTestBuildPatchSegments.TestPlainLine;
@@ -328,9 +330,8 @@ var
   segs: TRenderSegmentArray;
 begin
   segs := BuildPatchRenderSegments(' context line', FTheme);
-  AssertTrue('should produce one segment', Length(segs) = 1);
-  AssertTrue('plain line should use default foreground',
-    segs[0].Foreground = FTheme.Chrome.Foreground);
+  FContext.AssertTrue(Length(segs) = 1, 'should produce one segment');
+  FContext.AssertTrue(segs[0].Foreground = FTheme.Chrome.Foreground, 'plain line should use default foreground');
 end;
 
 { TTestHighlighterCache }
@@ -341,9 +342,9 @@ var
 begin
   cache := THighlighterCache.Create;
   try
-    AssertNotNull('Pascal highlighter should be created', cache.PascalHighlighter);
-    AssertNotNull('INI highlighter should be created', cache.INIHighlighter);
-    AssertNotNull('XML highlighter should be created', cache.XMLHighlighter);
+    FContext.AssertTrue((cache.PascalHighlighter)<>nil, 'Pascal highlighter should be created');
+    FContext.AssertTrue((cache.INIHighlighter)<>nil, 'INI highlighter should be created');
+    FContext.AssertTrue((cache.XMLHighlighter)<>nil, 'XML highlighter should be created');
   finally
     cache.Free;
   end;
@@ -358,20 +359,266 @@ begin
     { Invalidate with nil should not crash }
     cache.InvalidateEditor(nil);
     { After invalidation, tracked editors should be nil }
-    AssertNull('Pascal editor should be nil after invalidation',
-      cache.PascalEditor);
-    AssertNull('INI editor should be nil after invalidation',
-      cache.INIEditor);
-    AssertNull('XML editor should be nil after invalidation',
-      cache.XMLEditor);
+    FContext.AssertTrue((cache.PascalEditor)=nil, 'Pascal editor should be nil after invalidation');
+    FContext.AssertTrue((cache.INIEditor)=nil, 'INI editor should be nil after invalidation');
+    FContext.AssertTrue((cache.XMLEditor)=nil, 'XML editor should be nil after invalidation');
   finally
     cache.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestBuildRenderSegments);
-  RegisterTest(TTestBuildPatchSegments);
-  RegisterTest(TTestHighlighterCache);
+
+procedure RunTTestBuildRenderSegmentsTestEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyLine';
+    lFixture.SetUp;
+    try lFixture.TestEmptyLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestNilTokensDrawsPlain(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNilTokensDrawsPlain';
+    lFixture.SetUp;
+    try lFixture.TestNilTokensDrawsPlain; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestSingleKeyword(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSingleKeyword';
+    lFixture.SetUp;
+    try lFixture.TestSingleKeyword; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestGapBeforeToken(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGapBeforeToken';
+    lFixture.SetUp;
+    try lFixture.TestGapBeforeToken; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestMultipleTokens(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMultipleTokens';
+    lFixture.SetUp;
+    try lFixture.TestMultipleTokens; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestBracketMatchHighlight(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBracketMatchHighlight';
+    lFixture.SetUp;
+    try lFixture.TestBracketMatchHighlight; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestBracketMatchOnMatchLine(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBracketMatchOnMatchLine';
+    lFixture.SetUp;
+    try lFixture.TestBracketMatchOnMatchLine; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestNoBracketMatchWhenDisabled(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoBracketMatchWhenDisabled';
+    lFixture.SetUp;
+    try lFixture.TestNoBracketMatchWhenDisabled; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestTokenStyleForegroundFallback(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTokenStyleForegroundFallback';
+    lFixture.SetUp;
+    try lFixture.TestTokenStyleForegroundFallback; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildRenderSegmentsTestTokenStyleBackgroundFallback(AContext: TNXTestContext);
+var lFixture: TTestBuildRenderSegments;
+begin
+  lFixture:=TTestBuildRenderSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTokenStyleBackgroundFallback';
+    lFixture.SetUp;
+    try lFixture.TestTokenStyleBackgroundFallback; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestAddedLine(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAddedLine';
+    lFixture.SetUp;
+    lFixture.TestAddedLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestRemovedLine(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRemovedLine';
+    lFixture.SetUp;
+    lFixture.TestRemovedLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestHunkHeader(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHunkHeader';
+    lFixture.SetUp;
+    lFixture.TestHunkHeader;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestLeftFile(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLeftFile';
+    lFixture.SetUp;
+    lFixture.TestLeftFile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestRightFile(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRightFile';
+    lFixture.SetUp;
+    lFixture.TestRightFile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestStartOfFile(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStartOfFile';
+    lFixture.SetUp;
+    lFixture.TestStartOfFile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestBuildPatchSegmentsTestPlainLine(AContext: TNXTestContext);
+var lFixture: TTestBuildPatchSegments;
+begin
+  lFixture:=TTestBuildPatchSegments.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPlainLine';
+    lFixture.SetUp;
+    lFixture.TestPlainLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlighterCacheTestCreateDestroy(AContext: TNXTestContext);
+var lFixture: TTestHighlighterCache;
+begin
+  lFixture:=TTestHighlighterCache.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCreateDestroy';
+    lFixture.TestCreateDestroy;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestHighlighterCacheTestInvalidateEditor(AContext: TNXTestContext);
+var lFixture: TTestHighlighterCache;
+begin
+  lFixture:=TTestHighlighterCache.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInvalidateEditor';
+    lFixture.TestInvalidateEditor;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetesthighlightrendererTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.highlight.renderer.TTestBuildRenderSegments');
+  lSuite.AddTest('TestEmptyLine', @RunTTestBuildRenderSegmentsTestEmptyLine);
+  lSuite.AddTest('TestNilTokensDrawsPlain', @RunTTestBuildRenderSegmentsTestNilTokensDrawsPlain);
+  lSuite.AddTest('TestSingleKeyword', @RunTTestBuildRenderSegmentsTestSingleKeyword);
+  lSuite.AddTest('TestGapBeforeToken', @RunTTestBuildRenderSegmentsTestGapBeforeToken);
+  lSuite.AddTest('TestMultipleTokens', @RunTTestBuildRenderSegmentsTestMultipleTokens);
+  lSuite.AddTest('TestBracketMatchHighlight', @RunTTestBuildRenderSegmentsTestBracketMatchHighlight);
+  lSuite.AddTest('TestBracketMatchOnMatchLine', @RunTTestBuildRenderSegmentsTestBracketMatchOnMatchLine);
+  lSuite.AddTest('TestNoBracketMatchWhenDisabled', @RunTTestBuildRenderSegmentsTestNoBracketMatchWhenDisabled);
+  lSuite.AddTest('TestTokenStyleForegroundFallback', @RunTTestBuildRenderSegmentsTestTokenStyleForegroundFallback);
+  lSuite.AddTest('TestTokenStyleBackgroundFallback', @RunTTestBuildRenderSegmentsTestTokenStyleBackgroundFallback);
+  lSuite:=ARegistry.AddSuite('ide.test.highlight.renderer.TTestBuildPatchSegments');
+  lSuite.AddTest('TestAddedLine', @RunTTestBuildPatchSegmentsTestAddedLine);
+  lSuite.AddTest('TestRemovedLine', @RunTTestBuildPatchSegmentsTestRemovedLine);
+  lSuite.AddTest('TestHunkHeader', @RunTTestBuildPatchSegmentsTestHunkHeader);
+  lSuite.AddTest('TestLeftFile', @RunTTestBuildPatchSegmentsTestLeftFile);
+  lSuite.AddTest('TestRightFile', @RunTTestBuildPatchSegmentsTestRightFile);
+  lSuite.AddTest('TestStartOfFile', @RunTTestBuildPatchSegmentsTestStartOfFile);
+  lSuite.AddTest('TestPlainLine', @RunTTestBuildPatchSegmentsTestPlainLine);
+  lSuite:=ARegistry.AddSuite('ide.test.highlight.renderer.TTestHighlighterCache');
+  lSuite.AddTest('TestCreateDestroy', @RunTTestHighlighterCacheTestCreateDestroy);
+  lSuite.AddTest('TestInvalidateEditor', @RunTTestHighlighterCacheTestInvalidateEditor);
+end;
 
 end.

@@ -1,0 +1,16 @@
+[
+  {
+    "project": "FCLDB.nxpackage",
+    "build_exit": 0
+  },
+  {
+    "project": "tests/FCLDBTests.nxproject",
+    "build_exit": 0,
+    "run_exit": 0
+  },
+  {
+    "project": "tests/FCLDBRetained.nxproject",
+    "build_exit": 0,
+    "run_exit": 0
+  }
+]

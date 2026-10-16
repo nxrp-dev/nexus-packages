@@ -5,8 +5,7 @@ unit tcmig_grid;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry,
-  fpg_base,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpg_base,
   fpg_main,
   fpg_widget,
   fpg_miglayout,
@@ -17,8 +16,11 @@ type
 
   { TTestMigGrid }
 
-  TTestMigGrid = class(TTestCase)
-  published
+  TTestMigGrid = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     // CompWrap helper method tests
     procedure TestCorrectMinMax_AllInOrder;
     procedure TestCorrectMinMax_MinTooLarge;
@@ -49,11 +51,13 @@ type
 
 procedure RegisterTests;
 
+procedure RegistertcmiggridTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestMigGrid);
+  
 end;
 
 { TTestMigGrid }
@@ -71,9 +75,9 @@ begin
 
     cw.CorrectMinMax(sizes);
 
-    CheckEquals(50, sizes[SIZE_MIN], 'Min should remain unchanged');
-    CheckEquals(100, sizes[SIZE_PREF], 'Pref should remain unchanged');
-    CheckEquals(200, sizes[SIZE_MAX], 'Max should remain unchanged');
+    FContext.AssertTrue((50)=(sizes[SIZE_MIN]), 'Min should remain unchanged');
+    FContext.AssertTrue((100)=(sizes[SIZE_PREF]), 'Pref should remain unchanged');
+    FContext.AssertTrue((200)=(sizes[SIZE_MAX]), 'Max should remain unchanged');
   finally
     cw.Free;
   end;
@@ -92,9 +96,9 @@ begin
 
     cw.CorrectMinMax(sizes);
 
-    CheckEquals(200, sizes[SIZE_MIN], 'Min should be clamped to Max');
-    CheckEquals(200, sizes[SIZE_PREF], 'Pref should be clamped to Max');
-    CheckEquals(200, sizes[SIZE_MAX], 'Max should remain unchanged');
+    FContext.AssertTrue((200)=(sizes[SIZE_MIN]), 'Min should be clamped to Max');
+    FContext.AssertTrue((200)=(sizes[SIZE_PREF]), 'Pref should be clamped to Max');
+    FContext.AssertTrue((200)=(sizes[SIZE_MAX]), 'Max should remain unchanged');
   finally
     cw.Free;
   end;
@@ -113,9 +117,9 @@ begin
 
     cw.CorrectMinMax(sizes);
 
-    CheckEquals(100, sizes[SIZE_MIN], 'Min should remain unchanged');
-    CheckEquals(100, sizes[SIZE_PREF], 'Pref should be raised to Min');
-    CheckEquals(200, sizes[SIZE_MAX], 'Max should remain unchanged');
+    FContext.AssertTrue((100)=(sizes[SIZE_MIN]), 'Min should remain unchanged');
+    FContext.AssertTrue((100)=(sizes[SIZE_PREF]), 'Pref should be raised to Min');
+    FContext.AssertTrue((200)=(sizes[SIZE_MAX]), 'Max should remain unchanged');
   finally
     cw.Free;
   end;
@@ -134,9 +138,9 @@ begin
 
     cw.CorrectMinMax(sizes);
 
-    CheckEquals(50, sizes[SIZE_MIN], 'Min should remain unchanged');
-    CheckEquals(200, sizes[SIZE_PREF], 'Pref should be clamped to Max');
-    CheckEquals(200, sizes[SIZE_MAX], 'Max should remain unchanged');
+    FContext.AssertTrue((50)=(sizes[SIZE_MIN]), 'Min should remain unchanged');
+    FContext.AssertTrue((200)=(sizes[SIZE_PREF]), 'Pref should be clamped to Max');
+    FContext.AssertTrue((200)=(sizes[SIZE_MAX]), 'Max should remain unchanged');
   finally
     cw.Free;
   end;
@@ -155,9 +159,9 @@ begin
 
     cw.CorrectMinMax(sizes);
 
-    CheckEquals(200, sizes[SIZE_MIN], 'Min should be clamped to Max');
-    CheckEquals(200, sizes[SIZE_PREF], 'Pref should be clamped to corrected Min');
-    CheckEquals(200, sizes[SIZE_MAX], 'Max should remain unchanged');
+    FContext.AssertTrue((200)=(sizes[SIZE_MIN]), 'Min should be clamped to Max');
+    FContext.AssertTrue((200)=(sizes[SIZE_PREF]), 'Pref should be clamped to corrected Min');
+    FContext.AssertTrue((200)=(sizes[SIZE_MAX]), 'Max should remain unchanged');
   finally
     cw.Free;
   end;
@@ -169,8 +173,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(100, cw.ConstrainSize(100), 'Positive value should pass through');
-    CheckEquals(1, cw.ConstrainSize(1), 'Small positive value should pass through');
+    FContext.AssertTrue((100)=(cw.ConstrainSize(100)), 'Positive value should pass through');
+    FContext.AssertTrue((1)=(cw.ConstrainSize(1)), 'Small positive value should pass through');
   finally
     cw.Free;
   end;
@@ -182,7 +186,7 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.ConstrainSize(0), 'Zero should return 0');
+    FContext.AssertTrue((0)=(cw.ConstrainSize(0)), 'Zero should return 0');
   finally
     cw.Free;
   end;
@@ -194,8 +198,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.ConstrainSize(-10), 'Negative value should return 0');
-    CheckEquals(0, cw.ConstrainSize(-100), 'Large negative value should return 0');
+    FContext.AssertTrue((0)=(cw.ConstrainSize(-10)), 'Negative value should return 0');
+    FContext.AssertTrue((0)=(cw.ConstrainSize(-100)), 'Large negative value should return 0');
   finally
     cw.Free;
   end;
@@ -207,7 +211,7 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(INF, cw.ConstrainSize(INF), 'INF should pass through');
+    FContext.AssertTrue((INF)=(cw.ConstrainSize(INF)), 'INF should pass through');
   finally
     cw.Free;
   end;
@@ -219,8 +223,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(INF, cw.ConstrainSize(INF + 1000), 'Value above INF should be clamped to INF');
-    CheckEquals(INF, cw.ConstrainSize(High(Integer)), 'MaxInt should be clamped to INF');
+    FContext.AssertTrue((INF)=(cw.ConstrainSize(INF + 1000)), 'Value above INF should be clamped to INF');
+    FContext.AssertTrue((INF)=(cw.ConstrainSize(High(Integer))), 'MaxInt should be clamped to INF');
   finally
     cw.Free;
   end;
@@ -232,8 +236,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.GetGapIx(False, True), 'Top (vertical, true) should be index 0');
-    CheckEquals(1, cw.GetGapIx(True, True), 'Left (horizontal, true) should be index 1');
+    FContext.AssertTrue((0)=(cw.GetGapIx(False, True)), 'Top (vertical, true) should be index 0');
+    FContext.AssertTrue((1)=(cw.GetGapIx(True, True)), 'Left (horizontal, true) should be index 1');
   finally
     cw.Free;
   end;
@@ -245,8 +249,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.GetGapIx(False, True), 'Top should be index 0');
-    CheckEquals(3, cw.GetGapIx(True, False), 'Right (horizontal, false) should be index 3');
+    FContext.AssertTrue((0)=(cw.GetGapIx(False, True)), 'Top should be index 0');
+    FContext.AssertTrue((3)=(cw.GetGapIx(True, False)), 'Right (horizontal, false) should be index 3');
   finally
     cw.Free;
   end;
@@ -258,8 +262,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(2, cw.GetGapIx(False, False), 'Bottom (vertical, false) should be index 2');
-    CheckEquals(1, cw.GetGapIx(True, True), 'Left should be index 1');
+    FContext.AssertTrue((2)=(cw.GetGapIx(False, False)), 'Bottom (vertical, false) should be index 2');
+    FContext.AssertTrue((1)=(cw.GetGapIx(True, True)), 'Left should be index 1');
   finally
     cw.Free;
   end;
@@ -271,8 +275,8 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(2, cw.GetGapIx(False, False), 'Bottom should be index 2');
-    CheckEquals(3, cw.GetGapIx(True, False), 'Right should be index 3');
+    FContext.AssertTrue((2)=(cw.GetGapIx(False, False)), 'Bottom should be index 2');
+    FContext.AssertTrue((3)=(cw.GetGapIx(True, False)), 'Right should be index 3');
   finally
     cw.Free;
   end;
@@ -284,9 +288,9 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(100, cw.Filter(SIZE_MIN, 100), 'Valid MIN size should pass through');
-    CheckEquals(150, cw.Filter(SIZE_PREF, 150), 'Valid PREF size should pass through');
-    CheckEquals(200, cw.Filter(SIZE_MAX, 200), 'Valid MAX size should pass through');
+    FContext.AssertTrue((100)=(cw.Filter(SIZE_MIN, 100)), 'Valid MIN size should pass through');
+    FContext.AssertTrue((150)=(cw.Filter(SIZE_PREF, 150)), 'Valid PREF size should pass through');
+    FContext.AssertTrue((200)=(cw.Filter(SIZE_MAX, 200)), 'Valid MAX size should pass through');
   finally
     cw.Free;
   end;
@@ -298,7 +302,7 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.Filter(SIZE_MIN, NOT_SET), 'NOT_SET for MIN should return 0');
+    FContext.AssertTrue((0)=(cw.Filter(SIZE_MIN, NOT_SET)), 'NOT_SET for MIN should return 0');
   finally
     cw.Free;
   end;
@@ -310,7 +314,7 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(0, cw.Filter(SIZE_PREF, NOT_SET), 'NOT_SET for PREF should return 0');
+    FContext.AssertTrue((0)=(cw.Filter(SIZE_PREF, NOT_SET)), 'NOT_SET for PREF should return 0');
   finally
     cw.Free;
   end;
@@ -322,7 +326,7 @@ var
 begin
   cw := TfpgMigCompWrap.Create(nil, nil, 0, False);
   try
-    CheckEquals(INF, cw.Filter(SIZE_MAX, NOT_SET), 'NOT_SET for MAX should return INF');
+    FContext.AssertTrue((INF)=(cw.Filter(SIZE_MAX, NOT_SET)), 'NOT_SET for MAX should return INF');
   finally
     cw.Free;
   end;
@@ -363,8 +367,8 @@ begin
 
       // With Split(2), both widgets should be on same row (same Y position)
       // Without Split, w2 would be below w1
-      CheckEquals(w1.Top, w2.Top, 'Both widgets should have same Y position (same row) due to Split');
-      CheckTrue(w2.Left > w1.Left, 'Second widget should be to the right of first widget');
+      FContext.AssertTrue((w1.Top)=(w2.Top), 'Both widgets should have same Y position (same row) due to Split');
+      FContext.AssertTrue(w2.Left > w1.Left, 'Second widget should be to the right of first widget');
     finally
       container.Free;
     end;
@@ -410,10 +414,10 @@ begin
       container.Realign;
 
       // With Split(3), all three widgets should be on same row (same Y position)
-      CheckEquals(w1.Top, w2.Top, 'Widgets 1 and 2 should have same Y position');
-      CheckEquals(w1.Top, w3.Top, 'Widgets 1 and 3 should have same Y position');
-      CheckTrue(w2.Left > w1.Left, 'Widget 2 should be to the right of widget 1');
-      CheckTrue(w3.Left > w2.Left, 'Widget 3 should be to the right of widget 2');
+      FContext.AssertTrue((w1.Top)=(w2.Top), 'Widgets 1 and 2 should have same Y position');
+      FContext.AssertTrue((w1.Top)=(w3.Top), 'Widgets 1 and 3 should have same Y position');
+      FContext.AssertTrue(w2.Left > w1.Left, 'Widget 2 should be to the right of widget 1');
+      FContext.AssertTrue(w3.Left > w2.Left, 'Widget 3 should be to the right of widget 2');
     finally
       container.Free;
     end;
@@ -421,6 +425,253 @@ begin
     fpgApplication.Terminate;
   end;
 end;
+
+procedure RunTTestMigGridTestCorrectMinMax_AllInOrder(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCorrectMinMax_AllInOrder';
+    lFixture.TestCorrectMinMax_AllInOrder;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestCorrectMinMax_MinTooLarge(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCorrectMinMax_MinTooLarge';
+    lFixture.TestCorrectMinMax_MinTooLarge;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestCorrectMinMax_PrefTooSmall(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCorrectMinMax_PrefTooSmall';
+    lFixture.TestCorrectMinMax_PrefTooSmall;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestCorrectMinMax_PrefTooLarge(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCorrectMinMax_PrefTooLarge';
+    lFixture.TestCorrectMinMax_PrefTooLarge;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestCorrectMinMax_AllNeedCorrection(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCorrectMinMax_AllNeedCorrection';
+    lFixture.TestCorrectMinMax_AllNeedCorrection;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestConstrainSize_PositiveValue(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstrainSize_PositiveValue';
+    lFixture.TestConstrainSize_PositiveValue;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestConstrainSize_Zero(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstrainSize_Zero';
+    lFixture.TestConstrainSize_Zero;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestConstrainSize_Negative(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstrainSize_Negative';
+    lFixture.TestConstrainSize_Negative;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestConstrainSize_INF(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstrainSize_INF';
+    lFixture.TestConstrainSize_INF;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestConstrainSize_AboveINF(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstrainSize_AboveINF';
+    lFixture.TestConstrainSize_AboveINF;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestGetGapIx_TopLeft(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetGapIx_TopLeft';
+    lFixture.TestGetGapIx_TopLeft;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestGetGapIx_TopRight(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetGapIx_TopRight';
+    lFixture.TestGetGapIx_TopRight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestGetGapIx_BottomLeft(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetGapIx_BottomLeft';
+    lFixture.TestGetGapIx_BottomLeft;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestGetGapIx_BottomRight(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetGapIx_BottomRight';
+    lFixture.TestGetGapIx_BottomRight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestFilter_ValidSize(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilter_ValidSize';
+    lFixture.TestFilter_ValidSize;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestFilter_NotSet_MinType(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilter_NotSet_MinType';
+    lFixture.TestFilter_NotSet_MinType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestFilter_NotSet_PrefType(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilter_NotSet_PrefType';
+    lFixture.TestFilter_NotSet_PrefType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestFilter_NotSet_MaxType(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilter_NotSet_MaxType';
+    lFixture.TestFilter_NotSet_MaxType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestSplit_TwoComponentsShareCell(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSplit_TwoComponentsShareCell';
+    lFixture.TestSplit_TwoComponentsShareCell;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigGridTestSplit_ThreeComponentsShareCell(AContext: TNXTestContext);
+var lFixture: TTestMigGrid;
+begin
+  lFixture:=TTestMigGrid.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSplit_ThreeComponentsShareCell';
+    lFixture.TestSplit_ThreeComponentsShareCell;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcmiggridTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcmig_grid.TTestMigGrid');
+  lSuite.AddTest('TestCorrectMinMax_AllInOrder', @RunTTestMigGridTestCorrectMinMax_AllInOrder);
+  lSuite.AddTest('TestCorrectMinMax_MinTooLarge', @RunTTestMigGridTestCorrectMinMax_MinTooLarge);
+  lSuite.AddTest('TestCorrectMinMax_PrefTooSmall', @RunTTestMigGridTestCorrectMinMax_PrefTooSmall);
+  lSuite.AddTest('TestCorrectMinMax_PrefTooLarge', @RunTTestMigGridTestCorrectMinMax_PrefTooLarge);
+  lSuite.AddTest('TestCorrectMinMax_AllNeedCorrection', @RunTTestMigGridTestCorrectMinMax_AllNeedCorrection);
+  lSuite.AddTest('TestConstrainSize_PositiveValue', @RunTTestMigGridTestConstrainSize_PositiveValue);
+  lSuite.AddTest('TestConstrainSize_Zero', @RunTTestMigGridTestConstrainSize_Zero);
+  lSuite.AddTest('TestConstrainSize_Negative', @RunTTestMigGridTestConstrainSize_Negative);
+  lSuite.AddTest('TestConstrainSize_INF', @RunTTestMigGridTestConstrainSize_INF);
+  lSuite.AddTest('TestConstrainSize_AboveINF', @RunTTestMigGridTestConstrainSize_AboveINF);
+  lSuite.AddTest('TestGetGapIx_TopLeft', @RunTTestMigGridTestGetGapIx_TopLeft);
+  lSuite.AddTest('TestGetGapIx_TopRight', @RunTTestMigGridTestGetGapIx_TopRight);
+  lSuite.AddTest('TestGetGapIx_BottomLeft', @RunTTestMigGridTestGetGapIx_BottomLeft);
+  lSuite.AddTest('TestGetGapIx_BottomRight', @RunTTestMigGridTestGetGapIx_BottomRight);
+  lSuite.AddTest('TestFilter_ValidSize', @RunTTestMigGridTestFilter_ValidSize);
+  lSuite.AddTest('TestFilter_NotSet_MinType', @RunTTestMigGridTestFilter_NotSet_MinType);
+  lSuite.AddTest('TestFilter_NotSet_PrefType', @RunTTestMigGridTestFilter_NotSet_PrefType);
+  lSuite.AddTest('TestFilter_NotSet_MaxType', @RunTTestMigGridTestFilter_NotSet_MaxType);
+  lSuite.AddTest('TestSplit_TwoComponentsShareCell', @RunTTestMigGridTestSplit_TwoComponentsShareCell);
+  lSuite.AddTest('TestSplit_ThreeComponentsShareCell', @RunTTestMigGridTestSplit_ThreeComponentsShareCell);
+end;
+
 
 initialization
   RegisterTests;

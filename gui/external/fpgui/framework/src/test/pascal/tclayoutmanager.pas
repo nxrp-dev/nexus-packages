@@ -5,11 +5,8 @@ unit tclayoutmanager;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testutils,
-  testregistry,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -23,18 +20,23 @@ type
     function DoGetPreferredSize(AContainer: TfpgWidgetBase): TfpgSize; override;
   end;
 
-  TTestLayoutManager = class(TTestCase)
-  published
+  TTestLayoutManager = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestAssignLayoutManager;
   end;
 
 procedure RegisterTests;
 
+procedure RegistertclayoutmanagerTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestLayoutManager);
+  
 end;
 
 { TDummyLayoutManager }
@@ -60,12 +62,31 @@ begin
   try
     lm := TDummyLayoutManager.Create as ILayoutManager;
     widget.LayoutManager := lm;
-    Check(Assigned(widget.LayoutManager), 'LayoutManager should be assigned');
-    Check(widget.LayoutManager = lm, 'Assigned LayoutManager should be the same instance');
+    FContext.AssertTrue(Assigned(widget.LayoutManager), 'LayoutManager should be assigned');
+    FContext.AssertTrue(widget.LayoutManager = lm, 'Assigned LayoutManager should be the same instance');
   finally
     widget.Free;
   end;
 end;
+
+procedure RunTTestLayoutManagerTestAssignLayoutManager(AContext: TNXTestContext);
+var lFixture: TTestLayoutManager;
+begin
+  lFixture:=TTestLayoutManager.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAssignLayoutManager';
+    lFixture.TestAssignLayoutManager;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertclayoutmanagerTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tclayoutmanager.TTestLayoutManager');
+  lSuite.AddTest('TestAssignLayoutManager', @RunTTestLayoutManagerTestAssignLayoutManager);
+end;
+
 
 initialization
   RegisterTests;

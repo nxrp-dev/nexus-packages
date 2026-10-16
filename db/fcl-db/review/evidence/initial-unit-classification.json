@@ -1,0 +1,378 @@
+[
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/bufdataset.pas",
+    "name": "bufdataset",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/bufdataset_parser.pas",
+    "name": "bufdataset_parser",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/csvdataset.pas",
+    "name": "csvdataset",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/db.pas",
+    "name": "db",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/dbcoll.pas",
+    "name": "dbcoll",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/dbconst.pas",
+    "name": "dbconst",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/dbwhtml.pas",
+    "name": "dbwhtml",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/fieldmap.pas",
+    "name": "fieldmap",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/sqlscript.pas",
+    "name": "sqlscript",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/sqltypes.pas",
+    "name": "sqltypes",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/base/xmldatapacketreader.pas",
+    "name": "xmldatapacketreader",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgcreatedbf.pas",
+    "name": "fpcgcreatedbf",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgdbcoll.pas",
+    "name": "fpcgdbcoll",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgfieldmap.pas",
+    "name": "fpcgfieldmap",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgsqlconst.pas",
+    "name": "fpcgsqlconst",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgtiopf.pas",
+    "name": "fpcgtiopf",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpcgtypesafedataset.pas",
+    "name": "fpcgtypesafedataset",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpddcodegen.pas",
+    "name": "fpddcodegen",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/codegen/fpddpopcode.pas",
+    "name": "fpddpopcode",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/datadict/fpdatadict.pas",
+    "name": "fpdatadict",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/datadict/fpdddbf.pas",
+    "name": "fpdddbf",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/datadict/fpdddiff.pas",
+    "name": "fpdddiff",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/datadict/fpddregstd.pas",
+    "name": "fpddregstd",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/datadict/fpddsqldb.pas",
+    "name": "fpddsqldb",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf.pas",
+    "name": "dbf",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_avl.pas",
+    "name": "dbf_avl",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_collate.pas",
+    "name": "dbf_collate",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_common.pas",
+    "name": "dbf_common",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_cursor.pas",
+    "name": "dbf_cursor",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_dbffile.pas",
+    "name": "dbf_dbffile",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_fields.pas",
+    "name": "dbf_fields",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_idxcur.pas",
+    "name": "dbf_idxcur",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_idxfile.pas",
+    "name": "dbf_idxfile",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_lang.pas",
+    "name": "dbf_lang",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_memo.pas",
+    "name": "dbf_memo",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_parser.pas",
+    "name": "dbf_parser",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_pgcfile.pas",
+    "name": "dbf_pgcfile",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_pgfile.pas",
+    "name": "dbf_pgfile",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_prscore.pas",
+    "name": "dbf_prscore",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_prsdef.pas",
+    "name": "dbf_prsdef",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_prssupp.pas",
+    "name": "dbf_prssupp",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_reg.pas",
+    "name": "dbf_reg",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str.pas",
+    "name": "dbf_str",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_es.pas",
+    "name": "dbf_str_es",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_fr.pas",
+    "name": "dbf_str_fr",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_ita.pas",
+    "name": "dbf_str_ita",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_nl.pas",
+    "name": "dbf_str_nl",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_pl.pas",
+    "name": "dbf_str_pl",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_pt.pas",
+    "name": "dbf_str_pt",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_str_ru.pas",
+    "name": "dbf_str_ru",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/dbf_wtil.pas",
+    "name": "dbf_wtil",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/dbase/tdbf_l.pas",
+    "name": "tdbf_l",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpcsvexport.pas",
+    "name": "fpcsvexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpdbexport.pas",
+    "name": "fpdbexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpdbfexport.pas",
+    "name": "fpdbfexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpfixedexport.pas",
+    "name": "fpfixedexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fprtfexport.pas",
+    "name": "fprtfexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpsimplejsonexport.pas",
+    "name": "fpsimplejsonexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpsimplexmlexport.pas",
+    "name": "fpsimplexmlexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpsqlexport.pas",
+    "name": "fpsqlexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpstdexports.pas",
+    "name": "fpstdexports",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fptexexport.pas",
+    "name": "fptexexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/export/fpxmlxsdexport.pas",
+    "name": "fpxmlxsdexport",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/json/extjsdataset.pas",
+    "name": "extjsdataset",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/json/fpjsondataset.pas",
+    "name": "fpjsondataset",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/memds/memds.pas",
+    "name": "memds",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sdf/sdfdata.pas",
+    "name": "sdfdata",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sql/fpsqlparser.pas",
+    "name": "fpsqlparser",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sql/fpsqlscanner.pas",
+    "name": "fpsqlscanner",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sql/fpsqltree.pas",
+    "name": "fpsqltree",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sqldb/sqldb.pas",
+    "name": "sqldb",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sqldb/sqldbini.pas",
+    "name": "sqldbini",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sqldb/sqldblib.pas",
+    "name": "sqldblib",
+    "build_exit": 0
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline-package/src/sqldb/sqldbpool.pas",
+    "name": "sqldbpool",
+    "build_exit": 1
+  },
+  {
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/FCLDBRetained.lpr",
+    "name": "FCLDBRetained",
+    "build_exit": 0,
+    "run_exit": 0
+  }
+]

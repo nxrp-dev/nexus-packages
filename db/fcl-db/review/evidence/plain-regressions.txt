@@ -1,0 +1,17 @@
+passed FCLDB.Review.01JSONRowSeparators   
+passed FCLDB.Review.02JSONEscaping   
+passed FCLDB.Review.03IntegerExportWidth   
+passed FCLDB.Review.04CSVSettingsAssignment   
+passed FCLDB.Review.05FieldMapCallback   
+passed FCLDB.Review.06JSONNumericComparisons   
+passed FCLDB.Review.07JSONLocateFullDataset   
+passed FCLDB.Review.08JSONBookmarks   
+passed FCLDB.Review.09JSONComparerItems   
+passed FCLDB.Review.10JSONFieldBuffers   
+passed FCLDB.Review.11JSONMissingLookup   
+passed FCLDB.Review.12BlobStreamOverwrite   
+passed FCLDB.Review.13PoolComponentOwnership   
+passed FCLDB.Review.14BinaryPacketTransfers   
+passed FCLDB.Review.15SQLNullExport   
+passed FCLDB.Review.16UTF16FixedExport   
+16 passed; 0 failed; 0 errors; 0 skipped

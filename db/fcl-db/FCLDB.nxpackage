@@ -1,0 +1,130 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLDB {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/db/fcl-db";
+    OutputRoot: "output/nxbuild-fcl-db/" + @Tools.Native.Name;
+
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLDB.SourceRoot + "/src/base/bufdataset.pas",
+            @FCLDB.SourceRoot + "/src/base/bufdataset_parser.pas",
+            @FCLDB.SourceRoot + "/src/base/csvdataset.pas",
+            @FCLDB.SourceRoot + "/src/base/db.pas",
+            @FCLDB.SourceRoot + "/src/base/dbcoll.pas",
+            @FCLDB.SourceRoot + "/src/base/dbconst.pas",
+            @FCLDB.SourceRoot + "/src/base/dbwhtml.pas",
+            @FCLDB.SourceRoot + "/src/base/fieldmap.pas",
+            @FCLDB.SourceRoot + "/src/base/sqlscript.pas",
+            @FCLDB.SourceRoot + "/src/base/sqltypes.pas",
+            @FCLDB.SourceRoot + "/src/base/xmldatapacketreader.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgcreatedbf.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgdbcoll.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgfieldmap.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgsqlconst.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgtiopf.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpcgtypesafedataset.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpddcodegen.pas",
+            @FCLDB.SourceRoot + "/src/codegen/fpddpopcode.pas",
+            @FCLDB.SourceRoot + "/src/datadict/fpdatadict.pas",
+            @FCLDB.SourceRoot + "/src/datadict/fpdddbf.pas",
+            @FCLDB.SourceRoot + "/src/datadict/fpdddiff.pas",
+            @FCLDB.SourceRoot + "/src/datadict/fpddregstd.pas",
+            @FCLDB.SourceRoot + "/src/datadict/fpddsqldb.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_avl.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_collate.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_common.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_cursor.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_dbffile.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_fields.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_idxcur.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_idxfile.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_lang.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_memo.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_parser.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_pgcfile.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_pgfile.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_prscore.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_prsdef.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_prssupp.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_str.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_str_ru.pas",
+            @FCLDB.SourceRoot + "/src/dbase/dbf_wtil.pas",
+            @FCLDB.SourceRoot + "/src/export/fpcsvexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpdbexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpdbfexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpfixedexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fprtfexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpsimplejsonexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpsimplexmlexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpsqlexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpstdexports.pas",
+            @FCLDB.SourceRoot + "/src/export/fptexexport.pas",
+            @FCLDB.SourceRoot + "/src/export/fpxmlxsdexport.pas",
+            @FCLDB.SourceRoot + "/src/json/extjsdataset.pas",
+            @FCLDB.SourceRoot + "/src/json/fpjsondataset.pas",
+            @FCLDB.SourceRoot + "/src/memds/memds.pas",
+            @FCLDB.SourceRoot + "/src/sdf/sdfdata.pas",
+            @FCLDB.SourceRoot + "/src/sql/fpsqlparser.pas",
+            @FCLDB.SourceRoot + "/src/sql/fpsqlscanner.pas",
+            @FCLDB.SourceRoot + "/src/sql/fpsqltree.pas",
+            @FCLDB.SourceRoot + "/src/sqldb/sqldb.pas",
+            @FCLDB.SourceRoot + "/src/sqldb/sqldbini.pas",
+            @FCLDB.SourceRoot + "/src/sqldb/sqldblib.pas",
+            @FCLDB.SourceRoot + "/src/sqldb/sqldbpool.pas"
+        ];
+        OutputPath: @FCLDB.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @FCLDB.OutputRoot,
+                @FCLDB.SourceRoot + "/src/base",
+                @FCLDB.SourceRoot + "/src/codegen",
+                @FCLDB.SourceRoot + "/src/datadict",
+                @FCLDB.SourceRoot + "/src/dbase",
+                @FCLDB.SourceRoot + "/src/export",
+                @FCLDB.SourceRoot + "/src/json",
+                @FCLDB.SourceRoot + "/src/memds",
+                @FCLDB.SourceRoot + "/src/sdf",
+                @FCLDB.SourceRoot + "/src/sql",
+                @FCLDB.SourceRoot + "/src/sqldb",
+                "packages/nexus-packages/serialization/fcl-json/src",
+                "packages/nexus-packages/serialization/fcl-xml/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/packages/hash/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
+            ];
+            IncludePaths: [
+                @FCLDB.SourceRoot + "/src/base",
+                @FCLDB.SourceRoot + "/src/dbase",
+                @FCLDB.SourceRoot + "/src/memds",
+                @FCLDB.SourceRoot + "/src/sdf",
+                @FCLDB.SourceRoot + "/src/sqldb",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+            ];
+        }
+    }
+}

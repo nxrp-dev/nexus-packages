@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package FCLDB {
+    Id: "NXRP.Database.FCLDB";
+    Author: "Michael Van Canneyt, Joost van der Sluis, TDbf authors and Free Pascal contributors";
+    Description: "Datasets, SQL parsing, SQLDB, DBF files, data dictionaries, generation and exports.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+}

@@ -5,9 +5,8 @@ unit tcasynctask;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit, testutils, testregistry,
   fpg_base,
   fpg_main,
   fpg_async;
@@ -48,8 +47,11 @@ type
 
   { TTestAsyncTask }
 
-  TTestAsyncTask = class(TTestCase)
-  published
+  TTestAsyncTask = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     { Synchronous path }
     procedure TestRunSynchronous_ExecutesAndCompletes;
     procedure TestRunSynchronous_PublishProgressDelivered;
@@ -62,8 +64,11 @@ type
 
   { TTestInvokeLater }
 
-  TTestInvokeLater = class(TTestCase)
-  published
+  TTestInvokeLater = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestInvokeLater_ExecutesOnMainThread;
   end;
 
@@ -71,13 +76,15 @@ type
 procedure RegisterTests;
 
 
+procedure RegistertcasynctaskTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestAsyncTask);
-  RegisterTest(TTestInvokeLater);
+  
+  
 end;
 
 
@@ -163,9 +170,9 @@ begin
   task := TTestSumTask.Create(1, 100);
   try
     task.RunSynchronous;
-    AssertTrue('OnComplete should have been called', task.CompleteCalled);
-    AssertEquals('Sum 1..100 = 5050', 5050, task.SumResult);
-    AssertEquals('No errors', '', task.ErrorMessage);
+    FContext.AssertTrue(task.CompleteCalled, 'OnComplete should have been called');
+    FContext.AssertTrue((5050)=(task.SumResult), 'Sum 1..100 = 5050');
+    FContext.AssertTrue(('')=(task.ErrorMessage), 'No errors');
   finally
     task.Free;
   end;
@@ -178,9 +185,8 @@ begin
   task := TTestSumTask.Create(1, 50);
   try
     task.RunSynchronous;
-    AssertEquals('Should have 5 progress lines', 5, task.ProgressLines.Count);
-    AssertTrue('First progress line should mention 10',
-      Pos('10', task.ProgressLines[0]) > 0);
+    FContext.AssertTrue((5)=(task.ProgressLines.Count), 'Should have 5 progress lines');
+    FContext.AssertTrue(Pos('10', task.ProgressLines[0]) > 0, 'First progress line should mention 10');
   finally
     task.Free;
   end;
@@ -193,9 +199,8 @@ begin
   task := TTestFailingTask.Create;
   try
     task.RunSynchronous;
-    AssertFalse('OnComplete should NOT be called on error', task.CompleteCalled);
-    AssertTrue('OnError should have the exception message',
-      Pos('deliberate test failure', task.ErrorMessage) > 0);
+    FContext.AssertTrue(not (task.CompleteCalled), 'OnComplete should NOT be called on error');
+    FContext.AssertTrue(Pos('deliberate test failure', task.ErrorMessage) > 0, 'OnError should have the exception message');
   finally
     task.Free;
   end;
@@ -220,8 +225,8 @@ begin
       Sleep(10);
       Inc(waited, 10);
     end;
-    AssertTrue('OnComplete should fire via Start path', task.CompleteCalled);
-    AssertEquals('Sum 1..100 = 5050 via threaded path', 5050, task.SumResult);
+    FContext.AssertTrue(task.CompleteCalled, 'OnComplete should fire via Start path');
+    FContext.AssertTrue((5050)=(task.SumResult), 'Sum 1..100 = 5050 via threaded path');
   finally
     task.Free;
   end;
@@ -242,8 +247,8 @@ begin
       Sleep(10);
       Inc(waited, 10);
     end;
-    AssertTrue('Task should have completed', task.CompleteCalled);
-    AssertEquals('Should have 5 progress lines via thread', 5, task.ProgressLines.Count);
+    FContext.AssertTrue(task.CompleteCalled, 'Task should have completed');
+    FContext.AssertTrue((5)=(task.ProgressLines.Count), 'Should have 5 progress lines via thread');
   finally
     task.Free;
   end;
@@ -264,9 +269,8 @@ begin
       Sleep(10);
       Inc(waited, 10);
     end;
-    AssertFalse('OnComplete should NOT fire on error via Start', task.CompleteCalled);
-    AssertTrue('OnError should fire via Start path',
-      Pos('deliberate test failure', task.ErrorMessage) > 0);
+    FContext.AssertTrue(not (task.CompleteCalled), 'OnComplete should NOT fire on error via Start');
+    FContext.AssertTrue(Pos('deliberate test failure', task.ErrorMessage) > 0, 'OnError should fire via Start path');
   finally
     task.Free;
   end;
@@ -290,8 +294,100 @@ begin
   { Since we're on the main thread, process pending messages to
     trigger the invoke }
   fpgApplication.ProcessMessages;
-  AssertEquals('fpgInvokeLater should have executed the proc', 42, GInvokeResult);
+  FContext.AssertTrue((42)=(GInvokeResult), 'fpgInvokeLater should have executed the proc');
 end;
+
+procedure RunTTestAsyncTaskTestRunSynchronous_ExecutesAndCompletes(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRunSynchronous_ExecutesAndCompletes';
+    lFixture.TestRunSynchronous_ExecutesAndCompletes;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestAsyncTaskTestRunSynchronous_PublishProgressDelivered(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRunSynchronous_PublishProgressDelivered';
+    lFixture.TestRunSynchronous_PublishProgressDelivered;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestAsyncTaskTestRunSynchronous_ErrorCallsOnError(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRunSynchronous_ErrorCallsOnError';
+    lFixture.TestRunSynchronous_ErrorCallsOnError;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestAsyncTaskTestStart_CompleteFiredOnMainThread(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStart_CompleteFiredOnMainThread';
+    lFixture.TestStart_CompleteFiredOnMainThread;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestAsyncTaskTestStart_ProgressDeliveredViaThread(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStart_ProgressDeliveredViaThread';
+    lFixture.TestStart_ProgressDeliveredViaThread;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestAsyncTaskTestStart_ErrorFiredOnMainThread(AContext: TNXTestContext);
+var lFixture: TTestAsyncTask;
+begin
+  lFixture:=TTestAsyncTask.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStart_ErrorFiredOnMainThread';
+    lFixture.TestStart_ErrorFiredOnMainThread;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestInvokeLaterTestInvokeLater_ExecutesOnMainThread(AContext: TNXTestContext);
+var lFixture: TTestInvokeLater;
+begin
+  lFixture:=TTestInvokeLater.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInvokeLater_ExecutesOnMainThread';
+    lFixture.TestInvokeLater_ExecutesOnMainThread;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcasynctaskTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcasynctask.TTestAsyncTask');
+  lSuite.AddTest('TestRunSynchronous_ExecutesAndCompletes', @RunTTestAsyncTaskTestRunSynchronous_ExecutesAndCompletes);
+  lSuite.AddTest('TestRunSynchronous_PublishProgressDelivered', @RunTTestAsyncTaskTestRunSynchronous_PublishProgressDelivered);
+  lSuite.AddTest('TestRunSynchronous_ErrorCallsOnError', @RunTTestAsyncTaskTestRunSynchronous_ErrorCallsOnError);
+  lSuite.AddTest('TestStart_CompleteFiredOnMainThread', @RunTTestAsyncTaskTestStart_CompleteFiredOnMainThread);
+  lSuite.AddTest('TestStart_ProgressDeliveredViaThread', @RunTTestAsyncTaskTestStart_ProgressDeliveredViaThread);
+  lSuite.AddTest('TestStart_ErrorFiredOnMainThread', @RunTTestAsyncTaskTestStart_ErrorFiredOnMainThread);
+  lSuite:=ARegistry.AddSuite('tcasynctask.TTestInvokeLater');
+  lSuite.AddTest('TestInvokeLater_ExecutesOnMainThread', @RunTTestInvokeLaterTestInvokeLater_ExecutesOnMainThread);
+end;
+
 
 
 initialization

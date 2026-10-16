@@ -5,14 +5,16 @@ unit tcmig_layoututil;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry,
-  fpg_mig_layoututil, fpg_mig_resizeconstraint, fpg_mig_boundsize,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpg_mig_layoututil, fpg_mig_resizeconstraint, fpg_mig_boundsize,
   fpg_mig_unitvalue;
 
 type
   { Test TfpgMigLayoutUtil }
-  TTestLayoutUtil = class(TTestCase)
-  published
+  TTestLayoutUtil = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestCalculateSerial_EqualPreferred;
     procedure TestCalculateSerial_GrowSingleComponent;
     procedure TestCalculateSerial_GrowMultipleWithPriority;
@@ -40,6 +42,8 @@ type
     procedure TestObjectEquals_BothSame;
     procedure TestObjectEquals_Different;
   end;
+
+procedure RegistertcmiglayoututilTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -71,9 +75,9 @@ begin
 
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 300);
 
-  AssertEquals('Component 0 size', 100, result[0]);
-  AssertEquals('Component 1 size', 100, result[1]);
-  AssertEquals('Component 2 size', 100, result[2]);
+  FContext.AssertTrue((100)=(result[0]), 'Component 0 size');
+  FContext.AssertTrue((100)=(result[1]), 'Component 1 size');
+  FContext.AssertTrue((100)=(result[2]), 'Component 2 size');
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_GrowSingleComponent;
@@ -100,7 +104,7 @@ begin
 
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 150);
 
-  AssertEquals('Component grew to fill space', 150, result[0]);
+  FContext.AssertTrue((150)=(result[0]), 'Component grew to fill space');
 
   // Cleanup
   rc.Free;
@@ -140,11 +144,11 @@ begin
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 250);
 
   // Each should get 25 pixels extra (total 250 = 200 + 50 extra)
-  AssertEquals('Component 0 size', 125, result[0]);
-  AssertEquals('Component 1 size', 125, result[1]);
+  FContext.AssertTrue((125)=(result[0]), 'Component 0 size');
+  FContext.AssertTrue((125)=(result[1]), 'Component 1 size');
 
   total := result[0] + result[1];
-  AssertEquals('Total size matches bounds', 250, total);
+  FContext.AssertTrue((250)=(total), 'Total size matches bounds');
 
   // Cleanup
   rc1.Free;
@@ -175,7 +179,7 @@ begin
 
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 75);
 
-  AssertEquals('Component shrank to available space', 75, result[0]);
+  FContext.AssertTrue((75)=(result[0]), 'Component shrank to available space');
 
   // Cleanup
   rc.Free;
@@ -215,11 +219,11 @@ begin
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 150);
 
   // Each should shrink by 25 pixels (total 150 = 200 - 50)
-  AssertEquals('Component 0 size', 75, result[0]);
-  AssertEquals('Component 1 size', 75, result[1]);
+  FContext.AssertTrue((75)=(result[0]), 'Component 0 size');
+  FContext.AssertTrue((75)=(result[1]), 'Component 1 size');
 
   total := result[0] + result[1];
-  AssertEquals('Total size matches bounds', 150, total);
+  FContext.AssertTrue((150)=(total), 'Total size matches bounds');
 
   // Cleanup
   rc1.Free;
@@ -247,8 +251,8 @@ begin
 
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 200);
 
-  AssertEquals('Component 0 size', 100, result[0]);
-  AssertEquals('Component 1 size', 100, result[1]);
+  FContext.AssertTrue((100)=(result[0]), 'Component 0 size');
+  FContext.AssertTrue((100)=(result[1]), 'Component 1 size');
 end;
 
 procedure TTestLayoutUtil.TestCalculateSerial_MinMaxConstraints;
@@ -276,7 +280,7 @@ begin
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 200);
 
   // Should be clamped to max of 150
-  AssertEquals('Component clamped to max', 150, result[0]);
+  FContext.AssertTrue((150)=(result[0]), 'Component clamped to max');
 
   // Cleanup
   rc.Free;
@@ -304,8 +308,8 @@ begin
   result := TfpgMigLayoutUtil.CalculateSerial(sizes, resConstr, defPush, SIZE_PREF, 250);
 
   // Without resize constraints, components don't grow
-  AssertEquals('Component 0 stays at preferred', 100, result[0]);
-  AssertEquals('Component 1 stays at preferred', 100, result[1]);
+  FContext.AssertTrue((100)=(result[0]), 'Component 0 stays at preferred');
+  FContext.AssertTrue((100)=(result[1]), 'Component 1 stays at preferred');
 end;
 
 procedure TTestLayoutUtil.TestSum_PartialArray;
@@ -321,7 +325,7 @@ begin
   arr[4] := 50;
 
   result := TfpgMigLayoutUtil.Sum(arr, 1, 3);  // Sum arr[1..3]
-  AssertEquals('Partial sum', 90, result);  // 20 + 30 + 40
+  FContext.AssertTrue((90)=(result), 'Partial sum');  // 20 + 30 + 40
 end;
 
 procedure TTestLayoutUtil.TestSum_FullArray;
@@ -335,7 +339,7 @@ begin
   arr[2] := 30;
 
   result := TfpgMigLayoutUtil.Sum(arr);
-  AssertEquals('Full array sum', 60, result);
+  FContext.AssertTrue((60)=(result), 'Full array sum');
 end;
 
 procedure TTestLayoutUtil.TestSum_EmptyArray;
@@ -345,7 +349,7 @@ var
 begin
   SetLength(arr, 0);
   result := TfpgMigLayoutUtil.Sum(arr);
-  AssertEquals('Empty array sum', 0, result);
+  FContext.AssertTrue((0)=(result), 'Empty array sum');
 end;
 
 procedure TTestLayoutUtil.TestClamp_Float;
@@ -353,13 +357,13 @@ var
   result: Single;
 begin
   result := TfpgMigLayoutUtil.Clamp(50.0, 0.0, 100.0);
-  AssertEquals('Within range', 50.0, result, 0.001);
+  FContext.AssertTrue(Abs((50.0)-(result))<=(0.001), 'Within range');
 
   result := TfpgMigLayoutUtil.Clamp(-10.0, 0.0, 100.0);
-  AssertEquals('Below min', 0.0, result, 0.001);
+  FContext.AssertTrue(Abs((0.0)-(result))<=(0.001), 'Below min');
 
   result := TfpgMigLayoutUtil.Clamp(150.0, 0.0, 100.0);
-  AssertEquals('Above max', 100.0, result, 0.001);
+  FContext.AssertTrue(Abs((100.0)-(result))<=(0.001), 'Above max');
 end;
 
 procedure TTestLayoutUtil.TestClamp_Integer;
@@ -367,13 +371,13 @@ var
   result: Integer;
 begin
   result := TfpgMigLayoutUtil.Clamp(50, 0, 100);
-  AssertEquals('Within range', 50, result);
+  FContext.AssertTrue((50)=(result), 'Within range');
 
   result := TfpgMigLayoutUtil.Clamp(-10, 0, 100);
-  AssertEquals('Below min', 0, result);
+  FContext.AssertTrue((0)=(result), 'Below min');
 
   result := TfpgMigLayoutUtil.Clamp(150, 0, 100);
-  AssertEquals('Above max', 100, result);
+  FContext.AssertTrue((100)=(result), 'Above max');
 end;
 
 procedure TTestLayoutUtil.TestRoundSizes;
@@ -389,11 +393,11 @@ begin
 
   result := TfpgMigLayoutUtil.RoundSizes(floatArr);
 
-  AssertEquals('Count matches', 4, Length(result));
-  AssertEquals('Round 10.4', 10, result[0]);
-  AssertEquals('Round 20.5', 20, result[1]);  // FPC uses banker's rounding: 20.5 -> 20 (nearest even)
-  AssertEquals('Round 30.6', 31, result[2]);
-  AssertEquals('Round 40.2', 40, result[3]);
+  FContext.AssertTrue((4)=(Length(result)), 'Count matches');
+  FContext.AssertTrue((10)=(result[0]), 'Round 10.4');
+  FContext.AssertTrue((20)=(result[1]), 'Round 20.5');  // FPC uses banker's rounding: 20.5 -> 20 (nearest even)
+  FContext.AssertTrue((31)=(result[2]), 'Round 30.6');
+  FContext.AssertTrue((40)=(result[3]), 'Round 40.2');
 end;
 
 procedure TTestLayoutUtil.TestGetSizeSafe_ValidSize;
@@ -406,7 +410,7 @@ begin
   sizeArr[SIZE_MAX] := 200;
 
   result := TfpgMigLayoutUtil.GetSizeSafe(sizeArr, SIZE_PREF);
-  AssertEquals('Get preferred size', 100, result);
+  FContext.AssertTrue((100)=(result), 'Get preferred size');
 end;
 
 procedure TTestLayoutUtil.TestGetSizeSafe_NotSet;
@@ -419,7 +423,7 @@ begin
   sizeArr[SIZE_MAX] := NOT_SET;
 
   result := TfpgMigLayoutUtil.GetSizeSafe(sizeArr, SIZE_PREF);
-  AssertEquals('NOT_SET returns 0', 0, result);
+  FContext.AssertTrue((0)=(result), 'NOT_SET returns 0');
 end;
 
 
@@ -437,10 +441,10 @@ begin
   arr[1] := rc2;
 
   result := TfpgMigLayoutUtil.GetIndexSafe(arr, 0);
-  AssertTrue('Returns correct element', result = rc1);
+  FContext.AssertTrue(result = rc1, 'Returns correct element');
 
   result := TfpgMigLayoutUtil.GetIndexSafe(arr, 1);
-  AssertTrue('Returns correct element', result = rc2);
+  FContext.AssertTrue(result = rc2, 'Returns correct element');
 
   // Cleanup
   rc1.Free;
@@ -460,7 +464,7 @@ begin
 
   // Out of bounds returns last element
   result := TfpgMigLayoutUtil.GetIndexSafe(arr, 5);
-  AssertTrue('Returns last element for out of bounds', result = rc);
+  FContext.AssertTrue(result = rc, 'Returns last element for out of bounds');
 
   // Cleanup
   rc.Free;
@@ -473,7 +477,7 @@ var
 begin
   SetLength(arr, 0);
   result := TfpgMigLayoutUtil.GetIndexSafe(arr, 0);
-  AssertTrue('Returns nil for empty array', result = nil);
+  FContext.AssertTrue(result = nil, 'Returns nil for empty array');
 end;
 
 procedure TTestLayoutUtil.TestDerive_AllNewValues;
@@ -504,9 +508,9 @@ begin
     newPref.Free;
     newMax.Free;
   end;
-  AssertEquals('New min value', 60, result.Min.Value);
-  AssertEquals('New pref value', 110, result.Preferred.Value);
-  AssertEquals('New max value', 210, result.Max.Value);
+  FContext.AssertTrue((60)=(result.Min.Value), 'New min value');
+  FContext.AssertTrue((110)=(result.Preferred.Value), 'New pref value');
+  FContext.AssertTrue((210)=(result.Max.Value), 'New max value');
 
   // Cleanup - BoundSize clones UnitValues, so we must free originals
   base.Free;
@@ -529,9 +533,9 @@ begin
 
   result := TfpgMigLayoutUtil.Derive(base, nil, newPref, nil);
 
-  AssertEquals('Keep base min', 50, result.Min.Value);
-  AssertEquals('Use new pref', 120, result.Preferred.Value);
-  AssertEquals('Keep base max', 200, result.Max.Value);
+  FContext.AssertTrue((50)=(result.Min.Value), 'Keep base min');
+  FContext.AssertTrue((120)=(result.Preferred.Value), 'Use new pref');
+  FContext.AssertTrue((200)=(result.Max.Value), 'Keep base max');
 
   // Cleanup - BoundSize clones UnitValues, so we must free originals
   newPref.Free;
@@ -550,9 +554,9 @@ begin
 
   result := TfpgMigLayoutUtil.Derive(nil, newMin, newPref, newMax);
 
-  AssertEquals('New min value', 60, result.Min.Value);
-  AssertEquals('New pref value', 110, result.Preferred.Value);
-  AssertEquals('New max value', 210, result.Max.Value);
+  FContext.AssertTrue((60)=(result.Min.Value), 'New min value');
+  FContext.AssertTrue((110)=(result.Preferred.Value), 'New pref value');
+  FContext.AssertTrue((210)=(result.Max.Value), 'New max value');
 
   // Cleanup - BoundSize clones UnitValues, so we must free originals
   newMin.Free;
@@ -563,7 +567,7 @@ end;
 
 procedure TTestLayoutUtil.TestObjectEquals_BothNil;
 begin
-  AssertTrue('Both nil are equal', TfpgMigLayoutUtil.ObjectEquals(nil, nil));
+  FContext.AssertTrue(TfpgMigLayoutUtil.ObjectEquals(nil, nil), 'Both nil are equal');
 end;
 
 procedure TTestLayoutUtil.TestObjectEquals_OneNil;
@@ -572,8 +576,8 @@ var
 begin
   obj := TObject.Create;
   try
-    AssertFalse('One nil not equal', TfpgMigLayoutUtil.ObjectEquals(obj, nil));
-    AssertFalse('One nil not equal (reversed)', TfpgMigLayoutUtil.ObjectEquals(nil, obj));
+    FContext.AssertTrue(not (TfpgMigLayoutUtil.ObjectEquals(obj, nil)), 'One nil not equal');
+    FContext.AssertTrue(not (TfpgMigLayoutUtil.ObjectEquals(nil, obj)), 'One nil not equal (reversed)');
   finally
     obj.Free;
   end;
@@ -585,7 +589,7 @@ var
 begin
   obj := TObject.Create;
   try
-    AssertTrue('Same object equals', TfpgMigLayoutUtil.ObjectEquals(obj, obj));
+    FContext.AssertTrue(TfpgMigLayoutUtil.ObjectEquals(obj, obj), 'Same object equals');
   finally
     obj.Free;
   end;
@@ -598,14 +602,330 @@ begin
   obj1 := TObject.Create;
   obj2 := TObject.Create;
   try
-    AssertFalse('Different objects not equal', TfpgMigLayoutUtil.ObjectEquals(obj1, obj2));
+    FContext.AssertTrue(not (TfpgMigLayoutUtil.ObjectEquals(obj1, obj2)), 'Different objects not equal');
   finally
     obj1.Free;
     obj2.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestLayoutUtil);
+
+procedure RunTTestLayoutUtilTestCalculateSerial_EqualPreferred(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_EqualPreferred';
+    lFixture.TestCalculateSerial_EqualPreferred;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_GrowSingleComponent(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_GrowSingleComponent';
+    lFixture.TestCalculateSerial_GrowSingleComponent;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_GrowMultipleWithPriority(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_GrowMultipleWithPriority';
+    lFixture.TestCalculateSerial_GrowMultipleWithPriority;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_ShrinkSingleComponent(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_ShrinkSingleComponent';
+    lFixture.TestCalculateSerial_ShrinkSingleComponent;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_ShrinkMultipleWithPriority(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_ShrinkMultipleWithPriority';
+    lFixture.TestCalculateSerial_ShrinkMultipleWithPriority;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_ExactFit(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_ExactFit';
+    lFixture.TestCalculateSerial_ExactFit;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_MinMaxConstraints(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_MinMaxConstraints';
+    lFixture.TestCalculateSerial_MinMaxConstraints;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestCalculateSerial_NoResizeConstraints(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCalculateSerial_NoResizeConstraints';
+    lFixture.TestCalculateSerial_NoResizeConstraints;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestSum_PartialArray(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSum_PartialArray';
+    lFixture.TestSum_PartialArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestSum_FullArray(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSum_FullArray';
+    lFixture.TestSum_FullArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestSum_EmptyArray(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSum_EmptyArray';
+    lFixture.TestSum_EmptyArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestClamp_Float(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClamp_Float';
+    lFixture.TestClamp_Float;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestClamp_Integer(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClamp_Integer';
+    lFixture.TestClamp_Integer;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestRoundSizes(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRoundSizes';
+    lFixture.TestRoundSizes;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestGetSizeSafe_ValidSize(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetSizeSafe_ValidSize';
+    lFixture.TestGetSizeSafe_ValidSize;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestGetSizeSafe_NotSet(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetSizeSafe_NotSet';
+    lFixture.TestGetSizeSafe_NotSet;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestGetIndexSafe_ValidIndex(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetIndexSafe_ValidIndex';
+    lFixture.TestGetIndexSafe_ValidIndex;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestGetIndexSafe_OutOfBounds(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetIndexSafe_OutOfBounds';
+    lFixture.TestGetIndexSafe_OutOfBounds;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestGetIndexSafe_EmptyArray(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGetIndexSafe_EmptyArray';
+    lFixture.TestGetIndexSafe_EmptyArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestDerive_AllNewValues(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDerive_AllNewValues';
+    lFixture.TestDerive_AllNewValues;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestDerive_PartialNewValues(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDerive_PartialNewValues';
+    lFixture.TestDerive_PartialNewValues;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestDerive_NilBase(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDerive_NilBase';
+    lFixture.TestDerive_NilBase;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestObjectEquals_BothNil(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectEquals_BothNil';
+    lFixture.TestObjectEquals_BothNil;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestObjectEquals_OneNil(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectEquals_OneNil';
+    lFixture.TestObjectEquals_OneNil;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestObjectEquals_BothSame(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectEquals_BothSame';
+    lFixture.TestObjectEquals_BothSame;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestLayoutUtilTestObjectEquals_Different(AContext: TNXTestContext);
+var lFixture: TTestLayoutUtil;
+begin
+  lFixture:=TTestLayoutUtil.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectEquals_Different';
+    lFixture.TestObjectEquals_Different;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcmiglayoututilTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcmig_layoututil.TTestLayoutUtil');
+  lSuite.AddTest('TestCalculateSerial_EqualPreferred', @RunTTestLayoutUtilTestCalculateSerial_EqualPreferred);
+  lSuite.AddTest('TestCalculateSerial_GrowSingleComponent', @RunTTestLayoutUtilTestCalculateSerial_GrowSingleComponent);
+  lSuite.AddTest('TestCalculateSerial_GrowMultipleWithPriority', @RunTTestLayoutUtilTestCalculateSerial_GrowMultipleWithPriority);
+  lSuite.AddTest('TestCalculateSerial_ShrinkSingleComponent', @RunTTestLayoutUtilTestCalculateSerial_ShrinkSingleComponent);
+  lSuite.AddTest('TestCalculateSerial_ShrinkMultipleWithPriority', @RunTTestLayoutUtilTestCalculateSerial_ShrinkMultipleWithPriority);
+  lSuite.AddTest('TestCalculateSerial_ExactFit', @RunTTestLayoutUtilTestCalculateSerial_ExactFit);
+  lSuite.AddTest('TestCalculateSerial_MinMaxConstraints', @RunTTestLayoutUtilTestCalculateSerial_MinMaxConstraints);
+  lSuite.AddTest('TestCalculateSerial_NoResizeConstraints', @RunTTestLayoutUtilTestCalculateSerial_NoResizeConstraints);
+  lSuite.AddTest('TestSum_PartialArray', @RunTTestLayoutUtilTestSum_PartialArray);
+  lSuite.AddTest('TestSum_FullArray', @RunTTestLayoutUtilTestSum_FullArray);
+  lSuite.AddTest('TestSum_EmptyArray', @RunTTestLayoutUtilTestSum_EmptyArray);
+  lSuite.AddTest('TestClamp_Float', @RunTTestLayoutUtilTestClamp_Float);
+  lSuite.AddTest('TestClamp_Integer', @RunTTestLayoutUtilTestClamp_Integer);
+  lSuite.AddTest('TestRoundSizes', @RunTTestLayoutUtilTestRoundSizes);
+  lSuite.AddTest('TestGetSizeSafe_ValidSize', @RunTTestLayoutUtilTestGetSizeSafe_ValidSize);
+  lSuite.AddTest('TestGetSizeSafe_NotSet', @RunTTestLayoutUtilTestGetSizeSafe_NotSet);
+  lSuite.AddTest('TestGetIndexSafe_ValidIndex', @RunTTestLayoutUtilTestGetIndexSafe_ValidIndex);
+  lSuite.AddTest('TestGetIndexSafe_OutOfBounds', @RunTTestLayoutUtilTestGetIndexSafe_OutOfBounds);
+  lSuite.AddTest('TestGetIndexSafe_EmptyArray', @RunTTestLayoutUtilTestGetIndexSafe_EmptyArray);
+  lSuite.AddTest('TestDerive_AllNewValues', @RunTTestLayoutUtilTestDerive_AllNewValues);
+  lSuite.AddTest('TestDerive_PartialNewValues', @RunTTestLayoutUtilTestDerive_PartialNewValues);
+  lSuite.AddTest('TestDerive_NilBase', @RunTTestLayoutUtilTestDerive_NilBase);
+  lSuite.AddTest('TestObjectEquals_BothNil', @RunTTestLayoutUtilTestObjectEquals_BothNil);
+  lSuite.AddTest('TestObjectEquals_OneNil', @RunTTestLayoutUtilTestObjectEquals_OneNil);
+  lSuite.AddTest('TestObjectEquals_BothSame', @RunTTestLayoutUtilTestObjectEquals_BothSame);
+  lSuite.AddTest('TestObjectEquals_Different', @RunTTestLayoutUtilTestObjectEquals_Different);
+end;
 
 end.

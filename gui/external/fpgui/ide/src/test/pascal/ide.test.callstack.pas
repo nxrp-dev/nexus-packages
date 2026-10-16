@@ -13,22 +13,24 @@ unit ide.test.callstack;
 interface
 
 uses
-  Classes, SysUtils,
-  fpcunit, testregistry,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils,
   ide.callstack;
 
 type
 
   { TTestParseCallStackFrame }
 
-  TTestParseCallStackFrame = class(TTestCase)
+  TTestParseCallStackFrame = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     procedure AssertFrame(const AText: string;
         AExpectedIndex: Integer;
         const AExpectedFunc, AExpectedFile: string;
         AExpectedLine: Integer;
         AExpectedHasSource: Boolean);
-  published
+  public
     { Empty / degenerate input }
     procedure TestEmptyString;
     procedure TestNoHash;
@@ -51,8 +53,11 @@ type
 
   { TTestParseCallStack }
 
-  TTestParseCallStack = class(TTestCase)
-  published
+  TTestParseCallStack = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestEmptyArray;
     procedure TestSingleFrame;
     procedure TestMultipleFrames;
@@ -61,17 +66,22 @@ type
 
   { TTestCallStackFrameDisplay }
 
-  TTestCallStackFrameDisplay = class(TTestCase)
+  TTestCallStackFrameDisplay = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     function MakeFrame(AIndex: Integer; const AFunc, AFile: string;
         ALine: Integer; AAddr: QWord): TCallStackFrame;
-  published
+  public
     procedure TestDisplayWithSource;
     procedure TestDisplayAddressOnly;
     procedure TestDisplayUnknownNoAddress;
     procedure TestDisplayZeroAddress;
     procedure TestDisplayHighFrameIndex;
   end;
+
+procedure RegisteridetestcallstackTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -88,11 +98,11 @@ var
   F: TCallStackFrame;
 begin
   F := ParseCallStackFrame(AText);
-  AssertEquals('Index',     AExpectedIndex,     F.Index);
-  AssertEquals('FuncName',  AExpectedFunc,       F.FuncName);
-  AssertEquals('FileName',  AExpectedFile,       F.FileName);
-  AssertEquals('LineNumber', AExpectedLine,      F.LineNumber);
-  AssertEquals('HasSource', AExpectedHasSource,  F.HasSource);
+  FContext.AssertTrue((AExpectedIndex)=(F.Index), 'Index');
+  FContext.AssertTrue((AExpectedFunc)=(F.FuncName), 'FuncName');
+  FContext.AssertTrue((AExpectedFile)=(F.FileName), 'FileName');
+  FContext.AssertTrue((AExpectedLine)=(F.LineNumber), 'LineNumber');
+  FContext.AssertTrue((AExpectedHasSource)=(F.HasSource), 'HasSource');
 end;
 
 procedure TTestParseCallStackFrame.TestEmptyString;
@@ -100,9 +110,9 @@ var
   F: TCallStackFrame;
 begin
   F := ParseCallStackFrame('');
-  AssertEquals('FuncName on empty', '', F.FuncName);
-  AssertEquals('Index on empty', 0, F.Index);
-  AssertFalse('HasSource on empty', F.HasSource);
+  FContext.AssertTrue(('')=(F.FuncName), 'FuncName on empty');
+  FContext.AssertTrue((0)=(F.Index), 'Index on empty');
+  FContext.AssertTrue(not (F.HasSource), 'HasSource on empty');
 end;
 
 procedure TTestParseCallStackFrame.TestNoHash;
@@ -111,7 +121,7 @@ var
 begin
   F := ParseCallStackFrame('0 MyProc (0x0000000000000001)');
   { No leading '#' — falls back to AText as FuncName }
-  AssertFalse('HasSource', F.HasSource);
+  FContext.AssertTrue(not (F.HasSource), 'HasSource');
 end;
 
 procedure TTestParseCallStackFrame.TestHashOnly;
@@ -119,7 +129,7 @@ var
   F: TCallStackFrame;
 begin
   F := ParseCallStackFrame('#');
-  AssertFalse('HasSource', F.HasSource);
+  FContext.AssertTrue(not (F.HasSource), 'HasSource');
 end;
 
 procedure TTestParseCallStackFrame.TestFrame0WithSource;
@@ -151,7 +161,7 @@ var
   F: TCallStackFrame;
 begin
   F := ParseCallStackFrame('#0 MyProc at foo.pas:10 (0x00007FFFFFFFFFFF)');
-  AssertEquals('Address', QWord($00007FFFFFFFFFFF), F.Address);
+  FContext.AssertTrue((QWord($00007FFFFFFFFFFF))=(F.Address), 'Address');
 end;
 
 procedure TTestParseCallStackFrame.TestFrameNoSource;
@@ -186,9 +196,9 @@ var
 begin
   { On Windows paths contain 'C:\' — the last ':' must be used to split. }
   F := ParseCallStackFrame('#0 WinProc at C:\src\win.pas:55 (0x0000000000000001)');
-  AssertEquals('FileName', 'C:\src\win.pas', F.FileName);
-  AssertEquals('LineNumber', 55, F.LineNumber);
-  AssertTrue('HasSource', F.HasSource);
+  FContext.AssertTrue(('C:\src\win.pas')=(F.FileName), 'FileName');
+  FContext.AssertTrue((55)=(F.LineNumber), 'LineNumber');
+  FContext.AssertTrue(F.HasSource, 'HasSource');
 end;
 
 { ---------------------------------------------------------------------------
@@ -200,7 +210,7 @@ var
   Frames: TCallStackFrameArray;
 begin
   Frames := ParseCallStack([]);
-  AssertEquals('Empty array length', 0, Length(Frames));
+  FContext.AssertTrue((0)=(Length(Frames)), 'Empty array length');
 end;
 
 procedure TTestParseCallStack.TestSingleFrame;
@@ -208,8 +218,8 @@ var
   Frames: TCallStackFrameArray;
 begin
   Frames := ParseCallStack(['#0 MyProc at foo.pas:1 (0x0000000000000001)']);
-  AssertEquals('Length', 1, Length(Frames));
-  AssertEquals('FuncName', 'MyProc', Frames[0].FuncName);
+  FContext.AssertTrue((1)=(Length(Frames)), 'Length');
+  FContext.AssertTrue(('MyProc')=(Frames[0].FuncName), 'FuncName');
 end;
 
 procedure TTestParseCallStack.TestMultipleFrames;
@@ -221,11 +231,11 @@ begin
     '#1 Middle at b.pas:20 (0x0000000000000002)',
     '#2 Outer at c.pas:30 (0x0000000000000003)'
   ]);
-  AssertEquals('Length', 3, Length(Frames));
-  AssertEquals('Frame 0 func', 'Inner',  Frames[0].FuncName);
-  AssertEquals('Frame 1 func', 'Middle', Frames[1].FuncName);
-  AssertEquals('Frame 2 func', 'Outer',  Frames[2].FuncName);
-  AssertEquals('Frame 2 line', 30, Frames[2].LineNumber);
+  FContext.AssertTrue((3)=(Length(Frames)), 'Length');
+  FContext.AssertTrue(('Inner')=(Frames[0].FuncName), 'Frame 0 func');
+  FContext.AssertTrue(('Middle')=(Frames[1].FuncName), 'Frame 1 func');
+  FContext.AssertTrue(('Outer')=(Frames[2].FuncName), 'Frame 2 func');
+  FContext.AssertTrue((30)=(Frames[2].LineNumber), 'Frame 2 line');
 end;
 
 procedure TTestParseCallStack.TestFrameCountMatchesInput;
@@ -239,7 +249,7 @@ begin
     '#3 D (0x0000000000000004)',
     '#4 E (0x0000000000000005)'
   ]);
-  AssertEquals('Count', 5, Length(Frames));
+  FContext.AssertTrue((5)=(Length(Frames)), 'Count');
 end;
 
 { ---------------------------------------------------------------------------
@@ -263,10 +273,7 @@ var
   F: TCallStackFrame;
 begin
   F := MakeFrame(0, 'MyProc', 'myfile.pas', 42, QWord($00007F1234ABCDEF));
-  AssertEquals(
-    '#0  MyProc  (myfile.pas:42)',
-    CallStackFrameDisplay(F)
-  );
+  FContext.AssertTrue(('#0  MyProc  (myfile.pas:42)')=(CallStackFrameDisplay(F)), '');
 end;
 
 procedure TTestCallStackFrameDisplay.TestDisplayAddressOnly;
@@ -274,10 +281,7 @@ var
   F: TCallStackFrame;
 begin
   F := MakeFrame(2, 'LibProc', '', 0, QWord($00007F9900000000));
-  AssertEquals(
-    '#2  LibProc  (0x00007F9900000000)',
-    CallStackFrameDisplay(F)
-  );
+  FContext.AssertTrue(('#2  LibProc  (0x00007F9900000000)')=(CallStackFrameDisplay(F)), '');
 end;
 
 procedure TTestCallStackFrameDisplay.TestDisplayUnknownNoAddress;
@@ -286,10 +290,7 @@ var
 begin
   { Address = 0 and no source — display just index and name }
   F := MakeFrame(5, '<unknown>', '', 0, 0);
-  AssertEquals(
-    '#5  <unknown>',
-    CallStackFrameDisplay(F)
-  );
+  FContext.AssertTrue(('#5  <unknown>')=(CallStackFrameDisplay(F)), '');
 end;
 
 procedure TTestCallStackFrameDisplay.TestDisplayZeroAddress;
@@ -298,7 +299,7 @@ var
 begin
   { A frame with HasSource=False and Address=0 shows no location suffix }
   F := MakeFrame(1, 'SomeFunc', '', 0, 0);
-  AssertEquals('#1  SomeFunc', CallStackFrameDisplay(F));
+  FContext.AssertTrue(('#1  SomeFunc')=(CallStackFrameDisplay(F)), '');
 end;
 
 procedure TTestCallStackFrameDisplay.TestDisplayHighFrameIndex;
@@ -306,16 +307,256 @@ var
   F: TCallStackFrame;
 begin
   F := MakeFrame(15, 'DeepProc', 'deep.pas', 1, QWord($0000000000000001));
-  AssertEquals(
-    '#15  DeepProc  (deep.pas:1)',
-    CallStackFrameDisplay(F)
-  );
+  FContext.AssertTrue(('#15  DeepProc  (deep.pas:1)')=(CallStackFrameDisplay(F)), '');
 end;
 
-initialization
 
-  RegisterTest(TTestParseCallStackFrame);
-  RegisterTest(TTestParseCallStack);
-  RegisterTest(TTestCallStackFrameDisplay);
+procedure RunTTestParseCallStackFrameTestEmptyString(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyString';
+    lFixture.TestEmptyString;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestNoHash(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoHash';
+    lFixture.TestNoHash;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestHashOnly(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHashOnly';
+    lFixture.TestHashOnly;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFrame0WithSource(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFrame0WithSource';
+    lFixture.TestFrame0WithSource;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFrame1WithSource(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFrame1WithSource';
+    lFixture.TestFrame1WithSource;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestHighFrameIndex(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHighFrameIndex';
+    lFixture.TestHighFrameIndex;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestLongAddress(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLongAddress';
+    lFixture.TestLongAddress;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFrameNoSource(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFrameNoSource';
+    lFixture.TestFrameNoSource;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFrameUnknown(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFrameUnknown';
+    lFixture.TestFrameUnknown;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFuncNameWithSpaces(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFuncNameWithSpaces';
+    lFixture.TestFuncNameWithSpaces;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackFrameTestFileNameWithColon(AContext: TNXTestContext);
+var lFixture: TTestParseCallStackFrame;
+begin
+  lFixture:=TTestParseCallStackFrame.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFileNameWithColon';
+    lFixture.TestFileNameWithColon;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackTestEmptyArray(AContext: TNXTestContext);
+var lFixture: TTestParseCallStack;
+begin
+  lFixture:=TTestParseCallStack.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyArray';
+    lFixture.TestEmptyArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackTestSingleFrame(AContext: TNXTestContext);
+var lFixture: TTestParseCallStack;
+begin
+  lFixture:=TTestParseCallStack.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSingleFrame';
+    lFixture.TestSingleFrame;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackTestMultipleFrames(AContext: TNXTestContext);
+var lFixture: TTestParseCallStack;
+begin
+  lFixture:=TTestParseCallStack.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMultipleFrames';
+    lFixture.TestMultipleFrames;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParseCallStackTestFrameCountMatchesInput(AContext: TNXTestContext);
+var lFixture: TTestParseCallStack;
+begin
+  lFixture:=TTestParseCallStack.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFrameCountMatchesInput';
+    lFixture.TestFrameCountMatchesInput;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestCallStackFrameDisplayTestDisplayWithSource(AContext: TNXTestContext);
+var lFixture: TTestCallStackFrameDisplay;
+begin
+  lFixture:=TTestCallStackFrameDisplay.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDisplayWithSource';
+    lFixture.TestDisplayWithSource;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestCallStackFrameDisplayTestDisplayAddressOnly(AContext: TNXTestContext);
+var lFixture: TTestCallStackFrameDisplay;
+begin
+  lFixture:=TTestCallStackFrameDisplay.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDisplayAddressOnly';
+    lFixture.TestDisplayAddressOnly;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestCallStackFrameDisplayTestDisplayUnknownNoAddress(AContext: TNXTestContext);
+var lFixture: TTestCallStackFrameDisplay;
+begin
+  lFixture:=TTestCallStackFrameDisplay.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDisplayUnknownNoAddress';
+    lFixture.TestDisplayUnknownNoAddress;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestCallStackFrameDisplayTestDisplayZeroAddress(AContext: TNXTestContext);
+var lFixture: TTestCallStackFrameDisplay;
+begin
+  lFixture:=TTestCallStackFrameDisplay.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDisplayZeroAddress';
+    lFixture.TestDisplayZeroAddress;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestCallStackFrameDisplayTestDisplayHighFrameIndex(AContext: TNXTestContext);
+var lFixture: TTestCallStackFrameDisplay;
+begin
+  lFixture:=TTestCallStackFrameDisplay.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDisplayHighFrameIndex';
+    lFixture.TestDisplayHighFrameIndex;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetestcallstackTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.callstack.TTestParseCallStackFrame');
+  lSuite.AddTest('TestEmptyString', @RunTTestParseCallStackFrameTestEmptyString);
+  lSuite.AddTest('TestNoHash', @RunTTestParseCallStackFrameTestNoHash);
+  lSuite.AddTest('TestHashOnly', @RunTTestParseCallStackFrameTestHashOnly);
+  lSuite.AddTest('TestFrame0WithSource', @RunTTestParseCallStackFrameTestFrame0WithSource);
+  lSuite.AddTest('TestFrame1WithSource', @RunTTestParseCallStackFrameTestFrame1WithSource);
+  lSuite.AddTest('TestHighFrameIndex', @RunTTestParseCallStackFrameTestHighFrameIndex);
+  lSuite.AddTest('TestLongAddress', @RunTTestParseCallStackFrameTestLongAddress);
+  lSuite.AddTest('TestFrameNoSource', @RunTTestParseCallStackFrameTestFrameNoSource);
+  lSuite.AddTest('TestFrameUnknown', @RunTTestParseCallStackFrameTestFrameUnknown);
+  lSuite.AddTest('TestFuncNameWithSpaces', @RunTTestParseCallStackFrameTestFuncNameWithSpaces);
+  lSuite.AddTest('TestFileNameWithColon', @RunTTestParseCallStackFrameTestFileNameWithColon);
+  lSuite:=ARegistry.AddSuite('ide.test.callstack.TTestParseCallStack');
+  lSuite.AddTest('TestEmptyArray', @RunTTestParseCallStackTestEmptyArray);
+  lSuite.AddTest('TestSingleFrame', @RunTTestParseCallStackTestSingleFrame);
+  lSuite.AddTest('TestMultipleFrames', @RunTTestParseCallStackTestMultipleFrames);
+  lSuite.AddTest('TestFrameCountMatchesInput', @RunTTestParseCallStackTestFrameCountMatchesInput);
+  lSuite:=ARegistry.AddSuite('ide.test.callstack.TTestCallStackFrameDisplay');
+  lSuite.AddTest('TestDisplayWithSource', @RunTTestCallStackFrameDisplayTestDisplayWithSource);
+  lSuite.AddTest('TestDisplayAddressOnly', @RunTTestCallStackFrameDisplayTestDisplayAddressOnly);
+  lSuite.AddTest('TestDisplayUnknownNoAddress', @RunTTestCallStackFrameDisplayTestDisplayUnknownNoAddress);
+  lSuite.AddTest('TestDisplayZeroAddress', @RunTTestCallStackFrameDisplayTestDisplayZeroAddress);
+  lSuite.AddTest('TestDisplayHighFrameIndex', @RunTTestCallStackFrameDisplayTestDisplayHighFrameIndex);
+end;
 
 end.

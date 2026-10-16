@@ -1,0 +1,14 @@
+[
+  {
+    "file": "packages/nexus-packages/db/fcl-db/Package.nxscript",
+    "exit": 0
+  },
+  {
+    "file": "packages/Packages.PackageIndex.nxscript",
+    "exit": 0
+  },
+  {
+    "file": "packages/nexus-packages/Packages.RepositoryIndex.nxscript",
+    "exit": 0
+  }
+]

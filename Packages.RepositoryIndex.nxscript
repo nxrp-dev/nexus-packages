@@ -50,6 +50,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "binding/Package.nxscript";
         Description: "Source-independent value binding, navigation and edit coordination.";
     }
+    LocalPackage FCLDB {
+        Id: "NXRP.Database.FCLDB";
+        Descriptor: "db/fcl-db/Package.nxscript";
+        Description: "Datasets, SQL parsing, SQLDB, DBF files, data dictionaries and exports.";
+    }
     LocalPackage SQLite {
         Id: "NXRP.SQLite";
         Descriptor: "db/sqlite/Package.nxscript";

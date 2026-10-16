@@ -1,0 +1,3 @@
+DateStr: "" DateFloat:  0.0000000000000000E+000
+DateStr: "16-10-26" DateFloat:  4.6311000000000000E+004
+DateStr: "" DateFloat:  0.0000000000000000E+000

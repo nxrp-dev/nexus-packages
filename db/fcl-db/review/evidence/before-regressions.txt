@@ -1,0 +1,63 @@
+failed FCLDB.Review.01JSONRowSeparators Fixture heap/process failure: failed
+EJSONParser: Error at line 4, Pos 1: Unexpected token (]) encountered.
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.02JSONEscaping Fixture heap/process failure: failed
+ENXTestFailure: JSON control byte was not escaped
+  
+  expected: 0; actual: 256
+passed FCLDB.Review.03IntegerExportWidth   
+failed FCLDB.Review.04CSVSettingsAssignment Fixture heap/process failure: failed
+ENXTestFailure: Assign lost IgnoreOuterWhitespace
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.05FieldMapCallback Fixture heap/process failure: failed
+ENXTestFailure: Freed field map remains registered as AfterOpen
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.06JSONNumericComparisons Fixture heap/process failure: failed
+ENXTestFailure: Fractional comparison selected a different value
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.07JSONLocateFullDataset Fixture heap/process failure: failed
+ENXTestFailure: Locate missed a preceding row
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.08JSONBookmarks Fixture heap/process failure: failed
+ENXTestFailure: A captured bookmark is invalid
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.09JSONComparerItems Probe exited without a result; process status 139  
+failed FCLDB.Review.10JSONFieldBuffers Fixture heap/process failure: failed
+ENXTestFailure: String exceeded its declared field buffer
+expected: 165; actual: 101
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.11JSONMissingLookup Fixture heap/process failure: failed
+ENXTestFailure: Missing Lookup returned a non-null value
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.12BlobStreamOverwrite Fixture heap/process failure: failed
+ENXTestFailure: Overwrite changed blob size
+expected: 6; actual: 8
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.13PoolComponentOwnership Fixture heap/process failure: failed
+ENXTestFailure: Pool ignored its component owner
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.14BinaryPacketTransfers Fixture heap/process failure: failed
+ENXTestFailure: Partial write silently damaged the packet signature
+expected: BinBufDataSet; actual: BinBufDataSe
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.15SQLNullExport Fixture heap/process failure: failed
+ENXTestFailure: SQL NULL became an empty string
+  
+  expected: 0; actual: 256
+failed FCLDB.Review.16UTF16FixedExport Fixture heap/process failure: failed
+ENXTestFailure: Missing UTF16LE BOM
+expected: 255; actual: 195
+  
+  expected: 0; actual: 256
+1 passed; 15 failed; 0 errors; 0 skipped

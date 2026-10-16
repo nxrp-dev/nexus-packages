@@ -5,13 +5,16 @@ unit tcjsonini;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, fpjson, inifiles, jsonini;
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpjson, inifiles, jsonini;
 
 Type
 
   { TJSONIniTest }
 
-  TJSONIniTest = Class(TTestCase)
+  TJSONIniTest = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FFileContent: TJSONData;
     Fini: TJSONIniFile;
@@ -26,8 +29,8 @@ Type
     Procedure ReLoad;
     procedure NoFileYet;
     procedure RemoveFile;
-    Procedure Setup; override;
-    Procedure TearDown; override;
+    Procedure Setup; virtual;
+    Procedure TearDown; virtual;
     Procedure ReadFile;
     Procedure WriteFile;
     Procedure SampleFile;
@@ -36,7 +39,7 @@ Type
     Property ObjFileContent : TJSONObject Read GetO;
     Property Ini : TJSONIniFile Read GetIni;
     Property Strings : TStrings Read FStrings;
-  Published
+  public
     Procedure TestEmpty;
     Procedure TestReadEmpty;
     Procedure TestReadEmptyValue;
@@ -68,6 +71,8 @@ Type
     Procedure TestConvertIniString;
   end;
 
+procedure RegistertcjsoniniTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 { TJSONIniTest }
@@ -89,7 +94,7 @@ end;
 procedure TJSONIniTest.Setup;
 begin
   Inherited;
-  FTestFile:=TestName+'.json';
+  FTestFile:=FCaseName+'.json';
   If FileExists(FTestFile) then
     DeleteFile(FTestFile);
   FStrings:=TStringList.Create;
@@ -113,7 +118,7 @@ Var
 
 begin
   FreeAndNil(FFileContent);
-  AssertTrue('Test File '+TestFile+' exists.',FileExists(TestFile));
+  FContext.AssertTrue(FileExists(TestFile), 'Test File '+TestFile+' exists.');
   F:=TFileStream.Create(TestFile,fmOpenRead or fmShareDenyWrite);
   try
     FileContent:=GetJSON(F);
@@ -181,17 +186,17 @@ end;
 
 procedure TJSONIniTest.TestEmpty;
 begin
-  AssertFalse('No test file',FileExists(testfile));
-  AssertNull('No ini',Fini);
-  AssertNull('No file content',FFileContent);
-  AssertNotNull('Have strings',Strings);
-  AssertEquals('Have empty strings',0,Strings.Count);
+  FContext.AssertTrue(not (FileExists(testfile)), 'No test file');
+  FContext.AssertTrue((Fini)=nil, 'No ini');
+  FContext.AssertTrue((FFileContent)=nil, 'No file content');
+  FContext.AssertTrue((Strings)<>nil, 'Have strings');
+  FContext.AssertTrue((0)=(Strings.Count), 'Have empty strings');
 end;
 
 procedure TJSONIniTest.TestReadEmpty;
 begin
   Ini.ReadSections(Strings);
-  AssertEquals('No sections',0,Strings.Count);
+  FContext.AssertTrue((0)=(Strings.Count), 'No sections');
 end;
 
 procedure TJSONIniTest.TestReadEmptyValue;
@@ -199,7 +204,7 @@ begin
   FileContent:=TJSONString.Create('me');
   WriteFile;
   Ini.ReadSections(Strings);
-  AssertEquals('No sections',0,Strings.Count);
+  FContext.AssertTrue((0)=(Strings.Count), 'No sections');
 end;
 
 procedure TJSONIniTest.TestReadEmptyObject;
@@ -207,7 +212,7 @@ begin
   FileContent:=TJSONObject.Create();
   WriteFile;
   Ini.ReadSections(Strings);
-  AssertEquals('No sections',0,Strings.Count);
+  FContext.AssertTrue((0)=(Strings.Count), 'No sections');
 end;
 
 procedure TJSONIniTest.TestRead1EmptySection;
@@ -215,17 +220,17 @@ begin
   FileContent:=TJSONObject.Create(['empty',TJSONOBject.Create]);
   WriteFile;
   Ini.ReadSections(Strings);
-  AssertEquals('1 sections',1,Strings.Count);
-  AssertEquals('Section name','empty',Strings[0]);
+  FContext.AssertTrue((1)=(Strings.Count), '1 sections');
+  FContext.AssertTrue(('empty')=(Strings[0]), 'Section name');
 end;
 
 procedure TJSONIniTest.TestReadSections;
 begin
   SampleFile;
   Ini.ReadSections(Strings);
-  AssertEquals('2 sections',2,Strings.Count);
-  AssertEquals('Section name 0','a',Strings[0]);
-  AssertEquals('Section name 1','B',Strings[1]);
+  FContext.AssertTrue((2)=(Strings.Count), '2 sections');
+  FContext.AssertTrue(('a')=(Strings[0]), 'Section name 0');
+  FContext.AssertTrue(('B')=(Strings[1]), 'Section name 1');
 end;
 
 procedure TJSONIniTest.TestReadSection;
@@ -233,8 +238,8 @@ begin
   SampleFile;
   Ini.ReadSection('a',Strings);
   // Only valid values are reported
-  AssertEquals('value count',(FileContent as TJSONObject).Objects['a'].Count-2,Strings.Count);
-  AssertEquals('value names','i,i6,f,s,si,si6,sf,dt,id,fd,t,ft,fdt,d,b',Strings.CommaText);
+  FContext.AssertTrue(((FileContent as TJSONObject).Objects['a'].Count-2)=(Strings.Count), 'value count');
+  FContext.AssertTrue(('i,i6,f,s,si,si6,sf,dt,id,fd,t,ft,fdt,d,b')=(Strings.CommaText), 'value names');
 end;
 
 procedure TJSONIniTest.TestReadSectionValues;
@@ -246,39 +251,39 @@ begin
   SampleFile;
   Ini.ReadSectionValues('a',Strings,[]);
   // Only valid values are reported
-  AssertEquals('value count',(FileContent as TJSONObject).Objects['a'].Count-2,Strings.Count);
+  FContext.AssertTrue(((FileContent as TJSONObject).Objects['a'].Count-2)=(Strings.Count), 'value count');
   for D in (FileContent as TJSONObject).Objects['a'] do
     if D.Value.JSONType in ActualValueJSONTypes then
-      AssertEquals('value '+D.key,D.Value.AsString,Strings.Values[D.Key]);
+      FContext.AssertTrue((D.Value.AsString)=(Strings.Values[D.Key]), 'value '+D.key);
   Strings.Clear;
   Ini.ReadSectionValues('a',Strings);
   // All valid values are reported
-  AssertEquals('value count',(FileContent as TJSONObject).Objects['a'].Count,Strings.Count);
+  FContext.AssertTrue(((FileContent as TJSONObject).Objects['a'].Count)=(Strings.Count), 'value count');
 end;
 
 procedure TJSONIniTest.TestReadString;
 begin
   SampleFile;
-  AssertEquals('Value, case OK','test',Ini.ReadString('a','s','nono'));
-  AssertEquals('Value, key case not OK','test',Ini.ReadString('a','S','nono'));
-  AssertEquals('Value, section case not OK','test',Ini.ReadString('A','s','nono'));
-  AssertEquals('Value, section not exist','nono',Ini.ReadString('C','s','nono'));
-  AssertEquals('Value, key not exist','nono',Ini.ReadString('a','Z','nono'));
-  AssertEquals('Value, key not string','1',Ini.ReadString('a','i','nono'));
-  AssertEquals('Value, key not valid value','nono',Ini.ReadString('a','o','nono'));
+  FContext.AssertTrue(('test')=(Ini.ReadString('a','s','nono')), 'Value, case OK');
+  FContext.AssertTrue(('test')=(Ini.ReadString('a','S','nono')), 'Value, key case not OK');
+  FContext.AssertTrue(('test')=(Ini.ReadString('A','s','nono')), 'Value, section case not OK');
+  FContext.AssertTrue(('nono')=(Ini.ReadString('C','s','nono')), 'Value, section not exist');
+  FContext.AssertTrue(('nono')=(Ini.ReadString('a','Z','nono')), 'Value, key not exist');
+  FContext.AssertTrue(('1')=(Ini.ReadString('a','i','nono')), 'Value, key not string');
+  FContext.AssertTrue(('nono')=(Ini.ReadString('a','o','nono')), 'Value, key not valid value');
 end;
 
 procedure TJSONIniTest.TestReadInteger;
 
 begin
   SampleFile;
-  AssertEquals('Value, case OK',1,Ini.ReadInteger('a','i',2));
-  AssertEquals('Value, key case not OK',1,Ini.ReadInteger('a','I',2));
-  AssertEquals('Value, section case not OK',1,Ini.ReadInteger('A','i',2));
-  AssertEquals('Value, section not exist',2,Ini.ReadInteger('C','i',2));
-  AssertEquals('Value, key not exist',2,Ini.ReadInteger('a','Z',2));
-  AssertEquals('Value, key not integer',2,Ini.ReadInteger('a','s',2));
-  AssertEquals('Value, key not integer, but convertable to integer',1,Ini.ReadInteger('a','si',2));
+  FContext.AssertTrue((1)=(Ini.ReadInteger('a','i',2)), 'Value, case OK');
+  FContext.AssertTrue((1)=(Ini.ReadInteger('a','I',2)), 'Value, key case not OK');
+  FContext.AssertTrue((1)=(Ini.ReadInteger('A','i',2)), 'Value, section case not OK');
+  FContext.AssertTrue((2)=(Ini.ReadInteger('C','i',2)), 'Value, section not exist');
+  FContext.AssertTrue((2)=(Ini.ReadInteger('a','Z',2)), 'Value, key not exist');
+  FContext.AssertTrue((2)=(Ini.ReadInteger('a','s',2)), 'Value, key not integer');
+  FContext.AssertTrue((1)=(Ini.ReadInteger('a','si',2)), 'Value, key not integer, but convertable to integer');
 end;
 
 procedure TJSONIniTest.TestReadInt64;
@@ -287,36 +292,36 @@ Var
 begin
   I6:=MaxInt*2;
   SampleFile;
-  AssertEquals('Value, case OK',i6,Ini.ReadInt64('a','i6',2));
-  AssertEquals('Value, key case not OK',i6,Ini.ReadInt64('a','I6',2));
-  AssertEquals('Value, section case not OK',i6,Ini.ReadInt64('A','i6',2));
-  AssertEquals('Value, section not exist',2,Ini.ReadInt64('C','i',2));
-  AssertEquals('Value, key not exist',2,Ini.ReadInt64('a','Z',2));
-  AssertEquals('Value, key not integer',2,Ini.ReadInt64('a','s',2));
-  AssertEquals('Value, key not integer, but convertable to int64',I6,Ini.ReadInt64('a','si6',2));
+  FContext.AssertTrue((i6)=(Ini.ReadInt64('a','i6',2)), 'Value, case OK');
+  FContext.AssertTrue((i6)=(Ini.ReadInt64('a','I6',2)), 'Value, key case not OK');
+  FContext.AssertTrue((i6)=(Ini.ReadInt64('A','i6',2)), 'Value, section case not OK');
+  FContext.AssertTrue((2)=(Ini.ReadInt64('C','i',2)), 'Value, section not exist');
+  FContext.AssertTrue((2)=(Ini.ReadInt64('a','Z',2)), 'Value, key not exist');
+  FContext.AssertTrue((2)=(Ini.ReadInt64('a','s',2)), 'Value, key not integer');
+  FContext.AssertTrue((I6)=(Ini.ReadInt64('a','si6',2)), 'Value, key not integer, but convertable to int64');
 end;
 
 procedure TJSONIniTest.TestReadFloat;
 begin
   SampleFile;
-  AssertEquals('Value, case OK',1.2,Ini.ReadFloat('a','f',2.3));
-  AssertEquals('Value, key case not OK',1.2,Ini.ReadFloat('a','F',2.3));
-  AssertEquals('Value, section case not OK',1.2,Ini.ReadFloat('A','f',2.3));
-  AssertEquals('Value, section not exist',2.3,Ini.ReadFloat('C','f',2.3));
-  AssertEquals('Value, key not exist',2.3,Ini.ReadFloat('a','Z',2.3));
-  AssertEquals('Value, key not float',2.3,Ini.ReadFloat('a','s',2.3));
-  AssertEquals('Value, key not float, but convertable to float',1.2,Ini.ReadFloat('a','sf',2.3));
+  FContext.AssertTrue((1.2)=(Ini.ReadFloat('a','f',2.3)), 'Value, case OK');
+  FContext.AssertTrue((1.2)=(Ini.ReadFloat('a','F',2.3)), 'Value, key case not OK');
+  FContext.AssertTrue((1.2)=(Ini.ReadFloat('A','f',2.3)), 'Value, section case not OK');
+  FContext.AssertTrue((2.3)=(Ini.ReadFloat('C','f',2.3)), 'Value, section not exist');
+  FContext.AssertTrue((2.3)=(Ini.ReadFloat('a','Z',2.3)), 'Value, key not exist');
+  FContext.AssertTrue((2.3)=(Ini.ReadFloat('a','s',2.3)), 'Value, key not float');
+  FContext.AssertTrue((1.2)=(Ini.ReadFloat('a','sf',2.3)), 'Value, key not float, but convertable to float');
 end;
 
 procedure TJSONIniTest.TestReadBoolean;
 begin
   SampleFile;
-  AssertEquals('Value, case OK',True,Ini.ReadBool('a','b',False));
-  AssertEquals('Value, key case not OK',True,Ini.ReadBool('a','B',False));
-  AssertEquals('Value, section case not OK',True,Ini.ReadBool('A','b',False));
-  AssertEquals('Value, section not exist',True,Ini.ReadBool('C','b',True));
-  AssertEquals('Value, key not exist',True,Ini.ReadBool('a','Z',True));
-  AssertEquals('Value, key not bool but integer',True,Ini.ReadBool('a','i',false));
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','b',False)), 'Value, case OK');
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','B',False)), 'Value, key case not OK');
+  FContext.AssertTrue((True)=(Ini.ReadBool('A','b',False)), 'Value, section case not OK');
+  FContext.AssertTrue((True)=(Ini.ReadBool('C','b',True)), 'Value, section not exist');
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','Z',True)), 'Value, key not exist');
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','i',false)), 'Value, key not bool but integer');
 end;
 
 procedure TJSONIniTest.TestReadDate;
@@ -328,12 +333,12 @@ begin
   D:=EncodeDate(2001,05,06);
   DD:=EncodeDate(1999,11,12);
   SampleFile;
-  AssertEquals('Value, case OK',D,Ini.ReadDate('a','d',DD));
-  AssertEquals('Value, key case not OK',D,Ini.ReadDate('a','D',DD));
-  AssertEquals('Value, section case not OK',D,Ini.ReadDate('A','d',DD));
-  AssertEquals('Value, section not exist',DD,Ini.ReadDate('C','d',DD));
-  AssertEquals('Value, date as integer',D,Ini.ReadDate('a','id',DD));
-  AssertEquals('Value, date as float',D,Ini.ReadDate('a','fd',DD));
+  FContext.AssertTrue((D)=(Ini.ReadDate('a','d',DD)), 'Value, case OK');
+  FContext.AssertTrue((D)=(Ini.ReadDate('a','D',DD)), 'Value, key case not OK');
+  FContext.AssertTrue((D)=(Ini.ReadDate('A','d',DD)), 'Value, section case not OK');
+  FContext.AssertTrue((DD)=(Ini.ReadDate('C','d',DD)), 'Value, section not exist');
+  FContext.AssertTrue((D)=(Ini.ReadDate('a','id',DD)), 'Value, date as integer');
+  FContext.AssertTrue((D)=(Ini.ReadDate('a','fd',DD)), 'Value, date as float');
 end;
 
 procedure TJSONIniTest.TestReadTime;
@@ -345,11 +350,11 @@ begin
   T:=EncodeTime(12,13,14,567);
   DT:=EncodeTime(1,2,3,4);
   SampleFile;
-  AssertEquals('Value, case OK',T,Ini.ReadTime('a','t',DT));
-  AssertEquals('Value, key case not OK',T,Ini.ReadTime('a','T',DT));
-  AssertEquals('Value, section case not OK',T,Ini.ReadTime('A','t',DT));
-  AssertEquals('Value, section not exist',DT,Ini.ReadTime('C','t',DT));
-  AssertEquals('Value, key exist as float',T,Ini.ReadTime('a','ft',DT));
+  FContext.AssertTrue((T)=(Ini.ReadTime('a','t',DT)), 'Value, case OK');
+  FContext.AssertTrue((T)=(Ini.ReadTime('a','T',DT)), 'Value, key case not OK');
+  FContext.AssertTrue((T)=(Ini.ReadTime('A','t',DT)), 'Value, section case not OK');
+  FContext.AssertTrue((DT)=(Ini.ReadTime('C','t',DT)), 'Value, section not exist');
+  FContext.AssertTrue((T)=(Ini.ReadTime('a','ft',DT)), 'Value, key exist as float');
 end;
 
 procedure TJSONIniTest.TestReadDateTime;
@@ -360,11 +365,11 @@ begin
   DT:=EncodeDate(2001,05,06)+EncodeTime(23,24,25,678);
   DDT:=EncodeDate(1999,11,12)+EncodeTime(1,2,3,4);
   SampleFile;
-  AssertEquals('Value, case OK',DT,Ini.ReadDateTime('a','dt',DDT));
-  AssertEquals('Value, key case not OK',DT,Ini.ReadDateTime('a','DT',DDT));
-  AssertEquals('Value, section case not OK',DT,Ini.ReadDateTime('A','dt',DDT));
-  AssertEquals('Value, section not exist',DDT,Ini.ReadDateTime('C','dt',DDT));
-  AssertEquals('Value, key exist as float',DT,Ini.ReadDateTime('a','fdt',DDT));
+  FContext.AssertTrue((DT)=(Ini.ReadDateTime('a','dt',DDT)), 'Value, case OK');
+  FContext.AssertTrue((DT)=(Ini.ReadDateTime('a','DT',DDT)), 'Value, key case not OK');
+  FContext.AssertTrue((DT)=(Ini.ReadDateTime('A','dt',DDT)), 'Value, section case not OK');
+  FContext.AssertTrue((DDT)=(Ini.ReadDateTime('C','dt',DDT)), 'Value, section not exist');
+  FContext.AssertTrue((DT)=(Ini.ReadDateTime('a','fdt',DDT)), 'Value, key exist as float');
 end;
 
 procedure TJSONIniTest.TestEraseSection;
@@ -373,7 +378,7 @@ begin
   Ini.EraseSection('B');
   Ini.UpdateFile;
   ReadFile;
-  AssertEquals('No more section',-1,ObjFileContent.IndexOfName('B'));
+  FContext.AssertTrue((-1)=(ObjFileContent.IndexOfName('B')), 'No more section');
 end;
 
 procedure TJSONIniTest.TestEraseSectionCaseMismatch;
@@ -382,7 +387,7 @@ begin
   Ini.EraseSection('b');
   Ini.UpdateFile;
   ReadFile;
-  AssertEquals('No more section',-1,ObjFileContent.IndexOfName('B'));
+  FContext.AssertTrue((-1)=(ObjFileContent.IndexOfName('B')), 'No more section');
 end;
 
 procedure TJSONIniTest.TestDeleteKey;
@@ -391,7 +396,7 @@ begin
   Ini.DeleteKey('a','i');
   Ini.UpdateFile;
   ReadFile;
-  AssertEquals('No more key',-1,ObjFileContent.Objects['a'].IndexOfName('i'));
+  FContext.AssertTrue((-1)=(ObjFileContent.Objects['a'].IndexOfName('i')), 'No more key');
 end;
 
 procedure TJSONIniTest.TestDeleteKeySectionCaseMismatch;
@@ -400,7 +405,7 @@ begin
   Ini.DeleteKey('A','i');
   Ini.UpdateFile;
   ReadFile;
-  AssertEquals('No more key',-1,ObjFileContent.Objects['a'].IndexOfName('i'));
+  FContext.AssertTrue((-1)=(ObjFileContent.Objects['a'].IndexOfName('i')), 'No more key');
 end;
 
 procedure TJSONIniTest.TestDeleteKeyKeyCaseMismatch;
@@ -409,7 +414,7 @@ begin
   Ini.DeleteKey('a','I');
   Ini.UpdateFile;
   ReadFile;
-  AssertEquals('No more key',-1,ObjFileContent.Objects['a'].IndexOfName('i'));
+  FContext.AssertTrue((-1)=(ObjFileContent.Objects['a'].IndexOfName('i')), 'No more key');
 end;
 
 procedure TJSONIniTest.AssertValue(const aSection,Akey,avalue : string);
@@ -421,32 +426,32 @@ begin
   ini.UpdateFile;
   ReadFile;
   D:=ObjFileContent.FindPath(asection+'.'+akey);
-  AssertNotNull('Have value at '+asection+'.'+akey,D);
-  AssertEquals('Correct value at '+asection+'.'+akey,AValue,D.AsString);
+  FContext.AssertTrue((D)<>nil, 'Have value at '+asection+'.'+akey);
+  FContext.AssertTrue((AValue)=(D.AsString), 'Correct value at '+asection+'.'+akey);
 end;
 
 procedure TJSONIniTest.NoFileYet;
 
 begin
-  AssertFalse('File not exist yet',FileExists(TestFile));
+  FContext.AssertTrue(not (FileExists(TestFile)), 'File not exist yet');
 end;
 
 procedure TJSONIniTest.HaveFile;
 
 begin
-  AssertTrue('Test file exists',FileExists(TestFile));
+  FContext.AssertTrue(FileExists(TestFile), 'Test file exists');
 end;
 
 procedure TJSONIniTest.ReLoad;
 begin
   FreeAndNil(Fini);
-  AssertNotNull(Ini);
+  FContext.AssertTrue((Ini)<>nil, '');
 end;
 
 procedure TJSONIniTest.RemoveFile;
 begin
   if FileExists(TestFile) then
-    AssertTrue('Deleted file',DeleteFile(TestFile));
+    FContext.AssertTrue(DeleteFile(TestFile), 'Deleted file');
 end;
 
 procedure TJSONIniTest.TestWriteString;
@@ -459,7 +464,7 @@ begin
   HaveFile;
   AssertValue('a','i','string2');
   Reload;
-  AssertEquals('Can read value','string2',Ini.ReadString('a','i',''));
+  FContext.AssertTrue(('string2')=(Ini.ReadString('a','i','')), 'Can read value');
 end;
 
 procedure TJSONIniTest.TestWriteInteger;
@@ -472,7 +477,7 @@ begin
   HaveFile;
   AssertValue('a','i','3');
   Reload;
-  AssertEquals('Can read value',3,Ini.ReadInteger('a','i',0));
+  FContext.AssertTrue((3)=(Ini.ReadInteger('a','i',0)), 'Can read value');
 end;
 
 procedure TJSONIniTest.TestWriteDate;
@@ -488,7 +493,7 @@ begin
   HaveFile;
   AssertValue('a','i','2001-02-04T00:00:00.000');
   Reload;
-  AssertEquals('Can read value',D+1,Ini.ReadDate('a','i',0));
+  FContext.AssertTrue((D+1)=(Ini.ReadDate('a','i',0)), 'Can read value');
 end;
 
 procedure TJSONIniTest.TestWriteDateTime;
@@ -506,7 +511,7 @@ begin
   HaveFile;
   AssertValue('a','i','2001-02-04T12:13:14.567');
   Reload;
-  AssertEquals('Can read value',D+1,Ini.ReadDateTime('a','i',0));
+  FContext.AssertTrue((D+1)=(Ini.ReadDateTime('a','i',0)), 'Can read value');
 end;
 
 procedure TJSONIniTest.TestWriteTime;
@@ -525,7 +530,7 @@ begin
   HaveFile;
   AssertValue('a','i','0000-00-00T13:14:15.678');
   Reload;
-  AssertEquals('Can read value',D2,Ini.ReadTime('a','i',0));
+  FContext.AssertTrue((D2)=(Ini.ReadTime('a','i',0)), 'Can read value');
 end;
 
 procedure TJSONIniTest.CreateIni;
@@ -538,9 +543,9 @@ begin
   D:=EncodeDate(2001,2,3);
   T:=EncodeTime(12,13,14,567);
   DT:=D+T;
-  if FileExists(TestName+'.ini') then
-    DeleteFile(TestName+'.ini');
-  M:=TMemIniFile.Create(TestName+'.ini');
+  if FileExists(FCaseName+'.ini') then
+    DeleteFile(FCaseName+'.ini');
+  M:=TMemIniFile.Create(FCaseName+'.ini');
   try
     M.WriteString('a','s','c');
     M.WriteInteger('a','i',2);
@@ -566,17 +571,17 @@ begin
   T:=EncodeTime(12,13,14,567);
   DT:=D+T;
   CreateIni;
-  TJSONIniFile.ConvertIni(TestName+'.ini',TestFile,False);
-  AssertEquals('String','c',Ini.ReadString('a','s',''));
-  AssertEquals('Integer',2,Ini.ReadInteger('a','i',1));
-  AssertEquals('Bool',True,Ini.ReadBool('a','b',False));
-  AssertEquals('Int64',Int64(Maxint*2),Ini.ReadInt64('a','i6',Maxint*2));
-  AssertEquals('Date',D, Ini.ReadDate('a','d',0));
-  AssertEquals('Time',T,Ini.ReadTime('a','t',0));
-  AssertEquals('DateTime',DT,Ini.ReadDateTime('a','dt',0));
-  AssertEquals('Float',1.23,Ini.ReadFloat('a','f',0));
-  if FileExists(TestName+'.ini') then
-    DeleteFile(TestName+'.ini');
+  TJSONIniFile.ConvertIni(FCaseName+'.ini',TestFile,False);
+  FContext.AssertTrue(('c')=(Ini.ReadString('a','s','')), 'String');
+  FContext.AssertTrue((2)=(Ini.ReadInteger('a','i',1)), 'Integer');
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','b',False)), 'Bool');
+  FContext.AssertTrue((Int64(Maxint*2))=(Ini.ReadInt64('a','i6',Maxint*2)), 'Int64');
+  FContext.AssertTrue((D)=(Ini.ReadDate('a','d',0)), 'Date');
+  FContext.AssertTrue((T)=(Ini.ReadTime('a','t',0)), 'Time');
+  FContext.AssertTrue((DT)=(Ini.ReadDateTime('a','dt',0)), 'DateTime');
+  FContext.AssertTrue((1.23)=(Ini.ReadFloat('a','f',0)), 'Float');
+  if FileExists(FCaseName+'.ini') then
+    DeleteFile(FCaseName+'.ini');
 end;
 
 procedure TJSONIniTest.TestConvertIniString;
@@ -588,20 +593,388 @@ begin
   T:=EncodeTime(12,13,14,567);
   DT:=D+T;
   CreateIni;
-  TJSONIniFile.ConvertIni(TestName+'.ini',TestFile,True);
-  AssertEquals('String','c',Ini.ReadString('a','s',''));
-  AssertEquals('Integer',2,Ini.ReadInteger('a','i',1));
-  AssertEquals('Bool',True,Ini.ReadBool('a','b',False));
-  AssertEquals('Int64',Int64(Maxint*2),Ini.ReadInt64('a','i6',Maxint*2));
-  AssertEquals('Date',DateToStr(D), Ini.ReadString('a','d',''));
-  AssertEquals('Time',TimeToStr(T),Ini.ReadString('a','t',''));
-  AssertEquals('DateTime',DateTimeToStr(DT),Ini.ReadString('a','dt',''));
-  AssertEquals('Float',1.23,Ini.ReadFloat('a','f',0));
-  if FileExists(TestName+'.ini') then
-    DeleteFile(TestName+'.ini');
+  TJSONIniFile.ConvertIni(FCaseName+'.ini',TestFile,True);
+  FContext.AssertTrue(('c')=(Ini.ReadString('a','s','')), 'String');
+  FContext.AssertTrue((2)=(Ini.ReadInteger('a','i',1)), 'Integer');
+  FContext.AssertTrue((True)=(Ini.ReadBool('a','b',False)), 'Bool');
+  FContext.AssertTrue((Int64(Maxint*2))=(Ini.ReadInt64('a','i6',Maxint*2)), 'Int64');
+  FContext.AssertTrue((DateToStr(D))=(Ini.ReadString('a','d','')), 'Date');
+  FContext.AssertTrue((TimeToStr(T))=(Ini.ReadString('a','t','')), 'Time');
+  FContext.AssertTrue((DateTimeToStr(DT))=(Ini.ReadString('a','dt','')), 'DateTime');
+  FContext.AssertTrue((1.23)=(Ini.ReadFloat('a','f',0)), 'Float');
+  if FileExists(FCaseName+'.ini') then
+    DeleteFile(FCaseName+'.ini');
 end;
 
-initialization
-  RegisterTest(TJSONIniTest);
-end.
 
+procedure RunTJSONIniTestTestEmpty(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmpty';
+    lFixture.SetUp;
+    try lFixture.TestEmpty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadEmpty(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadEmpty';
+    lFixture.SetUp;
+    try lFixture.TestReadEmpty; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadEmptyValue(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadEmptyValue';
+    lFixture.SetUp;
+    try lFixture.TestReadEmptyValue; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadEmptyObject(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadEmptyObject';
+    lFixture.SetUp;
+    try lFixture.TestReadEmptyObject; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestRead1EmptySection(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRead1EmptySection';
+    lFixture.SetUp;
+    try lFixture.TestRead1EmptySection; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadSections(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadSections';
+    lFixture.SetUp;
+    try lFixture.TestReadSections; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadSection(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadSection';
+    lFixture.SetUp;
+    try lFixture.TestReadSection; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadSectionValues(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadSectionValues';
+    lFixture.SetUp;
+    try lFixture.TestReadSectionValues; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadString(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadString';
+    lFixture.SetUp;
+    try lFixture.TestReadString; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadInteger(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadInteger';
+    lFixture.SetUp;
+    try lFixture.TestReadInteger; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadInt64(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadInt64';
+    lFixture.SetUp;
+    try lFixture.TestReadInt64; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadFloat(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadFloat';
+    lFixture.SetUp;
+    try lFixture.TestReadFloat; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadBoolean(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadBoolean';
+    lFixture.SetUp;
+    try lFixture.TestReadBoolean; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadDate(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadDate';
+    lFixture.SetUp;
+    try lFixture.TestReadDate; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadTime(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadTime';
+    lFixture.SetUp;
+    try lFixture.TestReadTime; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestReadDateTime(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestReadDateTime';
+    lFixture.SetUp;
+    try lFixture.TestReadDateTime; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestEraseSection(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEraseSection';
+    lFixture.SetUp;
+    try lFixture.TestEraseSection; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestEraseSectionCaseMismatch(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEraseSectionCaseMismatch';
+    lFixture.SetUp;
+    try lFixture.TestEraseSectionCaseMismatch; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestDeleteKey(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDeleteKey';
+    lFixture.SetUp;
+    try lFixture.TestDeleteKey; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestDeleteKeySectionCaseMismatch(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDeleteKeySectionCaseMismatch';
+    lFixture.SetUp;
+    try lFixture.TestDeleteKeySectionCaseMismatch; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestDeleteKeyKeyCaseMismatch(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDeleteKeyKeyCaseMismatch';
+    lFixture.SetUp;
+    try lFixture.TestDeleteKeyKeyCaseMismatch; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestWriteString(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWriteString';
+    lFixture.SetUp;
+    try lFixture.TestWriteString; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestWriteInteger(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWriteInteger';
+    lFixture.SetUp;
+    try lFixture.TestWriteInteger; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestWriteDate(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWriteDate';
+    lFixture.SetUp;
+    try lFixture.TestWriteDate; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestWriteDateTime(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWriteDateTime';
+    lFixture.SetUp;
+    try lFixture.TestWriteDateTime; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestWriteTime(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWriteTime';
+    lFixture.SetUp;
+    try lFixture.TestWriteTime; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestConvertIni(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConvertIni';
+    lFixture.SetUp;
+    try lFixture.TestConvertIni; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTJSONIniTestTestConvertIniString(AContext: TNXTestContext);
+var lFixture: TJSONIniTest;
+begin
+  lFixture:=TJSONIniTest.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConvertIniString';
+    lFixture.SetUp;
+    try lFixture.TestConvertIniString; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcjsoniniTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcjsonini.TJSONIniTest');
+  lSuite.AddTest('TestEmpty', @RunTJSONIniTestTestEmpty);
+  lSuite.AddTest('TestReadEmpty', @RunTJSONIniTestTestReadEmpty);
+  lSuite.AddTest('TestReadEmptyValue', @RunTJSONIniTestTestReadEmptyValue);
+  lSuite.AddTest('TestReadEmptyObject', @RunTJSONIniTestTestReadEmptyObject);
+  lSuite.AddTest('TestRead1EmptySection', @RunTJSONIniTestTestRead1EmptySection);
+  lSuite.AddTest('TestReadSections', @RunTJSONIniTestTestReadSections);
+  lSuite.AddTest('TestReadSection', @RunTJSONIniTestTestReadSection);
+  lSuite.AddTest('TestReadSectionValues', @RunTJSONIniTestTestReadSectionValues);
+  lSuite.AddTest('TestReadString', @RunTJSONIniTestTestReadString);
+  lSuite.AddTest('TestReadInteger', @RunTJSONIniTestTestReadInteger);
+  lSuite.AddTest('TestReadInt64', @RunTJSONIniTestTestReadInt64);
+  lSuite.AddTest('TestReadFloat', @RunTJSONIniTestTestReadFloat);
+  lSuite.AddTest('TestReadBoolean', @RunTJSONIniTestTestReadBoolean);
+  lSuite.AddTest('TestReadDate', @RunTJSONIniTestTestReadDate);
+  lSuite.AddTest('TestReadTime', @RunTJSONIniTestTestReadTime);
+  lSuite.AddTest('TestReadDateTime', @RunTJSONIniTestTestReadDateTime);
+  lSuite.AddTest('TestEraseSection', @RunTJSONIniTestTestEraseSection);
+  lSuite.AddTest('TestEraseSectionCaseMismatch', @RunTJSONIniTestTestEraseSectionCaseMismatch);
+  lSuite.AddTest('TestDeleteKey', @RunTJSONIniTestTestDeleteKey);
+  lSuite.AddTest('TestDeleteKeySectionCaseMismatch', @RunTJSONIniTestTestDeleteKeySectionCaseMismatch);
+  lSuite.AddTest('TestDeleteKeyKeyCaseMismatch', @RunTJSONIniTestTestDeleteKeyKeyCaseMismatch);
+  lSuite.AddTest('TestWriteString', @RunTJSONIniTestTestWriteString);
+  lSuite.AddTest('TestWriteInteger', @RunTJSONIniTestTestWriteInteger);
+  lSuite.AddTest('TestWriteDate', @RunTJSONIniTestTestWriteDate);
+  lSuite.AddTest('TestWriteDateTime', @RunTJSONIniTestTestWriteDateTime);
+  lSuite.AddTest('TestWriteTime', @RunTJSONIniTestTestWriteTime);
+  lSuite.AddTest('TestConvertIni', @RunTJSONIniTestTestConvertIni);
+  lSuite.AddTest('TestConvertIniString', @RunTJSONIniTestTestConvertIniString);
+end;
+
+end.

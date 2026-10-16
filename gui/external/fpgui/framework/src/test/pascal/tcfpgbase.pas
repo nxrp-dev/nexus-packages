@@ -5,19 +5,21 @@ unit tcfpgbase;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
   //TestFramework,
-  fpcunit, testutils, testregistry,
   fpg_base,
   fpg_widget;
 
 type
 
-  TTestFPGRect = class(TTestCase)
+  TTestFPGRect = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     procedure CheckEqualsRect(const expected, actual: TfpgRect; const ErrorMsg: string= '');
-  published
+  public
     procedure TestSetRect;
     procedure TestClear;
     procedure TestIsUnassigned;
@@ -31,8 +33,11 @@ type
     procedure TestPixelCoverage;
   end;
 
-  TTestFPGWidget = class(TTestCase)
-  published
+  TTestFPGWidget = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestWidgetInclusiveBoundaries;
     procedure TestWidgetPixelCoverage;
     procedure TestWidgetAlignment;
@@ -41,6 +46,8 @@ type
 
 procedure RegisterTests;
 
+
+procedure RegistertcfpgbaseTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -51,9 +58,9 @@ uses
 
 procedure RegisterTests;
 begin
-  // TestFramework.RegisterTest('fpg_base', TTestFPGRect.Suite);
-  RegisterTest(TTestFPGRect);
-  RegisterTest(TTestFPGWidget);
+  // TestFramework.
+  
+  
 end;
 
 
@@ -62,10 +69,10 @@ end;
 procedure TTestFPGRect.CheckEqualsRect(const expected: TfpgRect;
                const actual: TfpgRect; const ErrorMsg: string = '');
 begin
-  CheckEquals(Expected.Left, Actual.Left, ErrorMsg + ': Left');
-  CheckEquals(Expected.Top, Actual.Top, ErrorMsg + ': Top');
-  CheckEquals(Expected.Width, Actual.Width, ErrorMsg + ': Width');
-  CheckEquals(Expected.Height, Actual.Height, ErrorMsg + ': Height');
+  FContext.AssertTrue((Expected.Left)=(Actual.Left), ErrorMsg + ': Left');
+  FContext.AssertTrue((Expected.Top)=(Actual.Top), ErrorMsg + ': Top');
+  FContext.AssertTrue((Expected.Width)=(Actual.Width), ErrorMsg + ': Width');
+  FContext.AssertTrue((Expected.Height)=(Actual.Height), ErrorMsg + ': Height');
 end;
 
 procedure TTestFPGRect.TestSetRect;
@@ -73,10 +80,10 @@ var
   r1: TfpgRect;
 begin
   r1.SetRect(10, 20, 30, 40);
-  CheckEquals(10, r1.Left, 'Failed on 1');
-  CheckEquals(20, r1.Top, 'Failed on 2');
-  CheckEquals(30, r1.Width, 'Failed on 3');
-  CheckEquals(40, r1.Height, 'Failed on 4');
+  FContext.AssertTrue((10)=(r1.Left), 'Failed on 1');
+  FContext.AssertTrue((20)=(r1.Top), 'Failed on 2');
+  FContext.AssertTrue((30)=(r1.Width), 'Failed on 3');
+  FContext.AssertTrue((40)=(r1.Height), 'Failed on 4');
 end;
 
 procedure TTestFPGRect.TestClear;
@@ -85,10 +92,10 @@ var
 begin
   r1.SetRect(10, 20, 30, 40);
   r1.Clear;
-  CheckEquals(0, r1.Left, 'Failed on 1');
-  CheckEquals(0, r1.Top, 'Failed on 2');
-  CheckEquals(0, r1.Width, 'Failed on 3');
-  CheckEquals(0, r1.Height, 'Failed on 4');
+  FContext.AssertTrue((0)=(r1.Left), 'Failed on 1');
+  FContext.AssertTrue((0)=(r1.Top), 'Failed on 2');
+  FContext.AssertTrue((0)=(r1.Width), 'Failed on 3');
+  FContext.AssertTrue((0)=(r1.Height), 'Failed on 4');
 end;
 
 procedure TTestFPGRect.TestIsUnassigned;
@@ -97,23 +104,23 @@ var
 begin
   r1.SetRect(10, 20, 30, 40);
   r1.Clear;
-  CheckEquals(0, r1.Left, 'Failed on 1');
-  CheckEquals(0, r1.Top, 'Failed on 2');
-  CheckEquals(0, r1.Width, 'Failed on 3');
-  CheckEquals(0, r1.Height, 'Failed on 4');
-  CheckEquals(true, r1.IsUnassigned, 'Failed on 5');
+  FContext.AssertTrue((0)=(r1.Left), 'Failed on 1');
+  FContext.AssertTrue((0)=(r1.Top), 'Failed on 2');
+  FContext.AssertTrue((0)=(r1.Width), 'Failed on 3');
+  FContext.AssertTrue((0)=(r1.Height), 'Failed on 4');
+  FContext.AssertTrue((true)=(r1.IsUnassigned), 'Failed on 5');
   r1.Clear;
   r1.Left := 1;
-  CheckEquals(false, r1.IsUnassigned, 'Failed on 6');
+  FContext.AssertTrue((false)=(r1.IsUnassigned), 'Failed on 6');
   r1.Clear;
   r1.Top := 1;
-  CheckEquals(false, r1.IsUnassigned, 'Failed on 7');
+  FContext.AssertTrue((false)=(r1.IsUnassigned), 'Failed on 7');
   r1.Clear;
   r1.Width := 1;
-  CheckEquals(false, r1.IsUnassigned, 'Failed on 8');
+  FContext.AssertTrue((false)=(r1.IsUnassigned), 'Failed on 8');
   r1.Clear;
   r1.Height := 1;
-  CheckEquals(false, r1.IsUnassigned, 'Failed on 9');
+  FContext.AssertTrue((false)=(r1.IsUnassigned), 'Failed on 9');
 end;
 
 procedure TTestFPGRect.TestIsRectEmpty;
@@ -121,25 +128,25 @@ var
   r1: TfpgRect;
 begin
   r1.Clear;
-  CheckEquals(true, r1.IsRectEmpty, 'Failed on 1');
+  FContext.AssertTrue((true)=(r1.IsRectEmpty), 'Failed on 1');
   r1.Clear;
   r1.Left := 1;
-  CheckEquals(true, r1.IsRectEmpty, 'Failed on 2');
+  FContext.AssertTrue((true)=(r1.IsRectEmpty), 'Failed on 2');
   r1.Clear;
   r1.Top := 1;
-  CheckEquals(true, r1.IsRectEmpty, 'Failed on 3');
+  FContext.AssertTrue((true)=(r1.IsRectEmpty), 'Failed on 3');
   r1.Clear;
   r1.Width := 1;
   // a rect with no height is not a rectangle
-  CheckEquals(true, r1.IsRectEmpty, 'Failed on 4');
+  FContext.AssertTrue((true)=(r1.IsRectEmpty), 'Failed on 4');
   r1.Clear;
   r1.Height := 1;
   // a rect with no width is not a rectangle
-  CheckEquals(true, r1.IsRectEmpty, 'Failed on 5');
+  FContext.AssertTrue((true)=(r1.IsRectEmpty), 'Failed on 5');
   r1.Clear;
   r1.Width := 1;
   r1.Height := 1;
-  CheckEquals(false, r1.IsRectEmpty, 'Failed on 6');
+  FContext.AssertTrue((false)=(r1.IsRectEmpty), 'Failed on 6');
 end;
 
 { See the TfpgRect API documentation for more details, if you don't understand. }
@@ -148,11 +155,11 @@ var
   r1: TfpgRect;
 begin
   r1.SetRect(10, 20, 30, 40);
-  CheckEquals(59, r1.Bottom, 'Failed on 1');
+  FContext.AssertTrue((59)=(r1.Bottom), 'Failed on 1');
   r1.SetRect(0, 0, 1, 1);
-  CheckEquals(0, r1.Bottom, 'Failed on 2');
+  FContext.AssertTrue((0)=(r1.Bottom), 'Failed on 2');
   r1.SetRect(0, 0, 2, 2);
-  CheckEquals(1, r1.Bottom, 'Failed on 3');
+  FContext.AssertTrue((1)=(r1.Bottom), 'Failed on 3');
 end;
 
 { See the TfpgRect API documentation for more details, if you don't understand. }
@@ -161,11 +168,11 @@ var
   r1: TfpgRect;
 begin
   r1.SetRect(10, 20, 30, 40);
-  CheckEquals(39, r1.Right, 'Failed on 1');
+  FContext.AssertTrue((39)=(r1.Right), 'Failed on 1');
   r1.SetRect(0, 0, 1, 1);
-  CheckEquals(0, r1.Right, 'Failed on 2');
+  FContext.AssertTrue((0)=(r1.Right), 'Failed on 2');
   r1.SetRect(0, 0, 2, 2);
-  CheckEquals(1, r1.Right, 'Failed on 3');
+  FContext.AssertTrue((1)=(r1.Right), 'Failed on 3');
 end;
 
 procedure TTestFPGRect.TestSetBottom;
@@ -174,8 +181,8 @@ var
 begin
   r1.SetRect(0, 0, 0, 0);
   r1.SetBottom(5);
-  CheckEquals(5, r1.Bottom, 'Failed on 1');
-  CheckEquals(6, r1.Height, 'Failed on 2');
+  FContext.AssertTrue((5)=(r1.Bottom), 'Failed on 1');
+  FContext.AssertTrue((6)=(r1.Height), 'Failed on 2');
 end;
 
 procedure TTestFPGRect.TestUnionRect_Old_vs_New;
@@ -214,17 +221,17 @@ begin
   // This means a rect at (0,0) with size (200,200) occupies pixels [0,199] x [0,199]
 
   r.SetRect(0, 0, 200, 200);
-  CheckEquals(199, r.Right, 'Right should be Left + Width - 1');
-  CheckEquals(199, r.Bottom, 'Bottom should be Top + Height - 1');
+  FContext.AssertTrue((199)=(r.Right), 'Right should be Left + Width - 1');
+  FContext.AssertTrue((199)=(r.Bottom), 'Bottom should be Top + Height - 1');
 
   r.SetRect(10, 20, 50, 30);
-  CheckEquals(59, r.Right, 'Right = 10 + 50 - 1 = 59');
-  CheckEquals(49, r.Bottom, 'Bottom = 20 + 30 - 1 = 49');
+  FContext.AssertTrue((59)=(r.Right), 'Right = 10 + 50 - 1 = 59');
+  FContext.AssertTrue((49)=(r.Bottom), 'Bottom = 20 + 30 - 1 = 49');
 
   // Edge case: 1x1 rectangle
   r.SetRect(5, 5, 1, 1);
-  CheckEquals(5, r.Right, 'A 1x1 rect at (5,5) has Right=5');
-  CheckEquals(5, r.Bottom, 'A 1x1 rect at (5,5) has Bottom=5');
+  FContext.AssertTrue((5)=(r.Right), 'A 1x1 rect at (5,5) has Right=5');
+  FContext.AssertTrue((5)=(r.Bottom), 'A 1x1 rect at (5,5) has Bottom=5');
 end;
 
 procedure TTestFPGRect.TestPixelCoverage;
@@ -237,15 +244,15 @@ begin
   r.SetRect(10, 20, 50, 30);
   // Horizontal coverage: pixels [10..59] = 50 pixels
   pixelCount := r.Right - r.Left + 1;
-  CheckEquals(50, pixelCount, 'Horizontal pixel count should equal Width');
+  FContext.AssertTrue((50)=(pixelCount), 'Horizontal pixel count should equal Width');
 
   // Vertical coverage: pixels [20..49] = 30 pixels
   pixelCount := r.Bottom - r.Top + 1;
-  CheckEquals(30, pixelCount, 'Vertical pixel count should equal Height');
+  FContext.AssertTrue((30)=(pixelCount), 'Vertical pixel count should equal Height');
 
   // Total coverage
   pixelCount := (r.Right - r.Left + 1) * (r.Bottom - r.Top + 1);
-  CheckEquals(1500, pixelCount, 'Total pixels = Width * Height = 50 * 30 = 1500');
+  FContext.AssertTrue((1500)=(pixelCount), 'Total pixels = Width * Height = 50 * 30 = 1500');
 end;
 
 { TTestFPGWidget }
@@ -261,15 +268,15 @@ begin
     // Widget boundaries should follow the same inclusive rules as TfpgRect
     w.Width := 200;
     w.Height := 200;
-    CheckEquals(199, w.Right, 'Widget.Right should be Left + Width - 1');
-    CheckEquals(199, w.Bottom, 'Widget.Bottom should be Top + Height - 1');
+    FContext.AssertTrue((199)=(w.Right), 'Widget.Right should be Left + Width - 1');
+    FContext.AssertTrue((199)=(w.Bottom), 'Widget.Bottom should be Top + Height - 1');
 
     w.Left := 10;
     w.Top := 20;
     w.Width := 50;
     w.Height := 30;
-    CheckEquals(59, w.Right, 'Widget.Right = 10 + 50 - 1 = 59');
-    CheckEquals(49, w.Bottom, 'Widget.Bottom = 20 + 30 - 1 = 49');
+    FContext.AssertTrue((59)=(w.Right), 'Widget.Right = 10 + 50 - 1 = 59');
+    FContext.AssertTrue((49)=(w.Bottom), 'Widget.Bottom = 20 + 30 - 1 = 49');
   finally
     w.Free;
   end;
@@ -289,7 +296,7 @@ begin
 
     // Widget should occupy exactly Width * Height pixels with inclusive boundaries
     pixelCount := (w.Right - w.Left + 1) * (w.Bottom - w.Top + 1);
-    CheckEquals(1500, pixelCount, 'Widget should occupy Width * Height pixels');
+    FContext.AssertTrue((1500)=(pixelCount), 'Widget should occupy Width * Height pixels');
   finally
     w.Free;
   end;
@@ -320,10 +327,10 @@ begin
       widget.Width := 50;
       widget.Height := 20;
 
-      CheckEquals(193, widget.Right, 'Widget right edge at container.Right - 6');
-      CheckEquals(193, widget.Bottom, 'Widget bottom edge at container.Bottom - 6');
-      CheckEquals(144, widget.Left, 'Widget.Left = (container.Right - 6) - Width + 1');
-      CheckEquals(174, widget.Top, 'Widget.Top = (container.Bottom - 6) - Height + 1');
+      FContext.AssertTrue((193)=(widget.Right), 'Widget right edge at container.Right - 6');
+      FContext.AssertTrue((193)=(widget.Bottom), 'Widget bottom edge at container.Bottom - 6');
+      FContext.AssertTrue((144)=(widget.Left), 'Widget.Left = (container.Right - 6) - Width + 1');
+      FContext.AssertTrue((174)=(widget.Top), 'Widget.Top = (container.Bottom - 6) - Height + 1');
     finally
       widget.Free;
     end;
@@ -331,6 +338,182 @@ begin
     container.Free;
   end;
 end;
+
+procedure RunTTestFPGRectTestSetRect(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSetRect';
+    lFixture.TestSetRect;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestClear(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClear';
+    lFixture.TestClear;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestIsUnassigned(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIsUnassigned';
+    lFixture.TestIsUnassigned;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestIsRectEmpty(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIsRectEmpty';
+    lFixture.TestIsRectEmpty;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestBottom(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestBottom';
+    lFixture.TestBottom;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestRight(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRight';
+    lFixture.TestRight;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestSetBottom(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSetBottom';
+    lFixture.TestSetBottom;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestUnionRect_Old_vs_New(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnionRect_Old_vs_New';
+    lFixture.TestUnionRect_Old_vs_New;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestUnionRect(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestUnionRect';
+    lFixture.TestUnionRect;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestInclusiveBoundaries(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInclusiveBoundaries';
+    lFixture.TestInclusiveBoundaries;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGRectTestPixelCoverage(AContext: TNXTestContext);
+var lFixture: TTestFPGRect;
+begin
+  lFixture:=TTestFPGRect.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestPixelCoverage';
+    lFixture.TestPixelCoverage;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGWidgetTestWidgetInclusiveBoundaries(AContext: TNXTestContext);
+var lFixture: TTestFPGWidget;
+begin
+  lFixture:=TTestFPGWidget.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWidgetInclusiveBoundaries';
+    lFixture.TestWidgetInclusiveBoundaries;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGWidgetTestWidgetPixelCoverage(AContext: TNXTestContext);
+var lFixture: TTestFPGWidget;
+begin
+  lFixture:=TTestFPGWidget.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWidgetPixelCoverage';
+    lFixture.TestWidgetPixelCoverage;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFPGWidgetTestWidgetAlignment(AContext: TNXTestContext);
+var lFixture: TTestFPGWidget;
+begin
+  lFixture:=TTestFPGWidget.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestWidgetAlignment';
+    lFixture.TestWidgetAlignment;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcfpgbaseTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcfpgbase.TTestFPGRect');
+  lSuite.AddTest('TestSetRect', @RunTTestFPGRectTestSetRect);
+  lSuite.AddTest('TestClear', @RunTTestFPGRectTestClear);
+  lSuite.AddTest('TestIsUnassigned', @RunTTestFPGRectTestIsUnassigned);
+  lSuite.AddTest('TestIsRectEmpty', @RunTTestFPGRectTestIsRectEmpty);
+  lSuite.AddTest('TestBottom', @RunTTestFPGRectTestBottom);
+  lSuite.AddTest('TestRight', @RunTTestFPGRectTestRight);
+  lSuite.AddTest('TestSetBottom', @RunTTestFPGRectTestSetBottom);
+  lSuite.AddTest('TestUnionRect_Old_vs_New', @RunTTestFPGRectTestUnionRect_Old_vs_New);
+  lSuite.AddTest('TestUnionRect', @RunTTestFPGRectTestUnionRect);
+  lSuite.AddTest('TestInclusiveBoundaries', @RunTTestFPGRectTestInclusiveBoundaries);
+  lSuite.AddTest('TestPixelCoverage', @RunTTestFPGRectTestPixelCoverage);
+  lSuite:=ARegistry.AddSuite('tcfpgbase.TTestFPGWidget');
+  lSuite.AddTest('TestWidgetInclusiveBoundaries', @RunTTestFPGWidgetTestWidgetInclusiveBoundaries);
+  lSuite.AddTest('TestWidgetPixelCoverage', @RunTTestFPGWidgetTestWidgetPixelCoverage);
+  lSuite.AddTest('TestWidgetAlignment', @RunTTestFPGWidgetTestWidgetAlignment);
+end;
+
 
 
 initialization

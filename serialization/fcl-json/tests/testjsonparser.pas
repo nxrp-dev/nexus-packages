@@ -21,7 +21,7 @@ unit testjsonparser;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry,fpjson,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpjson,
   jsonscanner,jsonParser,testjsondata;
 
 Const
@@ -49,7 +49,7 @@ type
     procedure DoTrailingCommaErrorObject;
   Protected
     Procedure Setup; override;
-  published
+  public
     procedure TestEmpty;
     procedure TestNull;
     procedure TestTrue;
@@ -83,6 +83,8 @@ type
     Procedure TestNoIgnoreDuplicates;
   end;
 
+procedure RegistertestjsonparserTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure TTestParser.TestEmpty;
@@ -96,7 +98,7 @@ begin
   Try
     J:=P.Parse;
     If (J<>Nil) then
-      Fail('Empty returns Nil');
+      FContext.Fail('Empty returns Nil');
   Finally
     FreeAndNil(J);
     FreeAndNil(P);
@@ -114,7 +116,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of 1 fails');
+      FContext.Fail('Parse of 1 fails');
     TestJSONType(J,jtNumber);
     TestAsInteger(J,1);
   Finally
@@ -134,7 +136,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of 123456789012345 fails');
+      FContext.Fail('Parse of 123456789012345 fails');
     TestJSONType(J,jtNumber);
     TestAsInt64(J,123456789012345);
   Finally
@@ -154,7 +156,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of null fails');
+      FContext.Fail('Parse of null fails');
     TestJSONType(J,jtNull);
   Finally
     FreeAndNil(J);
@@ -173,7 +175,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of True fails');
+      FContext.Fail('Parse of True fails');
     TestJSONType(J,jtBoolean);
     TestAsBoolean(J,True);
   Finally
@@ -193,7 +195,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of False fails');
+      FContext.Fail('Parse of False fails');
     TestJSONType(J,jtBoolean);
     TestAsBoolean(J,False);
   Finally
@@ -279,12 +281,12 @@ end;
 
 procedure TTestParser.TestTrailingCommaErrorArray;
 begin
-  AssertException('Need joIgnoreTrailingComma in options to allow trailing comma',EJSONParser,@DoTrailingCommaErrorArray) ;
+  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorArray, 'Need joIgnoreTrailingComma in options to allow trailing comma') ;
 end;
 
 procedure TTestParser.TestTrailingCommaErrorObject;
 begin
-  AssertException('Need joIgnoreTrailingComma in options to allow trailing comma',EJSONParser,@DoTrailingCommaErrorObject);
+  FContext.AssertRaises(EJSONParser, @DoTrailingCommaErrorObject, 'Need joIgnoreTrailingComma in options to allow trailing comma');
 end;
 
 procedure TTestParser.DoTrailingCommaErrorArray;
@@ -386,13 +388,12 @@ begin
     P.Options:=FOptions;
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of object "'+S+'" fails');
+      FContext.Fail('Parse of object "'+S+'" fails');
     TestJSONType(J,jtObject);
     TestItemCount(J,High(ElNames)-Low(ElNames)+1);
     O:=TJSONObject(J);
     For I:=Low(ElNames) to High(ElNames) do
-      AssertEquals(Format('Element %d name',[I-Low(Elnames)])
-                   ,ElNames[i], O.Names[I-Low(ElNames)]);
+      FContext.AssertTrue((ElNames[i])=(O.Names[I-Low(ElNames)]), Format('Element %d name',[I-Low(Elnames)]));
     If DoJSONTest then
       self.TestJSON(J,S);
   Finally
@@ -415,7 +416,7 @@ begin
     P.Options:=FOptions;
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of array "'+S+'" fails');
+      FContext.Fail('Parse of array "'+S+'" fails');
     TestJSONType(J,jtArray);
     TestItemCount(J,ACount);
     if not IgnoreJSON then
@@ -437,7 +438,7 @@ begin
   try
     D:=P.Parse;
     try
-      AssertEquals('Correct class for '+S+' : ',AClass,D.ClassType);
+      FContext.AssertTrue((AClass)=(D.ClassType), 'Correct class for '+S+' : ');
     finally
       D.Free
     end;
@@ -507,7 +508,7 @@ end;
 
 procedure TTestParser.TestHandler;
 begin
-  AssertNotNull('Handler installed',GetJSONParserHandler);
+  FContext.AssertTrue((GetJSONParserHandler)<>nil, 'Handler installed');
 end;
 
 procedure TTestParser.TestNoHandlerError;
@@ -520,10 +521,10 @@ begin
   H:=GetJSONParserHandler;
   HS:=GetJSONStringParserHandler;
   try
-    AssertSame('SetJSONParserHandler returns previous handler',H,SetJSONParserHandler(Nil));
-    AssertSame('SetJSONStringParserHandler returns previous handler',HS,SetJSONStringParserHandler(Nil));
-    AssertException('No handler raises exception',EJSON,@CallNoHandler);
-    AssertException('No handler raises exception',EJSON,@CallNoHandlerStream);
+    FContext.AssertTrue((H)=(SetJSONParserHandler(Nil)), 'SetJSONParserHandler returns previous handler');
+    FContext.AssertTrue((HS)=(SetJSONStringParserHandler(Nil)), 'SetJSONStringParserHandler returns previous handler');
+    FContext.AssertRaises(EJSON, @CallNoHandler, 'No handler raises exception');
+    FContext.AssertRaises(EJSON, @CallNoHandlerStream, 'No handler raises exception');
   finally
     SetJSONParserHandler(H);
     SetJSONStringParserHandler(HS);
@@ -538,7 +539,7 @@ Var
 begin
   D:=GetJSON('"123"');
   try
-    AssertEquals('Have correct string','123',D.AsString);
+    FContext.AssertTrue(('123')=(D.AsString), 'Have correct string');
   finally
     D.Free;
   end;
@@ -729,8 +730,8 @@ begin
   With TJSONParser.Create(MyJSON,[joIgnoreDuplicates]) do
     Try
       J:=Parse;
-      AssertEquals('Correct class',TJSONObject,J.ClassType);
-      AssertEquals('Correct value',100,TJSONObject(J).Get('a',0));
+      FContext.AssertTrue((TJSONObject)=(J.ClassType), 'Correct class');
+      FContext.AssertTrue((100)=(TJSONObject(J).Get('a',0)), 'Correct value');
       J.Free;
     Finally
       Free;
@@ -759,7 +760,7 @@ end;
 procedure TTestParser.TestNoIgnoreDuplicates;
 
 begin
-  AssertException('No duplicates allowed',EJSON,@DoDuplicate);
+  FContext.AssertRaises(EJSON, @DoDuplicate, 'No duplicates allowed');
 end;
 
 procedure TTestParser.DoTestError(S : String; Options : TJSONOptions = DefaultOpts);
@@ -792,7 +793,7 @@ begin
     ParseOk:=False;
   end;
   If ParseOK then
-    Fail('Parse of JSON string "'+S+'" should fail, but returned '+N);
+    FContext.Fail('Parse of JSON string "'+S+'" should fail, but returned '+N);
 end;
 
 procedure TTestParser.DoTestString(S: String);
@@ -812,7 +813,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of string "'+S+'" fails');
+      FContext.Fail('Parse of string "'+S+'" fails');
     TestJSONType(J,jtString);
     TestAsString(J,aResult);
     if Pos('\u',S)=0 then
@@ -844,7 +845,7 @@ begin
   Try
     J:=P.Parse;
     If (J=Nil) then
-      Fail('Parse of float '+S+' fails');
+      FContext.Fail('Parse of float '+S+' fails');
     TestJSONType(J,jtNumber);
     TestAsFloat(J,F);
   Finally
@@ -854,7 +855,414 @@ begin
 end;
 
 
-initialization
-  RegisterTest(TTestParser);
-end.
 
+procedure RunTTestParserTestEmpty(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmpty';
+    lFixture.SetUp;
+    lFixture.TestEmpty;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestNull(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNull';
+    lFixture.SetUp;
+    lFixture.TestNull;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestTrue(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTrue';
+    lFixture.SetUp;
+    lFixture.TestTrue;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestFalse(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFalse';
+    lFixture.SetUp;
+    lFixture.TestFalse;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestFloat(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFloat';
+    lFixture.SetUp;
+    lFixture.TestFloat;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestInteger(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInteger';
+    lFixture.SetUp;
+    lFixture.TestInteger;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestInt64(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestInt64';
+    lFixture.SetUp;
+    lFixture.TestInt64;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestString(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestString';
+    lFixture.SetUp;
+    lFixture.TestString;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestArray(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestArray';
+    lFixture.SetUp;
+    lFixture.TestArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestObject(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObject';
+    lFixture.SetUp;
+    lFixture.TestObject;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestObjectError(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectError';
+    lFixture.SetUp;
+    lFixture.TestObjectError;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestObjectKeyIdentifier(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectKeyIdentifier';
+    lFixture.SetUp;
+    lFixture.TestObjectKeyIdentifier;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestObjectKeyIdentifierStrict(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectKeyIdentifierStrict';
+    lFixture.SetUp;
+    lFixture.TestObjectKeyIdentifierStrict;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestTrailingComma(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTrailingComma';
+    lFixture.SetUp;
+    lFixture.TestTrailingComma;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestTrailingCommaErrorArray(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTrailingCommaErrorArray';
+    lFixture.SetUp;
+    lFixture.TestTrailingCommaErrorArray;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestTrailingCommaErrorObject(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTrailingCommaErrorObject';
+    lFixture.SetUp;
+    lFixture.TestTrailingCommaErrorObject;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestMixed(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMixed';
+    lFixture.SetUp;
+    lFixture.TestMixed;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestComment(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestComment';
+    lFixture.SetUp;
+    lFixture.TestComment;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestErrors(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestErrors';
+    lFixture.SetUp;
+    lFixture.TestErrors;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestClasses(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClasses';
+    lFixture.SetUp;
+    lFixture.TestClasses;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestHandler(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHandler';
+    lFixture.SetUp;
+    lFixture.TestHandler;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestNoHandlerError(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoHandlerError';
+    lFixture.SetUp;
+    lFixture.TestNoHandlerError;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestHandlerResult(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestHandlerResult';
+    lFixture.SetUp;
+    lFixture.TestHandlerResult;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptyLine';
+    lFixture.SetUp;
+    lFixture.TestEmptyLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestStartEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestStartEmptyLine';
+    lFixture.SetUp;
+    lFixture.TestStartEmptyLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestObjectEmptyLine(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestObjectEmptyLine';
+    lFixture.SetUp;
+    lFixture.TestObjectEmptyLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestCommentLine(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCommentLine';
+    lFixture.SetUp;
+    lFixture.TestCommentLine;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestFirstLineComment(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFirstLineComment';
+    lFixture.SetUp;
+    lFixture.TestFirstLineComment;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestMultiLineComment(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestMultiLineComment';
+    lFixture.SetUp;
+    lFixture.TestMultiLineComment;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestIgnoreDuplicates(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIgnoreDuplicates';
+    lFixture.SetUp;
+    lFixture.TestIgnoreDuplicates;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestParserTestNoIgnoreDuplicates(AContext: TNXTestContext);
+var lFixture: TTestParser;
+begin
+  lFixture:=TTestParser.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNoIgnoreDuplicates';
+    lFixture.SetUp;
+    lFixture.TestNoIgnoreDuplicates;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertestjsonparserTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('testjsonparser.TTestParser');
+  lSuite.AddTest('TestEmpty', @RunTTestParserTestEmpty);
+  lSuite.AddTest('TestNull', @RunTTestParserTestNull);
+  lSuite.AddTest('TestTrue', @RunTTestParserTestTrue);
+  lSuite.AddTest('TestFalse', @RunTTestParserTestFalse);
+  lSuite.AddTest('TestFloat', @RunTTestParserTestFloat);
+  lSuite.AddTest('TestInteger', @RunTTestParserTestInteger);
+  lSuite.AddTest('TestInt64', @RunTTestParserTestInt64);
+  lSuite.AddTest('TestString', @RunTTestParserTestString);
+  lSuite.AddTest('TestArray', @RunTTestParserTestArray);
+  lSuite.AddTest('TestObject', @RunTTestParserTestObject);
+  lSuite.AddTest('TestObjectError', @RunTTestParserTestObjectError);
+  lSuite.AddTest('TestObjectKeyIdentifier', @RunTTestParserTestObjectKeyIdentifier);
+  lSuite.AddTest('TestObjectKeyIdentifierStrict', @RunTTestParserTestObjectKeyIdentifierStrict);
+  lSuite.AddTest('TestTrailingComma', @RunTTestParserTestTrailingComma);
+  lSuite.AddTest('TestTrailingCommaErrorArray', @RunTTestParserTestTrailingCommaErrorArray);
+  lSuite.AddTest('TestTrailingCommaErrorObject', @RunTTestParserTestTrailingCommaErrorObject);
+  lSuite.AddTest('TestMixed', @RunTTestParserTestMixed);
+  lSuite.AddTest('TestComment', @RunTTestParserTestComment);
+  lSuite.AddTest('TestErrors', @RunTTestParserTestErrors);
+  lSuite.AddTest('TestClasses', @RunTTestParserTestClasses);
+  lSuite.AddTest('TestHandler', @RunTTestParserTestHandler);
+  lSuite.AddTest('TestNoHandlerError', @RunTTestParserTestNoHandlerError);
+  lSuite.AddTest('TestHandlerResult', @RunTTestParserTestHandlerResult);
+  lSuite.AddTest('TestEmptyLine', @RunTTestParserTestEmptyLine);
+  lSuite.AddTest('TestStartEmptyLine', @RunTTestParserTestStartEmptyLine);
+  lSuite.AddTest('TestObjectEmptyLine', @RunTTestParserTestObjectEmptyLine);
+  lSuite.AddTest('TestCommentLine', @RunTTestParserTestCommentLine);
+  lSuite.AddTest('TestFirstLineComment', @RunTTestParserTestFirstLineComment);
+  lSuite.AddTest('TestMultiLineComment', @RunTTestParserTestMultiLineComment);
+  lSuite.AddTest('TestIgnoreDuplicates', @RunTTestParserTestIgnoreDuplicates);
+  lSuite.AddTest('TestNoIgnoreDuplicates', @RunTTestParserTestNoIgnoreDuplicates);
+end;
+
+end.

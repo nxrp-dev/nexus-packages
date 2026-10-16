@@ -1,0 +1,14 @@
+[
+  {
+    "name": "NXSQLiteTests",
+    "source": "/media/kcollins/dev/source/nexus/packages/nexus-packages/db/sqlite/test/NXSQLiteTests.lpr",
+    "build_exit": 0,
+    "run_exit": 0
+  },
+  {
+    "name": "FCLDBSearchPaths",
+    "source": "/media/kcollins/dev/source/nexus/output/fcl-db-tests/consumer/FCLDBSearchPaths.lpr",
+    "build_exit": 0,
+    "run_exit": 0
+  }
+]

@@ -6,7 +6,7 @@ program NXSQLiteTests;
 
 {$mode objfpc}{$H+}
 
-uses SysUtils, obNXTestRegistry, obNXTestSuite, obNXTestResult, tsNXSQLiteTests,
+uses {$IFDEF UNIX}cwstring,{$ENDIF} SysUtils, obNXTestRegistry, obNXTestSuite, obNXTestResult, tsNXSQLiteTests,
   tsNXSQLiteBindingTests;
 
 procedure Run;

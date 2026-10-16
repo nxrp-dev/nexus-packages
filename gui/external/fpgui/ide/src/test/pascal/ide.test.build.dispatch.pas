@@ -11,10 +11,8 @@ unit ide.test.build.dispatch;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   fpg_tree,
   ide.build.dispatch,
   ide.project.pasbuild;
@@ -23,13 +21,18 @@ type
 
   { TTestDetectModuleFromTreeNode }
 
-  TTestDetectModuleFromTreeNode = class(TTestCase)
-  published
+  TTestDetectModuleFromTreeNode = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestNilNode;
     procedure TestNodeWithNilData;
     procedure TestNodeWithCategoryTag;
     procedure TestNodeWithModuleInfo;
   end;
+
+procedure RegisteridetestbuilddispatchTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -37,7 +40,7 @@ implementation
 
 procedure TTestDetectModuleFromTreeNode.TestNilNode;
 begin
-  AssertEquals('nil node should return empty', '', DetectModuleFromTreeNode(nil));
+  FContext.AssertTrue(('')=(DetectModuleFromTreeNode(nil)), 'nil node should return empty');
 end;
 
 procedure TTestDetectModuleFromTreeNode.TestNodeWithNilData;
@@ -46,8 +49,7 @@ var
 begin
   n := TfpgTreeNode.Create;
   try
-    AssertEquals('node with nil data should return empty', '',
-      DetectModuleFromTreeNode(n));
+    FContext.AssertTrue(('')=(DetectModuleFromTreeNode(n)), 'node with nil data should return empty');
   finally
     n.Free;
   end;
@@ -60,8 +62,7 @@ begin
   n := TfpgTreeNode.Create;
   try
     n.Data := Pointer(PtrInt(2));  { category tag }
-    AssertEquals('category tag node should return empty', '',
-      DetectModuleFromTreeNode(n));
+    FContext.AssertTrue(('')=(DetectModuleFromTreeNode(n)), 'category tag node should return empty');
   finally
     n.Free;
   end;
@@ -77,15 +78,66 @@ begin
   try
     info.Name := 'fpgui-framework';
     n.Data := info;
-    AssertEquals('module info node should return module name',
-      'fpgui-framework', DetectModuleFromTreeNode(n));
+    FContext.AssertTrue(('fpgui-framework')=(DetectModuleFromTreeNode(n)), 'module info node should return module name');
   finally
     info.Free;
     n.Free;
   end;
 end;
 
-initialization
-  RegisterTest(TTestDetectModuleFromTreeNode);
+
+procedure RunTTestDetectModuleFromTreeNodeTestNilNode(AContext: TNXTestContext);
+var lFixture: TTestDetectModuleFromTreeNode;
+begin
+  lFixture:=TTestDetectModuleFromTreeNode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNilNode';
+    lFixture.TestNilNode;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDetectModuleFromTreeNodeTestNodeWithNilData(AContext: TNXTestContext);
+var lFixture: TTestDetectModuleFromTreeNode;
+begin
+  lFixture:=TTestDetectModuleFromTreeNode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNodeWithNilData';
+    lFixture.TestNodeWithNilData;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDetectModuleFromTreeNodeTestNodeWithCategoryTag(AContext: TNXTestContext);
+var lFixture: TTestDetectModuleFromTreeNode;
+begin
+  lFixture:=TTestDetectModuleFromTreeNode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNodeWithCategoryTag';
+    lFixture.TestNodeWithCategoryTag;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestDetectModuleFromTreeNodeTestNodeWithModuleInfo(AContext: TNXTestContext);
+var lFixture: TTestDetectModuleFromTreeNode;
+begin
+  lFixture:=TTestDetectModuleFromTreeNode.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestNodeWithModuleInfo';
+    lFixture.TestNodeWithModuleInfo;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetestbuilddispatchTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.build.dispatch.TTestDetectModuleFromTreeNode');
+  lSuite.AddTest('TestNilNode', @RunTTestDetectModuleFromTreeNodeTestNilNode);
+  lSuite.AddTest('TestNodeWithNilData', @RunTTestDetectModuleFromTreeNodeTestNodeWithNilData);
+  lSuite.AddTest('TestNodeWithCategoryTag', @RunTTestDetectModuleFromTreeNodeTestNodeWithCategoryTag);
+  lSuite.AddTest('TestNodeWithModuleInfo', @RunTTestDetectModuleFromTreeNodeTestNodeWithModuleInfo);
+end;
 
 end.

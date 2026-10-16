@@ -1,0 +1,25 @@
+fpjsondataset.pas(621,21) Warning: Conversion between ordinals and pointers is not portable
+fpjsondataset.pas(626,30) Warning: Conversion between ordinals and pointers is not portable
+fpjsondataset.pas(632,25) Warning: Conversion between ordinals and pointers is not portable
+fpjsondataset.pas(1092,3) Warning: Case statement does not handle all possible cases
+fpjsondataset.pas(1101,5) Warning: Case statement does not handle all possible cases
+fpjsondataset.pas(1120,3) Warning: Case statement does not handle all possible cases
+fpjsondataset.pas(1129,5) Warning: Case statement does not handle all possible cases
+fpdbexport.pas(874,16) Warning: Symbol "ShortDateFormat" is deprecated
+fpdbexport.pas(875,16) Warning: Symbol "ShortTimeFormat" is deprecated
+fpdbexport.pas(876,20) Warning: Symbol "ShortDateFormat" is deprecated
+fpdbexport.pas(876,40) Warning: Symbol "ShortTimeFormat" is deprecated
+fpdbexport.pas(879,70) Warning: Symbol "DecimalSeparator" is deprecated
+fpdbexport.pas(880,68) Warning: Symbol "CurrencyString" is deprecated
+csvreadwrite.pas(305,11) Warning: Implicit string type conversion with potential data loss from "UnicodeString" to "AnsiString"
+fpfixedexport.pas(300,19) Warning: Implicit string type conversion from "AnsiString" to "UnicodeString"
+fpfixedexport.pas(355,9) Warning: Implicit string type conversion from "AnsiString" to "UnicodeString"
+fieldmap.pas(42,14) Warning: An inherited method is hidden by "TransformString(const WideString):System.WideString;"
+sqltypes.pas(54,17) Warning: An inherited method is hidden by "constructor Create(TSqlObjectIdentifierList;const AnsiString;const AnsiString);"
+sqldb.pas(1869,9) Warning: Case statement does not handle all possible cases
+sqldb.pas(1881,22) Warning: Case statement does not handle all possible cases
+syncobjs.pas(917,3) Warning: Symbol "CheckOSError" is not portable
+syncobjs.pas(919,5) Warning: Symbol "CheckOSError" is not portable
+syncobjs.pas(920,5) Warning: Symbol "CheckOSError" is not portable
+syncobjs.pas(1053,3) Warning: Symbol "CheckOSError" is not portable
+syncobjs.pas(1144,26) Warning: Function result does not seem to be set

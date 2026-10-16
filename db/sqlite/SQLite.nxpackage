@@ -62,7 +62,7 @@ Package SQLite {
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-db/src/base",
+                "packages/nexus-packages/db/fcl-db/src/base",
                 @SQLite.SourceRoot + "/src",
                 @SQLite.SourceRoot + "/src/bindings"
             ];

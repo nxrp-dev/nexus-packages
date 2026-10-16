@@ -5,8 +5,7 @@ unit tcmiglayout;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry,
-  fpg_base,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes, SysUtils, fpg_base,
   fpg_main,
   fpg_widget,
   fpg_form,
@@ -21,13 +20,16 @@ type
 
   { TTestMigLayout }
 
-  TTestMigLayout = class(TTestCase)
+  TTestMigLayout = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FMigDefaultBaseDpi: integer;
   protected
-    procedure SetUp; override;
-    procedure TearDown; override;
-  published
+    procedure SetUp; virtual;
+    procedure TearDown; virtual;
+  public
     procedure TestCreateMigLayout;
     procedure TestSingleWidgetLayout;
     procedure TestTwoWidgetsLayout;
@@ -44,18 +46,20 @@ type
 
 procedure RegisterTests;
 
+procedure RegistertcmiglayoutTests(ARegistry: TNXTestRegistry);
+
 implementation
 
 procedure RegisterTests;
 begin
-  RegisterTest(TTestMigLayout);
+  
 end;
 
 { TTestMigLayout }
 
 procedure TTestMigLayout.SetUp;
 begin
-  inherited SetUp;
+  
   FMigDefaultBaseDpi :=  TfpgMigPlatformDefaults.GetBaseDPI;
   // Set BaseDPI to match screen DPI so scale factor = 1.0
   // This makes tests DPI-independent by ensuring logical pixels = actual pixels
@@ -67,7 +71,7 @@ procedure TTestMigLayout.TearDown;
 begin
   // restore for other tests
   TfpgMigPlatformDefaults.SetBaseDPI(FMigDefaultBaseDpi);
-  inherited TearDown;
+  
 end;
 
 procedure TTestMigLayout.TestCreateMigLayout;
@@ -76,13 +80,13 @@ var
 begin
   mig := TfpgMigLayoutManager.Create;
   try
-    CheckNotNull(mig, 'MigLayout should be created');
-    CheckNotNull(mig.LC, 'LC should be created');
-    CheckNotNull(mig.RowConstraints, 'Row constraints should be created');
-    CheckNotNull(mig.ColumnConstraints, 'Column constraints should be created');
-    CheckTrue(mig.LC.IsFlowX, 'Default flow should be horizontal');
+    FContext.AssertTrue((mig)<>nil, 'MigLayout should be created');
+    FContext.AssertTrue((mig.LC)<>nil, 'LC should be created');
+    FContext.AssertTrue((mig.RowConstraints)<>nil, 'Row constraints should be created');
+    FContext.AssertTrue((mig.ColumnConstraints)<>nil, 'Column constraints should be created');
+    FContext.AssertTrue(mig.LC.IsFlowX, 'Default flow should be horizontal');
     // Default wrap is INF (no wrapping) - consistent with Java MigLayout
-    CheckTrue(mig.LC.GetWrapAfter > 1000000, 'Default should be no wrap (large value)');
+    FContext.AssertTrue(mig.LC.GetWrapAfter > 1000000, 'Default should be no wrap (large value)');
   finally
     mig.Free;
   end;
@@ -110,8 +114,8 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
   container.Free;
 end;
@@ -144,11 +148,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
-  CheckEquals(6, w2.Left, 'w2.Left');
-  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
+  FContext.AssertTrue((6)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((32)=(w2.Top), 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -181,11 +185,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
-  CheckEquals(62, w2.Left, 'w2.Left'); // 6 (left inset) + 50 (w1.width) + 6 (gap)
-  CheckEquals(6, w2.Top, 'w2.Top');
+  FContext.AssertTrue((62)=(w2.Left), 'w2.Left'); // 6 (left inset) + 50 (w1.width) + 6 (gap)
+  FContext.AssertTrue((6)=(w2.Top), 'w2.Top');
 
   container.Free;
 end;
@@ -225,17 +229,17 @@ begin
   container.Realign;
 
   // w1 is in column 0, row 0
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
   // w2 is in column 1, row 0
   // The first column width should be 100 because of w3
-  CheckEquals(112, w2.Left, 'w2.Left'); // 6 (left inset) + 100 (w3.width) + 6 (gap)
-  CheckEquals(6, w2.Top, 'w2.Top');
+  FContext.AssertTrue((112)=(w2.Left), 'w2.Left'); // 6 (left inset) + 100 (w3.width) + 6 (gap)
+  FContext.AssertTrue((6)=(w2.Top), 'w2.Top');
 
   // w3 is in column 0, row 1
-  CheckEquals(6, w3.Left, 'w3.Left');
-  CheckEquals(32, w3.Top, 'w3.Top'); // 6 (top inset) + 20 (max row height) + 6 (gap)
+  FContext.AssertTrue((6)=(w3.Left), 'w3.Left');
+  FContext.AssertTrue((32)=(w3.Top), 'w3.Top'); // 6 (top inset) + 20 (max row height) + 6 (gap)
 
   container.Free;
 end;
@@ -272,8 +276,8 @@ begin
   //   Widget (50x20) right-aligned: Right=193, Left=193-50+1=144
   //   Widget (50x20) bottom-aligned: Bottom=193, Top=193-20+1=174
 
-  CheckEquals(144, w1.Left, 'w1.Left');
-  CheckEquals(174, w1.Top, 'w1.Top');
+  FContext.AssertTrue((144)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((174)=(w1.Top), 'w1.Top');
 
   container.Free;
 end;
@@ -309,11 +313,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
-  CheckEquals(6, w2.Left, 'w2.Left');
-  CheckEquals(32, w2.Top, 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
+  FContext.AssertTrue((6)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((32)=(w2.Top), 'w2.Top'); // 6 (top inset) + 20 (w1.height) + 6 (gap)
 
   container.Free;
 end;
@@ -355,16 +359,16 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(6, w1.Top, 'w1.Top');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((6)=(w1.Top), 'w1.Top');
 
-  CheckEquals(62, w2.Left, 'w2.Left');
-  CheckEquals(6, w2.Top, 'w2.Top');
+  FContext.AssertTrue((62)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((6)=(w2.Top), 'w2.Top');
 
-  CheckEquals(62, w3.Left, 'w3.Left');
+  FContext.AssertTrue((62)=(w3.Left), 'w3.Left');
   // TODO: Investigate 2px discrepancy - expected 32, but spanning calculation distributes
   // extra space evenly across rows, giving 34. May need to check Java MigLayout behavior.
-  CheckEquals(34, w3.Top, 'w3.Top');
+  FContext.AssertTrue((34)=(w3.Top), 'w3.Top');
 
   container.Free;
 end;
@@ -403,11 +407,11 @@ begin
 
   container.Realign;
 
-  CheckEquals(6, w1.Left, 'w1.Left');
-  CheckEquals(50, w1.ActualWidth, 'w1.ActualWidth');
+  FContext.AssertTrue((6)=(w1.Left), 'w1.Left');
+  FContext.AssertTrue((50)=(w1.ActualWidth), 'w1.ActualWidth');
 
-  CheckEquals(62, w2.Left, 'w2.Left');
-  CheckEquals(132, w2.ActualWidth, 'w2.ActualWidth');
+  FContext.AssertTrue((62)=(w2.Left), 'w2.Left');
+  FContext.AssertTrue((132)=(w2.ActualWidth), 'w2.ActualWidth');
 
   container.Free;
 end;
@@ -450,11 +454,11 @@ begin
 
   // Failing check: This will fail if layout is based on creation order.
   // In that case, btnA is at top, btnB is second.
-  CheckTrue(btnA.Top > btnB.Top, 'btnA should be below btnB');
+  FContext.AssertTrue(btnA.Top > btnB.Top, 'btnA should be below btnB');
 
   // More specific checks
-  CheckEquals(6, btnB.Top, 'btnB.Top should be at top inset');
-  CheckTrue(btnA.Top > 30, 'btnA.Top should be below btnB'); // 12 + 25 + 6 = 43
+  FContext.AssertTrue((6)=(btnB.Top), 'btnB.Top should be at top inset');
+  FContext.AssertTrue(btnA.Top > 30, 'btnA.Top should be below btnB'); // 12 + 25 + 6 = 43
 
   container.Free;
 end;
@@ -520,28 +524,26 @@ begin
   container.Realign;
 
   // Verify North dock: should be at top, spanning width
-  CheckTrue(btnN.Top < btnCenter.Top, 'North dock should be above center');
-  CheckTrue(btnN.Top < btnW.Top, 'North dock should be above West dock');
-  CheckTrue(btnN.Top < btnE.Top, 'North dock should be above East dock');
+  FContext.AssertTrue(btnN.Top < btnCenter.Top, 'North dock should be above center');
+  FContext.AssertTrue(btnN.Top < btnW.Top, 'North dock should be above West dock');
+  FContext.AssertTrue(btnN.Top < btnE.Top, 'North dock should be above East dock');
 
   // Verify South dock: should be at bottom
-  CheckTrue(btnS.Top > btnCenter.Top, 'South dock should be below center');
-  CheckTrue(btnS.Top > btnW.Top, 'South dock should be below West dock');
-  CheckTrue(btnS.Top > btnE.Top, 'South dock should be below East dock');
+  FContext.AssertTrue(btnS.Top > btnCenter.Top, 'South dock should be below center');
+  FContext.AssertTrue(btnS.Top > btnW.Top, 'South dock should be below West dock');
+  FContext.AssertTrue(btnS.Top > btnE.Top, 'South dock should be below East dock');
 
   // Verify West dock: should be to the left of center
-  CheckTrue(btnW.Left < btnCenter.Left, 'West dock should be left of center');
+  FContext.AssertTrue(btnW.Left < btnCenter.Left, 'West dock should be left of center');
 
   // Verify East dock: should be to the right of center
-  CheckTrue(btnE.Left > btnCenter.Left, 'East dock should be right of center');
+  FContext.AssertTrue(btnE.Left > btnCenter.Left, 'East dock should be right of center');
 
   // Verify North spans full width (should be wider than a single component)
-  CheckTrue(btnN.ActualWidth > btnCenter.ActualWidth,
-    'North dock should span wider than center component');
+  FContext.AssertTrue(btnN.ActualWidth > btnCenter.ActualWidth, 'North dock should span wider than center component');
 
   // Verify South spans full width
-  CheckTrue(btnS.ActualWidth > btnCenter.ActualWidth,
-    'South dock should span wider than center component');
+  FContext.AssertTrue(btnS.ActualWidth > btnCenter.ActualWidth, 'South dock should span wider than center component');
 
   container.Free;
 end;
@@ -581,7 +583,7 @@ begin
 
   // Normal layout should work
   container.Realign;
-  CheckTrue(btn1.ActualWidth > 0, 'btn1 should have positive width at normal size');
+  FContext.AssertTrue(btn1.ActualWidth > 0, 'btn1 should have positive width at normal size');
 
   // Simulate resize to very small - smaller than insets would require
   container.Width := 5;
@@ -597,6 +599,169 @@ begin
 
   container.Free;
 end;
+
+procedure RunTTestMigLayoutTestCreateMigLayout(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCreateMigLayout';
+    lFixture.SetUp;
+    try lFixture.TestCreateMigLayout; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestSingleWidgetLayout(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSingleWidgetLayout';
+    lFixture.SetUp;
+    try lFixture.TestSingleWidgetLayout; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestTwoWidgetsLayout(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTwoWidgetsLayout';
+    lFixture.SetUp;
+    try lFixture.TestTwoWidgetsLayout; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestTwoColumnLayout(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestTwoColumnLayout';
+    lFixture.SetUp;
+    try lFixture.TestTwoColumnLayout; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestColumnWidthCalculation(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestColumnWidthCalculation';
+    lFixture.SetUp;
+    try lFixture.TestColumnWidthCalculation; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestCellAlignment(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestCellAlignment';
+    lFixture.SetUp;
+    try lFixture.TestCellAlignment; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestColumnSpan(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestColumnSpan';
+    lFixture.SetUp;
+    try lFixture.TestColumnSpan; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestRowSpan(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestRowSpan';
+    lFixture.SetUp;
+    try lFixture.TestRowSpan; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestGrow(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestGrow';
+    lFixture.SetUp;
+    try lFixture.TestGrow; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestComponentOrder(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestComponentOrder';
+    lFixture.SetUp;
+    try lFixture.TestComponentOrder; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestDocking(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestDocking';
+    lFixture.SetUp;
+    try lFixture.TestDocking; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestMigLayoutTestSmallContainerNoRangeError(AContext: TNXTestContext);
+var lFixture: TTestMigLayout;
+begin
+  lFixture:=TTestMigLayout.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestSmallContainerNoRangeError';
+    lFixture.SetUp;
+    try lFixture.TestSmallContainerNoRangeError; finally lFixture.TearDown; end;
+  finally lFixture.Free; end;
+end;
+
+procedure RegistertcmiglayoutTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('tcmiglayout.TTestMigLayout');
+  lSuite.AddTest('TestCreateMigLayout', @RunTTestMigLayoutTestCreateMigLayout);
+  lSuite.AddTest('TestSingleWidgetLayout', @RunTTestMigLayoutTestSingleWidgetLayout);
+  lSuite.AddTest('TestTwoWidgetsLayout', @RunTTestMigLayoutTestTwoWidgetsLayout);
+  lSuite.AddTest('TestTwoColumnLayout', @RunTTestMigLayoutTestTwoColumnLayout);
+  lSuite.AddTest('TestColumnWidthCalculation', @RunTTestMigLayoutTestColumnWidthCalculation);
+  lSuite.AddTest('TestCellAlignment', @RunTTestMigLayoutTestCellAlignment);
+  lSuite.AddTest('TestColumnSpan', @RunTTestMigLayoutTestColumnSpan);
+  lSuite.AddTest('TestRowSpan', @RunTTestMigLayoutTestRowSpan);
+  lSuite.AddTest('TestGrow', @RunTTestMigLayoutTestGrow);
+  lSuite.AddTest('TestComponentOrder', @RunTTestMigLayoutTestComponentOrder);
+  lSuite.AddTest('TestDocking', @RunTTestMigLayoutTestDocking);
+  lSuite.AddTest('TestSmallContainerNoRangeError', @RunTTestMigLayoutTestSmallContainerNoRangeError);
+end;
+
 
 initialization
   RegisterTests;

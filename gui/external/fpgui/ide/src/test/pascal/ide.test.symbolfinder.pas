@@ -11,10 +11,8 @@ unit ide.test.symbolfinder;
 interface
 
 uses
-  Classes,
+  obNXTestContext, obNXTestRegistry, obNXTestSuite, Classes,
   SysUtils,
-  fpcunit,
-  testregistry,
   ide.filefinder,
   ide.symbolfinder;
 
@@ -22,12 +20,15 @@ type
 
   { TTestScanSourceForSymbols }
 
-  TTestScanSourceForSymbols = class(TTestCase)
+  TTestScanSourceForSymbols = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FSymbols: TSymbolEntryArray;
     procedure ScanSource(const ASource: string);
     function FindSymbol(const AName: string): Integer;
-  published
+  public
     procedure TestExtractProcedure;
     procedure TestExtractFunction;
     procedure TestExtractClassType;
@@ -46,15 +47,18 @@ type
 
   { TTestFilterSymbols }
 
-  TTestFilterSymbols = class(TTestCase)
+  TTestFilterSymbols = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
   private
     FSymbols: TSymbolEntryArray;
     function MakeSymbol(const AName: string; AKind: TSymbolKind;
       ALine: Integer): TSymbolEntry;
     procedure SetupTestSymbols;
   protected
-    procedure SetUp; override;
-  published
+    procedure SetUp; virtual;
+  public
     procedure TestFilterByName;
     procedure TestFilterCamelCase;
     procedure TestFilterEmptyReturnsAll;
@@ -64,11 +68,16 @@ type
 
   { TTestSymbolKindToStr }
 
-  TTestSymbolKindToStr = class(TTestCase)
-  published
+  TTestSymbolKindToStr = class(TObject)
+  protected
+    FContext: TNXTestContext;
+    FCaseName: string;
+  public
     procedure TestAllKinds;
   end;
 
+
+procedure RegisteridetestsymbolfinderTests(ARegistry: TNXTestRegistry);
 
 implementation
 
@@ -101,11 +110,9 @@ begin
     'procedure DoSomething;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(Length(FSymbols) >= 1,
-    Format('Expected at least 1 symbol, got %d', [Length(FSymbols)]));
-  CheckEquals('DoSomething', FSymbols[FindSymbol('DoSomething')].Name);
-  CheckTrue(FSymbols[FindSymbol('DoSomething')].Kind = skProcedure,
-    'Should be skProcedure');
+  FContext.AssertTrue(Length(FSymbols) >= 1, Format('Expected at least 1 symbol, got %d', [Length(FSymbols)]));
+  FContext.AssertTrue(('DoSomething')=(FSymbols[FindSymbol('DoSomething')].Name), '');
+  FContext.AssertTrue(FSymbols[FindSymbol('DoSomething')].Kind = skProcedure, 'Should be skProcedure');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractFunction;
@@ -116,9 +123,8 @@ begin
     'function GetValue: Integer;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('GetValue') >= 0, 'Should find GetValue');
-  CheckTrue(FSymbols[FindSymbol('GetValue')].Kind = skFunction,
-    'Should be skFunction');
+  FContext.AssertTrue(FindSymbol('GetValue') >= 0, 'Should find GetValue');
+  FContext.AssertTrue(FSymbols[FindSymbol('GetValue')].Kind = skFunction, 'Should be skFunction');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractClassType;
@@ -131,9 +137,8 @@ begin
     '  end;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('TMyClass') >= 0, 'Should find TMyClass');
-  CheckTrue(FSymbols[FindSymbol('TMyClass')].Kind = skType,
-    'Should be skType');
+  FContext.AssertTrue(FindSymbol('TMyClass') >= 0, 'Should find TMyClass');
+  FContext.AssertTrue(FSymbols[FindSymbol('TMyClass')].Kind = skType, 'Should be skType');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractRecordType;
@@ -147,9 +152,8 @@ begin
     '  end;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('TPoint') >= 0, 'Should find TPoint');
-  CheckTrue(FSymbols[FindSymbol('TPoint')].Kind = skType,
-    'Should be skType');
+  FContext.AssertTrue(FindSymbol('TPoint') >= 0, 'Should find TPoint');
+  FContext.AssertTrue(FSymbols[FindSymbol('TPoint')].Kind = skType, 'Should be skType');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractEnumType;
@@ -161,9 +165,8 @@ begin
     '  TColor = (clRed, clGreen, clBlue);' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('TColor') >= 0, 'Should find TColor');
-  CheckTrue(FSymbols[FindSymbol('TColor')].Kind = skType,
-    'Should be skType');
+  FContext.AssertTrue(FindSymbol('TColor') >= 0, 'Should find TColor');
+  FContext.AssertTrue(FSymbols[FindSymbol('TColor')].Kind = skType, 'Should be skType');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractConst;
@@ -175,9 +178,8 @@ begin
     '  MaxItems = 100;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('MaxItems') >= 0, 'Should find MaxItems');
-  CheckTrue(FSymbols[FindSymbol('MaxItems')].Kind = skConst,
-    'Should be skConst');
+  FContext.AssertTrue(FindSymbol('MaxItems') >= 0, 'Should find MaxItems');
+  FContext.AssertTrue(FSymbols[FindSymbol('MaxItems')].Kind = skConst, 'Should be skConst');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractVar;
@@ -189,9 +191,8 @@ begin
     '  GlobalCount: Integer;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('GlobalCount') >= 0, 'Should find GlobalCount');
-  CheckTrue(FSymbols[FindSymbol('GlobalCount')].Kind = skVar,
-    'Should be skVar');
+  FContext.AssertTrue(FindSymbol('GlobalCount') >= 0, 'Should find GlobalCount');
+  FContext.AssertTrue(FSymbols[FindSymbol('GlobalCount')].Kind = skVar, 'Should be skVar');
 end;
 
 procedure TTestScanSourceForSymbols.TestExtractMultipleSymbols;
@@ -208,12 +209,11 @@ begin
     'function Done: Boolean;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('TFoo') >= 0, 'Should find TFoo');
-  CheckTrue(FindSymbol('Version') >= 0, 'Should find Version');
-  CheckTrue(FindSymbol('Init') >= 0, 'Should find Init');
-  CheckTrue(FindSymbol('Done') >= 0, 'Should find Done');
-  CheckTrue(Length(FSymbols) >= 4,
-    Format('Expected at least 4 symbols, got %d', [Length(FSymbols)]));
+  FContext.AssertTrue(FindSymbol('TFoo') >= 0, 'Should find TFoo');
+  FContext.AssertTrue(FindSymbol('Version') >= 0, 'Should find Version');
+  FContext.AssertTrue(FindSymbol('Init') >= 0, 'Should find Init');
+  FContext.AssertTrue(FindSymbol('Done') >= 0, 'Should find Done');
+  FContext.AssertTrue(Length(FSymbols) >= 4, Format('Expected at least 4 symbols, got %d', [Length(FSymbols)]));
 end;
 
 procedure TTestScanSourceForSymbols.TestIgnoresImplementation;
@@ -226,8 +226,8 @@ begin
     'procedure PrivateProc;' + LineEnding +
     'begin end;' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('PublicProc') >= 0, 'Should find PublicProc');
-  CheckTrue(FindSymbol('PrivateProc') < 0, 'Should NOT find PrivateProc');
+  FContext.AssertTrue(FindSymbol('PublicProc') >= 0, 'Should find PublicProc');
+  FContext.AssertTrue(FindSymbol('PrivateProc') < 0, 'Should NOT find PrivateProc');
 end;
 
 procedure TTestScanSourceForSymbols.TestClassMethods;
@@ -242,11 +242,10 @@ begin
     '  end;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('TFoo') >= 0, 'Should find TFoo');
+  FContext.AssertTrue(FindSymbol('TFoo') >= 0, 'Should find TFoo');
   { Class methods should appear with qualified display name }
-  CheckTrue(FindSymbol('Bar') >= 0, 'Should find Bar');
-  CheckTrue(FSymbols[FindSymbol('Bar')].DisplayName = 'TFoo.Bar',
-    'DisplayName should be TFoo.Bar');
+  FContext.AssertTrue(FindSymbol('Bar') >= 0, 'Should find Bar');
+  FContext.AssertTrue(FSymbols[FindSymbol('Bar')].DisplayName = 'TFoo.Bar', 'DisplayName should be TFoo.Bar');
 end;
 
 procedure TTestScanSourceForSymbols.TestConstructorDestructor;
@@ -261,12 +260,10 @@ begin
     '  end;' + LineEnding +
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('Create') >= 0, 'Should find Create');
-  CheckTrue(FSymbols[FindSymbol('Create')].Kind = skConstructor,
-    'Should be skConstructor');
-  CheckTrue(FindSymbol('Destroy') >= 0, 'Should find Destroy');
-  CheckTrue(FSymbols[FindSymbol('Destroy')].Kind = skDestructor,
-    'Should be skDestructor');
+  FContext.AssertTrue(FindSymbol('Create') >= 0, 'Should find Create');
+  FContext.AssertTrue(FSymbols[FindSymbol('Create')].Kind = skConstructor, 'Should be skConstructor');
+  FContext.AssertTrue(FindSymbol('Destroy') >= 0, 'Should find Destroy');
+  FContext.AssertTrue(FSymbols[FindSymbol('Destroy')].Kind = skDestructor, 'Should be skDestructor');
 end;
 
 procedure TTestScanSourceForSymbols.TestProgramFile;
@@ -277,14 +274,13 @@ begin
     'begin end;' + LineEnding +
     'begin' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('DoWork') >= 0,
-    'Program files should still extract top-level procedures');
+  FContext.AssertTrue(FindSymbol('DoWork') >= 0, 'Program files should still extract top-level procedures');
 end;
 
 procedure TTestScanSourceForSymbols.TestEmptySource;
 begin
   ScanSource('');
-  CheckEquals(0, Length(FSymbols), 'Empty source should produce no symbols');
+  FContext.AssertTrue((0)=(Length(FSymbols)), 'Empty source should produce no symbols');
 end;
 
 procedure TTestScanSourceForSymbols.TestLineNumbers;
@@ -296,12 +292,10 @@ begin
     'procedure Second;' + LineEnding + { line 4 }
     'implementation' + LineEnding +
     'end.');
-  CheckTrue(FindSymbol('First') >= 0, 'Should find First');
-  CheckEquals(3, FSymbols[FindSymbol('First')].Line,
-    'First should be on line 3');
-  CheckTrue(FindSymbol('Second') >= 0, 'Should find Second');
-  CheckEquals(4, FSymbols[FindSymbol('Second')].Line,
-    'Second should be on line 4');
+  FContext.AssertTrue(FindSymbol('First') >= 0, 'Should find First');
+  FContext.AssertTrue((3)=(FSymbols[FindSymbol('First')].Line), 'First should be on line 3');
+  FContext.AssertTrue(FindSymbol('Second') >= 0, 'Should find Second');
+  FContext.AssertTrue((4)=(FSymbols[FindSymbol('Second')].Line), 'Second should be on line 4');
 end;
 
 { TTestFilterSymbols }
@@ -338,8 +332,8 @@ var
   Results: TFilteredSymbolArray;
 begin
   Results := FilterSymbolsEx('DoSome', FSymbols);
-  CheckTrue(Length(Results) >= 1, 'Should match at least 1 symbol');
-  CheckEquals('DoSomething', Results[0].Entry.Name);
+  FContext.AssertTrue(Length(Results) >= 1, 'Should match at least 1 symbol');
+  FContext.AssertTrue(('DoSomething')=(Results[0].Entry.Name), '');
 end;
 
 procedure TTestFilterSymbols.TestFilterCamelCase;
@@ -347,9 +341,8 @@ var
   Results: TFilteredSymbolArray;
 begin
   Results := FilterSymbolsEx('MF', FSymbols);
-  CheckTrue(Length(Results) >= 1, 'Should match at least 1 symbol for "MF"');
-  CheckEquals('TMainForm', Results[0].Entry.Name,
-    'TMainForm should match "MF" via word-start');
+  FContext.AssertTrue(Length(Results) >= 1, 'Should match at least 1 symbol for "MF"');
+  FContext.AssertTrue(('TMainForm')=(Results[0].Entry.Name), 'TMainForm should match "MF" via word-start');
 end;
 
 procedure TTestFilterSymbols.TestFilterEmptyReturnsAll;
@@ -357,8 +350,7 @@ var
   Results: TFilteredSymbolArray;
 begin
   Results := FilterSymbolsEx('', FSymbols);
-  CheckEquals(Length(FSymbols), Length(Results),
-    'Empty pattern should return all symbols');
+  FContext.AssertTrue((Length(FSymbols))=(Length(Results)), 'Empty pattern should return all symbols');
 end;
 
 procedure TTestFilterSymbols.TestFilterNoMatch;
@@ -366,7 +358,7 @@ var
   Results: TFilteredSymbolArray;
 begin
   Results := FilterSymbolsEx('zzzzz', FSymbols);
-  CheckEquals(0, Length(Results), 'Non-matching pattern should return empty');
+  FContext.AssertTrue((0)=(Length(Results)), 'Non-matching pattern should return empty');
 end;
 
 procedure TTestFilterSymbols.TestFilterSortedByScore;
@@ -374,30 +366,278 @@ var
   Results: TFilteredSymbolArray;
 begin
   Results := FilterSymbolsEx('Main', FSymbols);
-  CheckTrue(Length(Results) >= 2, 'Should match at least 2 symbols');
+  FContext.AssertTrue(Length(Results) >= 2, 'Should match at least 2 symbols');
   { TMainForm should score higher than GetMainValue (prefix vs substring) }
-  CheckEquals('TMainForm', Results[0].Entry.Name,
-    'TMainForm should rank first (prefix match)');
+  FContext.AssertTrue(('TMainForm')=(Results[0].Entry.Name), 'TMainForm should rank first (prefix match)');
 end;
 
 { TTestSymbolKindToStr }
 
 procedure TTestSymbolKindToStr.TestAllKinds;
 begin
-  CheckEquals('procedure', SymbolKindToStr(skProcedure));
-  CheckEquals('function', SymbolKindToStr(skFunction));
-  CheckEquals('constructor', SymbolKindToStr(skConstructor));
-  CheckEquals('destructor', SymbolKindToStr(skDestructor));
-  CheckEquals('type', SymbolKindToStr(skType));
-  CheckEquals('const', SymbolKindToStr(skConst));
-  CheckEquals('var', SymbolKindToStr(skVar));
-  CheckEquals('property', SymbolKindToStr(skProperty));
+  FContext.AssertTrue(('procedure')=(SymbolKindToStr(skProcedure)), '');
+  FContext.AssertTrue(('function')=(SymbolKindToStr(skFunction)), '');
+  FContext.AssertTrue(('constructor')=(SymbolKindToStr(skConstructor)), '');
+  FContext.AssertTrue(('destructor')=(SymbolKindToStr(skDestructor)), '');
+  FContext.AssertTrue(('type')=(SymbolKindToStr(skType)), '');
+  FContext.AssertTrue(('const')=(SymbolKindToStr(skConst)), '');
+  FContext.AssertTrue(('var')=(SymbolKindToStr(skVar)), '');
+  FContext.AssertTrue(('property')=(SymbolKindToStr(skProperty)), '');
 end;
 
 
-initialization
-  RegisterTest(TTestScanSourceForSymbols);
-  RegisterTest(TTestFilterSymbols);
-  RegisterTest(TTestSymbolKindToStr);
+
+procedure RunTTestScanSourceForSymbolsTestExtractProcedure(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractProcedure';
+    lFixture.TestExtractProcedure;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractFunction(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractFunction';
+    lFixture.TestExtractFunction;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractClassType(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractClassType';
+    lFixture.TestExtractClassType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractRecordType(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractRecordType';
+    lFixture.TestExtractRecordType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractEnumType(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractEnumType';
+    lFixture.TestExtractEnumType;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractConst(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractConst';
+    lFixture.TestExtractConst;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractVar(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractVar';
+    lFixture.TestExtractVar;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestExtractMultipleSymbols(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestExtractMultipleSymbols';
+    lFixture.TestExtractMultipleSymbols;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestIgnoresImplementation(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestIgnoresImplementation';
+    lFixture.TestIgnoresImplementation;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestClassMethods(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestClassMethods';
+    lFixture.TestClassMethods;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestConstructorDestructor(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestConstructorDestructor';
+    lFixture.TestConstructorDestructor;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestProgramFile(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestProgramFile';
+    lFixture.TestProgramFile;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestEmptySource(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestEmptySource';
+    lFixture.TestEmptySource;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestScanSourceForSymbolsTestLineNumbers(AContext: TNXTestContext);
+var lFixture: TTestScanSourceForSymbols;
+begin
+  lFixture:=TTestScanSourceForSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestLineNumbers';
+    lFixture.TestLineNumbers;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFilterSymbolsTestFilterByName(AContext: TNXTestContext);
+var lFixture: TTestFilterSymbols;
+begin
+  lFixture:=TTestFilterSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilterByName';
+    lFixture.SetUp;
+    lFixture.TestFilterByName;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFilterSymbolsTestFilterCamelCase(AContext: TNXTestContext);
+var lFixture: TTestFilterSymbols;
+begin
+  lFixture:=TTestFilterSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilterCamelCase';
+    lFixture.SetUp;
+    lFixture.TestFilterCamelCase;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFilterSymbolsTestFilterEmptyReturnsAll(AContext: TNXTestContext);
+var lFixture: TTestFilterSymbols;
+begin
+  lFixture:=TTestFilterSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilterEmptyReturnsAll';
+    lFixture.SetUp;
+    lFixture.TestFilterEmptyReturnsAll;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFilterSymbolsTestFilterNoMatch(AContext: TNXTestContext);
+var lFixture: TTestFilterSymbols;
+begin
+  lFixture:=TTestFilterSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilterNoMatch';
+    lFixture.SetUp;
+    lFixture.TestFilterNoMatch;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestFilterSymbolsTestFilterSortedByScore(AContext: TNXTestContext);
+var lFixture: TTestFilterSymbols;
+begin
+  lFixture:=TTestFilterSymbols.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestFilterSortedByScore';
+    lFixture.SetUp;
+    lFixture.TestFilterSortedByScore;
+  finally lFixture.Free; end;
+end;
+
+procedure RunTTestSymbolKindToStrTestAllKinds(AContext: TNXTestContext);
+var lFixture: TTestSymbolKindToStr;
+begin
+  lFixture:=TTestSymbolKindToStr.Create;
+  try
+    lFixture.FContext:=AContext;
+    lFixture.FCaseName:='TestAllKinds';
+    lFixture.TestAllKinds;
+  finally lFixture.Free; end;
+end;
+
+procedure RegisteridetestsymbolfinderTests(ARegistry: TNXTestRegistry);
+var lSuite: TNXTestSuite;
+begin
+  lSuite:=ARegistry.AddSuite('ide.test.symbolfinder.TTestScanSourceForSymbols');
+  lSuite.AddTest('TestExtractProcedure', @RunTTestScanSourceForSymbolsTestExtractProcedure);
+  lSuite.AddTest('TestExtractFunction', @RunTTestScanSourceForSymbolsTestExtractFunction);
+  lSuite.AddTest('TestExtractClassType', @RunTTestScanSourceForSymbolsTestExtractClassType);
+  lSuite.AddTest('TestExtractRecordType', @RunTTestScanSourceForSymbolsTestExtractRecordType);
+  lSuite.AddTest('TestExtractEnumType', @RunTTestScanSourceForSymbolsTestExtractEnumType);
+  lSuite.AddTest('TestExtractConst', @RunTTestScanSourceForSymbolsTestExtractConst);
+  lSuite.AddTest('TestExtractVar', @RunTTestScanSourceForSymbolsTestExtractVar);
+  lSuite.AddTest('TestExtractMultipleSymbols', @RunTTestScanSourceForSymbolsTestExtractMultipleSymbols);
+  lSuite.AddTest('TestIgnoresImplementation', @RunTTestScanSourceForSymbolsTestIgnoresImplementation);
+  lSuite.AddTest('TestClassMethods', @RunTTestScanSourceForSymbolsTestClassMethods);
+  lSuite.AddTest('TestConstructorDestructor', @RunTTestScanSourceForSymbolsTestConstructorDestructor);
+  lSuite.AddTest('TestProgramFile', @RunTTestScanSourceForSymbolsTestProgramFile);
+  lSuite.AddTest('TestEmptySource', @RunTTestScanSourceForSymbolsTestEmptySource);
+  lSuite.AddTest('TestLineNumbers', @RunTTestScanSourceForSymbolsTestLineNumbers);
+  lSuite:=ARegistry.AddSuite('ide.test.symbolfinder.TTestFilterSymbols');
+  lSuite.AddTest('TestFilterByName', @RunTTestFilterSymbolsTestFilterByName);
+  lSuite.AddTest('TestFilterCamelCase', @RunTTestFilterSymbolsTestFilterCamelCase);
+  lSuite.AddTest('TestFilterEmptyReturnsAll', @RunTTestFilterSymbolsTestFilterEmptyReturnsAll);
+  lSuite.AddTest('TestFilterNoMatch', @RunTTestFilterSymbolsTestFilterNoMatch);
+  lSuite.AddTest('TestFilterSortedByScore', @RunTTestFilterSymbolsTestFilterSortedByScore);
+  lSuite:=ARegistry.AddSuite('ide.test.symbolfinder.TTestSymbolKindToStr');
+  lSuite.AddTest('TestAllKinds', @RunTTestSymbolKindToStrTestAllKinds);
+end;
 
 end.

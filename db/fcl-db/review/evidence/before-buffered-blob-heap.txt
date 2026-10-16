@@ -1,0 +1,44 @@
+/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/FCLDBFixture --probe 112 /media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/blob-buffer-proof/result.txt /media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/blob-buffer-proof
+Wrong size of $000074129C09DCE0: 4 allocated, 8 freed
+Allocated at:
+  $00000000003BEC2E
+  $00000000002D8349
+  $000000000034B224
+  $000000000034B635
+  $000000000034C659
+  $00000000002A3049
+
+Occured at:
+  $00000000003B56FD
+  $00000000003843E9
+  $000000000038784D
+  $00000000003896DC
+  $00000000003B3D37
+  $00000000002B5A77
+  $000000000034C659
+  $00000000002A3049
+
+No heap dump by heaptrc unit
+Exitcode = 204
+/media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/FCLDBFixture --probe 112 /media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/blob-buffer-proof/result.txt /media/kcollins/dev/source/nexus/output/fcl-db-tests/baseline/blob-buffer-proof
+Wrong size of $00007491A4689CE0: 4 allocated, 8 freed
+Allocated at:
+  $00000000003BEC2E
+  $00000000002D8349
+  $000000000034B224
+  $000000000034B635
+  $000000000034C659
+  $00000000002A3049
+
+Occured at:
+  $00000000003B56FD
+  $00000000003843E9
+  $000000000038784D
+  $00000000003896DC
+  $00000000003B3D37
+  $00000000002B5A77
+  $000000000034C659
+  $00000000002A3049
+
+No heap dump by heaptrc unit
+Exitcode = 204
