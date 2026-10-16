@@ -41,6 +41,7 @@ Project NexusVirtualTreeViewDemo {
                 "../../external/fpgui/framework/src/main/resources",
                 "../../../serialization/src",
                 "../../../serialization/json/src",
+                "../../../serialization/fcl-json/src",
                 "../../../db/sqlite/src/bindings",
                 "../../../core/src",
                 "../../../../../packages/nexus-packages-ext/mustache/external/dmustache",

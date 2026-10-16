@@ -1,0 +1,49 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLJSON {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/serialization/fcl-json";
+    OutputRoot: "output/nxbuild-fcl-json/" + @Tools.Native.Name;
+
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        // jsonfpcunit is an optional test helper, not a runtime dependency.
+        SourceFiles: [
+            @FCLJSON.SourceRoot + "/src/fpjson.pas",
+            @FCLJSON.SourceRoot + "/src/jsonscanner.pas",
+            @FCLJSON.SourceRoot + "/src/jsonreader.pas",
+            @FCLJSON.SourceRoot + "/src/jsonparser.pas",
+            @FCLJSON.SourceRoot + "/src/jsonwriter.pas",
+            @FCLJSON.SourceRoot + "/src/jsonconf.pas",
+            @FCLJSON.SourceRoot + "/src/jsoncomparer.pas",
+            @FCLJSON.SourceRoot + "/src/fpjsonrtti.pas",
+            @FCLJSON.SourceRoot + "/src/fpjsontopas.pas",
+            @FCLJSON.SourceRoot + "/src/jsonini.pas",
+            @FCLJSON.SourceRoot + "/src/json2yaml.pas",
+            @FCLJSON.SourceRoot + "/src/fpjsonapply.pas",
+            @FCLJSON.SourceRoot + "/src/fpjsonvalue.pas"
+        ];
+        OutputPath: @FCLJSON.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @FCLJSON.SourceRoot + "/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+        }
+    }
+}

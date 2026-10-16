@@ -35,6 +35,7 @@ Project NexusLSPTestModule {
                 "../src/protocol",
                 "../../core/src",
                 "../../serialization/json/src",
+                "../../serialization/fcl-json/src",
                 "../../network/json-rpc/src",
                 "../../nxtest/src",
                 "../../network/external/synapse",

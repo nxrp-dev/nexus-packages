@@ -1,0 +1,10 @@
+src/process.pas=namespaced/System.Process.pas
+{s*:src/}=namespaced/
+{i+:src/}
+src/dbugintf.pas=namespaced/System.Dbugintf.pas
+src/simpleipc.pas=namespaced/System.SimpleIpc.pas
+src/syncipc.pas=namespaced/System.SyncIpc.pas
+src/dbugmsg.pas=namespaced/System.Dbugmsg.pas
+src/processunicode.pas=namespaced/System.Process.Unicode.pas
+src/pipes.pas=namespaced/System.Pipes.pas
+src/fpsimpleservice.pas=namespaced/System.Simple.Service.pas

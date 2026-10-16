@@ -36,6 +36,7 @@ Project NexusScriptTestModule {
                 "../../db/sqlite/src/bindings",
                 "../../serialization/src",
                 "../../serialization/json/src",
+                "../../serialization/fcl-json/src",
                 "../../network/json-rpc/src",
                 "../../core/src",
                 "../../../../packages/nexus-packages-ext/mustache/external/dmustache",

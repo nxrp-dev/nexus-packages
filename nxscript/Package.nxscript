@@ -18,5 +18,5 @@ Package NexusScript {
     Author: "Kevin Collins";
     Description: "NexusScript compilation, validation, editing and emitters.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.Core, @NexusPackages.SQLite, @NexusPackages.DelimitedText, @NexusPackages.JSON, @NexusPackages.Mustache];
+    Requires: [@NexusPackages.Core, @NexusPackages.SQLite, @NexusPackages.DelimitedText, @NexusPackages.JSON, @NexusPackages.FCLJSON, @NexusPackages.Mustache];
 }

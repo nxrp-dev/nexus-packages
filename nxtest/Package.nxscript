@@ -18,5 +18,5 @@ Package NexusTest {
     Author: "Kevin Collins";
     Description: "Test cases, suites, assertions, results and module contracts.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.Core, @NexusPackages.JSONRPC, @NexusPackages.JSON];
+    Requires: [@NexusPackages.Core, @NexusPackages.JSONRPC, @NexusPackages.JSON, @NexusPackages.FCLJSON];
 }

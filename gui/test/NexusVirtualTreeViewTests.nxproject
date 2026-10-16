@@ -42,6 +42,7 @@ Project NexusVirtualTreeViewTests {
                 "../../nxscript/src",
                 "../../serialization/src",
                 "../../serialization/json/src",
+                "../../serialization/fcl-json/src",
                 "../../db/sqlite/src/bindings",
                 "../../core/src",
                 "../../../../packages/nexus-packages-ext/mustache/external/dmustache",

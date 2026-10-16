@@ -10,11 +10,12 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
-// Uses Free Pascal's fpjson support; no other package in this catalog is required.
 Package DelimitedText {
     Id: "NXRP.Serialization.DelimitedText";
     Author: "Kevin Collins";
     Description: "Delimited text parsing and conversion to JSON tabular data.";
     License: "MPL-2.0-no-copyleft-exception";
+    Requires: [@NexusPackages.FCLJSON];
 }

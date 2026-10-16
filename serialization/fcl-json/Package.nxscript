@@ -1,0 +1,13 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+// Requires NexusFPC's fcl-base and rtl-objpas sources, which have no catalog entries.
+// jsonfpcunit additionally requires fcl-fpcunit and is excluded from FCLJSON.nxpackage.
+Package FCLJSON {
+    Id: "NXRP.Serialization.FCLJSON";
+    Author: "Michael van Canneyt";
+    Description: "Free Pascal JSON values, parsing, writing, configuration and RTTI conversion.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+}

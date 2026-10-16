@@ -1,0 +1,16 @@
+src/fpjsontopas.pas=namespaced/FpJson.ToPas.pas
+{s*:src/}=namespaced/
+{i+:src/}
+src/jsonini.pas=namespaced/FpJson.Ini.pas
+src/fpjson.pas=namespaced/FpJson.Data.pas
+src/jsonscanner.pas=namespaced/FpJson.Scanner.pas
+src/json2yaml.pas=namespaced/FpJson.Json2Yaml.pas
+src/fpjsonrtti.pas=namespaced/FpJson.Rtti.pas
+src/fpjsonapply.pas=namespaced/FpJson.Apply.pas
+src/fpjsonvalue.pas=namespaced/FpJson.Value.pas
+src/jsonparser.pas=namespaced/FpJson.Parser.pas
+src/jsonreader.pas=namespaced/FpJson.Reader.pas
+src/jsonwriter.pas=namespaced/FpJson.Writer.pas
+src/jsonconf.pas=namespaced/FpJson.Conf.pas
+src/jsonfpcunit.pas=namespaced/FpJson.FpcUnit.pas
+src/jsoncomparer.pas=namespaced/FpJson.Comparer.pas

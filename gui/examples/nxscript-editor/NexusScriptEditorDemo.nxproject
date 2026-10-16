@@ -36,6 +36,7 @@ Project NexusScriptEditorDemo {
                 "../../../nxscript/src",
                 "../../../serialization/src",
                 "../../../serialization/json/src",
+                "../../../serialization/fcl-json/src",
                 "../../../db/sqlite/src/bindings",
                 "../../../network/json-rpc/src",
                 "../../../core/src",

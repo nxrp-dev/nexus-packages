@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../Packages.RepositoryIndex.nxscript";
 
 // JSON and DelimitedText have their own descriptors; directory nesting is not a dependency.
 Package Serialization {
@@ -17,4 +18,5 @@ Package Serialization {
     Author: "Kevin Collins";
     Description: "Object persistence and static string lookup support.";
     License: "MPL-2.0-no-copyleft-exception";
+    Requires: [@NexusPackages.FCLJSON];
 }
