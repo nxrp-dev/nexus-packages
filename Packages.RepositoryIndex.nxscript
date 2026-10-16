@@ -115,6 +115,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "serialization/fcl-json/Package.nxscript";
         Description: "Free Pascal JSON values, parsing, writing, configuration and RTTI conversion.";
     }
+    LocalPackage FCLXML {
+        Id: "NXRP.Serialization.FCLXML";
+        Descriptor: "serialization/fcl-xml/Package.nxscript";
+        Description: "XML DOM, readers, writers, XPath, configuration, SAX and HTML support.";
+    }
     LocalPackage JSON {
         Id: "NXRP.Serialization.JSON";
         Descriptor: "serialization/json/Package.nxscript";

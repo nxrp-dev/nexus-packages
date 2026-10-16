@@ -1,0 +1,112 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLXML {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
+    OutputRoot: "output/nxbuild-fcl-xml/" + @Tools.Native.Name;
+
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLXML.SourceRoot + "/src/dom.pas",
+            @FCLXML.SourceRoot + "/src/dom_html.pas",
+            @FCLXML.SourceRoot + "/src/dtdmodel.pas",
+            @FCLXML.SourceRoot + "/src/htmldefs.pas",
+            @FCLXML.SourceRoot + "/src/htmlelements.pas",
+            @FCLXML.SourceRoot + "/src/htmlwriter.pas",
+            @FCLXML.SourceRoot + "/src/htmwrite.pas",
+            @FCLXML.SourceRoot + "/src/sax.pas",
+            @FCLXML.SourceRoot + "/src/sax_html.pas",
+            @FCLXML.SourceRoot + "/src/sax_xml.pas",
+            @FCLXML.SourceRoot + "/src/xhtml.pas",
+            @FCLXML.SourceRoot + "/src/xmlcfg.pas",
+            @FCLXML.SourceRoot + "/src/xmlconf.pas",
+            @FCLXML.SourceRoot + "/src/xmlread.pas",
+            @FCLXML.SourceRoot + "/src/xmlreader.pas",
+            @FCLXML.SourceRoot + "/src/xmlstreaming.pas",
+            @FCLXML.SourceRoot + "/src/xmltextreader.pas",
+            @FCLXML.SourceRoot + "/src/xmlutils.pas",
+            @FCLXML.SourceRoot + "/src/xmlwrite.pas",
+            @FCLXML.SourceRoot + "/src/xpath.pas"
+        ];
+        OutputPath: @FCLXML.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @FCLXML.OutputRoot,
+                @FCLXML.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+    FPC UnixEncoding TargetOS[linux] {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLXML.SourceRoot + "/src/xmliconv.pas"
+        ];
+        OutputPath: @FCLXML.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @FCLXML.OutputRoot,
+                @FCLXML.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+    FPC WindowsEncoding TargetOS[win64] {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLXML.SourceRoot + "/src/xmliconv_windows.pas"
+        ];
+        OutputPath: @FCLXML.OutputRoot;
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @FCLXML.OutputRoot,
+                @FCLXML.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+}
