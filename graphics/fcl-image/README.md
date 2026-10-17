@@ -22,10 +22,10 @@ From the Nexus root, with nxbuild available:
 
 ```sh
 nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImage.nxpackage /action=build
-nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImageExamples.nxproject /action=build
+nxbuild /project=../nexus-lab/examples/graphics/images/FCLImageExamples.nxproject /action=build
 nxbuild /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageTests.nxproject /action=build
 output/fcl-image-tests/x86_64-linux/FCLImageTests
-python3 projects/nxtest/retained/BuildRetained.py fcl-image --nxbuild output/nxbuild-next/x86_64-linux/nxbuild --run
+nxbuild /action=build /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageBehaviorTests.nxproject
 ```
 
 Native host/compiler settings are in

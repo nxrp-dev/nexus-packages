@@ -35,7 +35,7 @@ begin
       T.ResourceStrings:=true;
       T.Dependencies.AddUnit('openssl');
 
-    P.ExamplePath.Add('examples');
+    P.ExamplePath.Add('../../../../../../nexus-lab/examples/network/tls');
     P.Targets.AddExampleProgram('test1.pas');
 
 

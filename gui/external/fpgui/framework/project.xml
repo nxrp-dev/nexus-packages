@@ -22,7 +22,7 @@
     </resources>
   </build>
 
-  <!-- Native test builds: Nexus projects/nxtest/retained/BuildRetained.py. -->
+  <!-- Native test build: src/test/pascal/fpGUIFrameworkTests.nxproject. -->
 
   <!-- only because we want the tool for resource compilation -->
   <moduleDependencies>

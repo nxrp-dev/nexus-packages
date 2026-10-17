@@ -1,0 +1,36 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLJSONBehaviorTests {
+    RootDirectory: "../../../../..";
+    OutputRoot: "output/fcl-json-tests/" + @Tools.Native.Name + "/behavior";
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/serialization/fcl-json/tests/FCLJSONBehaviorTests.lpr"
+        ];
+        OutputPath: @FCLJSONBehaviorTests.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/serialization/fcl-json/tests",
+                "packages/nexus-packages/serialization/fcl-json/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/nxtest/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+}

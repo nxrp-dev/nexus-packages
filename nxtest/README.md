@@ -17,6 +17,10 @@ It includes:
 The command-line host and sample module live under `projects/nxtest/host`. The fpGUI
 runner lives under `projects/nxtest/ui`.
 
+Native console tests share `utNXTestConsole.RunConsoleTests`. The framework
+regressions and their nxbuild recipe live in `projects/nxtest/test`; other
+packages keep their suites and recipes beside their own test sources.
+
 ## Exported module contract
 
 The sample test module exports:

@@ -15,7 +15,7 @@ called the system tray or notification area, where long-running applications
 can display icons and short messages.</p>
 <img file="screenshots/fpgui_trayicon.png" />
 </descr>
-<example file="examples/fpg_trayicon_usage.pas"/>
+<example file="../../../../../../../../../nexus-lab/examples/gui/control-snippets/fpg_trayicon_usage.pas"/>
 </element>
 
 <element name="TfpgSystemTrayIcon.Create">
@@ -25,7 +25,7 @@ can display icons and short messages.</p>
 called the system tray or notification area, where long-running applications
 can display icons and short messages.</p>
 </descr>
-<example file="examples/fpg_trayicon_usage.pas"/>
+<example file="../../../../../../../../../nexus-lab/examples/gui/control-snippets/fpg_trayicon_usage.pas"/>
 </element>
 
 

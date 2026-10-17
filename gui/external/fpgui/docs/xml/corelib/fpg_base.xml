@@ -872,7 +872,7 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
 <seealso>
   <link id="#fpgui.fpg_base.TfpgCanvasBase.FillArc">TfpgCanvasBase.FillArc</link>
 </seealso>
-<example file="examples/fpg_base.fpgcanvasbase.drawarc.pas"/>
+<example file="../../../../../../../../../nexus-lab/examples/gui/core-snippets/fpg_base.fpgcanvasbase.drawarc.pas"/>
 </element>
 
 
@@ -908,7 +908,7 @@ goes counter-clockwise, and a negative values goes clockwise.</dd>
 <seealso>
   <link id="#fpgui.fpg_base.TfpgCanvasBase.DrawArc">TfpgCanvasBase.DrawArc</link>
 </seealso>
-<example file="examples/fpg_base.fpgcanvasbase.fillarc.pas"/>
+<example file="../../../../../../../../../nexus-lab/examples/gui/core-snippets/fpg_base.fpgcanvasbase.fillarc.pas"/>
 </element>
 
 

@@ -14,6 +14,6 @@
     <module>../framework</module>
   </moduleDependencies>
 
-  <!-- Native test builds: Nexus projects/nxtest/retained/BuildRetained.py. -->
+  <!-- Native tests are owned by their framework/IDE modules. -->
 
 </project>

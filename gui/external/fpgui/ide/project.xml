@@ -10,7 +10,7 @@
     <executableName>maximus</executableName>
   </build>
 
-  <!-- Native test builds: Nexus projects/nxtest/retained/BuildRetained.py. -->
+  <!-- Native test build: src/test/pascal/fpGUIIDETests.nxproject. -->
 
   <moduleDependencies>
     <module>../framework</module>

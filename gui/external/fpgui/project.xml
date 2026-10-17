@@ -21,7 +21,7 @@
     <module activeByDefault="false">tools/docs-compile</module>
     <module>tools/hvif_dump</module>
     <module>tools/imageconvert</module>
-    <module activeByDefault="false">tools/vertex-canvas-demo</module>
+    <module activeByDefault="false">../../../../../../nexus-lab/examples/graphics/vertex-canvas</module>
   </modules>
 
   <profiles>

@@ -91,5 +91,5 @@ and [DOM Level 2 Core](https://www.w3.org/TR/DOM-Level-2-Core/).
 
 Useful retained behavior tests now use nxtest directly. The former FPCUnit
 helpers and runners were removed, with their originals preserved in hashed
-archives. The [retirement report](../../../../projects/nxtest/retained/README.md) records conversions,
+archives. The [retirement report](../../../../docs/migrations/fpcunit/README.md) records conversions,
 corrected invalid expectations, before/after results and verification limits.

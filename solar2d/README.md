@@ -59,7 +59,7 @@ obj:dispatchEvent({ name = "setVolume", value = 0.25 })
 
 Pascal descendants can receive Lua events by overriding `HandleEvent()` and can send local or global events with `DispatchEvent()` and `DispatchRuntimeEvent()`.
 
-See `sample/Sample.Plugin.pas` and `sample/main.lua` for the complete small example. See `STATUS.txt` for the validation state recorded when this archive was assembled.
+See `../../../../nexus-lab/examples/mobile/pascal-plugin/Sample.Plugin.pas` and `../../../../nexus-lab/examples/mobile/pascal-plugin/main.lua` for the complete small example. See `STATUS.txt` for the validation state recorded when this archive was assembled.
 
 ## Review findings / production readiness
 

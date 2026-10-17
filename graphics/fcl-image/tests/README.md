@@ -9,7 +9,7 @@ cannot be loaded independently; it passes on the verified Linux host.
 
 The retained barcode suite now registers 17 native nxtest cases. All pass.
 Its old FPCUnit runner was retired and archived; see the
-[Nexus retained-test report](../../../../../projects/nxtest/retained/README.md).
+[FPCUnit retirement report](../../../../../docs/migrations/fpcunit/README.md).
 Retained and review suites use separate output directories.
 
 From the Nexus root on Linux:
@@ -36,3 +36,16 @@ compiles all 13 examples. Run examples from a scratch directory with needed
 assets copied there; several examples produce files in their current directory.
 The review records the executed drawing, barcode, QR, codec and font examples
 and independent output checks. No Lazarus tooling or Delphi validation is used.
+
+## Native behavior suite
+
+From the Nexus root, build this suite with Nexus nxbuild and NexusFPC:
+
+```sh
+nxbuild /action=build /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageBehaviorTests.nxproject
+```
+
+Configure the matching compiler and RTL in Nexus
+`projects/nxbuild/nxbuild.environment.nxscript`.
+
+Run `FCLImageBehaviorTests` from its output directory.

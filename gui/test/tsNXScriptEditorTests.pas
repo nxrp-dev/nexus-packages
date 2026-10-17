@@ -28,7 +28,7 @@ uses Classes, SysUtils, obNXTestSuite, obNXTestContext,
   tpVTV, fpg_base, obNexusScriptLanguageDefinition;
 
 const
-  cSampleFile = 'packages/nexus-packages/gui/examples/nxscript-editor/Demo.nxscript';
+  cSampleFile = '../nexus-lab/examples/gui/script-editor/Demo.nxscript';
 
 type
   TTestEditor = class(TNXScriptEditor)
@@ -439,7 +439,7 @@ begin
   try
     lSource := ReadBytes(cSampleFile);
     lSource := StringReplace(lSource, '"Editor.Language.nxscript"',
-      lDocument.QuoteText(ExpandFileName('packages/nexus-packages/gui/examples/nxscript-editor/Editor.Language.nxscript')), []);
+      lDocument.QuoteText(ExpandFileName('../nexus-lab/examples/gui/script-editor/Editor.Language.nxscript')), []);
     lPath := ExpandFileName('output/NexusScriptEditorTests/roundtrip/saved.nxscript');
     ForceDirectories(ExtractFilePath(lPath));
     lDocument.LoadSource(lPath, lSource);

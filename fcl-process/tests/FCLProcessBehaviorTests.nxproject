@@ -1,0 +1,45 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLProcessBehaviorTests {
+    RootDirectory: "../../../..";
+    OutputRoot: "output/fcl-process-tests/" + @Tools.Native.Name + "/behavior";
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/fcl-process/tests/tdotouch.pas",
+            "packages/nexus-packages/fcl-process/tests/tdocat.pas",
+            "packages/nexus-packages/fcl-process/tests/tdoexit.pas",
+            "packages/nexus-packages/fcl-process/tests/t_genout.pas",
+            "packages/nexus-packages/fcl-process/tests/tdols.pas",
+            "packages/nexus-packages/fcl-process/tests/FCLProcessBehaviorTests.lpr"
+        ];
+        OutputPath: @FCLProcessBehaviorTests.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/fcl-process/tests",
+                "packages/nexus-packages/fcl-process/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/nxtest/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.OS,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform
+            ];
+        }
+    }
+}

@@ -11,13 +11,13 @@ From the Nexus root:
 ```sh
 nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBTests.nxproject /action=build
 output/fcl-db-tests/x86_64-linux/FCLDBTests
-python3 projects/nxtest/retained/BuildRetained.py fcl-db --nxbuild output/nxbuild-next/x86_64-linux/nxbuild --run
+nxbuild /action=build /project=packages/nexus-packages/db/fcl-db/tests/FCLDBBehaviorTests.nxproject
 ```
 
 The retained scanner, parser, SQL generator, SQL script and dictionary-diff
 suites now register 943 native nxtest cases. The old FPCUnit runners were
 removed; their originals remain in the hashed retirement archive. See the
-[Nexus retained-test report](../../../../../projects/nxtest/retained/README.md).
+[FPCUnit retirement report](../../../../../docs/migrations/fpcunit/README.md).
 
 ## Compare with the untouched source
 
@@ -58,3 +58,16 @@ first original failure is the memory dataset's incorrect overwrite size.
 No database server is required by these suites. The separate SQLite consumer
 check uses the Nexus SQLite wrapper and a native SQLite library; its 28 passing
 results are saved in the review evidence.
+
+## Native behavior suite
+
+From the Nexus root, build this suite with Nexus nxbuild and NexusFPC:
+
+```sh
+nxbuild /action=build /project=packages/nexus-packages/db/fcl-db/tests/FCLDBBehaviorTests.nxproject
+```
+
+Configure the matching compiler and RTL in Nexus
+`projects/nxbuild/nxbuild.environment.nxscript`.
+
+Run `FCLDBBehaviorTests` from its output directory.

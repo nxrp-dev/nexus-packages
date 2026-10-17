@@ -114,9 +114,9 @@ begin
   Add(o);
   o := TIDEMacro.Create(cMacro_FPGuiLibDir, cMacro_FPGuiDir+'lib/'+cMacro_Target+'/', 'fpGUI compiled library directory');
   Add(o);
-  o := TIDEMacro.Create(cMacro_SyntaxDefDir, cMacro_FPGuiDir+'examples/apps/fpgide/syntaxdefs/', 'Editor syntax highlighter definitions');
+  o := TIDEMacro.Create(cMacro_SyntaxDefDir, cMacro_FPGuiDir+'../../../../../../nexus-lab/examples/gui/fpgui/apps/fpgide/syntaxdefs/', 'Editor syntax highlighter definitions');
   Add(o);
-  o := TIDEMacro.Create(cMacro_TemplateDir, cMacro_FPGuiDir+'examples/apps/fpgide/templates/', 'Project template directory');
+  o := TIDEMacro.Create(cMacro_TemplateDir, cMacro_FPGuiDir+'../../../../../../nexus-lab/examples/gui/fpgui/apps/fpgide/templates/', 'Project template directory');
   Add(o);
   o := TIDEMacro.Create(cMacro_Compiler, '', 'FPC Compiler to use');
   Add(o);

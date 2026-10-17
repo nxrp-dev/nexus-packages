@@ -34,3 +34,16 @@ Evidence is in Nexus `output/fcl-xml-tests/`: the immutable original tree and
 hashes, baseline/fixed build and result logs, package and catalog validation,
 and relocation verification. Linux is the executed target; Windows execution
 has not been verified. Delphi is outside the Nexus support scope.
+
+## Native behavior suite
+
+From the Nexus root, build this suite with Nexus nxbuild and NexusFPC:
+
+```sh
+nxbuild /action=build /project=packages/nexus-packages/serialization/fcl-xml/tests/FCLXMLBehaviorTests.nxproject
+```
+
+Configure the matching compiler and RTL in Nexus
+`projects/nxbuild/nxbuild.environment.nxscript`.
+
+Run `FCLXMLBehaviorTests` from its output directory.

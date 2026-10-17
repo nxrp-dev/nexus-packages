@@ -854,7 +854,7 @@ begin
       '..\..\..\projects\schema\examples\' + ARelativePath);
   if not FileExists(Result) then
     Result := ExpandFileName(
-      'projects\schema\examples\' + ARelativePath);
+      '..\nexus-lab\examples\data\schema\' + ARelativePath);
 end;
 
 function NewOutputDirectory(const APrefix: string): string;
@@ -4326,10 +4326,10 @@ end;
 function WorkspaceIndexExamplePath: string;
 begin
   Result := ExpandFileName(
-    'tools\workspace-index\example\Test.WorkspaceIndex.nxscript');
+    '..\nexus-lab\examples\workspace\index\Test.WorkspaceIndex.nxscript');
   if not FileExists(Result) then
     Result := ExpandFileName(
-      '..\..\..\..\tools\workspace-index\example\Test.WorkspaceIndex.nxscript');
+      '..\..\..\..\..\nexus-lab\examples\workspace\index\Test.WorkspaceIndex.nxscript');
 end;
 
 function WorkspaceIndexAlternatePath: string;

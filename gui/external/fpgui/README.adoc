@@ -46,7 +46,7 @@ toc::[]
 | `framework/src/test/pascal/` | Unit tests
 | `uidesigner/` | Visual UI Designer application
 | `docview/` | Documentation viewer (INF/IPF file viewer)
-| `examples/` | Example applications and widget demos
+| `../../../../../../nexus-lab/examples/gui/fpgui/` | Example applications and widget demos
 | `extras/` | Third-party contributed components
 |===
 
@@ -230,7 +230,7 @@ See `license.ModifiedLGPL.txt` and `license.LGPL2.txt` for full details.
 | Framework (`framework/`) | Modified LGPL
 | UI Designer (`uidesigner/`) | Modified LGPL
 | DocView (`docview/`) | GPLv2
-| Examples (`examples/`) | GPLv2
+| Examples (`../../../../../../nexus-lab/examples/gui/fpgui/`) | GPLv2
 | Extras (`extras/`) | Various (see specific directories)
 |===
 

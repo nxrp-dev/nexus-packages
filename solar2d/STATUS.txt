@@ -38,14 +38,14 @@ Source contracts checked against
 - Free Pascal 3.2.2 RTTI source/API shape for TRttiContext, TRttiType, TRttiMethodType, TRttiProperty, TValue, GetMethodProp(), and Invoke().
 
 Verification status
-The published-link RTTI prerequisite test compiles and passes. On October 2, 2026, the Win64 Nexus2D simulator loaded the Pascal plugin in StarExplorer, created its object, and successfully called Add(20,22) and Greeting("StarExplorer"). The plugin links through Lua 5.1 and CoronaLabs.Corona.Native.dll, without simulator modifications. See sample/STAR_EXPLORER.md for its nexus-lab location, recovered source, runtime screenshot, archive hashes and rebuild recipe.
+The published-link RTTI prerequisite test compiles and passes. On October 2, 2026, the Win64 Nexus2D simulator loaded the Pascal plugin in StarExplorer, created its object, and successfully called Add(20,22) and Greeting("StarExplorer"). The plugin links through Lua 5.1 and CoronaLabs.Corona.Native.dll, without simulator modifications. See ../../../../nexus-lab/examples/mobile/pascal-plugin/STAR_EXPLORER.md for its nexus-lab location, recovered source, runtime screenshot, archive hashes and rebuild recipe.
 
 On October 10, the recovered recipe rebuilt and staged the plugin from current package source using native Win64 FPC 3.2.2. AMD64 image, import and export checks passed. This recovery rebuild was not rerun in the GUI; the screenshot records the original successful runtime test.
 
 The remaining validation is:
 1. compile ../lua/test/TestPublishedRTTI.pas with the current Nexus FPC toolchain;
 2. build the plugin with that toolchain;
-3. run the broader sample/main.lua property, event and retained-link tests under the simulator;
+3. run the broader ../../../../nexus-lab/examples/mobile/pascal-plugin/main.lua property, event and retained-link tests under the simulator;
 4. repeat on each supported target CPU/ABI, particularly where TRttiMethodType.Invoke may use a platform-specific invocation manager.
 
 Intentional current RTTI surface

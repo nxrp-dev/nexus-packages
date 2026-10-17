@@ -64,7 +64,7 @@ from an inactive editor cannot commit a newly opened cell. Commit callbacks may
 rebuild the tree, so callers must reacquire node pointers after accepted edits.
 
 `../obNXScriptEditor.pas` uses these hooks for dialect-driven structural editing;
-see `../../examples/nxscript-editor/README.md` for its interface and boundaries.
+see `../../../../../../nexus-lab/examples/gui/script-editor/README.md` for its interface and boundaries.
 
 ## Verification
 
@@ -80,7 +80,7 @@ checks cover both axes, repeated/reverse scrolling, range clamping, content
 coordinates, and row/header hit testing.
 
 For an interactive TNXSkin demonstration, build and run
-`../../examples/virtual-treeview/NexusVirtualTreeViewDemo.lpi`. It provides
+`../../../../../../nexus-lab/examples/gui/virtual-tree/NexusVirtualTreeViewDemo.lpi`. It provides
 100,000 lazy root branches, five children per expanded branch, checkboxes,
 multi-selection, column resizing, sorting, and F2 text editing.
 

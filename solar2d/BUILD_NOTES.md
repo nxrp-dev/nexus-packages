@@ -19,13 +19,13 @@ For Windows, the FPC link needs the Solar2D Native import library or equivalent 
 
 1. Run the NexusFPC libffi ABI probe against the headers matching the native libffi library selected for this target.
 2. Compile and run `../lua/test/TestPublishedRTTI.pas`. It has no Lua/Solar2D link dependency and proves the required published RTTI/`Invoke()` behavior for the chosen FPC target. On Win64, define `NX_TEST_FFI_MANAGER` to test the libffi manager separately from native invocation.
-3. Build `sample/plugin_sample.lpr` with `../lua/src`, `src`, and `sample` on the unit path and the target Solar2D/Lua/libffi link inputs available.
+3. Build `../../../../nexus-lab/examples/mobile/pascal-plugin/plugin_sample.lpr` with `../lua/src`, `src`, and `sample` on the unit path and the target Solar2D/Lua/libffi link inputs available.
 4. Export `luaopen_plugin_sample` exactly as shown in the sample library project.
-5. Load `sample/main.lua` under Solar2D and verify the link/property and event output.
+5. Load `../../../../nexus-lab/examples/mobile/pascal-plugin/main.lua` under Solar2D and verify the link/property and event output.
 6. Repeat the ABI and RTTI invoke checks for every supported CPU/ABI.
 
 ## Verification status
 
 The published-link RTTI prerequisite test compiles and passes. On October 2, 2026, the Win64 Nexus2D simulator successfully loaded the Pascal sample plugin in StarExplorer, created its object, and called its Add and Greeting links. The tested plugin imports Lua 5.1 and the existing CoronaLabs.Corona.Native.dll proxy; it requires no simulator changes.
 
-The [StarExplorer proof in nexus-lab](sample/STAR_EXPLORER.md) preserves the integration, import definitions, successful screenshot and reconstructed build script. On October 10 the script rebuilt and staged the plugin from current package source using FPC 3.2.2, and checked its AMD64 image, imports and export. The recovery rebuild was not rerun in the GUI. Broader property/event/lifetime tests and other CPU/ABI targets remain to be validated.
+The [StarExplorer proof in nexus-lab](../../../../nexus-lab/examples/mobile/pascal-plugin/STAR_EXPLORER.md) preserves the integration, import definitions, successful screenshot and reconstructed build script. On October 10 the script rebuilt and staged the plugin from current package source using FPC 3.2.2, and checked its AMD64 image, imports and export. The recovery rebuild was not rerun in the GUI. Broader property/event/lifetime tests and other CPU/ABI targets remain to be validated.

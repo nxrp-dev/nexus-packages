@@ -25,7 +25,7 @@ to their unit search path. Source consumers use this package's `src` directory.
 
 The runtime units still use NexusFPC's `fcl-base` and `rtl-objpas` sources.
 This move does not migrate those packages. The retained upstream behavior tests now use nxtest directly, alongside the review
-regressions. See [native retained tests](../../../../projects/nxtest/retained/README.md).
+regressions. See [FPCUnit retirement report](../../../../docs/migrations/fpcunit/README.md).
 
 Upstream authorship, source revision, relocation evidence and licensing are
 recorded in the canonical [Nexus attributions](../../../../ATTRIBUTIONS.md#fcl-json).

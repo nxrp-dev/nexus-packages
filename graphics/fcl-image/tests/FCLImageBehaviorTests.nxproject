@@ -1,0 +1,29 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLImageBehaviorTests {
+    RootDirectory: "../../../../..";
+    OutputRoot: "output/fcl-image-tests/" + @Tools.Native.Name + "/behavior";
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/graphics/fcl-image/tests/FCLImageBehaviorTests.lpr"
+        ];
+        OutputPath: @FCLImageBehaviorTests.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/graphics/fcl-image/tests",
+                "packages/nexus-packages/graphics/fcl-image/src",
+                "packages/nexus-packages/nxtest/src"
+            ];
+        }
+    }
+}

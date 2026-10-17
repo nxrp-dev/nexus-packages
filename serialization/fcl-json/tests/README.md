@@ -66,3 +66,16 @@ Evidence is in Nexus `output/fcl-json-tests/`, including raw regression results,
 untouched source hashes, build logs, `upstream-comparison.json`, follow-up
 snapshots in `remaining-before/` and results in `upstream-remaining-final/`.
 Windows and other target executions have not been verified.
+
+## Native behavior suite
+
+From the Nexus root, build this suite with Nexus nxbuild and NexusFPC:
+
+```sh
+nxbuild /action=build /project=packages/nexus-packages/serialization/fcl-json/tests/FCLJSONBehaviorTests.nxproject
+```
+
+Configure the matching compiler and RTL in Nexus
+`projects/nxbuild/nxbuild.environment.nxscript`.
+
+Run `FCLJSONBehaviorTests` from its output directory.

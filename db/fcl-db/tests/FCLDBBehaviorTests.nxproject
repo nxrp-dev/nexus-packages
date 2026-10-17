@@ -1,0 +1,70 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLDBBehaviorTests {
+    RootDirectory: "../../../../..";
+    OutputRoot: "output/fcl-db-tests/" + @Tools.Native.Name + "/behavior";
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/db/fcl-db/tests/FCLDBBehaviorTests.lpr"
+        ];
+        OutputPath: @FCLDBBehaviorTests.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/db/fcl-db/tests",
+                "packages/nexus-packages/db/fcl-db/src/base",
+                "packages/nexus-packages/db/fcl-db/src/codegen",
+                "packages/nexus-packages/db/fcl-db/src/datadict",
+                "packages/nexus-packages/db/fcl-db/src/dbase",
+                "packages/nexus-packages/db/fcl-db/src/export",
+                "packages/nexus-packages/db/fcl-db/src/json",
+                "packages/nexus-packages/db/fcl-db/src/memds",
+                "packages/nexus-packages/db/fcl-db/src/sdf",
+                "packages/nexus-packages/db/fcl-db/src/sql",
+                "packages/nexus-packages/db/fcl-db/src/sqldb",
+                "packages/nexus-packages/serialization/fcl-json/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/serialization/fcl-xml/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/hash/src",
+                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
+                "packages/nexus-packages/nxtest/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.OS,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
+                "packages/nexus-packages/db/fcl-db/src/base",
+                "packages/nexus-packages/db/fcl-db/src/codegen",
+                "packages/nexus-packages/db/fcl-db/src/datadict",
+                "packages/nexus-packages/db/fcl-db/src/dbase",
+                "packages/nexus-packages/db/fcl-db/src/export",
+                "packages/nexus-packages/db/fcl-db/src/json",
+                "packages/nexus-packages/db/fcl-db/src/memds",
+                "packages/nexus-packages/db/fcl-db/src/sdf",
+                "packages/nexus-packages/db/fcl-db/src/sql",
+                "packages/nexus-packages/db/fcl-db/src/sqldb"
+            ];
+        }
+    }
+}
