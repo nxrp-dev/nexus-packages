@@ -340,7 +340,7 @@ begin
       if lEndpoints[lIndex].Security = xtsDirectTLS then
       begin
         Transition(xcsSecuring);
-        FTransport.Secure(FJID.DomainPart, FConfig.CAFile);
+        FTransport.Secure(FJID.DomainPart, FConfig.CAFile, lEndpoints[lIndex].Security);
       end;
       Exit(lEndpoints[lIndex]);
     except
@@ -540,7 +540,7 @@ begin
         lProceed.Free;
       end;
       Transition(xcsSecuring);
-      FTransport.Secure(FJID.DomainPart, FConfig.CAFile);
+      FTransport.Secure(FJID.DomainPart, FConfig.CAFile, AEndpoint.Security);
       FreeAndNil(Result);
       ResetStream;
       SendOpen;

@@ -10,32 +10,55 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NexusNetXMPPTests {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "NexusNetXMPPTests.lpr";
-    OutputRoot: "../../../../../output/NexusNetXMPPTests/x86_64-win64";
-
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @NexusNetXMPPTests.OutputRoot + "/NexusNetXMPPTests.exe";
-        RawOptions: ["-O1", "-gl", "-Cr", "-Co", "-Ci"];
+    RootDirectory: "../../../../..";
+    OutputRoot: "output/NexusNetXMPPTests/" + @Tools.Native.Name;
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/network/openssl/src/fpopenssl.pp",
+            "packages/nexus-packages/network/xmpp/test/NexusNetXMPPTests.lpr",
+            "packages/nexus-packages/network/xmpp/test/NXXMPPTransportTests.lpr"
+        ];
+        OutputPath: @NexusNetXMPPTests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
         Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
-            ExecutableOutputPath: @NexusNetXMPPTests.OutputRoot;
-            UnitOutputPath: "../../../../../output/NexusNetXMPPTests/x86_64-win64/units";
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                ".",
-                "../src",
-                "../../external/synapse",
-                "../../openssl/src",
-                "../../openssl/synapse",
-                "../../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+                @NexusNetXMPPTests.OutputRoot,
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/network/xmpp/test",
+                "packages/nexus-packages/network/xmpp/src",
+                "packages/nexus-packages/serialization/fcl-xml/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                "packages/nexus-packages/network/openssl/src",
+                "packages/nexus-packages/network/openssl/synapse",
+                "packages/nexus-packages/network/external/synapse",
+                "packages/nexus-packages/network/fcl-net/src",
+                "packages/nexus-packages/nxtest/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                "packages/nexus-packages/network/fcl-net/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy"
             ];
         }
     }

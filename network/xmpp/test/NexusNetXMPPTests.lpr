@@ -1043,7 +1043,7 @@ begin
   try
     lServer.Start;
     lTransport.Connect('127.0.0.1', lServer.Port, 2000);
-    lTransport.Secure('localhost', lCAFile);
+    lTransport.Secure('localhost', lCAFile, xtsStartTLS);
     AssertTrue(lTransport.Socket.SSL.SSLEnabled,
       'A trusted loopback certificate with the right identity should pass.');
   finally
@@ -1058,7 +1058,7 @@ begin
     lServer.Start;
     lTransport.Connect('127.0.0.1', lServer.Port, 2000);
     try
-      lTransport.Secure('wrong.example', lCAFile);
+      lTransport.Secure('wrong.example', lCAFile, xtsStartTLS);
       raise Exception.Create('A wrong TLS service identity should fail.');
     except
       on E: ENXXMPPError do
@@ -1077,7 +1077,7 @@ begin
     lServer.Start;
     lTransport.Connect('127.0.0.1', lServer.Port, 2000);
     try
-      lTransport.Secure('localhost', lFixturePath + 'untrusted-ca.crt');
+      lTransport.Secure('localhost', lFixturePath + 'untrusted-ca.crt', xtsStartTLS);
       raise Exception.Create('An untrusted TLS issuer should fail.');
     except
       on E: ENXXMPPError do

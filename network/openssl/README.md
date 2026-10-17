@@ -42,6 +42,19 @@ that version. Older protocols are rejected. Verification uses `SNIHost` as the
 reference identity, or the connected peer IP when no name is provided; SNI is
 sent for DNS names only. HTTP and XMPP callers already provide their service name.
 
+ALPN is configured through `Socket.SSL.ALPNProtocols`, a comma-separated protocol
+list in preference order. The Nexus provider installs it before the client or
+server handshake. Read `Socket.SSL.SelectedALPNProtocol` afterward; it is empty
+when ALPN was not negotiated, before a successful handshake, or after shutdown.
+`Assign` copies the configured offer, never the negotiated session result. An
+empty configuration disables ALPN; an empty-token-only list or a protocol ID
+longer than 255 bytes fails TLS setup. The application offers only protocols it
+implements and decides whether an absent selection is acceptable.
+
+XMPP direct TLS offers `xmpp-client`; STARTTLS clears the offer, including when
+reusing a transport that previously used direct TLS. HTTP consumers keep their
+existing empty default. Negotiating `h2` does not itself implement HTTP/2.
+
 Handshake retries share the socket's `ConnectionTimeout` deadline. Send retries
 share `NonblockSendTimeout`; read retries share the adapter's `ReceiveTimeout`
 (default -1, unbounded). Set that property to the caller's receive timeout,
@@ -57,7 +70,35 @@ of equal-length inputs. SHA-1 remains for the XEP-0115 protocol digest. Helpers
 use the shared binding and caller-owned output buffers; there is no second loader.
 Shared crypto errors use `ESSL`; protocol validation errors remain owned by XMPP.
 
-## Verification
+## Native ALPN verification — 2026-10-17
+
+From the Nexus root on Linux:
+
+```sh
+bash packages/nexus-packages/network/openssl/test/Generate-NXOpenSSLFixtures.sh output/synapse-alpn/fixtures
+output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/network/openssl/test/NXOpenSSLTests.nxproject
+output/NXOpenSSLTests/x86_64-linux/NXOpenSSLTests output/synapse-alpn/fixtures /usr/lib/x86_64-linux-gnu
+```
+
+The final argument is the directory containing the native OpenSSL 3 libraries;
+select the matching directory for the host. Fixtures contain disposable test
+keys. The native recipe uses the configured NexusFPC compiler and matching RTL;
+it compiles the `.pp` wrapper units explicitly before the test runner.
+
+On x86_64 Linux, NexusFPC 3.3.1 identity
+`778927a6beede09df345f5e9ee5e95f500b4f838-work-95622f1b76` with OpenSSL 3.0.13:
+**22 nxtest cases passed** (14 retained and 8 new Synapse adapter cases). The
+new cases cover matching protocols, server preference, case-sensitive matching,
+no overlap, either peer omitting ALPN, disabled negotiation, invalid settings,
+configuration copying and session cleanup. With only the public API added and
+the adapter not yet wired, five adapter cases failed; all passed after wiring.
+The five XMPP transport nxtest cases and retained complete XMPP suite also pass.
+BotHost's file-exchange and OpenAI-provider consumer units compile against the
+updated Synapse interface and Nexus adapter with the same native toolchain.
+Generated logs stay under Nexus `output/synapse-alpn`. Windows was not rerun for
+this addition; the earlier Windows results below are historical.
+
+## Earlier Windows verification
 
 On Windows x64, with LLVM tools on PATH and a matching built NexusFPC checkout:
 

@@ -41,6 +41,7 @@ type
     FSocket: TTCPBlockSocket;
     FReady, FRelease: TEvent;
     FError: string;
+    FSelectedALPNProtocol: AnsiString;
   protected
     procedure Execute; override;
   public
@@ -48,6 +49,7 @@ type
     destructor Destroy; override;
     function WaitReady: Boolean;
     property Error: string read FError;
+    property SelectedALPNProtocol: AnsiString read FSelectedALPNProtocol;
   end;
 
 var
@@ -600,6 +602,7 @@ var
 begin
   try
     RequireNative(FSocket.SSL.Accept, 'Peer TLS handshake failed: ' + FSocket.SSL.LastErrorDesc);
+    FSelectedALPNProtocol := FSocket.SSL.SelectedALPNProtocol;
     lMarker := 'K';
     RequireNative(FSocket.SSL.SendBuffer(@lMarker, 1) = 1, 'Peer TLS write failed');
     // Deliberately stall a TLS record after its header. Readiness alone must
@@ -749,6 +752,135 @@ begin
   end;
 end;
 
+procedure CheckSynapseALPN(AContext: TNXTestContext;
+  const AClientProtocols, AServerProtocols, ASelected: AnsiString;
+  AExpected: Boolean);
+var
+  lListener: TTestServer;
+  lClient, lSocket, lAssigned: TTCPBlockSocket;
+  lPeer: TSynapsePeer;
+  lAddress: TInetSockAddr;
+  lAddressLength: TSockLen;
+begin
+  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lClient := TTCPBlockSocket.Create;
+  lAssigned := TTCPBlockSocket.Create;
+  lSocket := nil;
+  lPeer := nil;
+  try
+    lListener.Listen;
+    lAddressLength := SizeOf(lAddress);
+    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0,
+      'Could not read ALPN test port');
+    lClient.ConnectionTimeout := 1000;
+    lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
+    RequireNative(lClient.LastError = 0, 'Could not connect ALPN client');
+    lClient.SSL.ALPNProtocols := AClientProtocols;
+    AContext.AssertEquals('', lClient.SSL.SelectedALPNProtocol, 'Protocol exists before handshake');
+    lSocket := TTCPBlockSocket.Create;
+    lSocket.Socket := lListener.TakeSocket;
+    lSocket.ConnectionTimeout := 1000;
+    lSocket.SSL.CertificateFile := Fixture('first-chain.pem');
+    lSocket.SSL.PrivateKeyFile := Fixture('first.key');
+    lSocket.SSL.ALPNProtocols := AServerProtocols;
+    lPeer := TSynapsePeer.Create(lSocket);
+    lSocket := nil;
+    lPeer.Start;
+    AContext.AssertTrue(lClient.SSL.Connect = AExpected, lClient.SSL.LastErrorDesc);
+    AContext.AssertTrue(lPeer.WaitReady, 'ALPN peer did not complete');
+    if AExpected then
+    begin
+      AContext.AssertEquals('', lPeer.Error);
+      AContext.AssertEquals(ASelected, lClient.SSL.SelectedALPNProtocol, 'Client protocol');
+      AContext.AssertEquals(ASelected, lPeer.SelectedALPNProtocol, 'Server protocol');
+      lAssigned.SSL.Assign(lClient.SSL);
+      AContext.AssertEquals(AClientProtocols, lAssigned.SSL.ALPNProtocols, 'Assign lost protocol settings');
+      AContext.AssertEquals('', lAssigned.SSL.SelectedALPNProtocol, 'Assign copied negotiated session state');
+      AContext.AssertTrue(lClient.SSL.Shutdown, 'ALPN session shutdown failed');
+    end
+    else
+      AContext.AssertFalse(lClient.SSL.SSLEnabled, 'Failed negotiation enabled TLS');
+    AContext.AssertEquals('', lClient.SSL.SelectedALPNProtocol, 'Ended session retained protocol');
+    AContext.AssertEquals(AClientProtocols, lClient.SSL.ALPNProtocols, 'Session cleanup lost settings');
+    AContext.AssertFalse(lClient.NonBlockMode, 'ALPN handshake changed socket mode');
+  finally
+    lClient.Free;
+    lAssigned.Free;
+    lPeer.Free;
+    lSocket.Free;
+    lListener.Free;
+  end;
+end;
+
+procedure TestSynapseALPN(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, 'xmpp-client', 'xmpp-client', 'xmpp-client', True);
+end;
+
+procedure TestSynapseALPNPreference(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, 'xmpp-client,http/1.1', 'http/1.1,xmpp-client', 'http/1.1', True);
+end;
+
+procedure TestSynapseALPNNoOverlap(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, 'xmpp-client', 'http/1.1', '', False);
+end;
+
+procedure TestSynapseALPNCaseSensitive(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, 'XMPP-CLIENT', 'xmpp-client', '', False);
+end;
+
+procedure TestSynapseALPNPeerAbsent(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, 'xmpp-client', '', '', True);
+end;
+
+procedure TestSynapseALPNClientAbsent(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, '', 'xmpp-client', '', True);
+end;
+
+procedure TestSynapseALPNDisabled(AContext: TNXTestContext);
+begin
+  CheckSynapseALPN(AContext, '', '', '', True);
+end;
+
+procedure TestSynapseALPNInvalid(AContext: TNXTestContext);
+var
+  lListener: TTestServer;
+  lClient: TTCPBlockSocket;
+  lPeer: TSocketStream;
+  lAddress: TInetSockAddr;
+  lAddressLength: TSockLen;
+begin
+  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lClient := TTCPBlockSocket.Create;
+  lPeer := nil;
+  try
+    lListener.Listen;
+    lAddressLength := SizeOf(lAddress);
+    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0,
+      'Could not read ALPN configuration test port');
+    lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
+    lPeer := TSocketStream.Create(lListener.TakeSocket);
+    lClient.ConnectionTimeout := 150;
+    lClient.SSL.ALPNProtocols := ' , ';
+    AContext.AssertFalse(lClient.SSL.Connect, 'Empty-token ALPN list was accepted');
+    AContext.AssertTrue(Pos('ALPN', lClient.SSL.LastErrorDesc) > 0, lClient.SSL.LastErrorDesc);
+    lClient.SSL.ALPNProtocols := StringOfChar('x', 256);
+    AContext.AssertFalse(lClient.SSL.Connect, 'Oversized protocol ID was accepted');
+    AContext.AssertTrue(Pos('ALPN', lClient.SSL.LastErrorDesc) > 0, lClient.SSL.LastErrorDesc);
+    AContext.AssertFalse(lClient.SSL.SSLEnabled);
+    AContext.AssertEquals('', lClient.SSL.SelectedALPNProtocol);
+  finally
+    lPeer.Free;
+    lClient.Free;
+    lListener.Free;
+  end;
+end;
+
 procedure TestLoaderRecovery(AContext: TNXTestContext);
 begin
   {$IFDEF WINDOWS}
@@ -771,6 +903,14 @@ begin
   lSuite.AddTest('LoaderRecovery', @TestLoaderRecovery);
   lSuite.AddTest('SynapseTLS', @TestSynapseTLS);
   lSuite.AddTest('SynapseHandshakeDeadline', @TestSynapseHandshakeDeadline);
+  lSuite.AddTest('SynapseALPN', @TestSynapseALPN);
+  lSuite.AddTest('SynapseALPNPreference', @TestSynapseALPNPreference);
+  lSuite.AddTest('SynapseALPNNoOverlap', @TestSynapseALPNNoOverlap);
+  lSuite.AddTest('SynapseALPNCaseSensitive', @TestSynapseALPNCaseSensitive);
+  lSuite.AddTest('SynapseALPNPeerAbsent', @TestSynapseALPNPeerAbsent);
+  lSuite.AddTest('SynapseALPNClientAbsent', @TestSynapseALPNClientAbsent);
+  lSuite.AddTest('SynapseALPNDisabled', @TestSynapseALPNDisabled);
+  lSuite.AddTest('SynapseALPNInvalid', @TestSynapseALPNInvalid);
   lSuite.AddTest('SharedCrypto', @TestSharedCrypto);
   lSuite.AddTest('ECKeysAndModernSymbols', @TestECKeysAndModernSymbols);
   lSuite.AddTest('PFXChain', @TestPFXChain);

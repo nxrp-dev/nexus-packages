@@ -33,7 +33,8 @@ type
     procedure Connect(const AHost: string; APort: Word; ATimeoutMS: Integer);
     procedure Interrupt;
     function Receive(ATimeoutMS: Integer): RawByteString;
-    procedure Secure(const AServiceIdentity, ACAFile: string);
+    procedure Secure(const AServiceIdentity, ACAFile: string;
+      ASecurity: TNXXMPPTransportSecurity);
     procedure Send(const AValue: RawByteString);
     property Socket: TTCPBlockSocket read FSocket;
   end;
@@ -63,7 +64,8 @@ begin
       'The XMPP TCP connection failed: ' + FSocket.LastErrorDesc, True);
 end;
 
-procedure TNXXMPPTransport.Secure(const AServiceIdentity, ACAFile: string);
+procedure TNXXMPPTransport.Secure(const AServiceIdentity, ACAFile: string;
+  ASecurity: TNXXMPPTransportSecurity);
 begin
   if (ACAFile = '') or not FileExists(ACAFile) then
     raise ENXXMPPError.Create(xesTLS, 'missing-ca-file',
@@ -71,6 +73,9 @@ begin
   if not (FSocket.SSL is TNXSynapseOpenSSL) then
     raise ENXXMPPError.Create(xesTLS, 'openssl-provider-not-selected',
       'Synapse did not select the OpenSSL 3 TLS provider.');
+  FSocket.SSL.ALPNProtocols := '';
+  if ASecurity = xtsDirectTLS then
+    FSocket.SSL.ALPNProtocols := 'xmpp-client';
   FSocket.SSL.VerifyCert := True;
   FSocket.SSL.CertCAFile := ACAFile;
   FSocket.SSL.SNIHost := AServiceIdentity;

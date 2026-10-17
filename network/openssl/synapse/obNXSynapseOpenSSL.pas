@@ -38,6 +38,7 @@ type
     function Transfer(AWrite: Boolean; ABuffer: TMemory; ALength: Integer): Integer;
   protected
     function CreateSelfSignedCert(AHost: string): Boolean; override;
+    function GetSelectedALPNProtocol: AnsiString; override;
   public
     constructor Create(const ASocket: TTCPBlockSocket); override;
     destructor Destroy; override;
@@ -277,6 +278,9 @@ begin
       (FPFXFile = '') and (FPFX = '') then
       CreateSelfSignedCert('localhost');
     LoadKeys;
+    if ALPNProtocols <> '' then
+      if FContext.SetALPNProtocols(ALPNProtocols) <> 0 then
+        raise ESSL.Create('Could not configure TLS ALPN protocols');
     FSession := TSSL.Create(FContext);
     RequireSuccess(FSession.SetFd(FSocket.Socket), 'attach TLS socket');
     if not AServer then
@@ -506,6 +510,13 @@ end;
 function TNXSynapseOpenSSL.RecvBuffer(ABuffer: TMemory; ALength: Integer): Integer;
 begin
   Result := Transfer(False, ABuffer, ALength);
+end;
+
+function TNXSynapseOpenSSL.GetSelectedALPNProtocol: AnsiString;
+begin
+  Result := '';
+  if FSSLEnabled and (FSession <> nil) then
+    Result := FSession.GetSelectedALPNProtocol;
 end;
 
 function TNXSynapseOpenSSL.LibVersion: string;

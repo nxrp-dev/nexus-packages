@@ -1233,6 +1233,7 @@ type
    Please, read documentation of used SSL plugin.}
   TCustomSSL = class(TObject)
   private
+    FALPNProtocols: AnsiString;
   protected
     FOnVerifyCert: THookVerifyCert;
     FSocket: TTCPBlockSocket;
@@ -1263,6 +1264,7 @@ type
     procedure ReturnError;
     procedure SetCertCAFile(const Value: string); virtual;
     function DoVerifyCert:boolean;
+    function GetSelectedALPNProtocol: AnsiString; virtual;
     function CreateSelfSignedCert(Host: string): Boolean; virtual;
   public
     {: Create plugin class. it is called internally from @link(TTCPBlockSocket)}
@@ -1270,7 +1272,7 @@ type
 
     {: Assign settings (certificates and configuration) from another SSL plugin
      class.}
-    procedure Assign(const Value: TCustomSSL); virtual;
+    procedure Assign(const AValue: TCustomSSL); virtual;
 
     {: return description of used plugin. It usually return name and version
      of used SSL library.}
@@ -1362,6 +1364,11 @@ type
 
     {: Resurn @true if SSL mode is enabled on existing cvonnection.}
     property SSLEnabled: Boolean read FSSLEnabled;
+
+    // Comma-separated protocol IDs in preference order. Empty disables ALPN.
+    property ALPNProtocols: AnsiString read FALPNProtocols write FALPNProtocols;
+    // Empty until a handshake negotiates a protocol, or after the session ends.
+    property SelectedALPNProtocol: AnsiString read GetSelectedALPNProtocol;
 
     {:Return error code of last SSL operation. 0 is OK.}
     property LastError: integer read FLastError;
@@ -4208,26 +4215,27 @@ begin
   FSNIHost := '';
 end;
 
-procedure TCustomSSL.Assign(const Value: TCustomSSL);
+procedure TCustomSSL.Assign(const AValue: TCustomSSL);
 begin
-  FUsername := Value.Username;
-  FPassword := Value.Password;
-  FVerifyCert := Value.VerifyCert;
-  FSSLType := Value.SSLType;
-  FKeyPassword := Value.KeyPassword;
-  FCiphers := Value.Ciphers;
-  FCertificateFile := Value.CertificateFile;
-  FPrivateKeyFile := Value.PrivateKeyFile;
-  FCertCAFile := Value.CertCAFile;
-  FCertCA := Value.CertCA;
-  FTrustCertificate := Value.TrustCertificate;
-  FTrustCertificateFile := Value.TrustCertificateFile;
-  FCertificate := Value.Certificate;
-  FPrivateKey := Value.PrivateKey;
-  FPFX := Value.PFX;
-  FPFXfile := Value.PFXfile;
-  FCertComplianceLevel := Value.CertComplianceLevel;
-  FSNIHost := Value.FSNIHost;
+  FALPNProtocols := AValue.ALPNProtocols;
+  FUsername := AValue.Username;
+  FPassword := AValue.Password;
+  FVerifyCert := AValue.VerifyCert;
+  FSSLType := AValue.SSLType;
+  FKeyPassword := AValue.KeyPassword;
+  FCiphers := AValue.Ciphers;
+  FCertificateFile := AValue.CertificateFile;
+  FPrivateKeyFile := AValue.PrivateKeyFile;
+  FCertCAFile := AValue.CertCAFile;
+  FCertCA := AValue.CertCA;
+  FTrustCertificate := AValue.TrustCertificate;
+  FTrustCertificateFile := AValue.TrustCertificateFile;
+  FCertificate := AValue.Certificate;
+  FPrivateKey := AValue.PrivateKey;
+  FPFX := AValue.PFX;
+  FPFXfile := AValue.PFXfile;
+  FCertComplianceLevel := AValue.CertComplianceLevel;
+  FSNIHost := AValue.FSNIHost;
 end;
 
 procedure TCustomSSL.ReturnError;
@@ -4296,6 +4304,11 @@ function TCustomSSL.WaitingData: Integer;
 begin
   ReturnError;
   Result := 0;
+end;
+
+function TCustomSSL.GetSelectedALPNProtocol: AnsiString;
+begin
+  Result := '';
 end;
 
 function TCustomSSL.GetSSLVersion: string;

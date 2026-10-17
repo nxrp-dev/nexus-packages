@@ -1,7 +1,36 @@
 # NexusNet XMPP Test Record
 
-This is the retained verification record for the deterministic Win64
-NexusXMPP test target and the explicitly identified live-server checks below.
+This is the retained verification record for the native NexusXMPP test targets
+and the explicitly identified live-server checks below.
+
+## Native ALPN verification — 2026-10-17
+
+From the Nexus root on Linux:
+
+```sh
+output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/network/xmpp/test/NexusNetXMPPTests.nxproject
+output/NexusNetXMPPTests/x86_64-linux/NXXMPPTransportTests packages/nexus-packages/network/xmpp/test/fixtures/xmpp
+output/NexusNetXMPPTests/x86_64-linux/NexusNetXMPPTests
+```
+
+The five direct nxtest transport cases pass: direct TLS negotiates `xmpp-client`,
+a peer without ALPN remains usable, incompatible offers fail, STARTTLS omits
+ALPN, and a reused direct-TLS transport clears its offer before STARTTLS. Closing
+the transport clears the negotiated result. Before the XMPP wiring, four of
+those five cases failed. The retained complete deterministic XMPP suite also
+passes. Checks use only local TLS peers and the existing synthetic certificates.
+
+`TNXXMPPTransport.Secure` now takes the existing `TNXXMPPTransportSecurity` value
+explicitly; both production connection paths and all direct test callers pass
+it. Direct TLS enables the `xmpp-client` offer recommended by
+[XEP-0368](https://xmpp.org/extensions/xep-0368.html#discovery). The consumer accepts
+an absent selection because the extension is recommended rather than mandatory;
+an explicit incompatible offer fails in the shared TLS negotiation.
+
+Verified with NexusFPC 3.3.1 identity
+`778927a6beede09df345f5e9ee5e95f500b4f838-work-95622f1b76` and OpenSSL 3.0.13 on
+x86_64 Linux. Build/results are under Nexus `output/synapse-alpn`. Native Windows
+and external-server checks were not rerun for this addition.
 
 ## Verified 2026-10-08 after OpenSSL consolidation
 
