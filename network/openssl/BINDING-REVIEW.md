@@ -1,5 +1,9 @@
 # OpenSSL binding review
 
+Historical review. The FCL socket handler described below was retired on
+2026-10-17; current consumers use the Nexus Synapse adapter. See
+[the consolidation record](../FCL-NET-CONSOLIDATION.md).
+
 Reviewed the three implementations that mattered to the active consumers:
 the Nexus OpenSSL package, Synapse's OpenSSL 3 binding/adapter, and XMPP's
 cryptography-only binding. The shared package now supplies all three use cases.

@@ -23,10 +23,10 @@ interface
 
 {$IFDEF FPC_DOTTEDUNITS}
 uses
-  System.Classes, System.SysUtils, System.Net.Sslbase, Api.Openssl, System.CTypes;
+  System.Classes, System.SysUtils, tpNXOpenSSLTypes, obNXOpenSSLCertificates, Api.Openssl, System.CTypes;
 {$ELSE FPC_DOTTEDUNITS}
 uses
-  Classes, SysUtils, sslbase, openssl, ctypes;
+  Classes, SysUtils, tpNXOpenSSLTypes, obNXOpenSSLCertificates, openssl, ctypes;
 {$ENDIF FPC_DOTTEDUNITS}
 
 {$IFDEF DUMPCERT}
@@ -655,10 +655,7 @@ begin
 end;
 
 Const
-  // OpenSSL SSL_CTX control id used by SetMinProtoVersion. Defined here (not in
-  // openssl.pas) to avoid re-opening that done unit (Story 4.5). Standard/stable
-  // across OpenSSL 1.1.x/3.x. (TLS1_2_VERSION = $0303 lives at the call site in
-  // opensslsockets.pp, the unit that passes it.)
+  // OpenSSL SSL_CTX control id for the minimum TLS version (openssl/ssl.h).
   SSL_CTRL_SET_MIN_PROTO_VERSION = 123;    // openssl/ssl.h
 
 function TSSLContext.SetMinProtoVersion(aVersion: cInt): cLong;

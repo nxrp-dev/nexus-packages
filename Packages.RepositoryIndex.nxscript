@@ -23,11 +23,6 @@ RepositoryIndex NexusPackages {
         Repository: @NexusPackages.NexusExternal;
         Description: "Archive and compression runtime units (Abbrevia).";
     }
-    ExternalPackage PasZLib {
-        Id: "NXRP.Compression.PasZLib";
-        Repository: @NexusPackages.NexusExternal;
-        Description: "Pascal DEFLATE, zlib, GZIP and ZIP runtime units.";
-    }
     ExternalPackage Mustache {
         Id: "NXRP.Mustache";
         Repository: @NexusPackages.NexusExternal;
@@ -70,6 +65,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "fcl-process/Package.nxscript";
         Description: "External process execution, pipes, local IPC and Windows service support.";
     }
+    LocalPackage PasJPEG {
+        Id: "NXRP.Graphics.PasJPEG";
+        Descriptor: "graphics/pasjpeg/Package.nxscript";
+        Description: "Portable Pascal baseline/progressive JPEG codec and BMP stream conversion.";
+    }
     LocalPackage FCLImage {
         Id: "NXRP.Graphics.FCLImage";
         Descriptor: "graphics/fcl-image/Package.nxscript";
@@ -90,15 +90,10 @@ RepositoryIndex NexusPackages {
         Descriptor: "lua/Package.nxscript";
         Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
     }
-    LocalPackage FCLNet {
-        Id: "NXRP.Network.FCLNet";
-        Descriptor: "network/fcl-net/Package.nxscript";
-        Description: "Resolver and TLS support used by Synapse, plus retained FCL socket APIs.";
-    }
     LocalPackage OpenSSL {
         Id: "NXRP.Network.OpenSSL";
         Descriptor: "network/openssl/Package.nxscript";
-        Description: "OpenSSL bindings, certificate wrappers and FCL TLS socket adapter.";
+        Description: "OpenSSL 3 bindings, certificate wrappers and Nexus Synapse TLS adapter.";
     }
     LocalPackage JSONRPC {
         Id: "NXRP.Network.JSONRPC";

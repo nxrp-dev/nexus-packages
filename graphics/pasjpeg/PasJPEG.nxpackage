@@ -1,0 +1,28 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Package PasJPEG {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/graphics/pasjpeg";
+    OutputRoot: "output/nxbuild-pasjpeg/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @PasJPEG.SourceRoot + "/src/buildpasjpeg.pas",
+            @PasJPEG.SourceRoot + "/src/jctrans.pas",
+            @PasJPEG.SourceRoot + "/src/jdtrans.pas",
+            @PasJPEG.SourceRoot + "/src/jconsts.pas",
+            @PasJPEG.SourceRoot + "/src/pasjpeg.pas"
+        ];
+        OutputPath: @PasJPEG.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, @PasJPEG.SourceRoot + "/src"];
+            IncludePaths: [@PasJPEG.SourceRoot + "/src"];
+        }
+    }
+}

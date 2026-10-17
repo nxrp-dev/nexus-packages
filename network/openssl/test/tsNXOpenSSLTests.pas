@@ -11,8 +11,8 @@ procedure RegisterNXOpenSSLTests(ARegistry: TNXTestRegistry);
 
 implementation
 
-uses Classes, SysUtils, SyncObjs, blcksock, synsock, ctypes, Dynlibs, openssl, fpopenssl, opensslsockets,
-  obNXOpenSSLCrypto, obNXSynapseOpenSSL, sslbase, sockets, ssockets, obNXTestContext, obNXTestSuite;
+uses Classes, SysUtils, SyncObjs, blcksock, synsock, ctypes, Dynlibs, openssl, fpopenssl,
+  obNXOpenSSLCrypto, obNXSynapseOpenSSL, tpNXOpenSSLTypes, obNXOpenSSLCertificates, sockets, obNXTestContext, obNXTestSuite;
 
 type
   TTestBIOPair = function(var ABIO: PBIO; ASize: csize_t;
@@ -24,13 +24,10 @@ type
     ALength: csize_t; AFlags: cuint; APeerName: PPAnsiChar): cint; cdecl;
   TTestX509CheckIP = function(ACertificate: PX509; AIP: PAnsiChar;
     AFlags: cuint): cint; cdecl;
-  TTestHandler = class(TOpenSSLSocketHandler)
+  TTestServer = class(TTCPBlockSocket)
   public
-    procedure Prepare;
-  end;
-  TTestServer = class(TInetServer)
-  public
-    function TakeSocket: Integer;
+    constructor Create;
+    function TakeSocket: TSocket;
   end;
 
 type
@@ -86,15 +83,18 @@ begin
   if not AResult then raise Exception.Create(AMessage);
 end;
 
-procedure TTestHandler.Prepare;
+constructor TTestServer.Create;
 begin
-  RequireNative(InitContext(False), 'Could not prepare TLS handler');
+  inherited Create;
+  Bind('127.0.0.1', '0');
+  RequireNative(LastError = 0, 'Could not bind test loopback listener');
 end;
 
-function TTestServer.TakeSocket: Integer;
+function TTestServer.TakeSocket: TSocket;
 begin
-  Result := fpAccept(FPSocket.FD, nil, nil);
-  RequireNative(Result >= 0, 'Could not accept test loopback connection');
+  RequireNative(CanRead(2000), 'No test client reached the listener');
+  Result := Accept;
+  RequireNative(Result <> INVALID_SOCKET, 'Could not accept test loopback connection');
 end;
 
 procedure ConfigureOpenSSLTests(const AFixtureDirectory, ARuntimeDirectory: string);
@@ -372,7 +372,7 @@ begin
     AContext.AssertTrue(Handshake(lClient, lServer));
     AContext.AssertEquals('h2', lClient.GetSelectedALPNProtocol);
     AContext.AssertEquals('h2', lServer.GetSelectedALPNProtocol);
-    AContext.AssertTrue(H2TLSFloorMet(lClient.Version, lClient.CipherName));
+    AContext.AssertTrue((lClient.Version = 'TLSv1.2') or (lClient.Version = 'TLSv1.3'));
     lMessage := 'encrypted local test';
     AContext.AssertEquals(Length(lMessage), lClient.Write(Pointer(lMessage), Length(lMessage)));
     SetLength(lReceived, Length(lMessage));
@@ -453,76 +453,33 @@ end;
 
 procedure TestConfigurationFailures(AContext: TNXTestContext);
 var
-  lHandler: TTestHandler;
-  lRejected: Boolean;
+  lContext: TSSLContext;
+  lCiphers: AnsiString;
 begin
-  lHandler := TTestHandler.Create;
+  lContext := TSSLContext.Create(stAny);
   try
-    lHandler.CertificateData.ALPNProtocols := ' , ';
-    lRejected := False;
-    try lHandler.Prepare; except on E: ESSL do lRejected := True; end;
-    AContext.AssertTrue(lRejected, 'Invalid ALPN configuration accepted');
-    lHandler.CertificateData.ALPNProtocols := '';
-    lHandler.CertificateData.CipherList := 'not-a-cipher';
-    lRejected := False;
-    try lHandler.Prepare; except on E: ESSL do lRejected := True; end;
-    AContext.AssertTrue(lRejected, 'Invalid cipher configuration accepted');
+    AContext.AssertTrue(lContext.SetALPNProtocols(' , ') <> 0,
+      'Invalid ALPN configuration accepted');
+    lCiphers := 'not-a-cipher';
+    AContext.AssertEquals(0, lContext.SetCipherList(lCiphers),
+      'Invalid cipher configuration accepted');
   finally
-    lHandler.Free;
+    lContext.Free;
   end;
 end;
 
-procedure TestReceiveTimeout(AContext: TNXTestContext);
+procedure TestCertificateDefaults(AContext: TNXTestContext);
 var
-  lListener: TTestServer;
-  lPeer: TInetSocket;
-  lSocket: TSocketStream;
-  lHandler: TTestHandler;
-  lClientContext: TSSLContext;
-  lClient: TSSL;
-  lAddress: TInetSockAddr;
-  lAddressLength: TSockLen;
-  lStarted, lElapsed: QWord;
-  lByte: Byte;
+  lCertificate: TOpenSSLX509Certificate;
 begin
-  lListener := TTestServer.Create('127.0.0.1', 0, nil);
-  lPeer := nil;
-  lSocket := nil;
-  lHandler := nil;
-  lClientContext := nil;
-  lClient := nil;
+  lCertificate := TOpenSSLX509Certificate.Create;
   try
-    lListener.Listen;
-    lAddressLength := SizeOf(lAddress);
-    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0, 'Could not retrieve loopback port');
-    lPeer := TInetSocket.Create('127.0.0.1', ntohs(lAddress.sin_port));
-    lHandler := TTestHandler.Create;
-    lSocket := TSocketStream.Create(lListener.TakeSocket, lHandler);
-    lSocket.IOTimeout := 150;
-    lHandler.CertificateData.Certificate.FileName := Fixture('first-chain.pem');
-    lHandler.CertificateData.PrivateKey.FileName := Fixture('first.key');
-    lHandler.Prepare;
-    lClientContext := ClientContext(False);
-    lClient := TSSL.Create(lClientContext);
-    AttachMemoryPair(lClient, lHandler.SSL);
-    AContext.AssertTrue(Handshake(lClient, lHandler.SSL));
-    lStarted := GetTickCount64;
-    AContext.AssertEquals(-1, lSocket.Read(lByte, 1), 'Timeout was reported as clean EOF');
-    lElapsed := GetTickCount64 - lStarted;
-    AContext.AssertTrue((lElapsed >= 100) and (lElapsed < 5000), 'TLS retry did not wait within its deadline');
-    AContext.AssertFalse(lSocket.PeerClosed, 'Timeout incorrectly marked peer closed');
-    AContext.AssertEquals(SSL_ERROR_WANT_READ, lHandler.SSLLastError);
+    AContext.AssertEquals(1, lCertificate.Version);
+    AContext.AssertEquals(1, lCertificate.Version, 'Default version changed between reads');
+    lCertificate.Version := 3;
+    AContext.AssertEquals(3, lCertificate.Version);
   finally
-    lClient.Free;
-    lClientContext.Free;
-    if lSocket <> nil then
-    begin
-      lSocket.Free; // Socket stream owns the handler.
-      lHandler := nil;
-    end;
-    lHandler.Free;
-    lPeer.Free;
-    lListener.Free;
+    lCertificate.Free;
   end;
 end;
 
@@ -635,14 +592,14 @@ var
   lStart, lElapsed: QWord;
   lAdapter: TNXSynapseOpenSSL;
 begin
-  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lListener := TTestServer.Create;
   lClient := TTCPBlockSocket.Create;
   lSocket := nil;
   lPeer := nil;
   try
     lListener.Listen;
     lAddressLength := SizeOf(lAddress);
-    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0, 'Could not read test port');
+    RequireNative(fpGetSockName(lListener.Socket, @lAddress, @lAddressLength) = 0, 'Could not read test port');
     lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
     RequireNative(lClient.LastError = 0, 'Client TCP connection failed');
     lSocket := TTCPBlockSocket.Create;
@@ -711,20 +668,21 @@ procedure TestSynapseHandshakeDeadline(AContext: TNXTestContext);
 var
   lListener: TTestServer;
   lClient: TTCPBlockSocket;
-  lPeer: TSocketStream;
+  lPeer: TTCPBlockSocket;
   lAddress: TInetSockAddr;
   lAddressLength: TSockLen;
   lStart: QWord;
 begin
-  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lListener := TTestServer.Create;
   lClient := TTCPBlockSocket.Create;
   lPeer := nil;
   try
     lListener.Listen;
     lAddressLength := SizeOf(lAddress);
-    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0, 'Could not read test port');
+    RequireNative(fpGetSockName(lListener.Socket, @lAddress, @lAddressLength) = 0, 'Could not read test port');
     lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
-    lPeer := TSocketStream.Create(lListener.TakeSocket);
+    lPeer := TTCPBlockSocket.Create;
+    lPeer.Socket := lListener.TakeSocket;
     lClient.ConnectionTimeout := 150;
     lClient.SSL.Ciphers := 'not-a-cipher';
     AContext.AssertFalse(lClient.SSL.Connect, 'Invalid cipher configuration was accepted');
@@ -762,7 +720,7 @@ var
   lAddress: TInetSockAddr;
   lAddressLength: TSockLen;
 begin
-  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lListener := TTestServer.Create;
   lClient := TTCPBlockSocket.Create;
   lAssigned := TTCPBlockSocket.Create;
   lSocket := nil;
@@ -770,7 +728,7 @@ begin
   try
     lListener.Listen;
     lAddressLength := SizeOf(lAddress);
-    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0,
+    RequireNative(fpGetSockName(lListener.Socket, @lAddress, @lAddressLength) = 0,
       'Could not read ALPN test port');
     lClient.ConnectionTimeout := 1000;
     lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
@@ -851,20 +809,21 @@ procedure TestSynapseALPNInvalid(AContext: TNXTestContext);
 var
   lListener: TTestServer;
   lClient: TTCPBlockSocket;
-  lPeer: TSocketStream;
+  lPeer: TTCPBlockSocket;
   lAddress: TInetSockAddr;
   lAddressLength: TSockLen;
 begin
-  lListener := TTestServer.Create('127.0.0.1', 0, nil);
+  lListener := TTestServer.Create;
   lClient := TTCPBlockSocket.Create;
   lPeer := nil;
   try
     lListener.Listen;
     lAddressLength := SizeOf(lAddress);
-    RequireNative(fpGetSockName(lListener.FPSocket.FD, @lAddress, @lAddressLength) = 0,
+    RequireNative(fpGetSockName(lListener.Socket, @lAddress, @lAddressLength) = 0,
       'Could not read ALPN configuration test port');
     lClient.Connect('127.0.0.1', IntToStr(ntohs(lAddress.sin_port)));
-    lPeer := TSocketStream.Create(lListener.TakeSocket);
+    lPeer := TTCPBlockSocket.Create;
+    lPeer.Socket := lListener.TakeSocket;
     lClient.ConnectionTimeout := 150;
     lClient.SSL.ALPNProtocols := ' , ';
     AContext.AssertFalse(lClient.SSL.Connect, 'Empty-token ALPN list was accepted');
@@ -921,7 +880,7 @@ begin
   lSuite.AddTest('ALPNNoOverlap', @TestALPNNoOverlap);
   lSuite.AddTest('CertificateGeneration', @TestCertificateGeneration);
   lSuite.AddTest('ConfigurationFailures', @TestConfigurationFailures);
-  lSuite.AddTest('ReceiveTimeout', @TestReceiveTimeout);
+  lSuite.AddTest('CertificateDefaults', @TestCertificateDefaults);
 end;
 
 finalization

@@ -19,7 +19,6 @@ Project NXOpenSSLTests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/network/openssl/src/fpopenssl.pp",
-            "packages/nexus-packages/network/openssl/src/opensslsockets.pp",
             "packages/nexus-packages/network/openssl/test/NXOpenSSLTests.lpr"
         ];
         OutputPath: @NXOpenSSLTests.OutputRoot;
@@ -37,7 +36,6 @@ Project NXOpenSSLTests {
                 "packages/nexus-packages/network/openssl/src",
                 "packages/nexus-packages/network/openssl/synapse",
                 "packages/nexus-packages/network/external/synapse",
-                "packages/nexus-packages/network/fcl-net/src",
                 "packages/nexus-packages/nxtest/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
@@ -48,7 +46,6 @@ Project NXOpenSSLTests {
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
-                "packages/nexus-packages/network/fcl-net/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,

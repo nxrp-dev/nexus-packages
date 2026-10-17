@@ -72,7 +72,7 @@ interface
 
 uses
   SyncObjs, SysUtils, Classes,
-  synafpc, BaseUnix, Unix, termio, sockets, netdb;
+  synafpc, BaseUnix, Unix, termio, sockets, utNXSynapseResolver;
 
 function InitSocketInterface(stack: string): Boolean;
 function DestroySocketInterface: Boolean;
@@ -688,7 +688,7 @@ var
   var
     a4: array [1..1] of in_addr;
     a6: array [1..1] of Tin6_addr;
-    he: THostEntry;
+    he: TInAddr;
   begin
     Result := WSAEPROTONOSUPPORT;
     case f of
@@ -709,8 +709,8 @@ var
               Result := WSAHOST_NOT_FOUND;
               a4[1] := StrTonetAddr(IP);
               if a4[1].s_addr = INADDR_ANY then
-                if GetHostByName(ip, he) then
-                  a4[1]:=HostToNet(he.Addr)
+                if FindHostAddress(ip, he) then
+                  a4[1]:=HostToNet(he)
                 else
                   Resolvename(ip, a4);
             end;
@@ -807,7 +807,7 @@ var
   x, n: integer;
   a4: array [1..255] of in_addr;
   a6: array [1..255] of Tin6_addr;
-  he: THostEntry;
+  he: TInAddr;
 begin
   IPList.Clear;
   if (family = AF_INET) or (family = AF_UNSPEC) then
@@ -818,9 +818,9 @@ begin
     begin
       a4[1] := StrTonetAddr(name);
       if a4[1].s_addr = INADDR_ANY then
-        if GetHostByName(name, he) then
+        if FindHostAddress(name, he) then
         begin
-          a4[1]:=HostToNet(he.Addr);
+          a4[1]:=HostToNet(he);
           x := 1;
         end
         else
@@ -853,21 +853,10 @@ begin
 end;
 
 function ResolvePort(Port: string; Family, SockProtocol, SockType: integer): Word;
-var
-  ProtoEnt: TProtocolEntry;
-  ServEnt: TServiceEntry;
 begin
   Result := StrToIntDef(Port, 0);
   if Result = 0 then
-  begin
-    ProtoEnt.Name := '';
-    if GetProtocolByNumber(SockProtocol, ProtoEnt) then
-    begin
-      ServEnt.port := 0;
-      if GetServiceByName(Port, ProtoEnt.Name, ServEnt) then
-        Result := synsock.ntohs(ServEnt.port);
-    end;
-  end;
+    Result := ResolveServicePort(Port, SockProtocol);
 end;
 
 function ResolveIPToName(IP: string; Family, SockProtocol, SockType: integer): string;

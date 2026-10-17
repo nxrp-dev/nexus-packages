@@ -41,7 +41,7 @@ Project fpGUIIDETests {
                 "packages/nexus-packages/graphics/fcl-image/src",
                 @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
                 @Tools.NexusFPC.SourcePath + "/packages/hash/src",
-                @Tools.NexusFPC.SourcePath + "/packages/pasjpeg/src",
+                "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
                 "packages/nexus-packages/serialization/fcl-xml/src",
                 @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",

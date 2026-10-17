@@ -2,15 +2,17 @@
 
 This package owns the dynamic OpenSSL binding (`src/openssl.pas`), certificate
 and TLS object wrappers (`src/fpopenssl.pp`), shared cryptography helpers
-(`src/obNXOpenSSLCrypto.pas`), FCL socket adapter (`src/opensslsockets.pp`),
-and the Nexus-owned Synapse adapter (`synapse/obNXSynapseOpenSSL.pas`). Upstream
+(`src/obNXOpenSSLCrypto.pas`), certificate definitions in
+`src/tpNXOpenSSLTypes.pas` and `src/obNXOpenSSLCertificates.pas`, and the
+Nexus-owned Synapse adapter (`synapse/obNXSynapseOpenSSL.pas`). Upstream
 origins, import evidence, authors, and separate native-library/binding license
 indicators are maintained in the
 [central attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#openssl-and-fpc-bindings).
 Original notices remain in the inherited sources.
 
-Add `src` to the compiler unit search path. The wrappers require matching
-[`NXRP.Network.FCLNet`](../fcl-net/README.md) units from `../fcl-net/src`.
+Add `src` to the compiler unit search path. Certificate data and generator
+classes are owned here; FCL Net is no longer required. `OpenSSL.nxpackage` builds
+the wrappers and Nexus Synapse adapter with the configured native NexusFPC.
 Native OpenSSL libraries are loaded dynamically and
 are not bundled here. The runtime must be OpenSSL 3 and supply the required
 TLS and cryptography
@@ -69,6 +71,21 @@ HMAC-SHA-256, PBKDF2-HMAC-SHA-256, secure random bytes, and constant-time compar
 of equal-length inputs. SHA-1 remains for the XEP-0115 protocol digest. Helpers
 use the shared binding and caller-owned output buffers; there is no second loader.
 Shared crypto errors use `ESSL`; protocol validation errors remain owned by XMPP.
+
+## FCL Net removal — 2026-10-17
+
+The FCL socket handler was removed. The live `TSSLType` and `TCertAndKey`
+definitions live in `tpNXOpenSSLTypes`; `TSSLData` and `TX509Certificate` live in
+`obNXOpenSSLCertificates`. Consumers import those owners directly. The unused
+FCL-handler certificate container was removed. Original licenses and source
+headers remain with the extracted definitions.
+
+The current 22-case OpenSSL suite uses Synapse listeners and peers throughout.
+Configuration rejection remains covered at the shared context and Synapse
+boundaries. Synapse tests retain the partial-record read deadline and distinction
+between timeout and session closure; the obsolete FCL stream-handler timeout
+case was removed. The stable certificate default-version regression now runs
+here directly. See [consolidation review and results](../FCL-NET-CONSOLIDATION.md).
 
 ## Native ALPN verification — 2026-10-17
 

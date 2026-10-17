@@ -1,0 +1,32 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Project PasJPEGTests {
+ RootDirectory: "../../../../..";
+ SourceRoot: "packages/nexus-packages/graphics/pasjpeg";
+ OutputRoot: "output/pasjpeg-tests/" + @Tools.Native.Name;
+ FPC Tests {
+  CompilerPath: @Tools.Native.FPCCompiler;
+  SourceFiles: [
+    @PasJPEGTests.SourceRoot + "/tests/PasJPEGTests.lpr",
+    @PasJPEGTests.SourceRoot + "/tests/PasJPEGFixture.lpr"
+  ];
+  OutputPath: @PasJPEGTests.OutputRoot;
+  Config Options { DisableDefaultConfigFiles: True; }
+  Language Pascal { Mode: ObjFPC; }
+  Debug Checks { LineInfo: Enabled; }
+  Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+  Files Paths {
+   CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+   UnitPaths: [
+    @Tools.Native.RTLPath,
+    @Tools.NexusFPC.SourcePath + "/rtl/inc",
+    @PasJPEGTests.SourceRoot + "/src",
+    @PasJPEGTests.SourceRoot + "/tests",
+    "packages/nexus-packages/nxtest/src"
+   ];
+   IncludePaths: [@PasJPEGTests.SourceRoot + "/src"];
+  }
+ }
+}

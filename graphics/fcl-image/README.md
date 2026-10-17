@@ -14,7 +14,8 @@ The font's original embedded license is also retained as text beside the asset.
 `Package.nxscript` registers `NXRP.Graphics.FCLImage` in both catalogs.
 `FCLImage.nxpackage` builds all 56 ordinary runtime units. Namespace wrappers
 remain available for separate consumers. The recipe uses NexusFPC RTL,
-rtl-objpas, fcl-base, pasjpeg, paszlib and its transitive hash/CRC dependency.
+rtl-objpas, fcl-base, the adjacent relocated PasJPEG package, authoritative
+NexusFPC PasZLib and its transitive hash/CRC dependency.
 Dynamic font rendering needs the platform FreeType runtime; Linux loads its
 runtime SONAME `libfreetype.so.6`. A runtime-package SDK is not required.
 

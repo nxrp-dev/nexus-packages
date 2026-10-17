@@ -1,0 +1,62 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package OpenSSL {
+    RootDirectory: "../../../..";
+    OutputRoot: "output/nxbuild-openssl/" + @Tools.Native.Name;
+    FPC Units {
+        BuildKind: Unit;
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/network/openssl/src/tpNXOpenSSLTypes.pas",
+            "packages/nexus-packages/network/openssl/src/obNXOpenSSLCertificates.pas",
+            "packages/nexus-packages/network/openssl/src/openssl.pas",
+            "packages/nexus-packages/network/openssl/src/fpopenssl.pp",
+            "packages/nexus-packages/network/openssl/src/obNXOpenSSLCrypto.pas",
+            "packages/nexus-packages/network/openssl/synapse/obNXSynapseOpenSSL.pas"
+        ];
+        OutputPath: @OpenSSL.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @OpenSSL.OutputRoot,
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/network/openssl/src",
+                "packages/nexus-packages/network/openssl/synapse",
+                "packages/nexus-packages/network/external/synapse",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy"
+            ];
+        }
+    }
+}

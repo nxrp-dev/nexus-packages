@@ -1,9 +1,9 @@
 dialect "nxpackage.Language.nxscript";
 
-// Requires NXRP.Network.FCLNet units and a target-compatible OpenSSL runtime.
+// Requires a target-compatible OpenSSL 3 runtime.
 // Inherited binding and wrapper sources retain their original license notices.
 Package OpenSSL {
     Id: "NXRP.Network.OpenSSL";
     Author: "Nexus contributors and upstream authors";
-    Description: "Shared OpenSSL 3 bindings, crypto and certificate wrappers, FCL and Nexus Synapse TLS adapters.";
+    Description: "Shared OpenSSL 3 bindings, crypto and certificate wrappers, Nexus Synapse TLS adapter.";
 }

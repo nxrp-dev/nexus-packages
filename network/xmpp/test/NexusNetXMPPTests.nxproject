@@ -40,7 +40,6 @@ Project NexusNetXMPPTests {
                 "packages/nexus-packages/network/openssl/src",
                 "packages/nexus-packages/network/openssl/synapse",
                 "packages/nexus-packages/network/external/synapse",
-                "packages/nexus-packages/network/fcl-net/src",
                 "packages/nexus-packages/nxtest/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
@@ -51,7 +50,6 @@ Project NexusNetXMPPTests {
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
-                "packages/nexus-packages/network/fcl-net/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,

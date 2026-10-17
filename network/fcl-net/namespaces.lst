@@ -1,9 +1,0 @@
-{s*:src/}=namespaced/
-{i+:src/}
-src/resolve.pas=namespaced/System.Net.Resolve.pas
-src/sslbase.pas=namespaced/System.Net.Sslbase.pas
-src/sslsockets.pas=namespaced/System.Net.Sslsockets.pas
-src/cnetdb.pas=namespaced/System.Net.Cnetdb.pas
-src/netdb.pas=namespaced/System.Net.Netdb.pas
-src/ssockets.pas=namespaced/System.Net.Ssockets.pas
-src/fpsockets.pas=namespaced/System.Net.FPSockets.pas

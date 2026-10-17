@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-17",
+  "source_revision": "bfd5d2156b01f1213b3fa16e3b3fde38588c9d5d",
+  "original_files": 119,
+  "original_changed_runtime_files": [
+    "src/pasjpeg.pas"
+  ],
+  "core_untouched": {
+    "passed": 5,
+    "failed": 0,
+    "errors": 0
+  },
+  "compilation_only_baseline": {
+    "passed": 9,
+    "failed": 2,
+    "errors": 2,
+    "skipped": 0
+  },
+  "final_nxtest": {
+    "passed": 13,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "fcl_image_nxtest": {
+    "passed": 18,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "package_units_built": 55,
+  "native_example_programs_built": 5,
+  "example_smoke_commands_passed": 6,
+  "independent_codec_comparisons_passed": 4,
+  "catalog_descriptor_validations_passed": 4,
+  "old_source_directory_absent": true,
+  "active_old_source_references": [],
+  "verified_target": "x86_64-linux",
+  "compiler": "NexusFPC 3.3.1",
+  "limits": [
+    "No Windows or cross-target run",
+    "No full compiler bootstrap/release matrix",
+    "Namespace build needs dotted RTL System.Classes",
+    "fpGUI link needs host X11 development library; GUI not run",
+    "Historical VCL and platform prototype sources not supported build inputs",
+    "No exhaustive JPEG conformance or fuzzing claim"
+  ],
+  "local_evidence": "Nexus output/pasjpeg-review (ignored)"
+}

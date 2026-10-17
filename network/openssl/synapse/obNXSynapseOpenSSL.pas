@@ -71,7 +71,7 @@ type
 
 implementation
 
-uses Classes, ctypes, sslbase, openssl, sockets;
+uses Classes, ctypes, tpNXOpenSSLTypes, obNXOpenSSLCertificates, openssl, sockets;
 
 function PasswordCallback(ABuffer: PAnsiChar; ASize, AReadWrite: cint;
   AUserData: Pointer): cint; cdecl;
@@ -252,7 +252,7 @@ begin
   try
     if FSocket.Socket = INVALID_SOCKET then raise ESSL.Create('TLS socket is not connected');
     if not InitSSLInterface then raise ESSL.Create('Required OpenSSL 3 runtime unavailable');
-    FContext := TSSLContext.Create(sslbase.stAny);
+    FContext := TSSLContext.Create(tpNXOpenSSLTypes.stAny);
     lVersion := TLS1_2_VERSION;
     case FSSLType of
       LT_All: ;
