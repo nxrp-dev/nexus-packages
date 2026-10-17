@@ -60,6 +60,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "db/sqlite/Package.nxscript";
         Description: "SQLite bindings, connections and write-through datasets.";
     }
+    LocalPackage FCLRegistry {
+        Id: "NXRP.FCLRegistry";
+        Descriptor: "fcl-registry/Package.nxscript";
+        Description: "Native Windows registry access with portable XML registry emulation.";
+    }
     LocalPackage FCLProcess {
         Id: "NXRP.FCLProcess";
         Descriptor: "fcl-process/Package.nxscript";
@@ -84,6 +89,11 @@ RepositoryIndex NexusPackages {
         Id: "NXRP.Lua";
         Descriptor: "lua/Package.nxscript";
         Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
+    }
+    LocalPackage FCLNet {
+        Id: "NXRP.Network.FCLNet";
+        Descriptor: "network/fcl-net/Package.nxscript";
+        Description: "Resolver and TLS support used by Synapse, plus retained FCL socket APIs.";
     }
     LocalPackage OpenSSL {
         Id: "NXRP.Network.OpenSSL";

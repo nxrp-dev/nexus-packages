@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package FCLRegistry {
+    Id: "NXRP.FCLRegistry";
+    Author: "Michael van Canneyt and Free Pascal contributors";
+    Description: "Native Windows registry access with portable XML registry emulation.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+}

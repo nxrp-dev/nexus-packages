@@ -1,0 +1,45 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLRegistryTests {
+    RootDirectory: "../../../..";
+    OutputRoot: "output/fcl-registry-tests/" + @Tools.Native.Name;
+    FPC Tests TargetOS[linux] {
+        RawOptions: ["-Cr", "-dXMLRegfile_in_CurDir"];
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [
+            "packages/nexus-packages/fcl-registry/tests/FCLRegistryFixture.lpr",
+            "packages/nexus-packages/fcl-registry/tests/FCLRegistryTests.lpr",
+            "packages/nexus-packages/fcl-registry/tests/FCLRegistryExampleTests.lpr",
+            "packages/nexus-packages/fcl-registry/tests/tregistry2.pas"
+        ];
+        OutputPath: @FCLRegistryTests.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/fcl-registry/tests",
+                "packages/nexus-packages/fcl-process/src",
+                "packages/nexus-packages/serialization/fcl-xml/src",
+                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/fcl-registry/src",
+                "packages/nexus-packages/nxtest/src"
+            ];
+            IncludePaths: [
+                "packages/nexus-packages/fcl-registry/src",
+                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+}

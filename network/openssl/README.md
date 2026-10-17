@@ -10,7 +10,8 @@ indicators are maintained in the
 Original notices remain in the inherited sources.
 
 Add `src` to the compiler unit search path. The wrappers require matching
-NexusFPC `fcl-net` units. Native OpenSSL libraries are loaded dynamically and
+[`NXRP.Network.FCLNet`](../fcl-net/README.md) units from `../fcl-net/src`.
+Native OpenSSL libraries are loaded dynamically and
 are not bundled here. The runtime must be OpenSSL 3 and supply the required
 TLS and cryptography
 exports. Each candidate library pair is validated before loading is published;

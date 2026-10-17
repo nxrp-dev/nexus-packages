@@ -1,0 +1,4 @@
+src/registry.pas=namespaced/System.Registry.pas
+{s*:src/}=namespaced/
+{i+:src/}
+src/xmlreg.pas=namespaced/System.Xmlreg.pas
