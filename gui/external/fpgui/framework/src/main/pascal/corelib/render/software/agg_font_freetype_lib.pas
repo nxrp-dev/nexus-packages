@@ -46,7 +46,11 @@ const
 
 // Linux, FreeBSD etc.
 {$IFDEF AGG_LINUX}
+ {$IFDEF LINUX}
+  ft_lib = 'libfreetype.so.6';
+ {$ELSE}
   ft_lib = 'freetype';
+ {$ENDIF}
 {$ENDIF }
 
 // Mac OS X

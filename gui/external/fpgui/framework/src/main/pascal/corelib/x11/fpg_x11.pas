@@ -31,6 +31,7 @@ uses
   X,
   Xlib,
   XUtil,
+  tpX11Libraries,
   //xrender,
   ctypes,
   fpg_xft_x11,
@@ -38,7 +39,6 @@ uses
   fpg_base,
   fpg_impl;
 
-{$LINKLIB Xext} // for xsync functions
 
 
 const
@@ -606,25 +606,25 @@ type
  // some externals
 
 // defines:
-procedure XRenderSetPictureClipRectangles(disp: PXDisplay; pic: TPicture; xorigin, yorigin: integer; rect: PXRectangle; num: integer); cdecl; external;
+procedure XRenderSetPictureClipRectangles(disp: PXDisplay; pic: TPicture; xorigin, yorigin: integer; rect: PXRectangle; num: integer); cdecl; external libXrender;
 
 // redefines:
-function XmbLookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external;
-function Xutf8LookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external;
+function XmbLookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external libX11;
+function Xutf8LookupString(p1: PXIC; ev: PXKeyPressedEvent; str: PChar; len: longword; ks: PKeySym; stat: PStatus): longint; cdecl; external libX11;
 
 // Double buffer functions
-function XdbeQueryExtension(ADisplay: PXDisplay; AMajor, AMinor: PInt): PStatus; cdecl; external;
-function XdbeAllocateBackBufferName(ADisplay: PXDisplay; AWindow: TfpgWinHandle; ASwapAction: PChar): TfpgWinHandle; cdecl; external;
-function XdbeSwapBuffers(ADisplay: PXDisplay; ASwapInfo: PXdbeSwapInfo; AScreenNums: integer): PStatus; cdecl; external;
-function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandle): PStatus; cdecl; external;
+function XdbeQueryExtension(ADisplay: PXDisplay; AMajor, AMinor: PInt): PStatus; cdecl; external libXext;
+function XdbeAllocateBackBufferName(ADisplay: PXDisplay; AWindow: TfpgWinHandle; ASwapAction: PChar): TfpgWinHandle; cdecl; external libXext;
+function XdbeSwapBuffers(ADisplay: PXDisplay; ASwapInfo: PXdbeSwapInfo; AScreenNums: integer): PStatus; cdecl; external libXext;
+function XdbeDeallocateBackBufferName(ADisplay: PXDisplay; ABuffer: TfpgWinHandle): PStatus; cdecl; external libXext;
 
-function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external;
-function XCreateIC(para1: PXIM; para2: array of const): PXIC; cdecl; external;
+function XOpenIM(para1: PDisplay; para2: PXrmHashBucketRec; para3: Pchar; para4: Pchar): PXIM; cdecl; external libX11;
+function XCreateIC(para1: PXIM; para2: array of const): PXIC; cdecl; external libX11;
 
 // XSync functions
-function XSyncCreateCounter(dpy: PXDisplay; initial_value: TXSyncValue): TXSyncCounter; cdecl; external;
-function XSyncSetCounter(dpy: PXDisplay; counter: TXSyncCounter; value: TXSyncValue): TStatus; cdecl; external;
-function XSyncDestroyCounter(dpy: PXDisplay; counter: TXSyncCounter ): TStatus; cdecl; external;
+function XSyncCreateCounter(dpy: PXDisplay; initial_value: TXSyncValue): TXSyncCounter; cdecl; external libXext;
+function XSyncSetCounter(dpy: PXDisplay; counter: TXSyncCounter; value: TXSyncValue): TStatus; cdecl; external libXext;
+function XSyncDestroyCounter(dpy: PXDisplay; counter: TXSyncCounter ): TStatus; cdecl; external libXext;
 
 const
   AltGrMask = 1 shl 13;  // missing from X unit

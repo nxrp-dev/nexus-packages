@@ -41,9 +41,10 @@
     "No Windows or cross-target run",
     "No full compiler bootstrap/release matrix",
     "Namespace build needs dotted RTL System.Classes",
-    "fpGUI link needs host X11 development library; GUI not run",
+    "Original fpGUI linking limit resolved by the Linux SONAME follow-up; GUI execution not run",
     "Historical VCL and platform prototype sources not supported build inputs",
     "No exhaustive JPEG conformance or fuzzing claim"
   ],
-  "local_evidence": "Nexus output/pasjpeg-review (ignored)"
+  "local_evidence": "Nexus output/pasjpeg-review (ignored)",
+  "follow_up": "Nexus docs/reviews/linux-shared-libraries.md"
 }

@@ -74,9 +74,11 @@ now reads bounded chunks directly from the stream and verifies the final marker;
 it no longer allocates a copy of the entire remaining input. QOI arithmetic uses
 explicit modulo-256 operations. PCX pads each plane independently. TGA handles
 16-bit color and 8-bit alpha numerically and honors horizontal origin. BMP RLE4
-allocates its padded scratch width and initializes reader padding. Only Linux's
-dynamic FreeType default changes to `libfreetype.so.6`; static linking retains
-its build-time library name.
+allocates its padded scratch width and initializes reader padding. The initial
+relocation changed Linux's dynamic FreeType default to `libfreetype.so.6`.
+The subsequent 2026-10-17 Linux shared-library correction applies that same ABI
+name to linked FreeType bindings too; see the
+[follow-up verification](../../../../docs/reviews/linux-shared-libraries.md).
 
 The initial unchecked-write candidate included TIFF. Runtime injection disproved
 that part: TIFF stages into memory and its final CopyFrom already rejects short

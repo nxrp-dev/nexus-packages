@@ -39,7 +39,7 @@ Const
 
 // LINUX
 {$if defined(UNIX) and not defined(darwin)}
-  {$if defined(LINUX) and defined(DYNAMIC)}
+  {$if defined(LINUX)}
   FreeTypeDLL = 'libfreetype.so.6';
   {$else}
   FreeTypeDLL = 'libfreetype.so';

@@ -128,9 +128,11 @@ Original notices and the existing Lab `rdjpgcom` changes were preserved.
 - Namespace wrapper validation stops because this installed RTL has no
   `System.Classes`. Wrappers were preserved unchanged; a complete dotted RTL
   SDK was not built for this relocation.
-- The fpGUI framework consumer compiles its Pascal sources, then fails to
-  link because the host lacks the unversioned `libX11` development library.
-  That host prerequisite is not a PasJPEG failure. GUI execution was not run.
+- The original fpGUI consumer check stopped at an unversioned `libX11` request.
+  The subsequent 2026-10-17 Linux compiler/binding correction resolves that
+  limitation using the installed ABI-versioned runtime libraries. See the
+  [follow-up verification](../../../../docs/reviews/linux-shared-libraries.md).
+  GUI execution was not run.
 - Verification used native Linux x86_64 NexusFPC 3.3.1 and its matching installed
   RTL through Nexus nxbuild. Windows and other targets, historical VCL demos,
   malformed-input fuzzing and a full compiler bootstrap/release matrix were

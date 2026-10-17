@@ -18,7 +18,6 @@ unit fpg_xft_x11;
 
 {$I fpg_defines.inc}
 
-{$linklib Xft}
 
 interface
 uses
@@ -27,16 +26,13 @@ uses
   ,X
   ,XLib
   ,Xutil
+  ,tpX11Libraries
   ;
 
-const
-  {$IF Defined(DARWIN)}
-    libXft = 'libXft.dylib';
-    {$LINKLIB libXft}
-    {$LINKLIB libfontconfig}
-  {$ELSE}
-    libXft = 'libXft.so';
-  {$IFEND}
+{$IF Defined(DARWIN)}
+  {$LINKLIB libXft}
+  {$LINKLIB libfontconfig}
+{$IFEND}
 
 
 type
