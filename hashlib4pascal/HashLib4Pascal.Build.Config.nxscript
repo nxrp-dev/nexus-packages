@@ -1,0 +1,94 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+// Installation/work paths only. These settings do not alter NexusFPC bootstrap.
+Environment HashLibLinux {
+    // Configure a verified native Linux runtime-package SDK before Build:Package.
+    SDKDirectory: "";
+    FPCSourceRoot: "../../../../nexus-fpc";
+    Platform: "unix";
+    CompilerUtilitiesPath: "/usr/bin";
+    ProviderUnitPaths: [
+        "external/hashlib4pascal/HashLib/src/Base",
+        "external/hashlib4pascal/HashLib/src/Checksum",
+        "external/hashlib4pascal/HashLib/src/Crypto",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2BParams",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2SParams",
+        "external/hashlib4pascal/HashLib/src/Hash128",
+        "external/hashlib4pascal/HashLib/src/Hash32",
+        "external/hashlib4pascal/HashLib/src/Hash64",
+        "external/hashlib4pascal/HashLib/src/Interfaces",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2BParams",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2SParams",
+        "external/hashlib4pascal/HashLib/src/KDF",
+        "external/hashlib4pascal/HashLib/src/Misc",
+        "external/hashlib4pascal/HashLib/src/NullDigest",
+        "external/hashlib4pascal/HashLib/src/Simd/Backend",
+        "external/hashlib4pascal/HashLib/src/Simd/Facade",
+        "external/hashlib4pascal/HashLib/src/Utils",
+        @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/inc",
+        @HashLibLinux.FPCSourceRoot + "/packages/rtl-generics/src",
+        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src",
+        @HashLibLinux.FPCSourceRoot + "/packages/pthreads/src"
+    ];
+    ProviderIncludePaths: [
+        "external/hashlib4pascal/HashLib/src/Include",
+        "external/hashlib4pascal/HashLib/src/Simd/Backend",
+        @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/" + @HashLibLinux.Platform,
+        @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/x86_64",
+        @HashLibLinux.FPCSourceRoot + "/packages/rtl-generics/src/inc",
+        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src/" + @HashLibLinux.Platform,
+        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src/dummy",
+        @HashLibLinux.FPCSourceRoot + "/packages/pthreads/src"
+    ];
+}
+Environment HashLibWindows {
+    SDKDirectory: "C:/gitdev/tools/nexus-fpc/build/forge-bootstrap/package-sdk";
+    FPCSourceRoot: "../../../../tools/nexus-fpc";
+    Platform: "win";
+    CompilerUtilitiesPath: "C:/Program Files/LLVM/bin";
+    ProviderUnitPaths: [
+        "external/hashlib4pascal/HashLib/src/Base",
+        "external/hashlib4pascal/HashLib/src/Checksum",
+        "external/hashlib4pascal/HashLib/src/Crypto",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2BParams",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2SParams",
+        "external/hashlib4pascal/HashLib/src/Hash128",
+        "external/hashlib4pascal/HashLib/src/Hash32",
+        "external/hashlib4pascal/HashLib/src/Hash64",
+        "external/hashlib4pascal/HashLib/src/Interfaces",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2BParams",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2SParams",
+        "external/hashlib4pascal/HashLib/src/KDF",
+        "external/hashlib4pascal/HashLib/src/Misc",
+        "external/hashlib4pascal/HashLib/src/NullDigest",
+        "external/hashlib4pascal/HashLib/src/Simd/Backend",
+        "external/hashlib4pascal/HashLib/src/Simd/Facade",
+        "external/hashlib4pascal/HashLib/src/Utils",
+        @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/inc",
+        @HashLibWindows.FPCSourceRoot + "/packages/rtl-generics/src",
+        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src",
+        @HashLibWindows.FPCSourceRoot + "/packages/pthreads/src"
+    ];
+    ProviderIncludePaths: [
+        "external/hashlib4pascal/HashLib/src/Include",
+        "external/hashlib4pascal/HashLib/src/Simd/Backend",
+        @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/" + @HashLibWindows.Platform,
+        @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/x86_64",
+        @HashLibWindows.FPCSourceRoot + "/packages/rtl-generics/src/inc",
+        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src/" + @HashLibWindows.Platform,
+        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src/dummy",
+        @HashLibWindows.FPCSourceRoot + "/packages/pthreads/src"
+    ];
+}
+Environment HashLibBuild {
+    EntryPoint: "HashLib4Pascal.nxpk";
+    TestsEntryPoint: "tests/HashLib4PascalTests.lpr";
+    PackageWork: "../../../output/HashLib4Pascal/package-work";
+    PackageDirectory: "../../../output/HashLib4Pascal/packages";
+    TestWork: "../../../output/HashLib4Pascal/test-work";
+    TestDirectory: "../../../output/HashLib4Pascal/tests";
+    SmartTestWork: "../../../output/HashLib4Pascal/smart-test-work";
+    SmartTestDirectory: "../../../output/HashLib4Pascal/smart-tests";
+    TestUnitPaths: ["tests", "../nxtest/src"];
+}

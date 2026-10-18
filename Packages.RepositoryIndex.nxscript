@@ -150,9 +150,9 @@ RepositoryIndex NexusPackages {
         Descriptor: "solar2d/Package.nxscript";
         Description: "Solar2D native plugin API and Pascal event bridge.";
     }
-    ExternalPackage HashLib4Pascal {
+    LocalPackage HashLib4Pascal {
         Id: "NXRP.HashLib4Pascal";
-        Repository: @NexusPackages.NexusExternal;
+        Descriptor: "hashlib4pascal/Package.nxscript";
         Description: "HashLib4Pascal hashing, checksums, HMAC and KDFs.";
     }
 }

@@ -1,0 +1,31 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package HashLib4Pascal {
+    Id: "NXRP.HashLib4Pascal";
+    Author: "Ugochukwu Mmaduekwe and contributors";
+    Description: "HashLib4Pascal digest, HMAC, checksum and KDF runtime library.";
+    License: "MIT";
+    UnitPaths: [
+        "external/hashlib4pascal/HashLib/src/Base",
+        "external/hashlib4pascal/HashLib/src/Checksum",
+        "external/hashlib4pascal/HashLib/src/Crypto",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2BParams",
+        "external/hashlib4pascal/HashLib/src/Crypto/Blake2SParams",
+        "external/hashlib4pascal/HashLib/src/Hash128",
+        "external/hashlib4pascal/HashLib/src/Hash32",
+        "external/hashlib4pascal/HashLib/src/Hash64",
+        "external/hashlib4pascal/HashLib/src/Interfaces",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2BParams",
+        "external/hashlib4pascal/HashLib/src/Interfaces/IBlake2SParams",
+        "external/hashlib4pascal/HashLib/src/KDF",
+        "external/hashlib4pascal/HashLib/src/Misc",
+        "external/hashlib4pascal/HashLib/src/NullDigest",
+        "external/hashlib4pascal/HashLib/src/Simd/Backend",
+        "external/hashlib4pascal/HashLib/src/Simd/Facade",
+        "external/hashlib4pascal/HashLib/src/Utils"
+    ];
+    IncludePaths: ["external/hashlib4pascal/HashLib/src/Include", "external/hashlib4pascal/HashLib/src/Simd/Backend"];
+}

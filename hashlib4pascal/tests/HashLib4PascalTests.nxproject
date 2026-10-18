@@ -1,0 +1,56 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project HashLib4PascalTests {
+    RootDirectory: "../../../..";
+    OutputRoot: "output/HashLib4PascalTests/" + @Tools.Native.Name;
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/hashlib4pascal/tests/HashLib4PascalTests.lpr"];
+        OutputPath: @HashLib4PascalTests.OutputRoot;
+        RawOptions: ["-O2", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/nxtest/src",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Base",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Checksum",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto/Blake2BParams",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto/Blake2SParams",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash128",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash32",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash64",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces/IBlake2BParams",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces/IBlake2SParams",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/KDF",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Misc",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/NullDigest",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Facade",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Utils",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+            ];
+            IncludePaths: [
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend",
+                "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Include",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+            ];
+        }
+    }
+}

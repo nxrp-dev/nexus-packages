@@ -1,0 +1,156 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/forge/language/Forge.nxscript";
+module "HashLib4Pascal.Build.Config.nxscript";
+module PackageBuild "../../../projects/forge/templates/PackageBuild.nxscript";
+module LinuxPackageBuild "../../../projects/forge/templates/LinuxPackageBuild.nxscript";
+module LinuxPackageApplication "../../../projects/forge/templates/LinuxPackageApplication.nxscript";
+
+Group HashLib4PascalBuild {
+    Group Providerlinux (LinuxPackageBuild) Build[Package] TargetOS[linux] {
+        PackageBuildPrepare Prepare (LinuxPackageBuild.Prepare) {
+            SDKDirectory: @HashLibLinux.SDKDirectory;
+            WorkDirectory: @HashLibBuild.PackageWork;
+        }
+        FPC Compile (LinuxPackageBuild.Compile) {
+            EntryPoint: @HashLibBuild.EntryPoint;
+            Source: [@HashLibBuild.EntryPoint];
+            UnitPaths: @HashLibLinux.ProviderUnitPaths;
+            IncludePaths: @HashLibLinux.ProviderIncludePaths;
+            CompilerUtilitiesPath: @HashLibLinux.CompilerUtilitiesPath;
+            Assembler: "as-clang";
+            OptimizationLevel: 2;
+            SmartLinkUnits: False;
+        }
+        PackageBundlePublish Publish (LinuxPackageBuild.Publish) {
+            Name: "HashLib4Pascal";
+            Kind: Package;
+            OutputDirectory: @HashLibBuild.PackageDirectory;
+        }
+    }
+    Group Consumerlinux (LinuxPackageApplication) Build[Tests] TargetOS[linux] {
+        PackageBuildPrepare Prepare (LinuxPackageApplication.Prepare) {
+            SDKDirectory: @HashLibLinux.SDKDirectory;
+            WorkDirectory: @HashLibBuild.TestWork;
+            PackageDirectories: [@HashLibBuild.PackageDirectory];
+        }
+        FPC Compile (LinuxPackageApplication.Compile) {
+            EntryPoint: @HashLibBuild.TestsEntryPoint;
+            Source: [@HashLibBuild.TestsEntryPoint];
+            UnitPaths: @HashLibBuild.TestUnitPaths;
+            RequiredPackages: [nxrtl, HashLib4Pascal];
+            CompilerUtilitiesPath: @HashLibLinux.CompilerUtilitiesPath;
+            SmartLink: False;
+        }
+        PackageBundlePublish Publish (LinuxPackageApplication.Publish) {
+            Name: "HashLib4PascalTests";
+            Kind: Console;
+            OutputDirectory: @HashLibBuild.TestDirectory;
+        }
+    }
+    Group Providerwin64 (PackageBuild) Build[Package] TargetOS[win64] {
+        PackageBuildPrepare Prepare (PackageBuild.Prepare) {
+            SDKDirectory: @HashLibWindows.SDKDirectory;
+            WorkDirectory: @HashLibBuild.PackageWork;
+        }
+        FPC Compile (PackageBuild.Compile) {
+            EntryPoint: @HashLibBuild.EntryPoint;
+            Source: [@HashLibBuild.EntryPoint];
+            UnitPaths: @HashLibWindows.ProviderUnitPaths;
+            IncludePaths: @HashLibWindows.ProviderIncludePaths;
+            CompilerUtilitiesPath: @HashLibWindows.CompilerUtilitiesPath;
+            OptimizationLevel: 2;
+            SmartLinkUnits: False;
+        }
+        PackageBundlePublish Publish (PackageBuild.Publish) {
+            Name: "HashLib4Pascal";
+            Kind: Package;
+            OutputDirectory: @HashLibBuild.PackageDirectory;
+        }
+    }
+    Group Consumerwin64 (PackageBuild) Build[Tests] TargetOS[win64] {
+        PackageBuildPrepare Prepare (PackageBuild.Prepare) {
+            SDKDirectory: @HashLibWindows.SDKDirectory;
+            WorkDirectory: @HashLibBuild.TestWork;
+            PackageDirectories: [@HashLibBuild.PackageDirectory];
+        }
+        FPC Compile (PackageBuild.Compile) {
+            EntryPoint: @HashLibBuild.TestsEntryPoint;
+            Source: [@HashLibBuild.TestsEntryPoint];
+            UnitPaths: @HashLibBuild.TestUnitPaths;
+            RequiredPackages: [nxrtl, HashLib4Pascal];
+            CompilerUtilitiesPath: @HashLibWindows.CompilerUtilitiesPath;
+            SmartLink: False;
+        }
+        PackageBundlePublish Publish (PackageBuild.Publish) {
+            Name: "HashLib4PascalTests";
+            Kind: Console;
+            OutputDirectory: @HashLibBuild.TestDirectory;
+        }
+    }
+    Run LinuxTests Build[Tests] TargetOS[linux] {
+        Template: "../../../projects/forge/templates/Run.mustache";
+        Executable: "./HashLib4PascalTests";
+        WorkingDirectory: @HashLibBuild.TestWork;
+    }
+    Run WindowsTests Build[Tests] TargetOS[win64] {
+        Template: "../../../projects/forge/templates/Run.mustache";
+        Executable: "./HashLib4PascalTests.exe";
+        WorkingDirectory: @HashLibBuild.TestWork;
+    }
+
+    Group SmartConsumerlinux (LinuxPackageApplication) Build[Tests] TargetOS[linux] {
+        PackageBuildPrepare Prepare (LinuxPackageApplication.Prepare) {
+            SDKDirectory: @HashLibLinux.SDKDirectory;
+            WorkDirectory: @HashLibBuild.SmartTestWork;
+            PackageDirectories: [@HashLibBuild.PackageDirectory];
+        }
+        FPC Compile (LinuxPackageApplication.Compile) {
+            EntryPoint: @HashLibBuild.TestsEntryPoint;
+            Source: [@HashLibBuild.TestsEntryPoint];
+            UnitPaths: @HashLibBuild.TestUnitPaths;
+            RequiredPackages: [nxrtl, HashLib4Pascal];
+            CompilerUtilitiesPath: @HashLibLinux.CompilerUtilitiesPath;
+            SmartLinkUnits: True;
+            SmartLink: True;
+        }
+        PackageBundlePublish Publish (LinuxPackageApplication.Publish) {
+            Name: "HashLib4PascalTests";
+            Kind: Console;
+            OutputDirectory: @HashLibBuild.SmartTestDirectory;
+        }
+    }
+    Run SmartTestslinux Build[Tests] TargetOS[linux] {
+        Template: "../../../projects/forge/templates/Run.mustache";
+        Executable: "./HashLib4PascalTests";
+        WorkingDirectory: @HashLibBuild.SmartTestWork;
+    }
+
+    Group SmartConsumerwin64 (PackageBuild) Build[Tests] TargetOS[win64] {
+        PackageBuildPrepare Prepare (PackageBuild.Prepare) {
+            SDKDirectory: @HashLibWindows.SDKDirectory;
+            WorkDirectory: @HashLibBuild.SmartTestWork;
+            PackageDirectories: [@HashLibBuild.PackageDirectory];
+        }
+        FPC Compile (PackageBuild.Compile) {
+            EntryPoint: @HashLibBuild.TestsEntryPoint;
+            Source: [@HashLibBuild.TestsEntryPoint];
+            UnitPaths: @HashLibBuild.TestUnitPaths;
+            RequiredPackages: [nxrtl, HashLib4Pascal];
+            CompilerUtilitiesPath: @HashLibWindows.CompilerUtilitiesPath;
+            SmartLinkUnits: True;
+            SmartLink: True;
+        }
+        PackageBundlePublish Publish (PackageBuild.Publish) {
+            Name: "HashLib4PascalTests";
+            Kind: Console;
+            OutputDirectory: @HashLibBuild.SmartTestDirectory;
+        }
+    }
+    Run SmartTestswin64 Build[Tests] TargetOS[win64] {
+        Template: "../../../projects/forge/templates/Run.mustache";
+        Executable: "./HashLib4PascalTests.exe";
+        WorkingDirectory: @HashLibBuild.SmartTestWork;
+    }
+}
