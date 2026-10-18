@@ -73,7 +73,12 @@ Indic_Conjunct_Break properties. Regenerate it without network access:
 python3 packages/nexus-packages/rtl-unicode/tools/generate-grapheme-context.py
 ```
 
-Original headers, endian-specific generated data and license texts remain with
-the source. Retired Make/fpmake workflows and unused namespace aliases have not
+Original headers, little-endian generated data and license texts remain with
+the source. Nexus supports little-endian hosts and targets only; the unused
+big-endian collation blobs and host selector branches are retired. The
+little-endian table blobs are unchanged. The historical `utils/unicode`
+collation generator was already retired with the old tool collection and is
+not a maintained regeneration path. Future collation imports must retain only
+the little-endian layout and unconditional little-endian includes. Retired Make/fpmake workflows and unused namespace aliases have not
 been reintroduced. The old normalization runner's useful checks are part of the
 direct nxtest suite rather than a second retained runner.

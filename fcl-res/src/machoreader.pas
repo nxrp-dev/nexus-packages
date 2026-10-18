@@ -37,7 +37,6 @@ type
   private
     fDescription: string;
     fExtensions: string;
-    fNativeEndianess : integer;
     fEndianess : integer;
     fOppositeEndianess : boolean;
     fMachineType : TMachOMachineType;
@@ -249,12 +248,9 @@ begin
   end;
 
   if fOppositeEndianess then
-    case fNativeEndianess of
-      MACH_BIG_ENDIAN    : fEndianess:=MACH_LITTLE_ENDIAN;
-      MACH_LITTLE_ENDIAN : fEndianess:=MACH_BIG_ENDIAN;
-    end
+    fEndianess:=MACH_BIG_ENDIAN
   else
-    fEndianess:=fNativeEndianess;
+    fEndianess:=MACH_LITTLE_ENDIAN;
 
   if fOppositeEndianess then
     begin

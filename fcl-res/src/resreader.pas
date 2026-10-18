@@ -217,19 +217,10 @@ begin
   Result:=false;
   aStream.ReadBuffer(lw,4); if lw<>0 then exit; //datasize = 0
   aStream.ReadBuffer(lw,4);
-  {$IFDEF ENDIAN_BIG}
-  lw:=SwapEndian(lw);
-  {$ENDIF}
   if lw<>$20 then exit;                         //headersize = $20
   aStream.ReadBuffer(lw,4);
-  {$IFDEF ENDIAN_BIG}
-  lw:=SwapEndian(lw);
-  {$ENDIF}
   if lw<>$FFFF then exit;                       //type = $0000FFFF
   aStream.ReadBuffer(lw,4);
-  {$IFDEF ENDIAN_BIG}
-  lw:=SwapEndian(lw);
-  {$ENDIF}
   if lw<>$FFFF then exit;                       //name = $0000FFFF
   aStream.ReadBuffer(lw,4); if lw<>0 then exit; //dataversion = 0
   aStream.ReadBuffer(lw,4); if lw<>0 then exit; //memflags,langid = 0

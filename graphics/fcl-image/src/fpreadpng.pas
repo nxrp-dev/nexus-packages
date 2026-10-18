@@ -171,11 +171,7 @@ begin
     // chunk header
     with ChunkHeader do
       begin
-      {$IFDEF ENDIAN_LITTLE}
       alength := swap(CLength);
-      {$ELSE}
-      alength := CLength;
-      {$ENDIF}
       ReadType := CType;
       end;
     aType := low(TChunkTypes);
@@ -196,11 +192,7 @@ begin
     TheStream.Read (readCRC, sizeof(ReadCRC));
     l := CalculateCRC (All1Bits, ReadType, sizeOf(ReadType));
     l := CalculateCRC (l, data^, alength);
-    {$IFDEF ENDIAN_LITTLE}
     l := swap(l xor All1Bits);
-    {$ELSE}
-    l := l xor All1Bits;
-    {$ENDIF}
     if ReadCRC <> l then
       raise PNGImageException.Create ('CRC check failed');
     end;
@@ -273,9 +265,7 @@ procedure TFPReaderPNG.HandleAlpha;
     var a : word;
     begin
       move (chunk.data^[0], a, 2);
-      {$IFDEF ENDIAN_LITTLE}
       a := swap (a);
-      {$ENDIF}
       TransparentDataValue := a;
       UseTransparent := True;
     end;
@@ -290,11 +280,9 @@ procedure TFPReaderPNG.HandleAlpha;
         move (data^[2], g, 2);
         move (data^[4], b, 2);
         end;
-      {$IFDEF ENDIAN_LITTLE}
       r := swap (r);
       g := swap (g);
       b := swap (b);
-      {$ENDIF}
       d := header.bitdepth;
       a := (TColorData(b) shl d) shl d;
       a := a + (TColorData(g) shl d) + r;
@@ -526,9 +514,6 @@ begin
         end;
       end
     else move (FCurrentLine^[DataIndex], Databytes, bytewidth);
-    {$IFDEF ENDIAN_BIG}
-    Databytes:=swap(Databytes);
-    {$ENDIF}
     inc (DataIndex,bytewidth);
     end;
   if bytewidth = 1 then
@@ -626,45 +611,28 @@ end;
 function TFPReaderPNG.ColorGrayAlpha8 (CD:TColorData) : TFPColor;
 var c : word;
 begin
-  {$ifdef FPC_LITTLE_ENDIAN}
   c := CD and $00FF;
-  {$else}
-  c:=(CD shr 8) and $FF;
-  {$endif}
   c := c + (c shl 8);
   with result do
     begin
     red := c;
     green := c;
     blue := c;
-    {$ifdef FPC_LITTLE_ENDIAN}
      c := CD and $FF00;
      alpha := c + (c shr 8);
-    {$else}
-     c := CD and $00FF;
-     alpha := c + (c shl 8);
-    {$endif}
     end;
 end;
 
 function TFPReaderPNG.ColorGrayAlpha16 (CD:TColorData) : TFPColor;
 var c : word;
 begin
-  {$ifdef FPC_LITTLE_ENDIAN}
   c := CD and $FFFF;
-  {$else}
-  c := (CD shr 16) and $FFFF;
-  {$endif}
   with result do
     begin
     red := c;
     green := c;
     blue := c;
-  {$ifdef FPC_LITTLE_ENDIAN}
     alpha := (CD shr 16) and $FFFF;
-  {$else}
-    alpha := CD and $FFFF;
-  {$endif}
     end;
 end;
 
@@ -985,10 +953,8 @@ begin
   then
     Exit;
 
-  {$IFDEF ENDIAN_LITTLE}
   Width := Swap(Width);
   Height := Swap(Height);
-  {$ENDIF}
 
   Result.X := Width;
   Result.Y := Height;
@@ -1020,10 +986,8 @@ begin
   // FHeader, Header is read-only. Bug in compiler.
   with fheader do
     begin
-    {$IFDEF ENDIAN_LITTLE}
     Width := swap(width);
     height := swap (height);
-    {$ENDIF}
     result :=(width > 0) and (height > 0) and (compression = 0)
               and (filter = 0) and (Interlace in [0,1]);
     end;

@@ -28,10 +28,6 @@
   {$mode DELPHI}{$H+}
 {$ENDIF FPC}
 
-{$IFNDEF FPC}
-  {$DEFINE ENDIAN_LITTLE}
-{$ENDIF !FPC}
-
 {$IFNDEF FPC_DOTTEDUNITS}
 unit collation_fr_ca;
 {$ENDIF FPC_DOTTEDUNITS}

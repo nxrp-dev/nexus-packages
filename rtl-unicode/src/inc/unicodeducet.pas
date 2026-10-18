@@ -28,10 +28,6 @@ unit unicodeducet;
   {$PACKENUM 1}
 {$ENDIF FPC}
 
-{$IFNDEF FPC}
-  {$DEFINE ENDIAN_LITTLE}
-{$ENDIF !FPC}
-
 {$SCOPEDENUMS ON}
 
 interface
@@ -46,12 +42,7 @@ uses
 {$ENDIF FPC_DOTTEDUNITS}
 
 {$INCLUDE ucadata.inc}
-{$IFDEF ENDIAN_LITTLE}
   {$INCLUDE ucadata_le.inc}
-{$ENDIF ENDIAN_LITTLE}
-{$IFDEF ENDIAN_BIG}
-  {$INCLUDE ucadata_be.inc}
-{$ENDIF ENDIAN_BIG}
 
 const
   UCA_DataBookRecord : TUCA_DataBook = (

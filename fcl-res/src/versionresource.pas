@@ -118,14 +118,9 @@ type
 
 function TVersionResource.SwapVersion(const aData: qword): qword;
 begin
-  {$IFDEF ENDIAN_BIG}
-  Result:=Swap(aData);                      //MSLW is stored first...
-  Result:=SwapEndian(Result);
-  {$ELSE}
   Result:=Swap(longword(hi(aData)));
   Result:=Result shl 32;
   Result:=Result or Swap(longword(lo(aData)));
-  {$ENDIF}
 end;
 
 procedure TVersionResource.AlignDWordReading;
@@ -222,17 +217,6 @@ begin
   infodata.FileVersion:=SwapVersion(infodata.FileVersion);
   infodata.ProductVersion:=SwapVersion(infodata.ProductVersion);
   infodata.FileDate:=Swap(infodata.FileDate);             //MSLW is stored first...
-  {$IFDEF ENDIAN_BIG}
-  infodata.signature:=SwapEndian(infodata.signature);
-  infodata.verMinor:=SwapEndian(infodata.verMinor);
-  infodata.verMajor:=SwapEndian(infodata.verMajor);
-  infodata.FileFlagsMask:=SwapEndian(infodata.FileFlagsMask);
-  infodata.FileFlags:=SwapEndian(infodata.FileFlags);
-  infodata.FileOS:=SwapEndian(infodata.FileOS);
-  infodata.FileType:=SwapEndian(infodata.FileType);
-  infodata.FileSubType:=SwapEndian(infodata.FileSubType);
-  infodata.FileDate:=SwapEndian(infodata.FileDate);
-  {$ENDIF}
   if infodata.signature <> $FEEF04BD then
     raise EResourceReaderException.Create('Invalid fixed version signature');
   fFixedInfo:=TVersionFixedInfo.Create;
@@ -372,9 +356,6 @@ var after : int64;
 begin
   after:=RawData.Position;
   len:=after-position;
-  {$IFDEF ENDIAN_BIG}
-  len:=SwapEndian(len);
-  {$ENDIF}
   RawData.Position:=position;
   RawData.WriteBuffer(len,2);
   RawData.Position:=after;
@@ -390,10 +371,6 @@ begin
   block.vallength:=$34;
   block.valtype:=0;
   block.key:='VS_VERSION_INFO';
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  {$ENDIF}
 
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
@@ -422,17 +399,6 @@ begin
   infodata.FileType:=fFixedInfo.FileType;
   infodata.FileSubType:=fFixedInfo.FileSubType;
   infodata.FileDate:=fFixedInfo.FileDate;
-  {$IFDEF ENDIAN_BIG}
-  infodata.signature:=SwapEndian(infodata.signature);
-  infodata.verMinor:=SwapEndian(infodata.verMinor);
-  infodata.verMajor:=SwapEndian(infodata.verMajor);
-  infodata.FileFlagsMask:=SwapEndian(infodata.FileFlagsMask);
-  infodata.FileFlags:=SwapEndian(infodata.FileFlags);
-  infodata.FileOS:=SwapEndian(infodata.FileOS);
-  infodata.FileType:=SwapEndian(infodata.FileType);
-  infodata.FileSubType:=SwapEndian(infodata.FileSubType);
-  infodata.FileDate:=SwapEndian(infodata.FileDate);
-  {$ENDIF}
   infodata.FileVersion:=SwapVersion(infodata.FileVersion);
   infodata.ProductVersion:=SwapVersion(infodata.ProductVersion);
   infodata.FileDate:=Swap(infodata.FileDate);             //MSLW is stored first...
@@ -449,10 +415,6 @@ begin
   block.vallength:=0;
   block.valtype:=1;
   block.key:='StringFileInfo';
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  {$ENDIF}
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
   AlignDWordWriting;
@@ -473,10 +435,6 @@ begin
   block.vallength:=0;
   block.valtype:=1;
   block.key:=aTable.Name;
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  {$ENDIF}
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
   AlignDWordWriting;
@@ -496,10 +454,6 @@ begin
   block.vallength:=length(WideString(aValue))+1;
   block.valtype:=1;
   block.key:=aKey;
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  {$ENDIF}
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
   AlignDWordWriting;
@@ -519,10 +473,6 @@ begin
   block.vallength:=0;
   block.valtype:=1;
   block.key:='VarFileInfo';
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  {$ENDIF}
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
   AlignDWordWriting;
@@ -542,12 +492,6 @@ begin
   block.vallength:=4;
   block.valtype:=0;
   block.key:='Translation';
-  {$IFDEF ENDIAN_BIG}
-  block.vallength:=SwapEndian(block.vallength);
-  block.valtype:=SwapEndian(block.valtype);
-  aEntry.language:=SwapEndian(aEntry.language);
-  aEntry.codepage:=SwapEndian(aEntry.codepage);
-  {$ENDIF}
   RawData.WriteBuffer(block,6);
   WriteWideString(block.key);
   AlignDWordWriting;
@@ -565,9 +509,6 @@ begin
   for i:=1 to length(ws) do
   begin
     w:=word(ws[i]);
-    {$IFDEF ENDIAN_BIG}
-    w:=SwapEndian(w);
-    {$ENDIF}
     RawData.WriteBuffer(w,2);
   end;
   w:=length(ws);

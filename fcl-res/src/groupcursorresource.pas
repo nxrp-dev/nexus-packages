@@ -82,9 +82,6 @@ begin
   try
     RawData.ReadBuffer(pci^.header,sizeof(TResCursorDir));
     cursorid:=pci^.header.cursorId;
-    {$IFDEF ENDIAN_BIG}
-    cursorId:=SwapEndian(cursorId);
-    {$ENDIF}
     res:=OwnerList.Find(RT_CURSOR,cursorid,LangID);
     pci^.res:=res;
     SetChildOwner(res);
@@ -104,10 +101,6 @@ begin
   pci:=PCurInfo(fItemList[index]);
   tmpw:=pci^.header.width;
   tmph:=pci^.header.height;
-  {$IFDEF ENDIAN_BIG}
-  tmpw:=SwapEndian(tmpw);
-  tmph:=SwapEndian(tmph);
-  {$ENDIF}
   tmph:=tmph div 2;                    //in cursor resources, height is doubled.
 
   if tmpw = 256 then hdr.width := 0 else hdr.width := tmpw;
@@ -118,14 +111,7 @@ begin
   pci^.res.RawData.Position:=0;
   pci^.res.RawData.ReadBuffer(hdr.xhotspot,2);
   pci^.res.RawData.ReadBuffer(hdr.yhotspot,2);
-  {$IFDEF ENDIAN_BIG}
-  hdr.curoffset:=SwapEndian(hdr.curoffset);
-  hdr.bytesincur:=SwapEndian(hdr.bytesincur);
-  {$ENDIF}
   dec(hdr.bytesincur,4); //in resources, cursor has 2 words more for hotspots
-  {$IFDEF ENDIAN_BIG}
-  hdr.bytesincur:=SwapEndian(hdr.bytesincur);
-  {$ENDIF}
   aStream.WriteBuffer(hdr,sizeof(hdr));
   Result:=start+pci^.res.RawData.Size-4;
 end;
@@ -139,11 +125,6 @@ begin
   nh.reserved:=0;
   nh.restype:=RES_CURSOR;
   nh.rescount:=fItemList.Count;
-  {$IFDEF ENDIAN_BIG}
-  nh.reserved:=SwapEndian(nh.reserved);
-  nh.restype:=SwapEndian(nh.restype);
-  nh.rescount:=SwapEndian(nh.rescount);
-  {$ENDIF}
   aStream.Position:=0;
   aStream.WriteBuffer(nh,sizeof(nh));
   addrcount:=sizeof(TNewHeader)+sizeof(TCurCursorDir)*fItemList.Count;
@@ -211,10 +192,6 @@ begin
   pci^.header.cursorId:=index;
   bytesinres:=curhdr.bytesincur;
   curoffset:=curhdr.curoffset;
-  {$IFDEF ENDIAN_BIG}
-  bytesinres:=SwapEndian(bytesinres);
-  curoffset:=SwapEndian(curoffset);
-  {$ENDIF}
   oldpos:=ItemData.Position;
   try
     ItemData.Position:=curoffset;
@@ -228,14 +205,6 @@ begin
   end;
   inc(bytesinres,4);       //in resources, cursor has 2 words more for hotspots
   pci^.header.bytesinres:=bytesinres;
-  {$IFDEF ENDIAN_BIG}
-  pci^.header.width:=SwapEndian(pci^.header.width);
-  pci^.header.height:=SwapEndian(pci^.header.height);
-  pci^.header.planes:=SwapEndian(pci^.header.planes);
-  pci^.header.bitcount:=SwapEndian(pci^.header.bitcount);
-  pci^.header.bytesinres:=SwapEndian(pci^.header.bytesinres);
-  pci^.header.cursorId:=SwapEndian(pci^.header.cursorId);
-  {$ENDIF}
   RawData.WriteBuffer(pci^.header,sizeof(TResCursorDir));
 end;
 
@@ -257,9 +226,6 @@ begin
   begin
     theid:=pci^.res.Name.ID;
     pci^.header.cursorId:=theid; //update header id value
-    {$IFDEF ENDIAN_BIG}
-    pci^.header.cursorId:=SwapEndian(pci^.header.cursorId);
-    {$ENDIF}
     //update id in rawdata (ItemStream, if present, is ok)
     if (fItemData=nil) or TResourceDataStream(ItemData).Cached then
     begin

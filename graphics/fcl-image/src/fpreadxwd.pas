@@ -74,14 +74,10 @@ implementation
 {$push}{$R-}
 function BEtoN(const AValue: DWord): DWord;
 begin
-  {$IFDEF ENDIAN_BIG}
-    Result := AValue;
-  {$ELSE}
     Result := (AValue shl 24)
            or ((AValue and $0000FF00) shl 8)
            or ((AValue and $00FF0000) shr 8)
            or (AValue shr 24);
-  {$ENDIF}
 end;
 {$pop}
 
@@ -228,9 +224,7 @@ begin
 
   Stream.Read(XWDFileHeader, SizeOf(TXWDFileHeader));
 
-{$ifdef ENDIAN_LITTLE}
   SwapXWDFileHeader(XWDFileHeader);
-{$endif}
 
   {****************************************************************************
     Now reads the window name
@@ -255,9 +249,7 @@ begin
   begin
     Stream.Read(XWDColors[i - 1], SizeOf(TXWDColor));
 
-    {$ifdef ENDIAN_LITTLE}
     SwapXWDColor(XWDColors[i - 1]);
-    {$endif}
 
     Color.red := XWDColors[i - 1].red;
     Color.green := XWDColors[i - 1].green;
@@ -290,9 +282,7 @@ var
   Header: TXWDFileHeader;
 begin
   stream.Read(Header, SizeOf(Header));
-  {$IFDEF ENDIAN_LITTLE}
   SwapXWDFileHeader(Header);
-  {$ENDIF}
   Result := Header.file_version = XWD_FILE_VERSION; // Just check magic number
 end;
 

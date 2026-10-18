@@ -193,9 +193,6 @@ begin
   tmpg:=tmpcol.g and $F8; tmpg:= tmpg shl 2;
   tmpr:=tmpcol.r and $F8; tmpr:= tmpr shl 7;
   tmpb:= tmpr or tmpg or tmpb;
-  {$IFDEF ENDIAN_BIG}
-  tmpb:=swap(tmpb);
-  {$ENDIF}
   Result:=tmpb;
 end;
 
@@ -212,9 +209,6 @@ begin
   tmpg:=tmpcol.g and $FC; tmpg:= tmpg shl 3;
   tmpr:=tmpcol.r and $F8; tmpr:= tmpr shl 8;
   tmpb:= tmpr or tmpg or tmpb;
-  {$IFDEF ENDIAN_BIG}
-  tmpb:=swap(tmpb);
-  {$ENDIF}
   Result:=tmpb;
 end;
 
@@ -278,17 +272,9 @@ begin
     bfReserved:=0;
     bfSize:=bfOffset+BFI.SizeImage;
     end;
-  {$IFDEF ENDIAN_BIG}
-  SwapBMPFileHeader(BFH);
-  SwapBMPInfoHeader(BFI);
-  {$ENDIF}
   StartPosition:=Stream.Position;
   Stream.WriteBuffer(bfh,sizeof(TBitMapFileHeader));
   Stream.WriteBuffer(bfi,sizeof(TBitMapInfoHeader));
-  {$IFDEF ENDIAN_BIG}
-  SwapBMPFileHeader(BFH);
-  SwapBMPInfoHeader(BFI);
-  {$ENDIF}
   Result:=true;
 end;
 

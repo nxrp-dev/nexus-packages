@@ -28,10 +28,6 @@
   {$mode DELPHI}{$H+}
 {$ENDIF FPC}
 
-{$IFNDEF FPC}
-  {$DEFINE ENDIAN_LITTLE}
-{$ENDIF !FPC}
-
 {$IFNDEF FPC_DOTTEDUNITS}
 unit collation_es;
 {$ENDIF FPC_DOTTEDUNITS}
@@ -150,11 +146,7 @@ const
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
   );
 
-{$ifdef ENDIAN_LITTLE}
   {$include collation_es_le.inc}
-{$else ENDIAN_LITTLE}
-  {$include collation_es_be.inc}
-{$endif ENDIAN_LITTLE}
 var
   CLDR_Collation : TUCA_DataBook = (
     Base               : nil;

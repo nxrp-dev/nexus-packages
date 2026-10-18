@@ -79,10 +79,8 @@ begin
   Result:=Stream.Read(QoiHeader,n)=n;
   if Result then
     begin
-   {$IFDEF ENDIAN_LITTLE}
     QoiHeader.width:=SwapEndian(QoiHeader.width);
     QoiHeader.height:=SwapEndian(QoiHeader.height);
-   {$ENDIF}
     Result := (QoiHeader.magic = 'qoif'); // Just check magic number
     end;
 end;

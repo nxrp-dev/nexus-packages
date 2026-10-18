@@ -265,7 +265,7 @@ procedure TFPWriterTiff.WriteHeader;
 var
   EndianMark: AnsiString;
 begin
-  EndianMark:={$IFDEF FPC_BIG_ENDIAN}'MM'{$ELSE}'II'{$ENDIF};
+  EndianMark:='II';
   WriteBuf(EndianMark[1],2);
   WriteWord(42);
   WriteDWord(8);

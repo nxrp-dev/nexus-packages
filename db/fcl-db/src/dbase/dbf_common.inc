@@ -173,7 +173,6 @@
 
   {$define SUPPORT_VARIANTS}
   {$define WINDOWS}
-  {$define ENDIAN_LITTLE}
 
 {$ifdef DELPHI_4}
 
@@ -272,9 +271,4 @@
 
 {$ENDIF WINDOWS}
 
-{$ifndef ENDIAN_LITTLE}
-{$ifndef ENDIAN_BIG}
-{$error Neither ENDIAN_LITTLE nor ENDIAN_BIG defined!}
-{$endif}
-{$endif}
 

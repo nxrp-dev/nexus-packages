@@ -32,11 +32,7 @@ uses
 {$ENDIF FPC_DOTTEDUNITS}
 
 const
-{$ifdef FPC_LITTLE_ENDIAN}
   utf16_encoding = 'UTF-16LE';
-{$else  FPC_LITTLE_ENDIAN}
-  utf16_encoding = 'UTF-16BE';
-{$endif  FPC_LITTLE_ENDIAN}
 
 function Iconv_Decode(AContext: Pointer; AInBuf: PAnsiChar;
   var AInCount: Cardinal; AOutBuf: PWideChar;

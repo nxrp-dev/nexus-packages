@@ -68,16 +68,10 @@ begin
     on e : EReadError do exit;
   end;
 
-  {$IFDEF ENDIAN_BIG}
-  w:=SwapEndian(w);
-  {$ENDIF}
   Result:=w=$5A4D; //MZ
   if not Result then exit;
   aStream.Position:=PESignatureOffset;
   aStream.ReadBuffer(lw,4);
-  {$IFDEF ENDIAN_BIG}
-  lw:=SwapEndian(lw);
-  {$ENDIF}
   aStream.Position:=lw;
 end;
 
@@ -85,9 +79,6 @@ function TWinPEImageResourceReader.CheckPESignature(aStream: TStream): boolean;
 var lw : longword;
 begin
   aStream.ReadBuffer(lw,4);
-  {$IFDEF ENDIAN_BIG}
-  lw:=SwapEndian(lw);
-  {$ENDIF}
   Result:=lw=$00004550; //PE#0#0
 end;
 

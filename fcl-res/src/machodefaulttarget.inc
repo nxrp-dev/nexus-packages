@@ -35,11 +35,6 @@
   fBits:=MACH_64BIT;
   {$ENDIF}
 
-  {$IFDEF ENDIAN_BIG}
-  fNativeEndianess:=MACH_BIG_ENDIAN;
-  {$ELSE}
-  fNativeEndianess:=MACH_LITTLE_ENDIAN;
-  {$ENDIF}
-  fEndianess:=fNativeEndianess;
+  fEndianess:=MACH_LITTLE_ENDIAN;
   fOppositeEndianess:=false;
 

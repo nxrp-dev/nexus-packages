@@ -681,7 +681,7 @@ begin
             then exit
             else TiffError('ByteOrder expected II or MM');
 
-  FReverseEndian:={$ifdef FPC_BIG_ENDIAN}not{$endif} BigEndian;
+  FReverseEndian:= BigEndian;
   {$ifdef FPC_Debug_Image}
   if Debug then
     writeln('TFPReaderTiff.ReadTiffHeader Endian Big=',BigEndian,' ReverseEndian=',FReverseEndian);
@@ -2480,7 +2480,7 @@ var
     else
       exit;
 
-    lReverseEndian := {$ifdef FPC_BIG_ENDIAN}not{$endif} BigEndian;
+    lReverseEndian :=  BigEndian;
     lBigTiff := false;
 
     if lReverseEndian then

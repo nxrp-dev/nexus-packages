@@ -38,14 +38,7 @@
   fBits:=ELFCLASS64;
   {$ENDIF}
 
-  fNativeOrder:=ELFDATANONE;
-  {$IFDEF ENDIAN_LITTLE}
-  fNativeOrder:=ELFDATA2LSB;
-  {$ENDIF}
-  {$IFDEF ENDIAN_BIG}
-  fNativeOrder:=ELFDATA2MSB;
-  {$ENDIF}
-  fOrder:=fNativeOrder;
+  fOrder:=ELFDATA2LSB;
 
   fOppositeEndianess:=false;
 

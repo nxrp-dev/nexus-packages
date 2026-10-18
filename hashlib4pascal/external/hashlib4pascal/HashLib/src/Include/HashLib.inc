@@ -46,7 +46,6 @@
 
   {============================= CPU Architecture =============================}
 
-  {$DEFINE HASHLIB_LITTLE_ENDIAN}
 
   {$IFDEF CPUARM}
     {$DEFINE HASHLIB_REQUIRES_PROPER_ALIGNMENT}
@@ -61,20 +60,16 @@
   // indicate CPU386 is defined alongside CPU64BITS on a 64-bit target.
   {$IF DEFINED(CPUX86) OR (DEFINED(CPU386) AND NOT DEFINED(CPU64BITS))}
     {$DEFINE HASHLIB_I386}
-    {$IFDEF HASHLIB_LITTLE_ENDIAN}
       {$IFDEF MSWINDOWS}
         {$DEFINE HASHLIB_I386_ASM}
       {$ENDIF}
-    {$ENDIF}
   {$IFEND}
 
   {$IFDEF CPUX64}
     {$DEFINE HASHLIB_X86_64}
-    {$IFDEF HASHLIB_LITTLE_ENDIAN}
       {$IFDEF MSWINDOWS}
         {$DEFINE HASHLIB_X86_64_ASM}
       {$ENDIF}
-    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF CPUARM32}
@@ -113,7 +108,7 @@
 
 {========================== Common Feature Detection ==========================}
 
-{$IF DEFINED(HASHLIB_LITTLE_ENDIAN) AND NOT DEFINED(HASHLIB_REQUIRES_PROPER_ALIGNMENT)}
+{$IFNDEF HASHLIB_REQUIRES_PROPER_ALIGNMENT}
   {$DEFINE HASHLIB_HAS_FAST_UNALIGNED_ACCESS_LE}
 {$IFEND}
 

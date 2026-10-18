@@ -47,7 +47,6 @@ type
     fMachineType : TElfMachineType;
     fOrder : byte;
     fBits : byte;
-    fNativeOrder : integer;
     fOppositeEndianess : boolean;
     procedure SetDefaultTarget;
     function ReadElfIdent(aStream : TStream) : boolean;
@@ -248,7 +247,7 @@ begin
 
   if ident.Magic<>ELFMAGIC then exit;
   fBits:=ident.ElfClass;
-  fOppositeEndianess:=ident.ElfData<>fNativeOrder;
+  fOppositeEndianess:=ident.ElfData<>ELFDATA2LSB;
   fOrder:=ident.ElfData;
   if ident.ElfVersion<>EV_CURRENT then exit;
 

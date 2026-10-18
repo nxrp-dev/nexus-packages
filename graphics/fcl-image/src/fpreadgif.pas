@@ -207,13 +207,6 @@ begin
     if not ContProgress then exit;
 
     // Endian Fix Mantis 8541. Gif is always little endian
-    {$IFDEF ENDIAN_BIG}
-      with FHeader do
-        begin
-          ScreenWidth := LEtoN(ScreenWidth);
-          ScreenHeight := LEtoN(ScreenHeight);
-        end;
-    {$ENDIF}
     // global palette
     if (FHeader.Packedbit and $80) <> 0 then
     begin
@@ -231,15 +224,6 @@ begin
 
     // descriptor
     Stream.Read(FDescriptor, SizeOf(FDescriptor));
-    {$IFDEF ENDIAN_BIG}
-      with FDescriptor do
-        begin
-          Left := LEtoN(Left);
-          Top := LEtoN(Top);
-          Width := LEtoN(Width);
-          Height := LEtoN(Height);
-        end;
-    {$ENDIF}
     // local palette
     if (FDescriptor.Packedbit and $80) <> 0 then
     begin
@@ -338,10 +322,6 @@ begin
   Stream.Read(descr, SizeOf(descr));
   with descr do
   begin
-   {$IFDEF ENDIAN_BIG}
-    Width := LEtoN(Width);
-    Height := LEtoN(Height);
-   {$ENDIF}
     Result.X := Width;
     Result.Y := Height;
   end;

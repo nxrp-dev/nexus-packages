@@ -154,9 +154,6 @@ function TFPReaderBMP.ExpandColor(value : longword) : TFPColor;
 var tmpr, tmpg, tmpb : longword;
     col : TColorRGB;
 begin
-  {$IFDEF ENDIAN_BIG}
-  value:=swap(value);
-  {$ENDIF}
   tmpr:=value and RedMask;
   tmpg:=value and GreenMask;
   tmpb:=value and BlueMask;
@@ -187,11 +184,6 @@ begin
     Stream.Read(RedMask,4);
     Stream.Read(GreenMask,4);
     Stream.Read(BlueMask,4);
-    {$IFDEF ENDIAN_BIG}
-    RedMask:=swap(RedMask);
-    GreenMask:=swap(GreenMask);
-    BlueMask:=swap(BlueMask);
-    {$ENDIF}
     RedShift:=ShiftCount(RedMask);
     GreenShift:=ShiftCount(GreenMask);
     BlueShift:=ShiftCount(BlueMask);
@@ -510,9 +502,6 @@ begin
   n:=SizeOf(lBFH);
   if Stream.Read(lBFH,n)<>n then
     exit;
-  {$IFDEF ENDIAN_BIG}
-  SwapBMPFileHeader(lBFH);
-  {$ENDIF}
   if lBFH.bfType<>BMmagic then
     exit;
   if lBFH.bfReserved<>0 then
@@ -520,9 +509,6 @@ begin
   n:=SizeOf(BFI);
   if Stream.Read(BFI,n)<>n then
     exit;
-  {$IFDEF ENDIAN_BIG}
-  SwapBMPInfoHeader(BFI);
-  {$ENDIF}
   if not (BFI.Size in [12, 40, 52, 56, 108, 124]) then
     exit;
   if not (BFI.BitCount in [1, 4, 8, 16, 24, 32]) then
@@ -545,14 +531,10 @@ begin
   try
     n := Stream.Read(fileHdr, SizeOf(fileHdr));
     if n <> SizeOf(fileHdr) then exit;
-    if {$IFDEF ENDIAN_BIG}swap(fileHdr.bfType){$ELSE}fileHdr.bfType{$ENDIF} <> BMmagic then exit;
+    if fileHdr.bfType <> BMmagic then exit;
     n := Stream.Read(infoHdr, SizeOf(infoHdr));
     if n <> SizeOf(infoHdr) then exit;
-    {$IFDEF ENDIAN_BIG}
-    Result := Point(swap(infoHdr.Width), swap(infoHdr.Height));
-    {$ELSE}
     Result := Point(infoHdr.Width, infoHdr.Height);
-    {$ENDIF}
   finally
     Stream.Position := StartPos;
   end;

@@ -148,11 +148,7 @@ begin
 {$IFDEF FPC}
   Result := LEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := AValue;
-  {$ELSE}
-  Result := TBitOperations.ReverseBytesUInt16(AValue);
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -161,11 +157,7 @@ begin
 {$IFDEF FPC}
   Result := LEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := AValue;
-  {$ELSE}
-  Result := TBitOperations.ReverseBytesUInt32(AValue);
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -174,11 +166,7 @@ begin
 {$IFDEF FPC}
   Result := LEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := AValue;
-  {$ELSE}
-  Result := TBitOperations.ReverseBytesUInt64(AValue);
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -187,11 +175,7 @@ begin
 {$IFDEF FPC}
   Result := BEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := TBitOperations.ReverseBytesUInt16(AValue);
-  {$ELSE}
-  Result := AValue;
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -200,11 +184,7 @@ begin
 {$IFDEF FPC}
   Result := BEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := TBitOperations.ReverseBytesUInt32(AValue);
-  {$ELSE}
-  Result := AValue;
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -213,11 +193,7 @@ begin
 {$IFDEF FPC}
   Result := BEtoN(AValue);
 {$ELSE}
-  {$IFDEF HASHLIB_LITTLE_ENDIAN}
   Result := TBitOperations.ReverseBytesUInt64(AValue);
-  {$ELSE}
-  Result := AValue;
-  {$ENDIF HASHLIB_LITTLE_ENDIAN}
 {$ENDIF FPC}
 end;
 
@@ -352,45 +328,27 @@ end;
 class procedure TBinaryPrimitives.CopyUInt32LittleEndian(ASource: Pointer; ASourceIndex: Integer;
   ADestination: Pointer; ADestinationIndex: Integer; ASize: Integer);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   Move(Pointer(PByte(ASource) + ASourceIndex)^,
     Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-{$ELSE}
-  SwapCopyUInt32(ASource, ASourceIndex, ADestination, ADestinationIndex, ASize);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.CopyUInt32BigEndian(ASource: Pointer; ASourceIndex: Integer;
   ADestination: Pointer; ADestinationIndex: Integer; ASize: Integer);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   SwapCopyUInt32(ASource, ASourceIndex, ADestination, ADestinationIndex, ASize);
-{$ELSE}
-  Move(Pointer(PByte(ASource) + ASourceIndex)^,
-    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.CopyUInt64LittleEndian(ASource: Pointer; ASourceIndex: Integer;
   ADestination: Pointer; ADestinationIndex: Integer; ASize: Integer);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   Move(Pointer(PByte(ASource) + ASourceIndex)^,
     Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-{$ELSE}
-  SwapCopyUInt64(ASource, ASourceIndex, ADestination, ADestinationIndex, ASize);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.CopyUInt64BigEndian(ASource: Pointer; ASourceIndex: Integer;
   ADestination: Pointer; ADestinationIndex: Integer; ASize: Integer);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   SwapCopyUInt64(ASource, ASourceIndex, ADestination, ADestinationIndex, ASize);
-{$ELSE}
-  Move(Pointer(PByte(ASource) + ASourceIndex)^,
-    Pointer(PByte(ADestination) + ADestinationIndex)^, ASize);
-{$ENDIF}
 end;
 
 // ============================================================================
@@ -429,67 +387,35 @@ end;
 
 class procedure TBinaryPrimitives.WriteUInt16LEAt(AOutput: PByte; AOffset: Integer; AValue: UInt16);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   StoreUInt16(PWord(AOutput + AOffset), AValue);
-{$ELSE}
-  AOutput[AOffset]     := Byte(AValue);
-  AOutput[AOffset + 1] := Byte(AValue shr 8);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.WriteUInt16BEAt(AOutput: PByte; AOffset: Integer; AValue: UInt16);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   AOutput[AOffset]     := Byte(AValue shr 8);
   AOutput[AOffset + 1] := Byte(AValue);
-{$ELSE}
-  StoreUInt16(PWord(AOutput + AOffset), AValue);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.WriteUInt32LEAt(AOutput: PByte; AOffset: Integer; AValue: UInt32);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   StoreUInt32(PCardinal(AOutput + AOffset), AValue);
-{$ELSE}
-  AOutput[AOffset]     := Byte(AValue);
-  AOutput[AOffset + 1] := Byte(AValue shr 8);
-  AOutput[AOffset + 2] := Byte(AValue shr 16);
-  AOutput[AOffset + 3] := Byte(AValue shr 24);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.WriteUInt32BEAt(AOutput: PByte; AOffset: Integer; AValue: UInt32);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   AOutput[AOffset]     := Byte(AValue shr 24);
   AOutput[AOffset + 1] := Byte(AValue shr 16);
   AOutput[AOffset + 2] := Byte(AValue shr 8);
   AOutput[AOffset + 3] := Byte(AValue);
-{$ELSE}
-  StoreUInt32(PCardinal(AOutput + AOffset), AValue);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.WriteUInt64LEAt(AOutput: PByte; AOffset: Integer; AValue: UInt64);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   StoreUInt64(PUInt64(AOutput + AOffset), AValue);
-{$ELSE}
-  AOutput[AOffset]     := Byte(AValue);
-  AOutput[AOffset + 1] := Byte(AValue shr 8);
-  AOutput[AOffset + 2] := Byte(AValue shr 16);
-  AOutput[AOffset + 3] := Byte(AValue shr 24);
-  AOutput[AOffset + 4] := Byte(AValue shr 32);
-  AOutput[AOffset + 5] := Byte(AValue shr 40);
-  AOutput[AOffset + 6] := Byte(AValue shr 48);
-  AOutput[AOffset + 7] := Byte(AValue shr 56);
-{$ENDIF}
 end;
 
 class procedure TBinaryPrimitives.WriteUInt64BEAt(AOutput: PByte; AOffset: Integer; AValue: UInt64);
 begin
-{$IFDEF HASHLIB_LITTLE_ENDIAN}
   AOutput[AOffset]     := Byte(AValue shr 56);
   AOutput[AOffset + 1] := Byte(AValue shr 48);
   AOutput[AOffset + 2] := Byte(AValue shr 40);
@@ -498,9 +424,6 @@ begin
   AOutput[AOffset + 5] := Byte(AValue shr 16);
   AOutput[AOffset + 6] := Byte(AValue shr 8);
   AOutput[AOffset + 7] := Byte(AValue);
-{$ELSE}
-  StoreUInt64(PUInt64(AOutput + AOffset), AValue);
-{$ENDIF}
 end;
 
 // ============================================================================

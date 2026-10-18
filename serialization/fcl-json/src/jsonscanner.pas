@@ -735,10 +735,10 @@ end;
 
 function TJSONScanner.RecognizeKeyword(Sp: PAnsiChar; N: SizeInt): TJSONToken;
 const
-  U32Byte0Shift = {$ifdef ENDIAN_BIG} 24 {$else} 0 {$endif};
-  U32Byte1Shift = {$ifdef ENDIAN_BIG} 16 {$else} 8 {$endif};
-  U32Byte2Shift = {$ifdef ENDIAN_BIG} 8 {$else} 16 {$endif};
-  U32Byte3Shift = {$ifdef ENDIAN_BIG} 0 {$else} 24 {$endif};
+  U32Byte0Shift =  0 ;
+  U32Byte1Shift =  8 ;
+  U32Byte2Shift =  16 ;
+  U32Byte3Shift =  24 ;
 var
   sample: uint32;
 begin

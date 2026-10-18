@@ -76,20 +76,16 @@ begin
       //writeln('Save width ',width, '   height  ', height);
     end;
 
-  {$IFDEF ENDIAN_LITTLE}
   QoiHeader.width:=SwapEndian(QoiHeader.width);
   QoiHeader.height:=SwapEndian(QoiHeader.height);
-  {$ENDIF}
 
   //writeln('Save width 2 ',QoiHeader.width, '   height  ', QoiHeader.height);
   try
     Stream.WriteBuffer(QoiHeader,sizeof(TQoiHeader));
   finally
 
-  {$IFDEF ENDIAN_LITTLE}
   QoiHeader.width:=SwapEndian(QoiHeader.width);
   QoiHeader.height:=SwapEndian(QoiHeader.height);
-  {$ENDIF}
   end;
   Result:=true;
 end;

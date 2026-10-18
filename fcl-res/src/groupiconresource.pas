@@ -85,9 +85,6 @@ begin
     pii^.header.offsetId:=0;
     RawData.ReadBuffer(pii^.header,sizeof(TIconDir)-2);
     offsetid:=pii^.header.offsetId;
-    {$IFDEF ENDIAN_BIG}
-    offsetId:=SwapEndian(offsetId);
-    {$ENDIF}
     res:=OwnerList.Find(RT_ICON,offsetID,LangID);
     pii^.res:=res;
     SetChildOwner(res);
@@ -106,9 +103,6 @@ begin
   pii:=PIconInfo(fItemList[index]);
   hdr:=pii^.header;
   hdr.offsetId:=start;
-  {$IFDEF ENDIAN_BIG}
-  hdr.offsetId:=SwapEndian(hdr.offsetId);
-  {$ENDIF}
   aStream.WriteBuffer(hdr,sizeof(hdr));
   Result:=start+pii^.res.RawData.Size;
 end;
@@ -122,11 +116,6 @@ begin
   nh.reserved:=0;
   nh.restype:=RES_ICON;
   nh.rescount:=fItemList.Count;
-  {$IFDEF ENDIAN_BIG}
-  nh.reserved:=SwapEndian(nh.reserved);
-  nh.restype:=SwapEndian(nh.restype);
-  nh.rescount:=SwapEndian(nh.rescount);
-  {$ENDIF}
   aStream.Position:=0;
   aStream.WriteBuffer(nh,sizeof(nh));
   addrcount:=sizeof(TNewHeader)+sizeof(TIconDir)*fItemList.Count;
@@ -186,10 +175,6 @@ begin
   ItemData.ReadBuffer(pii^.header,sizeof(TIconDir));
   bytesinres:=pii^.header.bytesinres;
   offsetid:=pii^.header.offsetid;
-  {$IFDEF ENDIAN_BIG}
-  bytesinres:=SwapEndian(bytesinres);
-  offsetID:=SwapEndian(offsetID);
-  {$ENDIF}
   oldpos:=ItemData.Position;
   try
     ItemData.Position:=offsetid;
@@ -200,9 +185,6 @@ begin
     ItemData.Position:=oldpos;
   end;
   pii^.header.offsetId:=index;
-  {$IFDEF ENDIAN_BIG}
-  pii^.header.offsetID:=SwapEndian(pii^.header.offsetID);
-  {$ENDIF}
    //TIconDir is slightly different in resources and in .ico files
   RawData.WriteBuffer(pii^.header,sizeof(TIconDir)-2);
 end;
@@ -225,9 +207,6 @@ begin
   begin
     theid:=pii^.res.Name.ID;
     pii^.header.offsetId:=theid; //update header id value
-    {$IFDEF ENDIAN_BIG}
-    pii^.header.offsetID:=SwapEndian(pii^.header.offsetID);
-    {$ENDIF}
     //update id in rawdata (ItemStream, if present, is ok)
     if (fItemData=nil) or TResourceDataStream(ItemData).Cached then
     begin

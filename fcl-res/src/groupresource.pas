@@ -100,11 +100,6 @@ begin
   RawData.Position:=0;
   if RawData.Read(nh,sizeof(nh))<>sizeof(nh) then
     exit;
-  {$IFDEF ENDIAN_BIG}
-  nh.reserved:=SwapEndian(nh.reserved);
-  nh.restype:=SwapEndian(nh.restype);
-  nh.rescount:=SwapEndian(nh.rescount);
-  {$ENDIF}
   for i:=1 to nh.rescount do
     ReadResourceItemHeader;
 end;
@@ -132,9 +127,6 @@ begin
   RawData.Position:=0;
   RawData.WriteBuffer(nh,sizeof(nh));
   Result:=nh.rescount;
-  {$IFDEF ENDIAN_BIG}
-  Result:=SwapEndian(Result);
-  {$ENDIF}
 end;
 
 procedure TGroupResource.CreateSubItems;

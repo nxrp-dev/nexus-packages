@@ -734,12 +734,7 @@ begin
       ffi_call(@ffidata.CIF, ffi_fn(aCodeAddress), ffidata.ResultValue, @ffidata.Values[0]);
     if ffidata.ResultNeedsCopy then
     begin
-      {$ifdef ENDIAN_BIG}
-      Move((PByte(@ffidata.ResultBuffer) + SizeOf(ffi_arg) - ffidata.ResultType^.size)^,
-        aResultValue^, ffidata.ResultType^.size);
-      {$else}
       Move(ffidata.ResultBuffer, aResultValue^, ffidata.ResultType^.size);
-      {$endif}
     end;
     arginfos := Nil;
     argvalues := Nil;

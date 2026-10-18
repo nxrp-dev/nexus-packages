@@ -643,7 +643,7 @@ begin
   FLineNo := 1;
   if FAssumeUTF16 then
     begin
-    FFixedUCS2 := {$IFNDEF ENDIAN_BIG} 'UTF-16BE' {$ELSE} 'UTF-16LE' {$ENDIF};
+    FFixedUCS2 :=  'UTF-16BE' ;
     FDecoder.Decode := @Decode_UCS2;
     end
   else
@@ -655,12 +655,12 @@ begin
     if (FCharBuf[0] = #$FE) and (FCharBuf[1] = #$FF) then
     begin
       FFixedUCS2 := 'UTF-16BE';
-      FDecoder.Decode := {$IFNDEF ENDIAN_BIG} @Decode_UCS2_Swapped {$ELSE} @Decode_UCS2 {$ENDIF};
+      FDecoder.Decode :=  @Decode_UCS2_Swapped ;
     end
     else if (FCharBuf[0] = #$FF) and (FCharBuf[1] = #$FE) then
     begin
       FFixedUCS2 := 'UTF-16LE';
-      FDecoder.Decode := {$IFDEF ENDIAN_BIG} @Decode_UCS2_Swapped {$ELSE} @Decode_UCS2 {$ENDIF};
+      FDecoder.Decode :=  @Decode_UCS2 ;
     end;
   end;
   FBufSize := 6;             //  possible BOM and '<?xml'

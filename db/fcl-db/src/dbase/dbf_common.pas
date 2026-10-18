@@ -294,20 +294,12 @@ end;
 // Utility routines
 //====================================================================
 
-{$ifdef ENDIAN_LITTLE}
 function SwapWordBE(const Value: word): word;
-{$else}
-function SwapWordLE(const Value: word): word;
-{$endif}
 begin
   Result := ((Value and $FF) shl 8) or ((Value shr 8) and $FF);
 end;
 
-{$ifdef ENDIAN_LITTLE}
 function SwapWordLE(const Value: word): word;
-{$else}
-function SwapWordBE(const Value: word): word;
-{$endif}
 begin
   Result := Value;
 end;

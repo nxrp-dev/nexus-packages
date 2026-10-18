@@ -100,12 +100,6 @@ begin
   bmphdr.FileSize:=aStream.Size+hdrsize;
   bmphdr.Reserved:=0;
   bmphdr.DataOffset:=CalcDataOffset(aStream);
-  {$IFDEF ENDIAN_BIG}
-  bmphdr.Magic:=SwapEndian(bmphdr.Magic);
-  bmphdr.FileSize:=SwapEndian(bmphdr.FileSize);
-  bmphdr.Reserved:=SwapEndian(bmphdr.Reserved);
-  bmphdr.DataOffset:=SwapEndian(bmphdr.DataOffset);
-  {$ENDIF}
   fHeader.Position:=0;
   fHeader.WriteBuffer(bmphdr,hdrsize);
 end;
@@ -129,12 +123,6 @@ begin
   aStream.ReadBuffer(compression,4);
   aStream.Seek(12,soFromCurrent);
   aStream.ReadBuffer(clrused,4);
-  {$IFDEF ENDIAN_BIG}
-  infohdrsize:=SwapEndian(infohdrsize);
-  bitcount:=SwapEndian(bitcount);
-  compression:=SwapEndian(compression);
-  clrused:=SwapEndian(clrused);
-  {$ENDIF}
   aStream.Position:=oldpos;
   palentries:=0;
   if ((compression=BI_BITFIELDS) and (bitcount in [16,32]) and (infohdrsize=40)) then
