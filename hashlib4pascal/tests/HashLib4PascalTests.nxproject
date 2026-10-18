@@ -6,7 +6,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project HashLib4PascalTests {
     RootDirectory: "../../../..";
-    OutputRoot: "output/HashLib4PascalTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/HashLib4PascalTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/hashlib4pascal/tests/HashLib4PascalTests.lpr"];

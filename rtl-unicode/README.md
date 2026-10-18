@@ -15,17 +15,17 @@ interchangeable. The package does not participate in compiler bootstrap.
 
 Set `RTLUnicode.Build.Config.nxscript` to the selected compiler, matching RTL,
 text mode and output directory. The default takes the native ANSI compiler/RTL
-from the Nexus environment. The RTL must include this restoration's
+from the Nexus environment, and generated output uses `Tools.OutputRoot`. The RTL must include this restoration's
 `unicodedata.PrepareCollation` upper-bound correction; verification used rebuilt
 RTLs in isolated output directories rather than modifying an installed SDK.
 
 From the Nexus root on native Linux:
 
 ```sh
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/RTLUnicode.nxpackage
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/tests/RTLUnicodeTests.nxproject
-cp packages/nexus-packages/rtl-unicode/tests/data/Unicode17.zip output/rtl-unicode/ansi/tests/
-output/rtl-unicode/ansi/tests/RTLUnicodeTests
+../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/RTLUnicode.nxpackage
+../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/tests/RTLUnicodeTests.nxproject
+cp packages/nexus-packages/rtl-unicode/tests/data/Unicode17.zip ../../worktree/nexus/rtl-unicode/ansi/tests/
+../../worktree/nexus/rtl-unicode/ansi/tests/RTLUnicodeTests
 ```
 
 For Unicode defaults choose `TextMode: "UNICODESTRINGS"`, the corresponding RTL
@@ -43,11 +43,11 @@ memory; the tests create no expanded fixture files.
 The original three collation programs also have an explicit package recipe:
 
 ```sh
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/tests/CollationConformance.nxproject
-cp ../nexus-fpc/tests/test/units/fpwidestring/CollationTests.zip output/rtl-unicode/ansi/collation/
-output/rtl-unicode/ansi/collation/tuca1
-output/rtl-unicode/ansi/collation/tuca2
-output/rtl-unicode/ansi/collation/tucawsm
+../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/tests/CollationConformance.nxproject
+cp ../nexus-fpc/tests/test/units/fpwidestring/CollationTests.zip ../../worktree/nexus/rtl-unicode/ansi/collation/
+../../worktree/nexus/rtl-unicode/ansi/collation/tuca1
+../../worktree/nexus/rtl-unicode/ansi/collation/tuca2
+../../worktree/nexus/rtl-unicode/ansi/collation/tucawsm
 ```
 
 Their original archive stays in one FPC test location. Both members are extracted

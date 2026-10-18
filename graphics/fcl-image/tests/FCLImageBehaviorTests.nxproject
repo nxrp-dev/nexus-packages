@@ -6,7 +6,7 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLImageBehaviorTests {
     RootDirectory: "../../../../..";
-    OutputRoot: "output/fcl-image-tests/" + @Tools.Native.Name + "/behavior";
+    OutputRoot: @Tools.OutputRoot + "/fcl-image-tests/" + @Tools.Native.Name + "/behavior";
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: [

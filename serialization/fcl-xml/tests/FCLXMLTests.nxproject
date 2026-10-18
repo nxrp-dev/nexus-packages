@@ -7,7 +7,7 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLXMLTests {
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
-    OutputRoot: "output/fcl-xml-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/fcl-xml-tests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;

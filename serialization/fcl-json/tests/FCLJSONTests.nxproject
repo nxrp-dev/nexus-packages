@@ -7,7 +7,7 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLJSONTests {
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
-    OutputRoot: "output/fcl-json-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/fcl-json-tests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;

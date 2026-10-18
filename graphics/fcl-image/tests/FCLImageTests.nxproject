@@ -7,7 +7,7 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLImageTests {
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
-    OutputRoot: "output/fcl-image-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/fcl-image-tests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;

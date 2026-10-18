@@ -6,7 +6,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project LibFFITests {
     RootDirectory: "../../../..";
-    OutputRoot: "../../worktree/libffi-relocation/tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/libffi-tests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         RawOptions: ["-Cr", "-Co", "-gl"];

@@ -6,7 +6,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLResTests {
     RootDirectory: "../../../..";
-    OutputRoot: "output/fcl-res-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/fcl-res-tests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/fcl-res/tests/FCLResTests.lpr"];
