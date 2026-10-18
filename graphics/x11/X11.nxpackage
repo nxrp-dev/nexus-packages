@@ -1,0 +1,69 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Package X11 {
+    RootDirectory: "../../../..";
+    SourceRoot: "packages/nexus-packages/graphics/x11";
+    OutputRoot: "output/nxbuild-x11/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @X11.SourceRoot + "/src/cursorfont.pas",
+            @X11.SourceRoot + "/src/deckeysym.pas",
+            @X11.SourceRoot + "/src/dpms.pas",
+            @X11.SourceRoot + "/src/fontconfig.pas",
+            @X11.SourceRoot + "/src/hpkeysym.pas",
+            @X11.SourceRoot + "/src/keysym.pas",
+            @X11.SourceRoot + "/src/mitmisc.pas",
+            @X11.SourceRoot + "/src/multibuf.pas",
+            @X11.SourceRoot + "/src/security.pas",
+            @X11.SourceRoot + "/src/shape.pas",
+            @X11.SourceRoot + "/src/sunkeysym.pas",
+            @X11.SourceRoot + "/src/sync.pas",
+            @X11.SourceRoot + "/src/tpX11Libraries.pas",
+            @X11.SourceRoot + "/src/x.pas",
+            @X11.SourceRoot + "/src/xag.pas",
+            @X11.SourceRoot + "/src/xatom.pas",
+            @X11.SourceRoot + "/src/xcms.pas",
+            @X11.SourceRoot + "/src/xcup.pas",
+            @X11.SourceRoot + "/src/xdbe.pas",
+            @X11.SourceRoot + "/src/xevi.pas",
+            @X11.SourceRoot + "/src/xext.pas",
+            @X11.SourceRoot + "/src/xf86dga.pas",
+            @X11.SourceRoot + "/src/xf86keysym.pas",
+            @X11.SourceRoot + "/src/xf86vmode.pas",
+            @X11.SourceRoot + "/src/xfixes.pas",
+            @X11.SourceRoot + "/src/xft.pas",
+            @X11.SourceRoot + "/src/xge.pas",
+            @X11.SourceRoot + "/src/xi.pas",
+            @X11.SourceRoot + "/src/xi2.pas",
+            @X11.SourceRoot + "/src/xinerama.pas",
+            @X11.SourceRoot + "/src/xinput.pas",
+            @X11.SourceRoot + "/src/xinput2.pas",
+            @X11.SourceRoot + "/src/xkb.pas",
+            @X11.SourceRoot + "/src/xkblib.pas",
+            @X11.SourceRoot + "/src/xlbx.pas",
+            @X11.SourceRoot + "/src/xlib.pas",
+            @X11.SourceRoot + "/src/xmd.pas",
+            @X11.SourceRoot + "/src/xrandr.pas",
+            @X11.SourceRoot + "/src/xrender.pas",
+            @X11.SourceRoot + "/src/xresource.pas",
+            @X11.SourceRoot + "/src/xshm.pas",
+            @X11.SourceRoot + "/src/xtestext1.pas",
+            @X11.SourceRoot + "/src/xutil.pas",
+            @X11.SourceRoot + "/src/xv.pas",
+            @X11.SourceRoot + "/src/xvlib.pas"
+        ];
+        OutputPath: @X11.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: FPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, @X11.SourceRoot + "/src"];
+            IncludePaths: [@X11.SourceRoot + "/src"];
+        }
+    }
+}

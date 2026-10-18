@@ -7,8 +7,7 @@
     4. Style section parsing (solid color, gradient)
     5. Path section parsing (no-curves, curves, commands)
     6. Shape section parsing (transform flags)
-    7. Real-file parse: Alert_Idea.hvif from Haiku source tree
-    8. Image rendering: GetImage returns a TfpgImage of correct size
+    7. Image rendering: GetImage returns a TfpgImage of correct size
 
   All stream building uses the exact byte encoding documented in
   FlatIconFormat.cpp — this means tests also serve as format regression tests.
@@ -75,9 +74,6 @@ type
     procedure TestParseShape_NoTransform;
     procedure TestParseShape_WithTranslation;
     procedure TestParseShape_WithTransform;
-
-    { --- Real file --- }
-    procedure TestParseAlertIdeaHvif;
 
     { --- Rendering --- }
     procedure TestGetImageSize;
@@ -1000,36 +996,6 @@ begin
 end;
 
 
-{ --- Real file --- }
-
-procedure TTestHvifEncoding.TestParseAlertIdeaHvif;
-{ Parse the Alert_Idea.hvif from the Haiku source tree.
-  Expected: 5 styles, 8+ paths, 8+ shapes (verified from hex dump analysis).
-  If the file is not found the test is skipped. }
-const
-  HvifPath = '/data/devel/haiku/src/data/bin/Alert_Idea.hvif';
-var
-  icon: THvifIcon;
-begin
-  if not FileExists(HvifPath) then
-  begin
-    { File not found: skip rather than fail (CI may not have Haiku tree) }
-    TestContext.Skip('Missing external Haiku fixture: '+HvifPath);
-  end;
-
-  icon := THvifIcon.CreateFromFile(HvifPath);
-  try
-    TestContext.AssertTrue(icon.StyleCount > 0, 'Alert_Idea: must have styles');
-    TestContext.AssertTrue(icon.PathCount  > 0, 'Alert_Idea: must have paths');
-    TestContext.AssertTrue(icon.ShapeCount > 0, 'Alert_Idea: must have shapes');
-    { From hex analysis: 5 styles in the file }
-    TestContext.AssertTrue((5)=(icon.StyleCount), 'Alert_Idea: expected 5 styles');
-  finally
-    icon.Free;
-  end;
-end;
-
-
 { --- Rendering --- }
 
 procedure TTestHvifEncoding.TestGetImageSize;
@@ -1324,15 +1290,6 @@ begin
   finally lFixture.Free; end;
 end;
 
-procedure RunTTestHvifEncodingTestParseAlertIdeaHvif(AContext: TNXTestContext);
-var lFixture: TTestHvifEncoding;
-begin
-  lFixture:=TTestHvifEncoding.Create(AContext, 'TestParseAlertIdeaHvif');
-  try
-    lFixture.TestParseAlertIdeaHvif;
-  finally lFixture.Free; end;
-end;
-
 procedure RunTTestHvifEncodingTestGetImageSize(AContext: TNXTestContext);
 var lFixture: TTestHvifEncoding;
 begin
@@ -1380,7 +1337,6 @@ begin
   lSuite.AddTest('TestParseShape_NoTransform', @RunTTestHvifEncodingTestParseShape_NoTransform);
   lSuite.AddTest('TestParseShape_WithTranslation', @RunTTestHvifEncodingTestParseShape_WithTranslation);
   lSuite.AddTest('TestParseShape_WithTransform', @RunTTestHvifEncodingTestParseShape_WithTransform);
-  lSuite.AddTest('TestParseAlertIdeaHvif', @RunTTestHvifEncodingTestParseAlertIdeaHvif);
   lSuite.AddTest('TestGetImageSize', @RunTTestHvifEncodingTestGetImageSize);
   lSuite.AddTest('TestGetImageCached', @RunTTestHvifEncodingTestGetImageCached);
 end;

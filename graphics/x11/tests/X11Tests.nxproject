@@ -1,0 +1,25 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Project X11Tests {
+    RootDirectory: "../../../../..";
+    SourceRoot: "packages/nexus-packages/graphics/x11";
+    OutputRoot: "output/x11-tests/" + @Tools.Native.Name;
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: [@X11Tests.SourceRoot + "/tests/X11CoreTests.lpr",
+            @X11Tests.SourceRoot + "/tests/X11BindingTests.lpr"];
+        OutputPath: @X11Tests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Language Pascal { Mode: ObjFPC; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, @X11Tests.SourceRoot + "/src",
+                @X11Tests.SourceRoot + "/tests", "packages/nexus-packages/nxtest/src"];
+            IncludePaths: [@X11Tests.SourceRoot + "/src"];
+        }
+    }
+}

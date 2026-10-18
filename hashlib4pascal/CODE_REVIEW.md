@@ -80,19 +80,25 @@ of legacy hash removal. The entire package moved here with its review and origin
 notices; the External Packages copy is deleted. All 281 import hashes still match.
 Catalogs, ordinary build recipes and editor paths now use this location.
 
-Retained FPC RSA/ECDSA/PEM/OTP/UUID/NTLM services now call the Hlp API directly.
+In that pass, retained FPC RSA/ECDSA/PEM/OTP/UUID/NTLM services were migrated
+to the Hlp API directly. The owner subsequently directed their complete removal,
+including their dedicated tests and dependent Lab examples; both FPC package
+directories are now retired. Final removal verification is recorded in the
+[implementation review](../../../work/reviews/hashlib4pascal-package-and-hash-consumer-audit.md).
 The superseded MD/SHA/HMAC/CRC/FNV sources, dotted wrappers, assembly includes,
 obsolete runners and benchmark/fixture programs were deleted. No compatibility
 facade or second hash implementation was added. Useful vectors remain in direct
 nxtest: the fourteen RFC HMAC cases occupy 91 lines, without fixture classes.
 The source/provider suite passes **26 cases**, compiling all 144 runtime units.
 
-Consumer regressions reproduce and fix UUID variant-bit corruption and ECC
-range-check failures in high-bit masks and byte serialization. Empty-key OTP,
-RSA hash/MGF1 and PEM thumbprint checks also pass with the new provider and range
-checking. The full retained crypto service suite passes **37 cases with -Cr**;
-the unchanged baseline produces 29 passes, one failure and seven errors with
-those same checks. The original default-settings suites passed before migration.
+Before retirement, consumer regressions reproduced UUID variant-bit corruption
+and ECC range-check failures in high-bit masks and byte serialization. The
+migration corrected them and empty-key OTP, RSA hash/MGF1 and PEM thumbprint
+checks. The then-retained crypto service suite passed **37 cases with -Cr**;
+the unchanged baseline produced 29 passes, one failure and seven errors with
+those same checks. These service tests were deleted with their implementations
+by the subsequent owner direction. The original default-settings suites had
+passed before migration.
 The detailed before/after record is in the linked implementation review.
 
 Compiler metadata and PasZLib remain independent. Only an obsolete legacy hash

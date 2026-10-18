@@ -1,0 +1,10 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+// Original notices have individual licenses; see Nexus ATTRIBUTIONS.md#x11.
+Package X11 {
+    Id: "NXRP.Graphics.X11";
+    Author: "Free Pascal and X.Org contributors";
+    Description: "Xlib, XKB, input, rendering, font and X11 extension bindings.";
+}
