@@ -30,7 +30,6 @@ Project FCLImageTests {
                 @Tools.NexusFPC.SourcePath + "/rtl/inc",
                 "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
-                @Tools.NexusFPC.SourcePath + "/packages/hash/src",
                 @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
                 @FCLImageTests.SourceRoot + "/src",
                 @FCLImageTests.SourceRoot + "/tests",

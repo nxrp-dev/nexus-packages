@@ -18,7 +18,7 @@ unit obNXTorrentMetaInfo;
 interface
 
 uses
-  Classes, SysUtils, sha1, tpNXTorrent, obNXBEncode;
+  Classes, SysUtils, HlpHashFactory, tpNXTorrent, obNXBEncode;
 
 type
   ENXTorrentMetaInfoError = class(Exception);
@@ -307,7 +307,7 @@ end;
 function TNXTorrentMetaInfo.GetInfoHash: TNXTorrentHash;
 var
   lText: string;
-  lDigest: TSHA1Digest;
+  lDigest: TBytes;
   lInfo: TNXBEncodeDictionary;
 begin
   if Assigned(FInfoDictionary) then
@@ -322,7 +322,9 @@ begin
     end;
   end;
 
-  lDigest := SHA1String(lText);
+  SetLength(lDigest, Length(lText));
+  if lText <> '' then Move(lText[1], lDigest[0], Length(lText));
+  lDigest := THashFactory.TCrypto.CreateSHA1.ComputeBytes(lDigest).GetBytes;
   Move(lDigest[0], Result[0], SizeOf(Result));
 end;
 

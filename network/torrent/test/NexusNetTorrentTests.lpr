@@ -16,7 +16,8 @@ program NexusNetTorrentTests;
 {$mode objfpc}{$H+}
 
 uses
-  Classes, SysUtils, sha1, tpNXTorrent, obNXBEncode, obNXTorrentMetaInfo,
+  {$ifdef UNIX}cthreads, cwstring,{$endif}
+  Classes, SysUtils, HlpHashFactory, tpNXTorrent, obNXBEncode, obNXTorrentMetaInfo,
   obNXTorrentPieceMap, obNXTorrentFileStore, obNXTorrentPeerProtocol,
   obNXTorrentPeer, obNXTorrentPeerConnection, obNXTorrentTracker,
   obNXTorrentSession, obNXTorrentService;
@@ -98,10 +99,12 @@ end;
 
 function HashBytes(const AText: string): string;
 var
-  lDigest: TSHA1Digest;
+  lDigest: TBytes;
   lIndex: Integer;
 begin
-  lDigest := SHA1String(AText);
+  SetLength(lDigest, Length(AText));
+  if AText <> '' then Move(AText[1], lDigest[0], Length(AText));
+  lDigest := THashFactory.TCrypto.CreateSHA1.ComputeBytes(lDigest).GetBytes;
   SetLength(Result, 20);
   for lIndex := 0 to 19 do
     Result[lIndex + 1] := Chr(lDigest[lIndex]);
@@ -109,9 +112,11 @@ end;
 
 function HashForText(const AText: string): TNXTorrentHash;
 var
-  lDigest: TSHA1Digest;
+  lDigest: TBytes;
 begin
-  lDigest := SHA1String(AText);
+  SetLength(lDigest, Length(AText));
+  if AText <> '' then Move(AText[1], lDigest[0], Length(AText));
+  lDigest := THashFactory.TCrypto.CreateSHA1.ComputeBytes(lDigest).GetBytes;
   Move(lDigest[0], Result[0], SizeOf(Result));
 end;
 
@@ -163,6 +168,20 @@ begin
     on E: Exception do
       FErrorMessage := E.Message;
   end;
+end;
+
+procedure TestIndependentDigestVectors;
+var
+  lBytes, lRawInfo: string;
+  lMeta: TNXTorrentMetaInfo;
+begin
+  lBytes := #0 + #$80 + #$FF + 'Nexus';
+  AssertEquals('100eb56028aaeb943b1aac4ca1173ef7f882c1b4', NXTorrentHashToHex(HashForText(lBytes)), 'Independent binary piece hash');
+  lRawInfo := 'd6:lengthi8e4:name4:test12:piece lengthi8e6:pieces20:' + HashBytes(lBytes) + 'e';
+  lMeta := TNXTorrentMetaInfo.LoadFromBEncodedString('d8:announce7:tracker4:info' + lRawInfo + 'e');
+  try
+    AssertEquals('10df8e68958b9764edb77c8f94aa3cda7ea74655', lMeta.InfoHashHex, 'Independent raw bencoded info hash');
+  finally lMeta.Free; end;
 end;
 
 procedure TestBEncodeRoundTrip;
@@ -771,6 +790,7 @@ begin
 end;
 
 begin
+  TestIndependentDigestVectors;
   TestBEncodeRoundTrip;
   TestMetaInfoSingleFile;
   TestPieceMap;

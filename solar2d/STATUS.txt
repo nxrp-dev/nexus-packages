@@ -42,11 +42,16 @@ The published-link RTTI prerequisite test compiles and passes. On October 2, 202
 
 On October 10, the recovered recipe rebuilt and staged the plugin from current package source using native Win64 FPC 3.2.2. AMD64 image, import and export checks passed. This recovery rebuild was not rerun in the GUI; the screenshot records the original successful runtime test.
 
+On October 17, 2026, the native x86_64 Linux NexusFPC 3.3.1 build passed after
+correcting the example recipe's missing packages/libffi/src unit path. All 16
+C/Pascal ABI probe values match native libffi 3.4.6. The published RTTI test
+passes integer, floating-point and managed-string calls. libplugin_sample.so
+exports luaopen_plugin_sample and links to libffi.so.8. Linux simulator loading
+has not been verified.
+
 The remaining validation is:
-1. compile ../lua/test/TestPublishedRTTI.pas with the current Nexus FPC toolchain;
-2. build the plugin with that toolchain;
-3. run the broader ../../../../nexus-lab/examples/mobile/pascal-plugin/main.lua property, event and retained-link tests under the simulator;
-4. repeat on each supported target CPU/ABI, particularly where TRttiMethodType.Invoke may use a platform-specific invocation manager.
+1. run the broader ../../../../nexus-lab/examples/mobile/pascal-plugin/main.lua property, event and retained-link tests under the simulator;
+2. repeat the ABI, RTTI, build and load checks on each supported target CPU/ABI, particularly where TRttiMethodType.Invoke uses a platform-specific invocation manager.
 
 Intentional current RTTI surface
 - Boolean

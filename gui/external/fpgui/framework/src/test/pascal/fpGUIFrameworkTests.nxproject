@@ -39,7 +39,6 @@ Project fpGUIFrameworkTests {
                 @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
                 "packages/nexus-packages/graphics/fcl-image/src",
                 @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
-                @Tools.NexusFPC.SourcePath + "/packages/hash/src",
                 "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
                 "packages/nexus-packages/nxtest/src"

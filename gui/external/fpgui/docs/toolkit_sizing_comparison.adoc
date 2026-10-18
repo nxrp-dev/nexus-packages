@@ -1615,7 +1615,6 @@ Check these for patterns that third-party developers might copy:
 * [x] `examples/gui/helloworld/` - GUI button example ✓ VERIFIED (no changes needed - uses Align)
 * [x] `examples/gui/customwindow/` - Custom window painting ✓ FIXED (border and gradient rendering)
 * [x] `examples/gui/stdimages/` - Standard images list ✓ FIXED (HandlePaint overflow check)
-* [x] `examples/apps/ide/` - Maximus IDE ✓ FIXED (fpg_textedit.pas)
 * [x] `examples/apps/globe/` - Globe demo ✓ VERIFIED (no changes needed - uses hardcoded coords)
 * [x] `examples/gui/wulinetest/` - Wu line test ✓ VERIFIED (no changes needed - uses hardcoded coords)
 * [x] `examples/gui/lm-mig/` - MigLayout demo ✓ VERIFIED (no changes needed - uses layout manager)
@@ -1784,7 +1783,6 @@ The ActualWidth/ActualHeight migration is **100% complete** for all critical fra
   * Eliminated resize flicker by preventing double-resize conflicts (removed anchors)
 - Fixed example applications:
   * examples/gui/customwindow/ - Border and gradient rendering
-  * examples/apps/ide/fpg_textedit.pas - Gutter borders, scrollbar corner
   * examples/corelib/eventtest/ - Background fill
   * examples/corelib/helloworld/ - Gradient and text centering
   * examples/gui/stdimages/ - Image overflow check

@@ -18,7 +18,7 @@ unit obNXTorrentFileStore;
 interface
 
 uses
-  Classes, SysUtils, sha1, tpNXTorrent, obNXTorrentPieceMap;
+  Classes, SysUtils, HlpHashFactory, tpNXTorrent, obNXTorrentPieceMap;
 
 type
   ENXTorrentFileStoreError = class(Exception);
@@ -296,12 +296,14 @@ end;
 function TNXTorrentFileStore.VerifyPiece(APieceIndex: Integer): Boolean;
 var
   lData: string;
-  lDigest: TSHA1Digest;
+  lDigest: TBytes;
   lHash: TNXTorrentHash;
 begin
   EnsurePieceIndex(APieceIndex);
   lData := ReadPiece(APieceIndex);
-  lDigest := SHA1String(lData);
+  SetLength(lDigest, Length(lData));
+  if lData <> '' then Move(lData[1], lDigest[0], Length(lData));
+  lDigest := THashFactory.TCrypto.CreateSHA1.ComputeBytes(lDigest).GetBytes;
   Move(lDigest[0], lHash[0], SizeOf(lHash));
   Result := NXTorrentHashEquals(lHash, FPieceMap.MetaInfo.PieceHash(APieceIndex));
   if Result then

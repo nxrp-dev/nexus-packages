@@ -35,7 +35,7 @@ if mode.startswith('baseline'):
                 target.write_bytes(data)
 src = baseline / 'src' if mode.startswith('baseline') else package / 'src'
 paths = [sdk / 'units/x86_64-linux/rtl', *[src / d for d in ['base','codegen','datadict','dbase','export','json','memds','sdf','sql','sqldb']], package / 'tests',
-         root / 'packages/nexus-packages/nxtest/src', fpc / 'packages/iconvenc/src', fpc / 'rtl/inc', fpc / 'packages/pthreads/src',fpc / 'packages/paszlib/src', root / 'packages/nexus-packages/serialization/fcl-json/src', root / 'packages/nexus-packages/serialization/fcl-xml/src', fpc / 'packages/rtl-extra/src/inc', fpc / 'packages/rtl-extra/src/unix', fpc / 'packages/rtl-generics/src', fpc / 'packages/hash/src',
+         root / 'packages/nexus-packages/nxtest/src', fpc / 'packages/iconvenc/src', fpc / 'rtl/inc', fpc / 'packages/pthreads/src',fpc / 'packages/paszlib/src', root / 'packages/nexus-packages/serialization/fcl-json/src', root / 'packages/nexus-packages/serialization/fcl-xml/src', fpc / 'packages/rtl-extra/src/inc', fpc / 'packages/rtl-extra/src/unix', fpc / 'packages/rtl-generics/src',
          root / 'packages/nexus-packages/fcl-process/src',
          fpc / 'packages/rtl-objpas/src/inc', fpc / 'packages/rtl-objpas/src/unix',
          fpc / 'packages/fcl-base/src', fpc / 'packages/fcl-base/src/unix']

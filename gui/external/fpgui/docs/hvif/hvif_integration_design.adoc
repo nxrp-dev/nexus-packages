@@ -145,21 +145,21 @@ from a new unit `fpg_stdicons.pas`.
 
 === Strategy B: Pre-compiled `.res` Files (Application-Specific Icons)
 
-For applications with many icons (the IDE, for example), a `.res` resource file
+For applications with many icons, a `.res` resource file
 is compiled from a `.rc` manifest using FPC's `fpcres` tool and checked into the
 repository. The application references it with `{$R filename.res}`.
 
-The IDE already uses this pattern:
+An application can use this pattern:
 
 [source,pascal]
 ----
-(* ide.form.main.pas *)
-{$R ide.main.res}
+(* app.main.pas *)
+{$R app.main.res}
 ----
 
 [source]
 ----
-(* ide.main.rc *)
+(* app.main.rc *)
 MYAPP_ICON_BUILD  RCDATA  "icons/build.hvif"
 MYAPP_ICON_DIFF   RCDATA  "icons/diff.hvif"
 ----
@@ -168,8 +168,8 @@ At startup the application loads each resource into the icon store:
 
 [source,pascal]
 ----
-fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_BUILD', 'ide.build');
-fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_DIFF',  'ide.diff');
+fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_BUILD', 'app.build');
+fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_DIFF',  'app.diff');
 ----
 
 [cols="2,3", options="header"]
@@ -181,7 +181,7 @@ fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_DIFF',  'ide.diff');
   in a platform-neutral binary format
 
 | Build complexity
-| One manual or scripted step: `fpcres -o ide.main.res ide.main.rc`
+| One manual or scripted step: `fpcres -o app.main.res app.main.rc`
 
 | Binary overhead
 | Minimal — raw HVIF bytes stored directly in the resource section
@@ -190,7 +190,7 @@ fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_DIFF',  'ide.diff');
 | Add `.hvif` file to icons directory, add line to `.rc`, recompile `.res`
 
 | When to use
-| Application-specific icons (IDE, uidesigner, examples)
+| Application-specific icons (uidesigner, examples)
 |===
 
 === Why Not Automatic `.rc` Compilation?
@@ -259,7 +259,7 @@ type
     image cache.
 
     String identifiers follow the same naming convention as fpgImages:
-      'stdimg.quit', 'stdimg.save', 'ide.build', etc.
+      'stdimg.quit', 'stdimg.save', 'app.build', etc.
 
     Thread safety: NOT thread-safe. Use from the fpGUI main thread only. }
   TfpgIconStore = class
@@ -479,8 +479,8 @@ can populate the image list with pre-rendered images from the icon store:
 
 [source,pascal]
 ----
-imgList.AddImage(fpgIcons.GetIcon('ide.folder_src', 16), 0);
-imgList.AddImage(fpgIcons.GetIcon('ide.file_pas', 16), 1);
+imgList.AddImage(fpgIcons.GetIcon('app.folder_src', 16), 0);
+imgList.AddImage(fpgIcons.GetIcon('app.file_pas', 16), 1);
 ----
 
 === Backwards Compatibility
@@ -596,54 +596,6 @@ The icon store architecture supports this without structural changes — only
 the event wiring and widget response logic need to be added.
 
 
-== IDE-Specific Integration
-
-The IDE (Maximus) has its own icon set beyond the framework standard images.
-These are compiled into a `.res` file using Strategy B.
-
-=== Current State
-
-The IDE already has:
-
-* `ide/src/main/resources/ide.main.rc` — resource manifest
-* `ide/src/main/resources/icons/*.hvif` — HVIF icon files (build, diff,
-  folder_src, readme, release, search, settings, todo, xml)
-* `ide/src/main/pascal/ide.form.main.pas` — `{$R ide.main.res}`
-
-=== Startup Registration
-
-The IDE's main form startup registers its icons with the store:
-
-[source,pascal]
-----
-procedure TMainForm.RegisterIdeIcons;
-begin
-  fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_BUILD',  'ide.build');
-  fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_DIFF',   'ide.diff');
-  (* ... etc ... *)
-end;
-----
-
-Toolbar buttons then use the standard `ImageName` property:
-
-[source,pascal]
-----
-btnBuild.ImageName := 'ide.build';
-----
-
-=== Adding New IDE Icons
-
-The workflow for adding a new icon to the IDE:
-
-. Create or obtain an SVG source file.
-. Convert to HVIF: `svg2hvif icons/newicon.svg`
-. Add to the resource manifest: `MYAPP_ICON_NEWICON RCDATA "icons/newicon.hvif"`
-. Recompile the resource: `fpcres -o ide.main.res ide.main.rc`
-. Register in `RegisterIdeIcons`:
-  `fpgIcons.RegisterFromResource(HInstance, 'MYAPP_ICON_NEWICON', 'ide.newicon');`
-. Use in the form: `btnNewAction.ImageName := 'ide.newicon';`
-
-
 == Build Tooling
 
 Two small command-line tools support the workflow:
@@ -700,8 +652,6 @@ tools/
     hvif2inc.lpr             NEW  — HVIF-to-Pascal const generator
     hvif2inc.pas             NEW  — conversion logic
 
-ide/src/main/pascal/
-  ide.form.main.pas          MODIFIED — RegisterIdeIcons at startup
 ----
 
 
@@ -718,8 +668,7 @@ ide/src/main/pascal/
   to the framework itself
 
 | `.res` files for application icons
-| Cleaner for large icon sets; raw binary storage is more compact;
-  IDE already uses this pattern
+| Cleaner for large icon sets; raw binary storage is more compact
 | `const` arrays for everything — viable but verbose for 50+ icons
 
 | New `TfpgIconStore` alongside `fpgImages`
@@ -759,10 +708,6 @@ ide/src/main/pascal/
 . *Icon size per widget class:* Should `TfpgBaseButton` default to 16px or
   24px logical? Toolbar buttons typically use 24px; dialog buttons use 16px.
   Should this be a property on the widget or derived from context?
-
-. *Naming convention for IDE icons:* The current `.rc` uses `MYAPP_ICON_BUILD`
-  as the resource name and `ide.build` as the store identifier. Should there be
-  a formal convention (e.g. `app.category.name`)?
 
 . *Legacy icon removal timeline:* When can BMP entries in `stdimages.inc` be
   removed? This should be gated on all widgets being updated to check
