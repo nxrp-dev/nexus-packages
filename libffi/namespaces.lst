@@ -1,0 +1,4 @@
+src/ffi.pas=namespaced/Api.Ffi.pas
+{s*:src/}=namespaced/
+{i+:src/}
+src/ffi.manager.pas=namespaced/Api.Ffi.manager.pas

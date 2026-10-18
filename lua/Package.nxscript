@@ -12,7 +12,7 @@
 dialect "nxpackage.Language.nxscript";
 
 // No Lua runtime is bundled. Consumers must supply a matching Lua host/library.
-// Outside Win64 x86-64, the RTTI bridge also uses NexusFPC ffi.manager and target libffi.
+// Outside Win64 x86-64, the RTTI bridge also uses NXRP.LibFFI (ffi.manager) and a matching native libffi.
 // Package-wide License is left unset: upstream reference headers retain their own notices.
 Package Lua {
     Id: "NXRP.Lua";

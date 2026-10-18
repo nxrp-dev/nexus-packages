@@ -1,0 +1,16 @@
+{
+  "repository": "https://gitlab.com/freepascal.org/fpc/source",
+  "nexus_fpc_revision": "83d89d45657c66a5ae4636233cb16961fd00a1ed",
+  "git_tree": "a386598c08cbe28ad598a09dc2679506af547862",
+  "files": {
+    "README.md": "b5781428f6f43bd41efe96c7f46b860704a0ba1debef5ce03237a90fc7f11dfd",
+    "namespaced/Api.Ffi.manager.pas": "584fcddb6fb1d4708ac824095be10c7cc056ed75966fc3dd5b834fa2c7ad94c7",
+    "namespaced/Api.Ffi.pas": "96dcf9f84c8f916c2d4e92c09d522bf34ee13eaee0ccb21f743679f23b17317b",
+    "namespaces.lst": "ba6576cecb311c2720cc2368716b33bbe94faf14617b23b50e97007f5c989e70",
+    "src/ffi.manager.pas": "5808c703075c4bb79bcf5058771c643a40927a21d48e9917193853a7deeef9ab",
+    "src/ffi.pas": "39788abf6effb1e370b21d67816f0ea2a760b58cb8e1c5f26883042d4cc9e7ad",
+    "tests/Check-LibFFIABI.ps1": "2da03610f6465f82a4a5bc3e7d87ed91b05ceccb9cdbe2f2abe76516291b5b9b",
+    "tests/ffi_abi_probe.c": "edf22eaf298b2e7ca2eb4672a49eb1c203c2e38698659608b4b470d406b3b865",
+    "tests/ffi_abi_probe.pas": "596cd4a40622d0f688a2e2a83b5c0bd6b05b53a2e31f38dc57e95108b6e08544"
+  }
+}

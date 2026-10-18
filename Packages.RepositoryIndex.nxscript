@@ -60,6 +60,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "db/sqlite/Package.nxscript";
         Description: "SQLite bindings, connections and write-through datasets.";
     }
+    LocalPackage LibFFI {
+        Id: "NXRP.LibFFI";
+        Descriptor: "libffi/Package.nxscript";
+        Description: "Native libffi bindings and optional RTTI invocation/callback manager.";
+    }
     LocalPackage FCLRes {
         Id: "NXRP.FCLRes";
         Descriptor: "fcl-res/Package.nxscript";

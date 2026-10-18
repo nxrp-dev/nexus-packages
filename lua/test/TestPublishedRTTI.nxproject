@@ -1,37 +1,32 @@
 // Copyright (c) 2026 Kevin Collins.
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-//
-// This Source Code Form is "Incompatible With Secondary Licenses",
-// as defined by the Mozilla Public License, v. 2.0.
-//
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project TestPublishedRTTI {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "TestPublishedRTTI.pas";
-    OutputRoot: "../../../../output/TestPublishedRTTI/x86_64-win64";
-
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @TestPublishedRTTI.OutputRoot + "/TestPublishedRTTI.exe";
-        RawOptions: ["-gl"];
+    RootDirectory: "../../../..";
+    OutputRoot: "../../worktree/libffi-relocation/lua-test/" + @Tools.Native.Name;
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        RawOptions: ["-Cr", "-Co", "-gl"];
+        SourceFiles: ["packages/nexus-packages/lua/test/TestPublishedRTTI.pas"];
+        OutputPath: @TestPublishedRTTI.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
-            ExecutableOutputPath: @TestPublishedRTTI.OutputRoot;
-            UnitOutputPath: "../../../../output/TestPublishedRTTI/x86_64-win64/units";
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                ".",
-                "../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/libffi/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
             ];
         }
     }
