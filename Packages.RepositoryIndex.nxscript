@@ -60,6 +60,11 @@ RepositoryIndex NexusPackages {
         Descriptor: "db/sqlite/Package.nxscript";
         Description: "SQLite bindings, connections and write-through datasets.";
     }
+    LocalPackage FCLRes {
+        Id: "NXRP.FCLRes";
+        Descriptor: "fcl-res/Package.nxscript";
+        Description: "Executable resource readers, resource models and file version information.";
+    }
     LocalPackage FCLRegistry {
         Id: "NXRP.FCLRegistry";
         Descriptor: "fcl-registry/Package.nxscript";

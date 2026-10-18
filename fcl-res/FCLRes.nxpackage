@@ -1,0 +1,52 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLRes {
+    RootDirectory: "../../..";
+    SourceRoot: "packages/nexus-packages/fcl-res";
+    OutputRoot: "output/nxbuild-fcl-res/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLRes.SourceRoot + "/src/bitmapresource.pas",
+            @FCLRes.SourceRoot + "/src/coffconsts.pas",
+            @FCLRes.SourceRoot + "/src/coffreader.pas",
+            @FCLRes.SourceRoot + "/src/cofftypes.pas",
+            @FCLRes.SourceRoot + "/src/dfmreader.pas",
+            @FCLRes.SourceRoot + "/src/elfconsts.pas",
+            @FCLRes.SourceRoot + "/src/elfreader.pas",
+            @FCLRes.SourceRoot + "/src/elftypes.pas",
+            @FCLRes.SourceRoot + "/src/fileinfo.pas",
+            @FCLRes.SourceRoot + "/src/fpcrestypes.pas",
+            @FCLRes.SourceRoot + "/src/groupcursorresource.pas",
+            @FCLRes.SourceRoot + "/src/groupiconresource.pas",
+            @FCLRes.SourceRoot + "/src/groupresource.pas",
+            @FCLRes.SourceRoot + "/src/icocurtypes.pas",
+            @FCLRes.SourceRoot + "/src/machoconsts.pas",
+            @FCLRes.SourceRoot + "/src/machoreader.pas",
+            @FCLRes.SourceRoot + "/src/machotypes.pas",
+            @FCLRes.SourceRoot + "/src/resdatastream.pas",
+            @FCLRes.SourceRoot + "/src/resfactory.pas",
+            @FCLRes.SourceRoot + "/src/resource.pas",
+            @FCLRes.SourceRoot + "/src/resourcetree.pas",
+            @FCLRes.SourceRoot + "/src/resreader.pas",
+            @FCLRes.SourceRoot + "/src/strtable.pas",
+            @FCLRes.SourceRoot + "/src/versionconsts.pas",
+            @FCLRes.SourceRoot + "/src/versionresource.pas",
+            @FCLRes.SourceRoot + "/src/versiontypes.pas",
+            @FCLRes.SourceRoot + "/src/winpeimagereader.pas"
+        ];
+        OutputPath: @FCLRes.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, @FCLRes.SourceRoot + "/src"];
+            IncludePaths: [@FCLRes.SourceRoot + "/src"];
+        }
+    }
+}

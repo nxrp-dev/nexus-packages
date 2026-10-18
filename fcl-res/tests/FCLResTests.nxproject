@@ -1,0 +1,26 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project FCLResTests {
+    RootDirectory: "../../../..";
+    OutputRoot: "output/fcl-res-tests/" + @Tools.Native.Name;
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/fcl-res/tests/FCLResTests.lpr"];
+        OutputPath: @FCLResTests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath,
+                "packages/nexus-packages/fcl-res/src",
+                "packages/nexus-packages/fcl-res/tests",
+                "packages/nexus-packages/nxtest/src"];
+            IncludePaths: ["packages/nexus-packages/fcl-res/src"];
+        }
+    }
+}
