@@ -39,7 +39,7 @@ Project FCLDBBehaviorTests {
                 @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
                 @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
                 "packages/nexus-packages/nxtest/src"

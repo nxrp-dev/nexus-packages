@@ -1,0 +1,79 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Project TranslationTools {
+    RootDirectory: "../../../../../..";
+    OutputRoot: "../../worktree/collections-avl/final/tools/" + @Tools.Native.Name;
+    FPC UpdatePOFiles {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/gui/external/fpgui/tools/updatepofiles.pas"];
+        OutputPath: @TranslationTools.OutputRoot + "/updatepofiles";
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+            ];
+        }
+    }
+    FPC GenerateIncludeFiles {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/gui/external/fpgui/tools/generateincfiles.pas"];
+        OutputPath: @TranslationTools.OutputRoot + "/generateincfiles";
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
+            ];
+            IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+            ];
+        }
+    }
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/gui/external/fpgui/tools/tests/TranslationToolsTests.lpr"];
+        OutputPath: @TranslationTools.OutputRoot + "/tests";
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/nxtest/src",
+                "packages/nexus-packages/fcl-process/src",
+                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
+            ];
+            IncludePaths: [
+                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+            ];
+        }
+    }
+}

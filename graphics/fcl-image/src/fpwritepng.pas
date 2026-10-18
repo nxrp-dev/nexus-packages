@@ -20,9 +20,9 @@ unit FPWritePNG;
 interface
 
 {$IFDEF FPC_DOTTEDUNITS}
-uses System.SysUtils, System.Classes, FpImage, FpImage.Common, FpImage.Common.PNG, System.ZLib.Zstream;
+uses System.SysUtils, System.Classes, FpImage, FpImage.Common, FpImage.Common.PNG, System.ZLib.PasZLibIO;
 {$ELSE FPC_DOTTEDUNITS}
-uses sysutils, classes, FpImage, FPImgCmn, PNGComn, ZStream;
+uses sysutils, classes, FpImage, FPImgCmn, PNGComn, PasZLibIO;
 {$ENDIF FPC_DOTTEDUNITS}
 
 type

@@ -44,10 +44,10 @@ interface
 
 {$IFDEF FPC_DOTTEDUNITS}
 uses
-  System.Math, System.Classes, System.SysUtils, System.ZLib.Zbase, System.ZLib.Zdeflate, FpImage, FpImage.Common.TIFF;
+  System.Math, System.Classes, System.SysUtils, System.ZLib.PasZLib,  FpImage, FpImage.Common.TIFF;
 {$ELSE FPC_DOTTEDUNITS}
 uses
-  Math, Classes, SysUtils, zbase, zdeflate, FPimage, FPTiffCmn;
+  Math, Classes, SysUtils, PasZLib,  FPimage, FPTiffCmn;
 {$ENDIF FPC_DOTTEDUNITS}
 
 type

@@ -44,7 +44,7 @@ program GenarateIncFiles;
 
 
 uses
-  Classes, SysUtils, AvL_Tree, contnrs;
+  Classes, SysUtils, Generics.Collections, Generics.Defaults;
   
 const
   UTF8FileHeader = #$ef#$bb#$bf;
@@ -103,29 +103,17 @@ begin
     Result := ID;
 end;
   
-function CompareMsgItems(Data1, Data2: pointer): integer;
-var
-  MsgItem1: PMsgItem;
-  MsgItem2: PMsgItem;
+function CompareMsgIDs(const AFirst, ASecond: string): Integer;
 begin
-  MsgItem1:=PMsgItem(Data1);
-  MsgItem2:=PMsgItem(Data2);
-  Result:=CompareStr(MsgItem1^.ID,MsgItem2^.ID);
+  Result := CompareStr(AFirst, ASecond);
 end;
 
-procedure DisposeMsgTree(var Tree: TAVLTree);
+procedure DisposeMsgTree(var ATree: specialize TAVLTreeMap<string, PMsgItem>);
 var
-  Node: TAVLTreeNode;
-  MsgItem: PMsgItem;
+  lMessage: PMsgItem;
 begin
-  Node:=Tree.FindLowest;
-  while Node<>nil do begin
-    MsgItem:=PMsgItem(Node.Data);
-    Dispose(MsgItem);
-    Node:=Tree.FindSuccessor(Node);
-  end;
-  Tree.Free;
-  Tree:=nil;
+  for lMessage in ATree.Values do Dispose(lMessage);
+  FreeAndNil(ATree);
 end;
 
 function GetAllFilesMask: string;
@@ -150,9 +138,9 @@ end;
 type
   TPoFile = class
   public
-    Tree: TAVLTree;
+    Tree: specialize TAVLTreeMap<string, PMsgItem>;
     Header: TStringList;
-    Items: TObjectList;
+    Items: specialize TObjectList<TMsgItemClass>;
     UTF8Header: string;
     constructor Create;
     destructor Destroy; override;
@@ -162,9 +150,10 @@ type
 
 constructor TPoFile.Create;
 begin
-  Tree:=TAVLTree.Create(@CompareMsgItems);
+  Tree := specialize TAVLTreeMap<string, PMsgItem>.Create(
+    specialize TComparer<string>.Construct(@CompareMsgIDs));
   Header:=TStringList.Create;
-  Items := TObjectList.Create;
+  Items := specialize TObjectList<TMsgItemClass>.Create(True);
 end;
 
 destructor TPoFile.Destroy;
@@ -271,16 +260,16 @@ begin
   end;
 end;
 
-function CreateMsgItemClass(MsgItem: PMsgItem): TMsgItemClass;
+function CreateMsgItemClass(AMsgItem: PMsgItem): TMsgItemClass;
 begin
   Result := nil;
-  if MsgItem^.Comment[1] <> ':' then
+  if (AMsgItem^.Comment = '') or (AMsgItem^.Comment[1] <> ':') then
     exit;
   Result := TMsgItemClass.Create;
-  Result.Comment := MsgItem^.Comment;
+  Result.Comment := AMsgItem^.Comment;
 //  writeln(Prefix, ' Comment: ', Result.Comment);
-  Result.ID := MsgItem^.ID;
-  Result.Str := MsgItem^.Str;
+  Result.ID := AMsgItem^.ID;
+  Result.Str := AMsgItem^.Str;
 end;
 
 procedure WriteMessageItem(MsgItem: PMsgItem; DestFile: TStringList);
@@ -351,7 +340,7 @@ begin
       // message
       MsgItem:=ReadMessageItem(SrcFile,Line);
       // ignore doubles
-      if (Result.Tree.FindKey(MsgItem,@CompareMsgItems)<>nil) then
+      if (Result.Tree.Find(MsgItem^.ID)<>nil) then
       begin
         Dispose(MsgItem);
         continue;
@@ -359,7 +348,7 @@ begin
       // message class
       oMsgItem := CreateMsgItemClass(MsgItem);
       // add message
-      Result.Tree.Add(MsgItem);
+      Result.Tree.Add(MsgItem^.ID, MsgItem);
       if oMsgItem <> nil then
         Result.Items.Add(oMsgItem);
     end;
@@ -368,66 +357,59 @@ begin
   SrcFile.Free;
 end;
 
-procedure WritePoFile(PoFile: TPoFile; const Filename: string);
+procedure WritePoFile(APoFile: TPoFile; const AFileName: string);
 var
-  DestFile: TStringList;
-  Node: TAVLTreeNode;
-  MsgItem: PMsgItem;
-  Save: Boolean;
-  OldDestFile: TStringList;
+  lDestFile: TStringList;
+  lMessage: PMsgItem;
+  lSave: Boolean;
+  lOldDestFile: TStringList;
 begin
-  //writeln(Prefix,'Saving ',Filename,' ...');
-  DestFile:=TStringList.Create;
-  if (PoFile.Header.Count>0) then begin
-    DestFile.Add('msgid ""');
-    DestFile.Add('msgstr ""');
-    DestFile.AddStrings(PoFile.Header);
-    DestFile.Add('');
+  lDestFile:=TStringList.Create;
+  if (APoFile.Header.Count>0) then begin
+    lDestFile.Add('msgid ""');
+    lDestFile.Add('msgstr ""');
+    lDestFile.AddStrings(APoFile.Header);
+    lDestFile.Add('');
   end;
-  Node:=PoFile.Tree.FindLowest;
-  while Node<>nil do begin
-    MsgItem:=PMsgItem(Node.Data);
-    WriteMessageItem(MsgItem,DestFile);
-    Node:=PoFile.Tree.FindSuccessor(Node);
+  for lMessage in APoFile.Tree.Values do begin
+    WriteMessageItem(lMessage,lDestFile);
   end;
-  if (PoFile.UTF8Header<>'') and (DestFile.Count>0) then
-    DestFile[0]:=PoFile.UTF8Header+DestFile[0];
-  Save:=true;
-  if FileExists(Filename) then begin
-    OldDestFile:=TStringList.Create;
-    OldDestFile.LoadFromFile(Filename);
-    if OldDestFile.Text=DestFile.Text then Save:=false;
-    OldDestFile.Free;
+  if (APoFile.UTF8Header<>'') and (lDestFile.Count>0) then
+    lDestFile[0]:=APoFile.UTF8Header+lDestFile[0];
+  lSave:=true;
+  if FileExists(AFileName) then begin
+    lOldDestFile:=TStringList.Create;
+    lOldDestFile.LoadFromFile(AFileName);
+    if lOldDestFile.Text=lDestFile.Text then lSave:=false;
+    lOldDestFile.Free;
   end;
-  if Save then
-    DestFile.SaveToFile(Filename);
-  DestFile.Free;
+  if lSave then
+    lDestFile.SaveToFile(AFileName);
+  lDestFile.Free;
 end;
 
-procedure WriteIncludeFile(PoFile: TPoFile; const Filename: string);
+procedure WriteIncludeFile(APoFile: TPoFile; const AFileName: string);
 var
-  DestFile: TStringList;
-  i: integer;
-  oMsg: TMsgItemClass;
+  lDestFile: TStringList;
+  lMessage: TMsgItemClass;
 begin
-  DestFile := TStringList.Create;
-  DestFile.Add('{%mainunit fpg_constants.pas}');
-  DestFile.Add('');
-  DestFile.Add('{ This file is auto generated!  DO NOT EDIT. }');
-  DestFile.Add('{ Only exception is the default language English - lang_en.inc  }');
-  DestFile.Add('');
-  for i := 0 to PoFile.Items.Count - 1 do
+  lDestFile := TStringList.Create;
+  lDestFile.Add('{%mainunit fpg_constants.pas}');
+  lDestFile.Add('');
+  lDestFile.Add('{ This file is auto generated!  DO NOT EDIT. }');
+  lDestFile.Add('{ Only exception is the default language English - lang_en.inc  }');
+  lDestFile.Add('');
+  for lMessage in APoFile.Items do
   begin
-    oMsg := TMsgItemClass(PoFile.Items[i]);
-    DestFile.Add(Format('%s  =  %s;', [oMsg.Identifier, QuotedStr(oMsg.Value)]));
+    lDestFile.Add(Format('%s  =  %s;', [lMessage.Identifier, QuotedStr(lMessage.Value)]));
     { ***** Handle special cases ***** }
 
     // Long and Short month May has the same text so one gets lost. Add it back.
-    if SameText(oMsg.Identifier, 'rsShortMay') then
-      DestFile.Add(Format('%s  =  %s;', ['rsLongMay', QuotedStr(oMsg.Value)]));
+    if SameText(lMessage.Identifier, 'rsShortMay') then
+      lDestFile.Add(Format('%s  =  %s;', ['rsLongMay', QuotedStr(lMessage.Value)]));
   end;
-  DestFile.SaveToFile(Filename);
-  DestFile.Free;
+  lDestFile.SaveToFile(AFileName);
+  lDestFile.Free;
 end;
 
 function FindAllTranslatedPoFiles(const ALangDir: string): TStringList;
@@ -455,43 +437,37 @@ begin
   SysUtils.FindClose(FileInfo);
 end;
 
-procedure MergePoTrees(SrcTree, DestTree: TAVLTree);
+procedure MergePoTrees(ASrcTree, ADestTree: specialize TAVLTreeMap<string, PMsgItem>);
 var
-  SrcNode, DestNode: TAVLTreeNode;
-  SrcMsgItem, DestMsgItem: PMsgItem;
-  OldNode: TAVLTreeNode;
+  lSrcNode, lDestNode, lOldNode: specialize TAVLTreeMap<string, PMsgItem>.PNode;
+  lSrcMessage, lDestMessage: PMsgItem;
 begin
-  // add all message items from SrcTree into DestTree
-  SrcNode:=SrcTree.FindLowest;
-  while SrcNode<>nil do begin
-    SrcMsgItem:=PMsgItem(SrcNode.Data);
-    DestNode:=DestTree.FindKey(SrcMsgItem,@CompareMsgItems);
-    if DestNode<>nil then begin
-      // ID already exists -> update comment
-      DestMsgItem:=PMsgItem(DestNode.Data);
-      DestMsgItem^.Comment:=SrcMsgItem^.Comment;
-    end else begin
-      // new ID -> add new message item to DestTree
-      New(DestMsgItem);
-      DestMsgItem^.Comment:=SrcMsgItem^.Comment;
-      DestMsgItem^.ID:=SrcMsgItem^.ID;
-      DestMsgItem^.Str:=SrcMsgItem^.Str;
-      DestTree.Add(DestMsgItem);
+  lSrcNode := ASrcTree.FindLowest;
+  while lSrcNode <> nil do
+  begin
+    lSrcMessage := lSrcNode^.Value;
+    lDestNode := ADestTree.Find(lSrcMessage^.ID);
+    if lDestNode <> nil then
+      lDestNode^.Value^.Comment := lSrcMessage^.Comment
+    else
+    begin
+      New(lDestMessage);
+      lDestMessage^ := lSrcMessage^;
+      ADestTree.Add(lDestMessage^.ID, lDestMessage);
     end;
-    SrcNode:=SrcTree.FindSuccessor(SrcNode);
+    lSrcNode := lSrcNode^.Successor;
   end;
-  // remove all old messages in DestTree
-  DestNode:=DestTree.FindLowest;
-  while DestNode<>nil do begin
-    DestMsgItem:=PMsgItem(DestNode.Data);
-    OldNode:=DestNode;
-    DestNode:=DestTree.FindSuccessor(DestNode);
-    if (DestMsgItem^.ID<>'')
-    and (SrcTree.FindKey(DestMsgItem,@CompareMsgItems)=nil) then begin
-      // unused message -> delete it
-      writeln('Deleting unused message "',DestMsgItem^.ID,'"');
-      Dispose(DestMsgItem);
-      DestTree.Delete(OldNode);
+  lDestNode := ADestTree.FindLowest;
+  while lDestNode <> nil do
+  begin
+    lDestMessage := lDestNode^.Value;
+    lOldNode := lDestNode;
+    lDestNode := lDestNode^.Successor;
+    if (lDestMessage^.ID <> '') and (ASrcTree.Find(lDestMessage^.ID) = nil) then
+    begin
+      WriteLn('Deleting unused message "', lDestMessage^.ID, '"');
+      ADestTree.Delete(lOldNode);
+      Dispose(lDestMessage);
     end;
   end;
 end;

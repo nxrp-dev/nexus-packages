@@ -80,7 +80,7 @@ Package FCLImage {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/graphics/pasjpeg/src",
-                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @FCLImage.OutputRoot,

@@ -23,7 +23,7 @@ Project CollationConformance {
             UnitPaths: [
                 @RTLUnicodeBuild.RTLPath,
                 @CollationConformance.SourceRoot + "/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
                 @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"
             ];
             IncludePaths: [@CollationConformance.SourceRoot + "/src/inc"];

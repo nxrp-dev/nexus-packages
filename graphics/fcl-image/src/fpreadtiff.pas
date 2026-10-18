@@ -51,10 +51,10 @@ interface
 
 {$IFDEF FPC_DOTTEDUNITS}
 uses
-  System.Math, System.Classes, System.SysUtils, System.CTypes, System.ZLib.Zinflate, System.ZLib.Zbase, FpImage, FpImage.Common.TIFF, FpImage.ColorSpace;
+  System.Math, System.Classes, System.SysUtils, System.CTypes, System.ZLib.PasZLib,  FpImage, FpImage.Common.TIFF, FpImage.ColorSpace;
 {$ELSE FPC_DOTTEDUNITS}
 uses
-  Math, Classes, SysUtils, ctypes, zinflate, zbase, FPimage, FPTiffCmn, fpcolorspace;
+  Math, Classes, SysUtils, ctypes, PasZLib,  FPimage, FPTiffCmn, fpcolorspace;
 {$ENDIF FPC_DOTTEDUNITS}
 
 type

@@ -22,10 +22,10 @@ unit fpg_listview;
 interface
 
 uses
+  Generics.Collections,
   Classes,
   SysUtils,
   contnrs,
-  AVL_Tree,
   fpg_base,
   fpg_main,
   fpg_widget,
@@ -306,8 +306,8 @@ type
     FSelectionFollowsFocus: Boolean;
     FSelectionShiftStart: Integer;
     FOnColumnClick: TfpgLVColumnClickEvent;
-    FSelected: TAVLTree;
-    FOldSelected: TAVLTree;
+    FSelected: specialize TAVLTree<TfpgLVItem>;
+    FOldSelected: specialize TAVLTree<TfpgLVItem>;
     FUpdateCount: Integer;
     FViewStyle: TfpgLVPainter;
     FViewStyleClass: TfpgLVPainterClass;
@@ -452,21 +452,12 @@ type
   end;
 
 
-procedure CopyAVLTree(From, To_: TAVLTree; Clear: Boolean = False);
-
-  procedure AddNodeNodes(ANode: TAVLTreeNode);
-  begin
-    if ANode = nil then
-      Exit; // ==>
-    To_.Add(ANode.Data);
-    AddNodeNodes(ANode.Left);
-    AddNodeNodes(ANode.Right);
-  end;
-
+procedure CopySelectedItems(AFrom, ATo: specialize TAVLTree<TfpgLVItem>);
+var
+  lItem: TfpgLVItem;
 begin
-  if Clear then
-    To_.Clear;
-  AddNodeNodes(From.Root);
+  ATo.Clear;
+  for lItem in AFrom.Keys do ATo.Add(lItem);
 end;
 
 { TfpgLVItems }
@@ -1615,7 +1606,7 @@ begin
     // ensure start index is at least 0
     if FSelectionShiftStart = -1 then
       Inc(FSelectionShiftStart);
-    CopyAVLTree(FSelected, FOldSelected, True);
+    CopySelectedItems(FSelected, FOldSelected);
   end
   else
   begin
@@ -1775,7 +1766,7 @@ begin
     AStart := AEnd;
     AEnd := TmpI;
   end;
-  CopyAVLTree(FOldSelected, FSelected, True);
+  CopySelectedItems(FOldSelected, FSelected);
   if (AStart < 0) or (AEnd > FItems.Count-1) then
     Exit;
   for I := AStart to AEnd do
@@ -1813,49 +1804,35 @@ end;
 
 procedure TfpgListView.SelectionClear;
 var
-  Item: TfpgLVItem;
+  lItem: TfpgLVItem;
 begin
   while FSelected.Root <> nil do
   begin
-    Item := TfpgLVItem(FSelected.Root.Data);
+    lItem := FSelected.Root^.Key;
     FSelected.Delete(FSelected.Root);
     if Assigned(FOnSelectionChanged) then
-      FOnSelectionChanged(Self, Item, Items.IndexOf(Item), False);
+      FOnSelectionChanged(Self, lItem, Items.IndexOf(lItem), False);
   end;
 end;
 
 function TfpgListView.ItemGetSelected(const AItem: TfpgLVItem): Boolean;
 begin
-  Result := FSelected.Find(Pointer(AItem)) <> nil;
+  Result := FSelected.ContainsKey(AItem);
 end;
 
 procedure TfpgListView.ItemSetSelected(const AItem: TfpgLVItem; const AValue: Boolean);
 var
-  Node: TAVLTreeNode;
-  Changed: Boolean;
+  lChanged: Boolean;
 begin
-
-  Changed := False;
-  Node := FSelected.Find(AItem);
-
   if AValue then
   begin
-    if Node = nil then
-    begin
-      FSelected.Add(Pointer(AItem));
-      Changed := True;
-    end;
+    lChanged := not FSelected.ContainsKey(AItem);
+    if lChanged then FSelected.Add(AItem);
   end
   else
-  begin
-    if Node <> nil then
-    begin
-      FSelected.Delete(Node);
-      Changed := True;
-    end;
-  end;
-  
-  if Changed and Assigned(FOnSelectionChanged) then
+    lChanged := FSelected.Remove(AItem);
+
+  if lChanged and Assigned(FOnSelectionChanged) then
     FOnSelectionChanged(Self, AItem, Items.IndexOf(AItem), AValue);
 end;
 
@@ -2431,8 +2408,8 @@ begin
   FColumns := TfpgLVColumns.Create(Self);
 
   FItems := TfpgLVItems.Create(Self);
-  FSelected := TAVLTree.Create;
-  FOldSelected := TAVLTree.Create;
+  FSelected := specialize TAVLTree<TfpgLVItem>.Create;
+  FOldSelected := specialize TAVLTree<TfpgLVItem>.Create;
   FSelectionShiftStart := -1;
   FSelectionFollowsFocus := True;
   FItemIndex := -1;

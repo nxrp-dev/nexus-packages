@@ -21,10 +21,10 @@ interface
 
 {$IFDEF FPC_DOTTEDUNITS}
 uses
-  System.SysUtils,System.Classes, FpImage, FpImage.Common, FpImage.Common.PNG, System.ZLib.Zstream;
+  System.SysUtils,System.Classes, FpImage, FpImage.Common, FpImage.Common.PNG, System.ZLib.PasZLibIO;
 {$ELSE FPC_DOTTEDUNITS}
 uses
-  SysUtils,Classes, FpImage, FPImgCmn, PNGComn, ZStream;
+  SysUtils,Classes, FpImage, FPImgCmn, PNGComn, PasZLibIO;
 {$ENDIF FPC_DOTTEDUNITS}
 
 Type

@@ -41,7 +41,8 @@ uses
   tcfontdefinition,
   tchybridcanvas,
   tcmig_linkhandler,
-  tcmig_unitvalue;
+  tcmig_unitvalue,
+  tclistviewselection;
 var
   lRegistry: TNXTestRegistry;
 begin
@@ -84,6 +85,7 @@ begin
     RegistertchybridcanvasTests(lRegistry);
     RegistertcmiglinkhandlerTests(lRegistry);
     RegistertcmigunitvalueTests(lRegistry);
+    RegisterListViewSelectionTests(lRegistry);
     ExitCode := RunConsoleTests(lRegistry);
   finally
     lRegistry.Free;

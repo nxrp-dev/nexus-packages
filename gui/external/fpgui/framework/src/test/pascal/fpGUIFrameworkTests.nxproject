@@ -6,7 +6,7 @@ module "../../../../../../../../../projects/nxbuild/nxbuild.environment.nxscript
 
 Project fpGUIFrameworkTests {
     RootDirectory: "../../../../../../../../..";
-    OutputRoot: "output/fpgui-tests/" + @Tools.Native.Name + "/framework";
+    OutputRoot: "../../worktree/collections-avl/final/gui/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: [
@@ -38,7 +38,7 @@ Project fpGUIFrameworkTests {
                 "packages/nexus-packages-ext/regexpr/external/tregexpr/src",
                 @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
                 "packages/nexus-packages/graphics/fcl-image/src",
-                @Tools.NexusFPC.SourcePath + "/packages/paszlib/src",
+                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
                 "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
                 "packages/nexus-packages/nxtest/src"
