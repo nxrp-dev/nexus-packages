@@ -8,7 +8,7 @@ unit obNXSQLiteDataSet;
 
 interface
 
-uses Classes, SysUtils, DB, FGL, SQLite3Dyn, tpNXSQLite,
+uses Classes, SysUtils, DB, Generics.Collections, SQLite3Dyn, tpNXSQLite,
   obNXSQLiteConnection, obNXSQLiteRow;
 
 type
@@ -44,7 +44,7 @@ type
     procedure Detach;
   end;
 
-  TNXSQLiteRows = specialize TFPGObjectList<TNXSQLiteRow>;
+  TNXSQLiteRows = specialize TObjectList<TNXSQLiteRow>;
 
   TNXSQLiteDataSet = class(TDataSet)
   private
@@ -64,7 +64,7 @@ type
     FWritable: Boolean;
     FNextID: QWord;
     FEditSerial: QWord;
-    FStreams: TList;
+    FStreams: Classes.TList;
     FOriginal: TNXSQLiteRow;
     FFilterBuffer: TRecordBuffer;
     FFilterStatement: Psqlite3_stmt;
@@ -172,7 +172,7 @@ type
     procedure SetOnFilterRecord(const AValue: TFilterRecordEvent); override;
     function FindRecord(ARestart, AGoForward: Boolean): Boolean; override;
     procedure UpdateIndexDefs; override;
-    procedure PSGetAttributes(AList: TList); override;
+    procedure PSGetAttributes(AList: Classes.TList); override;
     function PSGetCommandType: TPSCommandType; override;
     function PSGetDefaultOrder: TIndexDef; override;
     function PSGetIndexDefs(AIndexTypes: TIndexOptions): TIndexDefs; override;
@@ -288,7 +288,7 @@ begin
   FUpdateSQL.OnChanging := @SQLChanging;
   FDeleteSQL.OnChanging := @SQLChanging;
   FRows := TNXSQLiteRows.Create(True);
-  FStreams := TList.Create;
+  FStreams := Classes.TList.Create;
   FIndexDefs := TIndexDefs.Create(Self);
   FMasterLink := TMasterParamsDataLink.Create(Self);
   FMasterLink.Params := FParams;
@@ -2073,7 +2073,7 @@ begin
   GetCalcFields(ABuffer);
 end;
 
-procedure TNXSQLiteDataSet.PSGetAttributes(AList: TList);
+procedure TNXSQLiteDataSet.PSGetAttributes(AList: Classes.TList);
 begin
   AList.Clear;
 end;

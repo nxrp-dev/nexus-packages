@@ -18,7 +18,7 @@ unit obNXTreeView;
 interface
 
 uses
-  Classes, Math, fgl,
+  Classes, Math, Generics.Collections,
   fpg_base, fpg_main, fpg_scrollbar, fpg_widget;
 
 type
@@ -80,10 +80,10 @@ type
     property Width: Integer read FWidth write SetWidth;
   end;
 
-  TNXTreeViewCellList = specialize TFPGObjectList<TNXTreeViewCell>;
-  TNXTreeViewNodeList = specialize TFPGObjectList<TNXTreeViewNode>;
-  TNXTreeViewColumnListBase = specialize TFPGObjectList<TNXTreeViewColumn>;
-  TNXTreeViewVisibleNodeList = specialize TFPGList<TNXTreeViewNode>;
+  TNXTreeViewCellList = specialize TObjectList<TNXTreeViewCell>;
+  TNXTreeViewNodeList = specialize TObjectList<TNXTreeViewNode>;
+  TNXTreeViewColumnListBase = specialize TObjectList<TNXTreeViewColumn>;
+  TNXTreeViewVisibleNodeList = specialize TList<TNXTreeViewNode>;
 
   TNXTreeViewNode = class
   private

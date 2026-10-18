@@ -23,7 +23,8 @@
 interface
 
 uses
-  Classes, SysUtils, fpg_widget, fpg_base, fpg_main, fpg_scrollbar, fpg_label, fpg_edit, fgl;
+  Classes, SysUtils, fpg_widget, fpg_base, fpg_main, fpg_scrollbar, fpg_label, fpg_edit,
+  Generics.Collections;
 
 type
   TfpgHexView = class;
@@ -48,7 +49,7 @@ type
     AddressSpace   = 2; // use an even number
     CharSpacing    = 5;
   type
-    TEventList = specialize TFPGList<IfpgHexEventListener>;
+    TEventList = specialize TList<IfpgHexEventListener>;
   private
     FCursor: Int64;
     FOwnsStream: Boolean;

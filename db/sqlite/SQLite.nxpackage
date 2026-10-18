@@ -61,12 +61,14 @@ Package SQLite {
                 @Tools.Native.PackageSDKPath + "/units",
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
                 @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
                 "packages/nexus-packages/db/fcl-db/src/base",
                 @SQLite.SourceRoot + "/src",
                 @SQLite.SourceRoot + "/src/bindings"
             ];
             IncludePaths: [
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

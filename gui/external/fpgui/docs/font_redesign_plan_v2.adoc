@@ -370,7 +370,7 @@ unit fpg_fontmanager;
 interface
 
 uses
-  Classes, SysUtils, contnrs, fgl, fpg_base;
+  Classes, SysUtils, contnrs, fpg_base;
 
 type
   TfpgFontManager = class(TObject)

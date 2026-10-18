@@ -28,8 +28,8 @@ uses
   fpg_impl,
   syncobjs, // TCriticalSection usage
   variants,
-  fgl,
   contnrs,
+  Generics.Collections,
   fpg_cmdlineparams,
   fpg_wakeChannel;
 
@@ -819,7 +819,7 @@ type
   protected
     FOnIdle: TNotifyEvent;
     FIsInitialized: Boolean;
-    FModalFormStack: TList;
+    FModalFormStack: Classes.TList;
     FSelection: TfpgClipboardBase;
     function    DoGetFontFaceList: TStringList; virtual; abstract;
     procedure   DoWaitWindowMessage(atimeoutms: integer); virtual; abstract;
@@ -921,7 +921,7 @@ type
 
   TfpgFileListBase = class(TObject)
   private
-    FEntries: TList;
+    FEntries: Classes.TList;
     FDirectoryName: TfpgString;
     FFileMask: TfpgString;
     FSearchMode: TfpgSearchMode;
@@ -960,19 +960,19 @@ type
     constructor Create(const AFormat: TfpgString; const AData: variant); reintroduce;
   end;
 
-  TfpgMimeDataItemList = specialize TFPGObjectList<TfpgMimeDataItem>;
+  TfpgMimeDataItemList = specialize TObjectList<TfpgMimeDataItem>;
 
 
   TfpgMimeDataBase = class(TObject)
   private
     { TODO: This is wrong, we must have one Data Storage object }
-    FDataList: TObjectList;
-    FUrlList: TList;
+    FDataList: Contnrs.TObjectList;
+    FUrlList: Classes.TList;
     function    GetItem(AIndex: Integer): TfpgMimeDataItem;
     function    GetObject(AMimeType: String): TObject;
-    function    Geturls: TList;
+    function    Geturls: Classes.TList;
     procedure   SetObject(AMimeType: String; AValue: TObject);
-    procedure   Seturls(const AValue: TList);
+    procedure   Seturls(const AValue: Classes.TList);
     function    GetText: TfpgString;
     procedure   SetText(const AValue: TfpgString);
     function    GetHTML: TfpgString;
@@ -987,7 +987,7 @@ type
     function    GetData(const AMimeType: TfpgString): Variant;
     procedure   SetData(const AMimeType: TfpgString; const AData: Variant);
     property    Items[AIndex: Integer]: TfpgMimeDataItem read GetItem; default;
-    property    urls: TList read Geturls write Seturls;
+    property    urls: Classes.TList read Geturls write Seturls;
     property    Text: TfpgString read GetText write SetText;
     property    HTML: TfpgString read GetHTML write SetHTML;
     property    Obj[AMimeType: String]: TObject read GetObject write SetObject; // defaults to MIME_OBJECT if blank
@@ -4068,7 +4068,7 @@ end;
 constructor TfpgApplicationBase.Create(const AParams: string);
 begin
   inherited Create(nil);
-  FModalFormStack := TList.Create;
+  FModalFormStack := Classes.TList.Create;
   FCritSect := TCriticalSection.Create;
   FHelpKey := keyF1;
   FHelpType := htContext;
@@ -4459,7 +4459,7 @@ end;
 
 constructor TfpgFileListBase.Create;
 begin
-  FEntries := TList.Create;
+  FEntries := Classes.TList.Create;
   FFileMask :=  AllFilesMask;
   FDirectoryName := '';
   FSpecialDirs := TStringList.Create;
@@ -4535,7 +4535,7 @@ end;
 
 procedure TfpgFileListBase.Sort(AOrder: TFileListSortOrder);
 var
-  newl: TList;
+  newl: Classes.TList;
   n: integer;
   i: integer;
   e: TFileEntry;
@@ -4571,7 +4571,7 @@ var
   end;
 
 begin
-  newl := TList.Create;
+  newl := Classes.TList.Create;
   for n := 0 to FEntries.Count-1 do
   begin
     e := TFileEntry(FEntries[n]);
@@ -4624,7 +4624,7 @@ end;
 
 { TfpgMimeDataBase }
 
-function TfpgMimeDataBase.Geturls: TList;
+function TfpgMimeDataBase.Geturls: Classes.TList;
 begin
   { TODO: We should only return data related to MIME type:  text/uri-list }
   Result := nil;
@@ -4676,7 +4676,7 @@ begin
   end;
 end;
 
-procedure TfpgMimeDataBase.Seturls(const AValue: TList);
+procedure TfpgMimeDataBase.Seturls(const AValue: Classes.TList);
 begin
   if AValue = nil then
     raise Exception.Create('Source URI list must not be nil');
@@ -4772,7 +4772,7 @@ end;
 constructor TfpgMimeDataBase.Create;
 begin
   inherited Create;
-  FDataList := TObjectList.Create;
+  FDataList := Contnrs.TObjectList.Create;
 end;
 
 destructor TfpgMimeDataBase.Destroy;
