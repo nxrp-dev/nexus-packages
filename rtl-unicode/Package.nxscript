@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "nxpackage.Language.nxscript";
+Package RTLUnicode {
+    Id: "NXRP.RTLUnicode";
+    Author: "Inoussa Ouedraogo, Nikolay Nikolov, LazUtils and Free Pascal contributors";
+    Description: "Unicode collation, UTF-8 utilities, grapheme clusters, width properties and code-page mappings.";
+    // Original per-file LGPL/Unicode notices and exceptions are retained; see root ATTRIBUTIONS.md.
+    UnitPaths: ["src/inc", "src/collations"];
+    IncludePaths: ["src/inc", "src/collations"];
+}

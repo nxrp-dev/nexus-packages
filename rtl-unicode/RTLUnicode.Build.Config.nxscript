@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+// A Unicode-default build supplies a matching Unicode RTL and selects UNICODESTRINGS.
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+Environment RTLUnicodeBuild {
+    Compiler: @Tools.Native.FPCCompiler;
+    RTLPath: @Tools.Native.RTLPath;
+    TextMode: "ANSISTRINGS";
+    SourceRoot: "packages/nexus-packages/rtl-unicode";
+    OutputRoot: "output/rtl-unicode/ansi";
+}

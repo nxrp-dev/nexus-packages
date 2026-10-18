@@ -13,6 +13,11 @@
 dialect "nxpackage.Language.nxscript";
 
 RepositoryIndex NexusPackages {
+    LocalPackage RTLUnicode {
+        Id: "NXRP.RTLUnicode";
+        Descriptor: "rtl-unicode/Package.nxscript";
+        Description: "Unicode collation, UTF-8 utilities, graphemes, width and code-page mappings.";
+    }
     // Sister repository discovery only; no traversal or acquisition is implied.
     TrustedRepository NexusExternal {
         Source: "https://github.com/nxrp-dev/nexus-packages-ext.git";

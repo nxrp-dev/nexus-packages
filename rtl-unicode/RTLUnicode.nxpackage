@@ -1,0 +1,36 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "RTLUnicode.Build.Config.nxscript";
+Package RTLUnicode {
+    RootDirectory: "../../..";
+    SourceRoot: @RTLUnicodeBuild.SourceRoot;
+    OutputRoot: @RTLUnicodeBuild.OutputRoot + "/package";
+    FPC Units {
+        CompilerPath: @RTLUnicodeBuild.Compiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @RTLUnicode.SourceRoot + "/src/inc/unicodeducet.pas",
+            @RTLUnicode.SourceRoot + "/src/collations/buildcollations.pas",
+            @RTLUnicode.SourceRoot + "/src/inc/cpbuildu.pas",
+            @RTLUnicode.SourceRoot + "/src/inc/utf8utils.pas",
+            @RTLUnicode.SourceRoot + "/src/inc/graphemebreakproperty.pas",
+            @RTLUnicode.SourceRoot + "/src/inc/eastasianwidth.pas"
+        ];
+        OutputPath: @RTLUnicode.OutputRoot;
+        RawOptions: ["-M" + @RTLUnicodeBuild.TextMode];
+        Language Pascal { Mode: ObjFPC; }
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @RTLUnicodeBuild.RTLPath,
+                @RTLUnicode.SourceRoot + "/src/inc",
+                @RTLUnicode.SourceRoot + "/src/collations",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
+            ];
+            IncludePaths: [@RTLUnicode.SourceRoot + "/src/inc", @RTLUnicode.SourceRoot + "/src/collations"];
+        }
+    }
+}
