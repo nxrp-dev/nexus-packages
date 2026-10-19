@@ -7,9 +7,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project HashLib4PascalTests {
     Id: "NXRP.Tests.HashLib4PascalTests";
-    Requires: [@Projects.NexusTest, @Projects.HashLib4Pascal, @Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NexusTest, @Projects.HashLib4Pascal, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/HashLib4PascalTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/HashLib4PascalTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/hashlib4pascal/tests/HashLib4PascalTests.lpr"];
@@ -19,16 +19,6 @@ Project HashLib4PascalTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
-            ];
         }
     }
 }

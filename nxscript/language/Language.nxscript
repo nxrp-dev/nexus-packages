@@ -130,7 +130,7 @@ Language Language {
                         EffectiveCategories: [Array];
                         Array Array {
                             EntryEffectiveCategories: [Text];
-                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition];
+                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition, ExternalReference];
                         }
                     }
                 },
@@ -179,7 +179,7 @@ Language Language {
                         EffectiveCategories: [Array];
                         Array Array {
                             EntryEffectiveCategories: [Text];
-                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition];
+                            AllowedValues: [Text, Array, Reference, TextComposition, InlineDefinition, ExternalReference];
                         }
                     }
                 },

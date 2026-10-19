@@ -28,11 +28,10 @@ type
   TNSUnknownPolicy = (nupAllow, nupReject);
   TNSNamePolicy = (nnpOptional, nnpRequired, nnpForbidden);
   TNSSourceForm = (nsfText, nsfArray, nsfReference,
-    nsfTextComposition, nsfInlineDefinition);
+    nsfTextComposition, nsfInlineDefinition, nsfExternalReference);
   TNSSourceForms = set of TNSSourceForm;
   TNSEffectiveCategory = (necText, necArray, necDefinition);
   TNSEffectiveCategories = set of TNSEffectiveCategory;
-  TNSScalarKind = (nskNone, nskText, nskInteger, nskBoolean);
   TNSReferenceTarget = (nrtProperty, nrtDefinition);
   TNSReferenceTargets = set of TNSReferenceTarget;
 
@@ -641,6 +640,7 @@ begin
   case AValue.Kind of
     nsvArray: Result := nsfArray;
     nsvReference: Result := nsfReference;
+    nsvExternalReference: Result := nsfExternalReference;
     nsvTextComposition: Result := nsfTextComposition;
     nsvDefinition: Result := nsfInlineDefinition;
   else
@@ -683,6 +683,7 @@ begin
     if SameText(lText, 'Text') then Include(AForms, nsfText)
     else if SameText(lText, 'Array') then Include(AForms, nsfArray)
     else if SameText(lText, 'Reference') then Include(AForms, nsfReference)
+    else if SameText(lText, 'ExternalReference') then Include(AForms, nsfExternalReference)
     else if SameText(lText, 'TextComposition') then Include(AForms, nsfTextComposition)
     else if SameText(lText, 'InlineDefinition') then Include(AForms, nsfInlineDefinition)
     else Exit(False);

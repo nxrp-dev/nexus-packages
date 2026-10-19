@@ -7,9 +7,9 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLImageBehaviorTests {
     Id: "NXRP.Tests.FCLImageBehaviorTests";
-    Requires: [@Projects.FCLImage, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.FCLImage, @Projects.NexusTest];
     RootDirectory: "../../../../..";
-    OutputRoot: @Tools.OutputRoot + "/FCLImageBehaviorTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLImageBehaviorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/graphics/fcl-image/tests/FCLImageBehaviorTests.lpr"];
@@ -20,7 +20,6 @@ Project FCLImageBehaviorTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
                 "packages/nexus-packages/graphics/fcl-image/tests"
             ];
         }

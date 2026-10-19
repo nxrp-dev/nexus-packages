@@ -1,0 +1,12 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "RTLUnicode.Build.Config.nxscript";
+
+Project RTLUnicodeRTL {
+    Id: "NXRP.SDK.RTLUnicodeRTL";
+    RootDirectory: "../../..";
+    Description: "RTL units matching the Unicode build configuration.";
+    Publishes Directories { Sources: [@RTLUnicodeBuild.RTLPath]; }
+}

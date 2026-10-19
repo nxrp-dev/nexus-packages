@@ -8,9 +8,9 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project Users {
     Id: "NXRP.Unix.Users.Units";
     Publishes Directories { Sources: [@Users.OutputRoot]; }
-    Requires: [@Projects.Users];
+    Requires: [@Projects.NexusRTL, @Projects.Users];
     RootDirectory: "../../..";
-    OutputRoot: @Tools.OutputRoot + "/Users/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/Users/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -25,7 +25,6 @@ Project Users {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }
@@ -38,7 +37,6 @@ Project Users {
         Assembler Native { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
         }
     }
 }

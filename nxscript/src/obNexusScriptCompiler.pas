@@ -58,7 +58,7 @@ type
   TNexusScriptTokenKind = (
     nstWord, nstQuoted, nstLeftBrace, nstRightBrace, nstColon, nstSemicolon,
     nstLeftParenthesis, nstRightParenthesis, nstComma, nstLeftBracket,
-    nstRightBracket, nstAt, nstDot, nstPlus, nstEndOfFile
+    nstRightBracket, nstAt, nstDollar, nstDot, nstPlus, nstEndOfFile
   );
 
   TNexusScriptToken = record
@@ -218,6 +218,7 @@ begin
       '[': begin Advance; Emit(nstLeftBracket, '['); end;
       ']': begin Advance; Emit(nstRightBracket, ']'); end;
       '@': begin Advance; Emit(nstAt, '@'); end;
+      '$': begin Advance; Emit(nstDollar, '$'); end;
       '.': begin Advance; Emit(nstDot, '.'); end;
       '+': begin Advance; Emit(nstPlus, '+'); end;
       '"':
@@ -268,7 +269,7 @@ begin
       lText := '';
       while (lIndex <= Length(AText)) and not (AText[lIndex] <= ' ') and
         not (AText[lIndex] in ['{', '}', ':', ';', '(', ')', ',', '[', ']',
-          '@', '.', '+', '"']) do
+          '@', '$', '.', '+', '"']) do
       begin
         lText := lText + AText[lIndex];
         Advance;
@@ -381,9 +382,15 @@ var
     lToken: TNexusScriptToken;
   begin
     lRange := Current.SourceRange;
-    if Match(nstAt) then
+    if Current.Kind in [nstAt, nstDollar] then
     begin
-      Result := TNexusScriptSourceValue.Create(nsvReference, lRange);
+      if Match(nstAt) then
+        Result := TNexusScriptSourceValue.Create(nsvReference, lRange)
+      else
+      begin
+        Inc(FIndex);
+        Result := TNexusScriptSourceValue.Create(nsvExternalReference, lRange);
+      end;
       Result.Text := ParsePath(lRange, Result.ReferenceRanges);
       lRange.StartPosition := Result.SourceRange.StartPosition;
       Result.SourceRange := lRange;
@@ -399,7 +406,7 @@ var
       Result := TNexusScriptSourceValue.Create(nsvText, lRange);
       lText := '';
       while not (Current.Kind in AStopKinds + [nstPlus, nstComma,
-        nstRightBracket, nstEndOfFile]) do
+        nstRightBracket, nstDollar, nstEndOfFile]) do
       begin
         lToken := Current;
         if lText <> '' then
@@ -487,6 +494,8 @@ var
   lTarget: TNexusScriptTarget;
   lDuplicateTarget: Boolean;
   lSelectorRange: TNexusScriptRange;
+  lExternal: Boolean;
+  lNameRange: TNexusScriptRange;
 begin
   lKindToken := Require(nstWord, 'definition kind');
   lNameToken := Require(nstWord, 'definition name');
@@ -592,12 +601,20 @@ begin
   while (Current.Kind <> nstRightBrace) and
     (Current.Kind <> nstEndOfFile) do
   begin
-    lMemberToken := Require(nstWord, 'member name');
+    lExternal := Match(nstDollar);
+    if lExternal then
+    begin
+      lMemberToken := FTokens[FIndex - 1];
+      lMemberToken.Text := ParsePath(lNameRange);
+      lMemberToken.SourceRange.EndPosition := lNameRange.EndPosition;
+    end
+    else
+      lMemberToken := Require(nstWord, 'member name');
     if Match(nstColon) then
     begin
       lValue := ParseValue([nstSemicolon]);
       lEndToken := Require(nstSemicolon, ';');
-      if Result.FindProperty(lMemberToken.Text) <> nil then
+      if Result.FindProperty(lMemberToken.Text, lExternal) <> nil then
       begin
         FCompiler.AddError('NXS3001', 'Duplicate member ' +
           lMemberToken.Text, lMemberToken.SourceRange);
@@ -606,7 +623,7 @@ begin
       else
       begin
         Result.Properties.Add(TNexusScriptSourceProperty.Create(
-          lMemberToken.Text, lValue, lMemberToken.SourceRange));
+          lMemberToken.Text, lValue, lMemberToken.SourceRange, lExternal));
         Result.Properties[Result.Properties.Count - 1].NameRange :=
           lMemberToken.SourceRange;
         Result.Properties[Result.Properties.Count - 1].ValueRange :=
@@ -617,6 +634,9 @@ begin
           lSourceRange;
       end;
     end
+    else if lExternal then
+      FCompiler.AddError('NXS2001', 'Expected : after external assignment',
+        Current.SourceRange)
     else
     begin
       Dec(FIndex);
@@ -1025,7 +1045,7 @@ begin
     lCompiledValue := CopyValue(ACompiler, lProperty.Value, ASelectedTargets);
     if lCompiledValue <> nil then
       Result.Properties.Add(TNexusScriptCompiledProperty.Create(lProperty.Name,
-        lCompiledValue, lProperty.SourceRange));
+        lCompiledValue, lProperty.SourceRange, lProperty.IsExternal));
   end;
   for lChild in ASource.Children do
   begin
@@ -1075,6 +1095,8 @@ begin
   Result.InlineSourceDefinition := AValue.InlineSourceDefinition;
   Result.EffectiveText := AValue.EffectiveText;
   Result.HasEffectiveText := AValue.HasEffectiveText;
+  Result.RequiresContext := AValue.RequiresContext;
+  Result.TextConstraints.Assign(AValue.TextConstraints);
   Result.ResolvedDefinition := AValue.ResolvedDefinition;
   Result.ResolvedProperty := AValue.ResolvedProperty;
   Result.ResolvedValue := AValue.ResolvedValue;
@@ -1110,6 +1132,8 @@ begin
   AValue.ResolvedValue := lBinding.ResolvedValue;
   AValue.EffectiveText := lBinding.EffectiveText;
   AValue.HasEffectiveText := lBinding.HasEffectiveText;
+  AValue.RequiresContext := lBinding.RequiresContext;
+  AValue.TextConstraints.Assign(lBinding.TextConstraints);
   AValue.EffectiveName := lBinding.EffectiveName;
   AValue.OriginalDefinitionName := lBinding.OriginalDefinitionName;
   AValue.EffectiveValue.Free;
@@ -1132,6 +1156,7 @@ var
 begin
   Result := TNexusScriptCompiledValue.Create(AValue.Kind, AValue.SourceRange);
   Result.SourceText := AValue.SourceText;
+  Result.TextConstraints.Assign(AValue.TextConstraints);
   Result.ImportBinding := AValue.ImportBinding;
   Result.ReferenceRanges.AddRange(AValue.ReferenceRanges);
   Result.EntryName := AValue.EntryName;
@@ -1169,7 +1194,7 @@ begin
   for lProperty in ASource.Properties do
   begin
     Result.Properties.Add(TNexusScriptCompiledProperty.Create(lProperty.Name,
-      CloneValue(lProperty.Value), lProperty.SourceRange));
+      CloneValue(lProperty.Value), lProperty.SourceRange, lProperty.IsExternal));
     CopyContributorRanges(lProperty,
       Result.Properties[Result.Properties.Count - 1]);
   end;
@@ -1196,7 +1221,7 @@ begin
   begin
     Result.Properties.Add(TNexusScriptCompiledProperty.Create(lProperty.Name,
       CloneValueForRebinding(lProperty.Value, ADetachSource),
-      lProperty.SourceRange));
+      lProperty.SourceRange, lProperty.IsExternal));
     CopyContributorRanges(lProperty,
       Result.Properties[Result.Properties.Count - 1]);
   end;
@@ -1329,12 +1354,13 @@ var
     lLocalChildren: TNexusScriptCompiledDefinitionList;
     lEmptyRange: TNexusScriptRange;
 
-    procedure RemoveProperty(const AName: string);
+    procedure RemoveProperty(const AName: string; AIsExternal: Boolean = False);
     var
       lMemberIndex: Integer;
     begin
       for lMemberIndex := ADefinition.Properties.Count - 1 downto 0 do
-        if SameText(ADefinition.Properties[lMemberIndex].Name, AName) then
+        if ADefinition.Properties[lMemberIndex] =
+          ADefinition.FindProperty(AName, AIsExternal) then
           ADefinition.Properties.Delete(lMemberIndex);
     end;
 
@@ -1373,14 +1399,14 @@ var
         Result := AValue.Kind in [nsvArray, nsvReference];
       end;
     begin
-      if ADefinition.FindChild(AProperty.Name) <> nil then
+      if not AProperty.IsExternal and (ADefinition.FindChild(AProperty.Name) <> nil) then
       begin
         AddError('NXS4003', 'Ambiguous composed member ' + AProperty.Name,
           ADefinition.SourceRange);
         Exit;
       end;
-      lExisting := ADefinition.FindProperty(AProperty.Name);
-      if (lExisting <> nil) and CanHaveArrayResult(lExisting.Value) and
+      lExisting := ADefinition.FindProperty(AProperty.Name, AProperty.IsExternal);
+      if not AProperty.IsExternal and (lExisting <> nil) and CanHaveArrayResult(lExisting.Value) and
         CanHaveArrayResult(AProperty.Value) then
       begin
         lMergedValue := CloneValueForRebinding(AProperty.Value);
@@ -1390,26 +1416,26 @@ var
         AppendCompositionLayers(lMergedValue, lExisting.Value);
         AppendCompositionLayers(lMergedValue, AProperty.Value);
         lResultProperty := TNexusScriptCompiledProperty.Create(
-          AProperty.Name, lMergedValue, AProperty.SourceRange);
+          AProperty.Name, lMergedValue, AProperty.SourceRange, AProperty.IsExternal);
         lResultProperty.ContributorRanges.Clear;
         lResultProperty.ContributorRanges.AddRange(
           lExisting.ContributorRanges);
         lResultProperty.ContributorRanges.AddRange(
           AProperty.ContributorRanges);
-        RemoveProperty(AProperty.Name);
+        RemoveProperty(AProperty.Name, AProperty.IsExternal);
         ADefinition.Properties.Add(lResultProperty);
         Exit;
       end;
       lResultProperty := TNexusScriptCompiledProperty.Create(
         AProperty.Name, CloneValueForRebinding(AProperty.Value),
-        AProperty.SourceRange);
+        AProperty.SourceRange, AProperty.IsExternal);
       lResultProperty.ContributorRanges.Clear;
       if lExisting <> nil then
         lResultProperty.ContributorRanges.AddRange(
           lExisting.ContributorRanges);
       lResultProperty.ContributorRanges.AddRange(
         AProperty.ContributorRanges);
-      RemoveProperty(AProperty.Name);
+      RemoveProperty(AProperty.Name, AProperty.IsExternal);
       ADefinition.Properties.Add(lResultProperty);
     end;
   begin
@@ -1435,7 +1461,7 @@ var
       for lProperty in ADefinition.Properties do
       begin
         lLocalProperties.Add(TNexusScriptCompiledProperty.Create(lProperty.Name,
-          CloneValue(lProperty.Value), lProperty.SourceRange));
+          CloneValue(lProperty.Value), lProperty.SourceRange, lProperty.IsExternal));
         CopyContributorRanges(lProperty,
           lLocalProperties[lLocalProperties.Count - 1]);
       end;
@@ -1942,6 +1968,11 @@ var
         if not PrepareArrayValue(AScope, AValue, lArrayValue) then
           Exit;
       case AValue.Kind of
+      nsvExternalReference:
+        begin
+          AValue.RequiresContext := True;
+          Result := True;
+        end;
       nsvText:
         begin
           AValue.EffectiveText := AValue.SourceText;
@@ -1998,6 +2029,7 @@ var
               Exit;
             AValue.EffectiveText := lDirectValue.EffectiveText;
             AValue.HasEffectiveText := lDirectValue.HasEffectiveText;
+            AValue.RequiresContext := lDirectValue.RequiresContext;
             AValue.ResolvedDefinition := lDirectValue.DefinitionValue;
             AValue.EffectiveValue.Free;
             AValue.EffectiveValue := nil;
@@ -2029,6 +2061,7 @@ var
               Exit;
             AValue.EffectiveText := lProperty.Value.EffectiveText;
             AValue.HasEffectiveText := lProperty.Value.HasEffectiveText;
+            AValue.RequiresContext := lProperty.Value.RequiresContext;
             AValue.EffectiveValue.Free;
             AValue.EffectiveValue := nil;
             if lProperty.Value.EffectiveValue <> nil then
@@ -2062,7 +2095,9 @@ var
           begin
             if not EvaluateValue(AScope, lItem, AReceiverName) then
               lSucceeded := False;
-            if not lItem.HasEffectiveText then
+            if lItem.RequiresContext then
+              AValue.RequiresContext := True
+            else if not lItem.HasEffectiveText then
             begin
               AddError('NXS5003',
                 'Definition reference cannot be composed as text',
@@ -2073,6 +2108,11 @@ var
             else
               AValue.EffectiveText := AValue.EffectiveText +
                 lItem.EffectiveText;
+          end;
+          if AValue.RequiresContext then
+          begin
+            AValue.HasEffectiveText := False;
+            AValue.EffectiveText := '';
           end;
           Result := lSucceeded;
         end;
@@ -2103,8 +2143,24 @@ var
   begin
     Result := True;
     for lProperty in ADefinition.Properties do
+    begin
       if not EvaluateProperty(ADefinition, lProperty) then
         Result := False;
+      if lProperty.IsExternal then
+      begin
+        if FSelectedTargets.Find(lProperty.Name) <> nil then
+        begin
+          AddError('NXS5010', 'Selected Target $' + lProperty.Name + ' is read-only',
+            lProperty.SourceRange);
+          Result := False;
+        end;
+        if not lProperty.Value.HasEffectiveText and not lProperty.Value.RequiresContext then
+        begin
+          AddError('NXS5011', 'External assignment requires text', lProperty.SourceRange);
+          Result := False;
+        end;
+      end;
+    end;
     for lChild in ADefinition.Children do
       if not BindDefinition(lChild) then
         Result := False;
@@ -2200,6 +2256,7 @@ begin
   FreeAndNil(FCompiledDocument);
   FreeAndNil(FSourceDocument);
   FCompiledDocument := TNexusScriptCompiledDocument.Create(ASourceName, ACompiledAt);
+  FCompiledDocument.SelectedTargets.Assign(FSelectedTargets);
   lParser := TNexusScriptParser.Create(Self, ASourceName, AText);
   try
     FSourceDocument := lParser.Parse;

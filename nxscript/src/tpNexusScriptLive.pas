@@ -18,6 +18,12 @@ unit tpNexusScriptLive;
 interface
 
 type
+  TNexusScriptExternalReadEvent = procedure(const APath: string;
+    out AValue: string; out AHandled: Boolean) of object;
+  TNexusScriptExternalResultEvent = procedure(const APath, AValue: string;
+    out AHandled: Boolean) of object;
+  TNexusScriptLiveReferenceKind = (nslrInternal, nslrExternal);
+
   TNexusScriptLiveValueKind = (nslvText, nslvArray, nslvDefinition);
 
 implementation

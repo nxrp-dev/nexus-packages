@@ -6,7 +6,8 @@ This package contains the reusable NexusScript mechanism:
 - compiler, import, source-provider, and compilation-session logic;
 - analysis, language definitions, normalization, and validation;
 - artifact model, bounded JSON, SQLite relational projection, and native Live snapshots;
-- external tabular-source handling and manifest processing.
+- external tabular-source handling and manifest processing;
+- lazy `$` external references, generic selected Target values and desired-state events.
 
 The command-line frontend remains under `projects/nxscript/cli`. The
 NexusScript language-server adapter remains under `projects/ls/nxscript`.
@@ -29,7 +30,9 @@ delegates to that stream operation.
 
 Live is an in-memory result, not a stream artifact or a CLI output format.
 `TNexusScriptLiveEmitter.Emit` returns a caller-owned snapshot with semantic
-objects and real links. See [Live ownership and navigation](doc/live-emitter.md).
+objects and real links. External values are evaluated when accessed. See
+[Live ownership and navigation](doc/live-emitter.md) and
+[external references](doc/external-references.md).
 Concrete object-reference cycles compile normally. Scalar aliases with no
 terminating value still fail compilation. JSON rejects recursive expansion at
 emission; Live retains real object links. SQLite keeps its authored relational

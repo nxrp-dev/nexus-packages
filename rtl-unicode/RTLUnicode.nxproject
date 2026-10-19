@@ -6,10 +6,10 @@ module "RTLUnicode.Build.Config.nxscript";
 Project RTLUnicode {
     Id: "NXRP.RTLUnicode.Units";
     Publishes Directories { Sources: [@RTLUnicode.OutputRoot]; }
-    Requires: [@Projects.RTLUnicode];
+    Requires: [@Projects.RTLUnicodeRTL, @Projects.RTLObjPas, @Projects.RTLUnicode];
     RootDirectory: "../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @Tools.OutputRoot + "/RTLUnicode/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/RTLUnicode/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         BuildKind: Unit;
@@ -28,7 +28,6 @@ Project RTLUnicode {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@RTLUnicodeBuild.RTLPath, @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"];
             IncludePaths: [];
         }
     }

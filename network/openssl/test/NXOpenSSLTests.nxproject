@@ -15,9 +15,9 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NXOpenSSLTests {
     Id: "NXRP.Tests.NXOpenSSLTests";
-    Requires: [@Projects.OpenSSL, @Projects.Synapse, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLExtra, @Projects.OpenSSL, @Projects.Synapse, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NXOpenSSLTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NXOpenSSLTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: [
@@ -34,19 +34,7 @@ Project NXOpenSSLTests {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @NXOpenSSLTests.OutputRoot,
-                @Tools.Native.RTLPath,
-                "packages/nexus-packages/network/openssl/test",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                "packages/nexus-packages/network/openssl/test"
             ];
         }
     }

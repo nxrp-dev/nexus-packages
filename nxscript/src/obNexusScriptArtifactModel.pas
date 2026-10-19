@@ -155,7 +155,69 @@ type
 
   TNexusScriptArtifactDocumentList = TObjectList<TNexusScriptArtifactDocument>;
 
+procedure RequireMaterializedNexusScriptDocument(ADocument: TNexusScriptCompiledDocument);
+
 implementation
+
+uses SysUtils, obNexusScriptDefinitionView;
+
+procedure RequireMaterializedNexusScriptDocument(ADocument: TNexusScriptCompiledDocument);
+var
+  lView: TNexusScriptDefinitionView;
+  lDefinitions: TList<TNexusScriptCompiledDefinition>;
+  lValues: TList<TNexusScriptCompiledValue>;
+  lRoot: TNexusScriptCompiledDefinition;
+
+  procedure CheckDefinition(ADefinition: TNexusScriptCompiledDefinition); forward;
+
+  procedure CheckValue(AValue: TNexusScriptCompiledValue);
+  var
+    lValue, lItem: TNexusScriptCompiledValue;
+  begin
+    if lValues.IndexOf(AValue) >= 0 then Exit;
+    lValues.Add(AValue);
+    if AValue.RequiresContext then
+      raise Exception.CreateFmt('%s(%d,%d): External expressions require Live evaluation before artifact materialization.',
+        [AValue.SourceRange.SourceName, AValue.SourceRange.StartPosition.Line,
+         AValue.SourceRange.StartPosition.Column]);
+    lValue := AValue.SemanticValue;
+    if lValue.DefinitionValue <> nil then
+      CheckDefinition(lValue.DefinitionValue)
+    else if lValue.Kind = nsvArray then
+      for lItem in lValue.Items do CheckValue(lItem);
+  end;
+
+  procedure CheckDefinition(ADefinition: TNexusScriptCompiledDefinition);
+  var
+    lProperty: TNexusScriptCompiledProperty;
+    lChild: TNexusScriptCompiledDefinition;
+  begin
+    if lDefinitions.IndexOf(ADefinition) >= 0 then Exit;
+    lDefinitions.Add(ADefinition);
+    for lProperty in ADefinition.Properties do
+    begin
+      if lProperty.IsExternal then
+        raise Exception.CreateFmt('%s(%d,%d): External assignment $%s requires processor-specific artifact lowering.',
+          [lProperty.SourceRange.SourceName, lProperty.SourceRange.StartPosition.Line,
+           lProperty.SourceRange.StartPosition.Column, lProperty.Name]);
+      CheckValue(lProperty.Value);
+    end;
+    for lChild in ADefinition.Children do CheckDefinition(lChild);
+  end;
+begin
+  lView := TNexusScriptDefinitionView.Create;
+  lDefinitions := TList<TNexusScriptCompiledDefinition>.Create;
+  lValues := TList<TNexusScriptCompiledValue>.Create;
+  try
+    lView.AddDocument(ADocument);
+    for lRoot in lView.Roots do CheckDefinition(lRoot);
+  finally
+    lValues.Free;
+    lDefinitions.Free;
+    lView.Free;
+  end;
+end;
+
 
 class function TNexusScriptArtifactTargetArray.ItemClass: TNXJSONValueClass;
 begin

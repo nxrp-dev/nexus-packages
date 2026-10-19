@@ -8,10 +8,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLImage {
     Id: "NXRP.Graphics.FCLImage.Units";
     Publishes Directories { Sources: [@FCLImage.OutputRoot]; }
-    Requires: [@Projects.FCLImage, @Projects.PasJPEG, @Projects.FCLBase, @Projects.Iconv];
+    Requires: [@Projects.NexusRTL, @Projects.RTLSystem, @Projects.RTLObjPas, @Projects.FCLImage, @Projects.PasJPEG, @Projects.FCLBase, @Projects.Iconv];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
-    OutputRoot: @Tools.OutputRoot + "/FCLImage/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLImage/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -82,15 +82,7 @@ Project FCLImage {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @FCLImage.OutputRoot
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

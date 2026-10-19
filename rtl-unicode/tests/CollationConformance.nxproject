@@ -4,11 +4,11 @@ dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
 module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../RTLUnicode.Build.Config.nxscript";
 Project CollationConformance {
-    Requires: [@Projects.RTLUnicode];
+    Requires: [@Projects.RTLUnicodeRTL, @Projects.RTLSystem, @Projects.RTLUnicode];
     Id: "NXRP.Tests.CollationConformance";
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @Tools.OutputRoot + "/CollationConformance/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/CollationConformance/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [
@@ -23,7 +23,7 @@ Project CollationConformance {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@RTLUnicodeBuild.RTLPath, @Tools.NexusFPC.SourcePath + "/rtl/objpas", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            UnitPaths: [@Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
             IncludePaths: [];
         }
     }

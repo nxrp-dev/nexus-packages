@@ -8,9 +8,9 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project Iconv {
     Id: "NXRP.Unix.Iconv.Units";
     Publishes Directories { Sources: [@Iconv.OutputRoot]; }
-    Requires: [@Projects.Iconv];
+    Requires: [@Projects.NexusRTL, @Projects.Iconv];
     RootDirectory: "../../..";
-    OutputRoot: @Tools.OutputRoot + "/Iconv/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/Iconv/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -23,7 +23,6 @@ Project Iconv {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }

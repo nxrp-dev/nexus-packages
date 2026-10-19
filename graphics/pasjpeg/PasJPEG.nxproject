@@ -6,10 +6,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project PasJPEG {
     Id: "NXRP.Graphics.PasJPEG.Units";
     Publishes Directories { Sources: [@PasJPEG.OutputRoot]; }
-    Requires: [@Projects.PasJPEG];
+    Requires: [@Projects.NexusRTL, @Projects.PasJPEG];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/pasjpeg";
-    OutputRoot: @Tools.OutputRoot + "/PasJPEG/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/PasJPEG/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -25,7 +25,6 @@ Project PasJPEG {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }

@@ -6,9 +6,9 @@ module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project PthreadsTests {
     Id: "NXRP.Tests.PthreadsTests";
-    Requires: [@Projects.Pthreads, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.Pthreads, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/PthreadsTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/PthreadsTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     LLVM NativeABI {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: Object;
@@ -25,7 +25,7 @@ Project PthreadsTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/pthreads/tests"];
+            UnitPaths: ["packages/nexus-packages/pthreads/tests"];
             IncludePaths: [];
             ObjectPaths: [@PthreadsTests.NativeABI.OutputPath];
         }

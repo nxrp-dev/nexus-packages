@@ -8,10 +8,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLJSON {
     Id: "NXRP.Serialization.FCLJSON.Units";
     Publishes Directories { Sources: [@FCLJSON.OutputRoot]; }
-    Requires: [@Projects.FCLJSON, @Projects.FCLBase];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLJSON, @Projects.FCLBase];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
-    OutputRoot: @Tools.OutputRoot + "/FCLJSON/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLJSON/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -36,14 +36,6 @@ Project FCLJSON {
         Config Options { DisableDefaultConfigFiles: True; }
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
-            UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
-            ];
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
         }
     }

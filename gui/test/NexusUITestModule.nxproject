@@ -15,9 +15,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NexusUITestModule TargetOS[win64] {
     Id: "NXRP.Tests.NexusUITestModule";
-    Requires: [@Projects.GUI, @Projects.Core, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.NexusTest, @Projects.NexusScript, @Projects.SQLite, @Projects.Mustache, @Projects.RegExpr];
+    Requires: [@Projects.NexusRTL, @Projects.GUI, @Projects.Core, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.NexusTest, @Projects.NexusScript, @Projects.SQLite, @Projects.Mustache, @Projects.RegExpr];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NexusUITestModule/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusUITestModule/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Compiler {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -30,8 +30,7 @@ Project NexusUITestModule TargetOS[win64] {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             IncludePaths: [@NexusUITestModule.OutputRoot];
             UnitPaths: [
-                "packages/nexus-packages/gui/test",
-                @Tools.Native.RTLPath
+                "packages/nexus-packages/gui/test"
             ];
         }
     }

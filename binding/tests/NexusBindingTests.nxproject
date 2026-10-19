@@ -15,9 +15,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NexusBindingTests TargetOS[win64] {
     Id: "NXRP.Tests.NexusBindingTests";
-    Requires: [@Projects.Binding, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.Binding, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NexusBindingTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusBindingTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Compiler {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -29,8 +29,7 @@ Project NexusBindingTests TargetOS[win64] {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                "packages/nexus-packages/binding/tests",
-                @Tools.Native.RTLPath
+                "packages/nexus-packages/binding/tests"
             ];
         }
     }

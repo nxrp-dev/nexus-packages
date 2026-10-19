@@ -8,10 +8,10 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLRegistry {
     Id: "NXRP.FCLRegistry.Units";
     Publishes Directories { Sources: [@FCLRegistry.OutputRoot]; }
-    Requires: [@Projects.FCLRegistry, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLRegistry, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-registry";
-    OutputRoot: @Tools.OutputRoot + "/FCLRegistry/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLRegistry/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -26,15 +26,6 @@ Project FCLRegistry {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
-            ];
         }
     }
 }

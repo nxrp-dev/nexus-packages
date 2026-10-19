@@ -8,9 +8,9 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project Pthreads {
     Id: "NXRP.Unix.Pthreads.Units";
     Publishes Directories { Sources: [@Pthreads.OutputRoot]; }
-    Requires: [@Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.Pthreads];
     RootDirectory: "../../..";
-    OutputRoot: @Tools.OutputRoot + "/Pthreads/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/Pthreads/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -20,7 +20,6 @@ Project Pthreads {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }

@@ -21,7 +21,7 @@ uses
   Generics.Collections,
   tpNexusScript,
   obNexusScriptModel,
-  obNexusScriptLanguageDefinition;
+  obNexusScriptLanguageDefinition, obNexusScriptTextConstraints;
 
 type
   TNexusScriptValidationSeverity = (nvsError);
@@ -71,6 +71,7 @@ type
   private
     FDiagnostics: TNexusScriptValidationDiagnosticList;
     FLanguage: TNexusScriptLanguageDefinition;
+    FValidationSource: string;
     FVisited: TList<TNexusScriptCompiledDefinition>;
     procedure AddDiagnostic(const ACode, AMessageText: string;
       const ASourceRange: TNexusScriptRange);
@@ -188,6 +189,7 @@ begin
   case AValue.Kind of
     nsvArray: Result := nsfArray;
     nsvReference: Result := nsfReference;
+    nsvExternalReference: Result := nsfExternalReference;
     nsvTextComposition: Result := nsfTextComposition;
     nsvDefinition: Result := nsfInlineDefinition;
   else
@@ -244,8 +246,10 @@ var
   lFirstCategory: TNSEffectiveCategory;
   lHasFirstCategory: Boolean;
   lDefinition: TNexusScriptCompiledDefinition;
+  lConstraint: TNexusScriptTextConstraint;
+  lIndex: Integer;
 begin
-  lArray := EffectiveValue(AValue);
+  lArray := AValue.SemanticValue;
   if (lArray = nil) or (lArray.Kind <> nsvArray) then Exit;
   if lArray.Items.Count < ARule.Minimum then
     AddDiagnostic('NSV2401', 'Array has fewer than ' + IntToStr(ARule.Minimum) +
@@ -272,7 +276,16 @@ begin
         lItem.SourceRange);
     if ARule.AllowedValueCount > 0 then
     begin
-      if not EffectiveValue(lItem).HasEffectiveText then
+      if lItem.RequiresContext then
+      begin
+        lConstraint := TNexusScriptTextConstraint.Create;
+        lConstraint.ValidationSource := FValidationSource;
+        lItem.TextConstraints.Add(lConstraint);
+        lConstraint.AllowedValueCode := 'NSV2409';
+        for lIndex := 0 to ARule.AllowedValueCount - 1 do
+          lConstraint.AllowedValues.Add(ARule.AllowedValues[lIndex]);
+      end
+      else if not EffectiveValue(lItem).HasEffectiveText then
         AddDiagnostic('NSV2409', 'Array entry must have an allowed scalar value.',
           lItem.SourceRange)
       else if not ARule.HasAllowedValue(EffectiveValue(lItem).EffectiveText) then
@@ -305,6 +318,8 @@ var
   lText: string;
   lInteger: Integer;
   lBoolean: Boolean;
+  lConstraint: TNexusScriptTextConstraint;
+  lIndex: Integer;
 begin
   if ARule.HasSourceForms and not (SourceFormOf(AValue) in ARule.SourceForms) then
     AddDiagnostic('NSV2301', 'Value source form is not allowed.', AValue.SourceRange);
@@ -312,7 +327,17 @@ begin
     not (EffectiveCategoryOf(AValue) in ARule.EffectiveCategories) then
     AddDiagnostic('NSV2302', 'Value effective category is not allowed.',
       AValue.SourceRange);
-  if ARule.ScalarKind <> nskNone then
+  if AValue.RequiresContext and
+    ((ARule.ScalarKind <> nskNone) or (ARule.AllowedValueCount > 0)) then
+  begin
+    lConstraint := TNexusScriptTextConstraint.Create;
+    lConstraint.ValidationSource := FValidationSource;
+    AValue.TextConstraints.Add(lConstraint);
+    lConstraint.ScalarKind := ARule.ScalarKind;
+    for lIndex := 0 to ARule.AllowedValueCount - 1 do
+      lConstraint.AllowedValues.Add(ARule.AllowedValues[lIndex]);
+  end;
+  if not AValue.RequiresContext and (ARule.ScalarKind <> nskNone) then
   begin
     if not EffectiveValue(AValue).HasEffectiveText then
       AddDiagnostic('NSV2303', 'Value must have effective text.', AValue.SourceRange)
@@ -327,7 +352,7 @@ begin
         AddDiagnostic('NSV2305', 'Value must be True or False.', AValue.SourceRange);
     end;
   end;
-  if ARule.AllowedValueCount > 0 then
+  if not AValue.RequiresContext and (ARule.AllowedValueCount > 0) then
   begin
     if not EffectiveValue(AValue).HasEffectiveText then
       AddDiagnostic('NSV2306', 'Value must have an allowed scalar value.',
@@ -337,6 +362,8 @@ begin
         ' is not allowed.', AValue.SourceRange);
   end;
   if ARule.ArrayRule <> nil then ValidateArray(AValue, ARule.ArrayRule);
+  if (ARule.ReferenceRule <> nil) and (AValue.Kind = nsvExternalReference) then
+    AddDiagnostic('NSV3004', 'External reference cannot satisfy an internal reference rule.', AValue.SourceRange);
   if (ARule.ReferenceRule <> nil) and (AValue.Kind = nsvReference) then
     ValidateReference(AValue, ARule.ReferenceRule);
 end;
@@ -404,6 +431,7 @@ begin
   end;
   for lProperty in ADefinition.Properties do
   begin
+    if lProperty.IsExternal then Continue;
     lPropertyRule := lRule.FindPropertyRule(lProperty.Name);
     if lPropertyRule = nil then
     begin
@@ -451,6 +479,55 @@ begin
   end;
 end;
 
+procedure ClearDocumentTextConstraints(ADocument: TNexusScriptCompiledDocument;
+  AView: TNexusScriptDefinitionView);
+var
+  lDefinitions: TList<TNexusScriptCompiledDefinition>;
+  lValues: TList<TNexusScriptCompiledValue>;
+  lRoot: TNexusScriptCompiledDefinition;
+
+  procedure ClearDefinition(ADefinition: TNexusScriptCompiledDefinition); forward;
+
+  procedure ClearValue(AValue: TNexusScriptCompiledValue);
+  var
+    lIndex: Integer;
+    lItem: TNexusScriptCompiledValue;
+  begin
+    if (AValue = nil) or (lValues.IndexOf(AValue) >= 0) then Exit;
+    lValues.Add(AValue);
+    for lIndex := AValue.TextConstraints.Count - 1 downto 0 do
+      if AValue.TextConstraints[lIndex].ValidationSource = ADocument.SourceName then
+        AValue.TextConstraints.Delete(lIndex);
+    ClearDefinition(AValue.StructuralDefinition);
+    ClearDefinition(AValue.ResolvedDefinition);
+    if AValue.ResolvedProperty <> nil then ClearValue(AValue.ResolvedProperty.Value);
+    ClearValue(AValue.ResolvedValue);
+    ClearValue(AValue.EffectiveValue);
+    for lItem in AValue.Items do ClearValue(lItem);
+    for lItem in AValue.CompositionContributors do ClearValue(lItem);
+  end;
+
+  procedure ClearDefinition(ADefinition: TNexusScriptCompiledDefinition);
+  var
+    lProperty: TNexusScriptCompiledProperty;
+    lChild: TNexusScriptCompiledDefinition;
+  begin
+    if (ADefinition = nil) or (lDefinitions.IndexOf(ADefinition) >= 0) then Exit;
+    lDefinitions.Add(ADefinition);
+    for lProperty in ADefinition.Properties do ClearValue(lProperty.Value);
+    for lChild in ADefinition.Children do ClearDefinition(lChild);
+  end;
+begin
+  lDefinitions := TList<TNexusScriptCompiledDefinition>.Create;
+  lValues := TList<TNexusScriptCompiledValue>.Create;
+  try
+    for lRoot in AView.Roots do ClearDefinition(lRoot);
+  finally
+    lValues.Free;
+    lDefinitions.Free;
+  end;
+end;
+
 function TNSValidatorEngine.Execute(ASubject,
   ALanguageDefinition: TNexusScriptCompiledDocument): Boolean;
 var
@@ -490,6 +567,8 @@ begin
         Exit(False);
       end;
     end;
+    FValidationSource := ASubject.SourceName;
+    ClearDocumentTextConstraints(ASubject, lView);
     for lDefinition in lView.Roots do
       ValidateDefinition(lDefinition, nil, True);
   finally

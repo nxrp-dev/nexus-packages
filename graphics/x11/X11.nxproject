@@ -6,10 +6,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project X11 {
     Id: "NXRP.Graphics.X11.Units";
     Publishes Directories { Sources: [@X11.OutputRoot]; }
-    Requires: [@Projects.X11];
+    Requires: [@Projects.NexusRTL, @Projects.X11];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/x11";
-    OutputRoot: @Tools.OutputRoot + "/X11/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/X11/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -66,7 +66,6 @@ Project X11 {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }

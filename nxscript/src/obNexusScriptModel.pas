@@ -21,7 +21,7 @@ uses
   Classes,
   SysUtils,
   Generics.Collections,
-  tpNexusScript;
+  tpNexusScript, obNexusScriptTextConstraints;
 
 type
   TNexusScriptDiagnostic = class
@@ -136,14 +136,16 @@ type
   TNexusScriptSourceProperty = class
   private
     FName: string;
+    FIsExternal: Boolean;
     FValue: TNexusScriptSourceValue;
     FSourceRange: TNexusScriptRange;
     FNameRange: TNexusScriptRange;
     FValueRange: TNexusScriptRange;
   public
     constructor Create(const AName: string; AValue: TNexusScriptSourceValue;
-      const ASourceRange: TNexusScriptRange);
+      const ASourceRange: TNexusScriptRange; AIsExternal: Boolean = False);
     destructor Destroy; override;
+    property IsExternal: Boolean read FIsExternal;
     property Name: string read FName;
     property Value: TNexusScriptSourceValue read FValue;
     property SourceRange: TNexusScriptRange read FSourceRange write FSourceRange;
@@ -172,7 +174,7 @@ type
     constructor Create(const AKind, AName: string;
       const ASourceRange: TNexusScriptRange);
     destructor Destroy; override;
-    function FindProperty(const AName: string): TNexusScriptSourceProperty;
+    function FindProperty(const AName: string; AIsExternal: Boolean = False): TNexusScriptSourceProperty;
     function FindChild(const AName: string): TNexusScriptSourceDefinition;
     property Kind: string read FKind;
     property Name: string read FName;
@@ -287,6 +289,8 @@ type
     FResolvedProperty: TNexusScriptCompiledProperty;
     FEffectiveText: string;
     FHasEffectiveText: Boolean;
+    FRequiresContext: Boolean;
+    FTextConstraints: TNexusScriptTextConstraintList;
     FStructuralDefinition: TNexusScriptCompiledDefinition;
     FEntryName: string;
     FEffectiveName: string;
@@ -315,6 +319,8 @@ type
     property ResolvedProperty: TNexusScriptCompiledProperty
       read FResolvedProperty write FResolvedProperty;
     property EffectiveText: string read FEffectiveText write FEffectiveText;
+    property TextConstraints: TNexusScriptTextConstraintList read FTextConstraints;
+    property RequiresContext: Boolean read FRequiresContext write FRequiresContext;
     property HasEffectiveText: Boolean read FHasEffectiveText write FHasEffectiveText;
     property StructuralDefinition: TNexusScriptCompiledDefinition
       read FStructuralDefinition write FStructuralDefinition;
@@ -340,14 +346,16 @@ type
   TNexusScriptCompiledProperty = class
   private
     FName: string;
+    FIsExternal: Boolean;
     FValue: TNexusScriptCompiledValue;
     FSourceRange: TNexusScriptRange;
     FContributorRanges: TNexusScriptRangeList;
     FResolving: Boolean;
   public
     constructor Create(const AName: string; AValue: TNexusScriptCompiledValue;
-      const ASourceRange: TNexusScriptRange);
+      const ASourceRange: TNexusScriptRange; AIsExternal: Boolean = False);
     destructor Destroy; override;
+    property IsExternal: Boolean read FIsExternal;
     property Name: string read FName;
     property Value: TNexusScriptCompiledValue read FValue;
     property SourceRange: TNexusScriptRange read FSourceRange;
@@ -373,7 +381,7 @@ type
     constructor Create(const AKind, AName: string;
       const ASourceRange: TNexusScriptRange);
     destructor Destroy; override;
-    function FindProperty(const AName: string): TNexusScriptCompiledProperty;
+    function FindProperty(const AName: string; AIsExternal: Boolean = False): TNexusScriptCompiledProperty;
     function FindChild(const AName: string): TNexusScriptCompiledDefinition;
     property ImportContext: TNexusScriptImportContext read FImportContext write FImportContext;
     property Kind: string read FKind;
@@ -406,6 +414,7 @@ type
 
   TNexusScriptCompiledDocument = class
   private
+    FSelectedTargets: TNexusScriptTargetSelection;
     FIncludedDocuments: TList<TNexusScriptCompiledDocument>;
     FSourceName: string;
     FCompiledAt: TDateTime;
@@ -421,6 +430,7 @@ type
     procedure SetDialect(const APath, ASourceName: string;
       const ASourceRange: TNexusScriptRange;
       ADocument: TNexusScriptCompiledDocument);
+    property SelectedTargets: TNexusScriptTargetSelection read FSelectedTargets;
     property SourceName: string read FSourceName;
     // UTC start time, captured once for this document compilation.
     property CompiledAt: TDateTime read FCompiledAt;
@@ -600,10 +610,11 @@ begin
 end;
 
 constructor TNexusScriptSourceProperty.Create(const AName: string;
-  AValue: TNexusScriptSourceValue; const ASourceRange: TNexusScriptRange);
+  AValue: TNexusScriptSourceValue; const ASourceRange: TNexusScriptRange; AIsExternal: Boolean);
 begin
   inherited Create;
   FName := AName;
+  FIsExternal := AIsExternal;
   FValue := AValue;
   FSourceRange := ASourceRange;
 end;
@@ -641,13 +652,15 @@ begin
 end;
 
 function TNexusScriptSourceDefinition.FindProperty(
-  const AName: string): TNexusScriptSourceProperty;
+  const AName: string; AIsExternal: Boolean): TNexusScriptSourceProperty;
 var
   lProperty: TNexusScriptSourceProperty;
 begin
   Result := nil;
   for lProperty in FProperties do
-    if SameText(lProperty.Name, AName) then
+    if (lProperty.IsExternal = AIsExternal) and
+      ((AIsExternal and (lProperty.Name = AName)) or
+       (not AIsExternal and SameText(lProperty.Name, AName))) then
       Exit(lProperty);
 end;
 
@@ -716,6 +729,7 @@ constructor TNexusScriptCompiledValue.Create(AKind: TNexusScriptValueKind;
   const ASourceRange: TNexusScriptRange);
 begin
   inherited Create;
+  FTextConstraints := TNexusScriptTextConstraintList.Create(True);
   FKind := AKind;
   FSourceRange := ASourceRange;
   FItems := TNexusScriptCompiledValueList.Create(True);
@@ -725,6 +739,7 @@ end;
 
 destructor TNexusScriptCompiledValue.Destroy;
 begin
+  FTextConstraints.Free;
   FReferenceRanges.Free;
   FEffectiveValue.Free;
   FCompositionContributors.Free;
@@ -768,10 +783,11 @@ begin
 end;
 
 constructor TNexusScriptCompiledProperty.Create(const AName: string;
-  AValue: TNexusScriptCompiledValue; const ASourceRange: TNexusScriptRange);
+  AValue: TNexusScriptCompiledValue; const ASourceRange: TNexusScriptRange; AIsExternal: Boolean);
 begin
   inherited Create;
   FName := AName;
+  FIsExternal := AIsExternal;
   FValue := AValue;
   FSourceRange := ASourceRange;
   FContributorRanges := TNexusScriptRangeList.Create;
@@ -808,13 +824,15 @@ begin
 end;
 
 function TNexusScriptCompiledDefinition.FindProperty(
-  const AName: string): TNexusScriptCompiledProperty;
+  const AName: string; AIsExternal: Boolean): TNexusScriptCompiledProperty;
 var
   lProperty: TNexusScriptCompiledProperty;
 begin
   Result := nil;
   for lProperty in FProperties do
-    if SameText(lProperty.Name, AName) then
+    if (lProperty.IsExternal = AIsExternal) and
+      ((AIsExternal and (lProperty.Name = AName)) or
+       (not AIsExternal and SameText(lProperty.Name, AName))) then
       Exit(lProperty);
 end;
 
@@ -849,6 +867,7 @@ constructor TNexusScriptCompiledDocument.Create(const ASourceName: string;
   ACompiledAt: TDateTime);
 begin
   inherited Create;
+  FSelectedTargets := TNexusScriptTargetSelection.Create;
   FSourceName := ASourceName;
   FCompiledAt := ACompiledAt;
   FDefinitions := TNexusScriptCompiledDefinitionList.Create(True);
@@ -857,6 +876,7 @@ end;
 
 destructor TNexusScriptCompiledDocument.Destroy;
 begin
+  FSelectedTargets.Free;
   FIncludedDocuments.Free;
   FDefinitions.Free;
   inherited Destroy;

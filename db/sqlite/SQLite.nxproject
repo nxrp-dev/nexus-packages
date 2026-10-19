@@ -16,10 +16,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project SQLite {
     Id: "NXRP.SQLite.Units";
     Publishes Directories { Sources: [@SQLite.OutputRoot]; }
-    Requires: [@Projects.SQLite, @Projects.FCLBase, @Projects.FCLDB];
+    Requires: [@Projects.PackageSDK, @Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NativeLibraries, @Projects.SQLite, @Projects.FCLBase, @Projects.FCLDB];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/sqlite";
-    OutputRoot: @Tools.OutputRoot + "/SQLite/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/SQLite/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     LLVM Native {
         CompilerPath: @Tools.Native.LLVMCompiler;
@@ -49,7 +49,6 @@ Project SQLite {
             "SQLITE_ENABLE_STMTVTAB"
         ];
         SystemIncludePaths: @Tools.Native.SystemIncludePaths;
-        LibraryPaths: @Tools.Native.LibraryPaths;
         OutputPath: @SQLite.OutputRoot;
     }
     FPC Runtime {
@@ -61,19 +60,7 @@ Project SQLite {
         Config Options { DisableDefaultConfigFiles: True; }
         Language Pascal { Mode: ObjFPC; }
         Files Paths {
-            UnitPaths: [
-                @Tools.Native.PackageSDKPath + "/units",
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
-            ];
             PackagePaths: [@Tools.Native.PackageSDKPath + "/packages"];
-            LibraryPaths: @Tools.Native.PackageLibraryPaths;
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
         }
         Linking RuntimeLibraries { LinkerOptions: @Tools.Native.LinkerOptions; }

@@ -1,0 +1,13 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+
+Project Solar2DNative {
+    Id: "NXRP.Solar2D.NativeSDK";
+    RootDirectory: "../../..";
+    Description: "Installed native Solar2D plugin library directory.";
+    Publishes Directories TargetOS[win64] {
+        Libraries: ["../nexus-mobile/platform/windows/Corona.Native.Library.Win32/Release.Simulator/x64/Corona.Native.Library.Win32"];
+    }
+}

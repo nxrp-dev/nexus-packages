@@ -323,6 +323,11 @@ var
   lIndex, lExisting: Integer;
   lKey, lName: string;
 begin
+  try
+    RequireMaterializedNexusScriptDocument(ADocument);
+  except
+    on E: Exception do raise ENexusScriptJSON.Create(E.Message);
+  end;
   lView := TNexusScriptDefinitionView.Create;
   lRoots := TJSONObject.Create;
   lDefinitions := TJSONObject.Create;

@@ -6,9 +6,9 @@ module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project IconvTests {
     Id: "NXRP.Tests.IconvTests";
-    Requires: [@Projects.Iconv, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.Iconv, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/IconvTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/IconvTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     LLVM IncompleteLibrary {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: SharedLibrary;
@@ -27,7 +27,7 @@ Project IconvTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/tests"];
+            UnitPaths: ["packages/nexus-packages/iconvenc/tests"];
             IncludePaths: [];
         }
     }

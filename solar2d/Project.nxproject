@@ -18,7 +18,7 @@ Project Solar2D {
     Author: "Kevin Collins";
     Description: "Solar2D native plugin API and Pascal event bridge.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@Projects.Lua];
+    Requires: [@Projects.Solar2DNative, @Projects.Lua];
     Publishes Directories {
         Sources: ["packages/nexus-packages/solar2d/src"];
         Headers: ["packages/nexus-packages/solar2d/src"];

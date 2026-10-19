@@ -49,7 +49,8 @@ uses
   obNexusScriptLanguageDefinition,
   obNexusScriptValidator,
   SQLite3Dyn,
-  tsNexusScriptLiveTests;
+  tsNexusScriptLiveTests,
+  tsNexusScriptExternalTests;
 
 procedure TestStructureAndValues(AContext: TNXTestContext);
 var
@@ -1934,15 +1935,15 @@ begin
       '/output=' + lOutputDirectory]),
       'Manifest rendering should not write to stdout.');
     AContext.AssertEquals('First Example', Trim(FileText(
-      lOutputDirectory + '\generated\first.txt')),
+      lOutputDirectory + '/generated/first.txt')),
       'First manifest entry should use the shared JSON artifact.');
     AContext.AssertEquals('Second Example', Trim(FileText(
-      lOutputDirectory + '\second.txt')),
+      lOutputDirectory + '/second.txt')),
       'Local reference composition should provide the second output path.');
   finally
-    DeleteFile(lOutputDirectory + '\generated\first.txt');
-    DeleteFile(lOutputDirectory + '\second.txt');
-    RemoveDir(lOutputDirectory + '\generated');
+    DeleteFile(lOutputDirectory + '/generated/first.txt');
+    DeleteFile(lOutputDirectory + '/second.txt');
+    RemoveDir(lOutputDirectory + '/generated');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -1952,10 +1953,10 @@ begin
       '/manifest=' + ManifestFixturePath('Ordered.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory]);
     AContext.AssertEquals('Second Example', Trim(FileText(
-      lOutputDirectory + '\shared.txt')),
+      lOutputDirectory + '/shared.txt')),
       'Compiled child order should determine ordinary overwrite order.');
   finally
-    DeleteFile(lOutputDirectory + '\shared.txt');
+    DeleteFile(lOutputDirectory + '/shared.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -1966,10 +1967,10 @@ begin
       '/output=' + lOutputDirectory]);
     AContext.AssertTrue(Pos('GeneratedFiles.Missing', lError) > 0,
       'A render failure should identify the current manifest entry.');
-    AContext.AssertTrue(FileExists(lOutputDirectory + '\first.txt'),
+    AContext.AssertTrue(FileExists(lOutputDirectory + '/first.txt'),
       'A later failure should not roll back an earlier successful write.');
   finally
-    DeleteFile(lOutputDirectory + '\first.txt');
+    DeleteFile(lOutputDirectory + '/first.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -1978,10 +1979,10 @@ begin
     ExecuteCLI([
       '/manifest=' + ManifestFixturePath('Literal.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory]);
-    AContext.AssertTrue(FileExists(lOutputDirectory + '\{{Name}}.txt'),
+    AContext.AssertTrue(FileExists(lOutputDirectory + '/{{Name}}.txt'),
       'Output EffectiveText should not receive Mustache interpolation.');
   finally
-    DeleteFile(lOutputDirectory + '\{{Name}}.txt');
+    DeleteFile(lOutputDirectory + '/{{Name}}.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -2004,10 +2005,10 @@ begin
       '/manifest=' + ManifestFixturePath('MultiModel.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory]);
     AContext.AssertEquals('Example_TBL', Trim(FileText(
-      lOutputDirectory + '\combined.txt')),
+      lOutputDirectory + '/combined.txt')),
       'Independent models should contribute sibling roots to one context.');
   finally
-    DeleteFile(lOutputDirectory + '\combined.txt');
+    DeleteFile(lOutputDirectory + '/combined.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -2018,10 +2019,10 @@ begin
       'MultiModelAlternative.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory]);
     AContext.AssertEquals('Example_ALT', Trim(FileText(
-      lOutputDirectory + '\combined.txt')),
+      lOutputDirectory + '/combined.txt')),
       'A complete alternative constants model should change template data.');
   finally
-    DeleteFile(lOutputDirectory + '\combined.txt');
+    DeleteFile(lOutputDirectory + '/combined.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -2031,10 +2032,10 @@ begin
       '/manifest=' + ManifestFixturePath('IncludedOnce.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory]);
     AContext.AssertEquals('one/common/two', Trim(FileText(
-      lOutputDirectory + '\included.txt')),
+      lOutputDirectory + '/included.txt')),
       'A shared canonical include should contribute once across model sessions.');
   finally
-    DeleteFile(lOutputDirectory + '\included.txt');
+    DeleteFile(lOutputDirectory + '/included.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -2046,7 +2047,7 @@ begin
     AContext.AssertTrue((Pos('DuplicateModel.Second', lError) > 0) and
       (Pos('more than once', LowerCase(lError)) > 0),
       'A duplicate direct canonical model source should identify the later entry.');
-    AContext.AssertTrue(not FileExists(lOutputDirectory + '\result.txt'),
+    AContext.AssertTrue(not FileExists(lOutputDirectory + '/result.txt'),
       'Duplicate model failure should occur before output.');
   finally
     RemoveDir(lOutputDirectory);
@@ -2060,7 +2061,7 @@ begin
     AContext.AssertTrue((Pos('DuplicateRoot.Second', lError) > 0) and
       (Pos('duplicate artifact root', LowerCase(lError)) > 0),
       'Different files with the same root should fail without aliasing.');
-    AContext.AssertTrue(not FileExists(lOutputDirectory + '\result.txt'),
+    AContext.AssertTrue(not FileExists(lOutputDirectory + '/result.txt'),
       'Root collision should occur before output.');
   finally
     RemoveDir(lOutputDirectory);
@@ -2071,10 +2072,10 @@ begin
     ExecuteCLI([
       '/manifest=' + ManifestFixturePath('ValidatedModels.NexusManifest.nxscript'),
       '/output=' + lOutputDirectory, '/validate']);
-    AContext.AssertTrue(FileExists(lOutputDirectory + '\result.txt'),
+    AContext.AssertTrue(FileExists(lOutputDirectory + '/result.txt'),
       'Validation should accept plain models and validate typed models.');
   finally
-    DeleteFile(lOutputDirectory + '\result.txt');
+    DeleteFile(lOutputDirectory + '/result.txt');
     RemoveDir(lOutputDirectory);
   end;
 
@@ -2086,7 +2087,7 @@ begin
     AContext.AssertTrue((Pos('InvalidModel.Broken', lError) > 0) and
       (Pos('NSV', lError) > 0),
       'A typed model validation failure should identify its manifest entry.');
-    AContext.AssertTrue(not FileExists(lOutputDirectory + '\result.txt'),
+    AContext.AssertTrue(not FileExists(lOutputDirectory + '/result.txt'),
       'Model validation failure should occur before output.');
   finally
     RemoveDir(lOutputDirectory);
@@ -2099,7 +2100,7 @@ begin
       '/output=' + lOutputDirectory]);
     AContext.AssertTrue(Pos('MissingModelFile.Missing', lError) > 0,
       'A model compilation failure should identify its manifest entry.');
-    AContext.AssertTrue(not FileExists(lOutputDirectory + '\result.txt'),
+    AContext.AssertTrue(not FileExists(lOutputDirectory + '/result.txt'),
       'Model compilation failure should occur before output.');
   finally
     RemoveDir(lOutputDirectory);
@@ -2926,9 +2927,9 @@ var
   lError: string;
 begin
   lOutputDirectory := NewOutputDirectory('nxd');
-  lPreloadDirectory := lOutputDirectory + '\preload';
-  lStateFile := lPreloadDirectory + '\state.sql';
-  lCountyFile := lPreloadDirectory + '\county.sql';
+  lPreloadDirectory := lOutputDirectory + '/preload';
+  lStateFile := lPreloadDirectory + '/state.sql';
+  lCountyFile := lPreloadDirectory + '/county.sql';
   try
     ExecuteCLI(['/manifest=' +
       ManifestFixturePath('ExternalData.NexusManifest.nxscript'),
@@ -2969,8 +2970,8 @@ begin
   end;
 
   lOutputDirectory := NewOutputDirectory('nxs');
-  lStateFile := lOutputDirectory + '\state.sql';
-  lCountyFile := lOutputDirectory + '\county.sql';
+  lStateFile := lOutputDirectory + '/state.sql';
+  lCountyFile := lOutputDirectory + '/county.sql';
   try
     ExecuteCLI(['/manifest=' +
       ManifestFixturePath('ExternalDataSQL.NexusManifest.nxscript'),
@@ -3025,10 +3026,10 @@ var
     lGeneratedFile: string;
   begin
     for lGeneratedFile in cPreloadFiles do
-      DeleteFile(ADirectory + '\preload\' + lGeneratedFile);
-    DeleteFile(ADirectory + '\DatabaseSchema.sql');
-    DeleteFile(ADirectory + '\AutoProviderList.prv');
-    RemoveDir(ADirectory + '\preload');
+      DeleteFile(ADirectory + '/preload/' + lGeneratedFile);
+    DeleteFile(ADirectory + '/DatabaseSchema.sql');
+    DeleteFile(ADirectory + '/AutoProviderList.prv');
+    RemoveDir(ADirectory + '/preload');
     RemoveDir(ADirectory);
   end;
 begin
@@ -3044,8 +3045,8 @@ begin
 
     for lFileName in cPreloadFiles do
     begin
-      lInForceFile := lInForceOutput + '\preload\' + lFileName;
-      lStormFile := lStormOutput + '\preload\' + lFileName;
+      lInForceFile := lInForceOutput + '/preload/' + lFileName;
+      lStormFile := lStormOutput + '/preload/' + lFileName;
       AContext.AssertTrue(FileExists(lInForceFile),
         'inForce should generate mock preload output ' + lFileName + '.');
       AContext.AssertTrue(FileExists(lStormFile),
@@ -3055,7 +3056,7 @@ begin
         lFileName + '.');
     end;
     AContext.AssertTrue(Pos('insert into STATE_TBL', FileText(
-      lInForceOutput + '\preload\state.sql')) > 0,
+      lInForceOutput + '/preload/state.sql')) > 0,
       'The mock state data should render through the copied SQL template.');
   finally
     RemoveGeneratedOutput(lStormOutput);
@@ -4394,8 +4395,7 @@ begin
   {$ELSE}
   lSQLiteLibrary := '';
   {$ENDIF}
-  lDatabaseFile := ExpandFileName(
-    'output\NexusScript\SQLiteCommandFormat.sqlite');
+  lDatabaseFile := NewOutputDirectory('nxs') + '.sqlite';
   DeleteFile(lDatabaseFile);
   if not LoadSQLite3(lSQLiteLibrary) then
     raise Exception.Create(SQLite3LoadError);
@@ -4910,8 +4910,7 @@ begin
   {$ELSE}
   lSQLiteLibrary := '';
   {$ENDIF}
-  lDatabaseFile := ExpandFileName(
-    'output\NexusScript\SchemaDialectReview.sqlite');
+  lDatabaseFile := NewOutputDirectory('nxs') + '.sqlite';
   try
     lSession.DialectRoot := ExpandFileName('projects\schema\language');
     AContext.AssertTrue(lSession.CompileFile(SchemaDialectFixturePath),
@@ -5068,8 +5067,7 @@ begin
   {$ELSE}
   lSQLiteLibrary := '';
   {$ENDIF}
-  lDatabaseFile := ExpandFileName(
-    'output\NexusScript\StormSchemaReview.sqlite');
+  lDatabaseFile := NewOutputDirectory('nxs') + '.sqlite';
   try
     AContext.AssertTrue(lSession.CompileFile(SchemaGenerationPath(
       'models\StormSpecific.Schema.nxscript')),
@@ -5466,6 +5464,7 @@ begin
   lSuite.AddTest('StructuralReferenceAliasJSON', @TestStructuralReferenceAliasJSON);
   lSuite.AddTest('InlineReferenceMetadata', @TestInlineReferenceMetadata);
   RegisterNexusScriptLiveTests(ARegistry);
+  RegisterNexusScriptExternalTests(ARegistry);
 end;
 
 end.

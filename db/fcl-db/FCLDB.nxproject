@@ -8,10 +8,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLDB {
     Id: "NXRP.Database.FCLDB.Units";
     Publishes Directories { Sources: [@FCLDB.OutputRoot]; }
-    Requires: [@Projects.FCLDB, @Projects.FCLJSON, @Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLSystem, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.RTLExtra, @Projects.FCLDB, @Projects.FCLJSON, @Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/fcl-db";
-    OutputRoot: @Tools.OutputRoot + "/FCLDB/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLDB/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -92,19 +92,7 @@ Project FCLDB {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @FCLDB.OutputRoot,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+                @FCLDB.OutputRoot
             ];
         }
     }

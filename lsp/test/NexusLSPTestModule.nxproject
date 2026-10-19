@@ -15,9 +15,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NexusLSPTestModule TargetOS[win64] {
     Id: "NXRP.Tests.NexusLSPTestModule";
-    Requires: [@Projects.LSP, @Projects.Core, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.NexusTest, @Projects.Synapse, @Projects.Serialization];
+    Requires: [@Projects.NexusRTL, @Projects.LSP, @Projects.Core, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.NexusTest, @Projects.Synapse, @Projects.Serialization];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NexusLSPTestModule/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusLSPTestModule/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Compiler {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -30,8 +30,7 @@ Project NexusLSPTestModule TargetOS[win64] {
             IncludePaths: [@NexusLSPTestModule.OutputRoot];
             UnitPaths: [
                 "packages/nexus-packages/lsp/test",
-                "C:/lazarus" + "/components/lazutils",
-                @Tools.Native.RTLPath
+                "C:/lazarus" + "/components/lazutils"
             ];
         }
     }

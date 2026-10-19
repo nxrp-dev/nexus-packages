@@ -7,9 +7,9 @@ module "../../../../../../../../../projects/nxbuild/nxbuild.environment.nxscript
 
 Project fpGUIFrameworkTests {
     Id: "NXRP.Tests.fpGUIFrameworkTests";
-    Requires: [@Projects.GUI, @Projects.FCLProcess, @Projects.FCLBase, @Projects.FCLJSON, @Projects.Users, @Projects.X11, @Projects.RegExpr, @Projects.Pthreads, @Projects.FCLImage, @Projects.PasJPEG, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.RTLSystem, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.RTLExtra, @Projects.GUI, @Projects.FCLProcess, @Projects.FCLBase, @Projects.FCLJSON, @Projects.Users, @Projects.X11, @Projects.RegExpr, @Projects.Pthreads, @Projects.FCLImage, @Projects.PasJPEG, @Projects.NexusTest];
     RootDirectory: "../../../../../../../../..";
-    OutputRoot: @Tools.OutputRoot + "/fpGUIFrameworkTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/fpGUIFrameworkTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/gui/external/fpgui/framework/src/test/pascal/fpGUIFrameworkTests.lpr"];
@@ -20,18 +20,7 @@ Project fpGUIFrameworkTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                "packages/nexus-packages/gui/external/fpgui/framework/src/test/pascal",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                "packages/nexus-packages/gui/external/fpgui/framework/src/test/pascal"
             ];
         }
     }

@@ -14,9 +14,9 @@ module Projects "../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project NexusNetTorrentTests {
     Id: "NXRP.Tests.NexusNetTorrentTests";
-    Requires: [@Projects.Torrent, @Projects.Synapse, @Projects.OpenSSL, @Projects.Core, @Projects.HashLib4Pascal, @Projects.FCLBase, @Projects.Pthreads, @Projects.FCLProcess];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.RTLExtra, @Projects.Torrent, @Projects.Synapse, @Projects.OpenSSL, @Projects.Core, @Projects.HashLib4Pascal, @Projects.FCLBase, @Projects.Pthreads, @Projects.FCLProcess];
     RootDirectory: "../../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NexusNetTorrentTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusNetTorrentTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/network/torrent/test/NexusNetTorrentTests.lpr"];
@@ -27,20 +27,7 @@ Project NexusNetTorrentTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.Native.RTLPath,
-                "packages/nexus-packages/network/synapse/src",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
+                "packages/nexus-packages/network/synapse/src"
             ];
         }
     }

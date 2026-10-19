@@ -79,6 +79,7 @@ implementation
 
 uses
   ctypes,
+  obNexusScriptArtifactModel,
   tpNexusScript,
   obNXClassFactory;
 
@@ -781,6 +782,11 @@ var
   lIndex: Integer;
   lMessage: string;
 begin
+  try
+    RequireMaterializedNexusScriptDocument(ADocument);
+  except
+    on E: Exception do raise ENexusScriptSQLite.Create(E.Message);
+  end;
   if ADocument = nil then
     raise ENexusScriptSQLite.Create('SQLite projection requires a document.');
   if not FHasDocument then

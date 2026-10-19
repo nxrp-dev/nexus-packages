@@ -5,10 +5,10 @@ module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../RTLUnicode.Build.Config.nxscript";
 Project RTLUnicodeTests {
     Id: "NXRP.Tests.RTLUnicodeTests";
-    Requires: [@Projects.RTLUnicode, @Projects.NexusTest];
+    Requires: [@Projects.RTLUnicodeRTL, @Projects.RTLSystem, @Projects.RTLObjPas, @Projects.RTLUnicode, @Projects.NexusTest];
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @Tools.OutputRoot + "/RTLUnicodeTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/RTLUnicodeTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [@RTLUnicodeTests.SourceRoot + "/tests/RTLUnicodeTests.lpr"];
@@ -19,7 +19,7 @@ Project RTLUnicodeTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@RTLUnicodeBuild.RTLPath, @RTLUnicodeTests.SourceRoot + "/tests", @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc", @Tools.NexusFPC.SourcePath + "/rtl/objpas", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            UnitPaths: [@RTLUnicodeTests.SourceRoot + "/tests", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
             IncludePaths: [];
         }
     }

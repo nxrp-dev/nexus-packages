@@ -8,10 +8,10 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLRes {
     Id: "NXRP.FCLRes.Units";
     Publishes Directories { Sources: [@FCLRes.OutputRoot]; }
-    Requires: [@Projects.FCLRes];
+    Requires: [@Projects.NexusRTL, @Projects.FCLRes];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-res";
-    OutputRoot: @Tools.OutputRoot + "/FCLRes/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLRes/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -49,7 +49,6 @@ Project FCLRes {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
             IncludePaths: [];
         }
     }

@@ -8,10 +8,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLXML {
     Id: "NXRP.Serialization.FCLXML.Units";
     Publishes Directories { Sources: [@FCLXML.OutputRoot]; }
-    Requires: [@Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
-    OutputRoot: @Tools.OutputRoot + "/FCLXML/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLXML/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -46,13 +46,7 @@ Project FCLXML {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }
@@ -68,13 +62,7 @@ Project FCLXML {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }
@@ -90,13 +78,7 @@ Project FCLXML {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

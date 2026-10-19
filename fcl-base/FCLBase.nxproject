@@ -8,10 +8,10 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project FCLBase {
     Id: "NXRP.FCLBase.Units";
     Publishes Directories { Sources: [@FCLBase.OutputRoot]; }
-    Requires: [@Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-base";
-    OutputRoot: @Tools.OutputRoot + "/FCLBase/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLBase/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -67,16 +67,6 @@ Project FCLBase {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
-            ];
         }
     }
 }

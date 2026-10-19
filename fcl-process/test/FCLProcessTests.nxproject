@@ -7,10 +7,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLProcessTests {
     Id: "NXRP.Tests.FCLProcessTests";
-    Requires: [@Projects.FCLProcess, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLProcess, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/fcl-process";
-    OutputRoot: @Tools.OutputRoot + "/FCLProcessTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLProcessTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -26,14 +26,7 @@ Project FCLProcessTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @FCLProcessTests.SourceRoot + "/test",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                @FCLProcessTests.SourceRoot + "/test"
             ];
         }
     }

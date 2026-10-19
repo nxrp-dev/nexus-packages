@@ -138,7 +138,7 @@ begin
   if FProperties.TryGetValue(ASource, Result) then Exit;
   lValue := CopyValue(ASource.Value);
   FContext.Values.Extract(lValue);
-  Result := TNexusScriptCompiledProperty.Create(ASource.Name, lValue, ASource.SourceRange);
+  Result := TNexusScriptCompiledProperty.Create(ASource.Name, lValue, ASource.SourceRange, ASource.IsExternal);
   Result.ContributorRanges.Clear;
   Result.ContributorRanges.AddRange(ASource.ContributorRanges);
   FProperties.Add(ASource, Result);
@@ -164,6 +164,8 @@ begin
   Result.OriginalDefinitionName := ASource.OriginalDefinitionName;
   Result.EffectiveText := ASource.EffectiveText;
   Result.HasEffectiveText := ASource.HasEffectiveText;
+  Result.RequiresContext := ASource.RequiresContext;
+  Result.TextConstraints.Assign(ASource.TextConstraints);
   Result.EvaluationState := ASource.EvaluationState;
   Result.ArrayPreparationState := ASource.ArrayPreparationState;
   lDefinition := CopyDefinition(ASource.StructuralDefinition);

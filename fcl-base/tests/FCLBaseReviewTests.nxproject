@@ -7,10 +7,10 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLBaseReviewTests {
     Id: "NXRP.Tests.FCLBaseReviewTests";
-    Requires: [@Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/fcl-base";
-    OutputRoot: @Tools.OutputRoot + "/FCLBaseReviewTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLBaseReviewTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         RawOptions: ["-Cr", "-Co", "-Ci", "-Sa", "-gl"];
@@ -21,15 +21,7 @@ Project FCLBaseReviewTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @FCLBaseReviewTests.SourceRoot + "/tests",
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                @FCLBaseReviewTests.SourceRoot + "/tests"
             ];
         }
     }

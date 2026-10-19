@@ -13,25 +13,25 @@ dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
 module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Project NexusScriptTests TargetOS[win64] {
+Project NexusScriptTests {
     Id: "NXRP.Tests.NexusScriptTests";
-    Requires: [@Projects.NexusScript, @Projects.NexusTest, @Projects.SQLite, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.Core, @Projects.Mustache];
+    Requires: [@Projects.NexusRTL, @Projects.RTLSystem, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NexusScript, @Projects.NexusTest, @Projects.SQLite, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.JSONRPC, @Projects.Core, @Projects.Mustache];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NexusScriptTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusScriptTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Compiler {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/nxscript/test/NexusScriptTests.lpr"];
         OutputPath: @NexusScriptTests.OutputRoot;
-        Target Platform { OperatingSystem: "win64"; }
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
         RawOptions: ["-gh", "-gl"];
         Config Options { DisableDefaultConfigFiles: True; }
+        Assembler LLVM TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 "packages/nexus-packages/nxscript/test",
-                "projects/nxscript/cli",
-                @Tools.Native.RTLPath
+                "projects/nxscript/cli"
             ];
         }
     }

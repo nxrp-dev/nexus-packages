@@ -16,9 +16,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project OpenSSL {
     Id: "NXRP.Network.OpenSSL.Units";
     Publishes Directories { Sources: [@OpenSSL.OutputRoot]; }
-    Requires: [@Projects.OpenSSL, @Projects.Synapse, @Projects.FCLBase, @Projects.Pthreads];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLExtra, @Projects.OpenSSL, @Projects.Synapse, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/OpenSSL/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/OpenSSL/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Units {
         BuildKind: Unit;
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -39,19 +39,7 @@ Project OpenSSL {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @OpenSSL.OutputRoot,
-                @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                @OpenSSL.OutputRoot
             ];
         }
     }

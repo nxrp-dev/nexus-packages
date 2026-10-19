@@ -7,9 +7,9 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLResTests {
     Id: "NXRP.Tests.FCLResTests";
-    Requires: [@Projects.FCLRes, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.FCLRes, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/FCLResTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLResTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/fcl-res/tests/FCLResTests.lpr"];
@@ -20,7 +20,6 @@ Project FCLResTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
                 "packages/nexus-packages/fcl-res/tests"
             ];
             IncludePaths: [];

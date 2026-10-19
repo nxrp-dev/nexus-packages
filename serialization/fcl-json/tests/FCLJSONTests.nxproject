@@ -7,10 +7,10 @@ module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLJSONTests {
     Id: "NXRP.Tests.FCLJSONTests";
-    Requires: [@Projects.FCLJSON, @Projects.NexusTest, @Projects.FCLProcess, @Projects.FCLBase];
+    Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLJSON, @Projects.NexusTest, @Projects.FCLProcess, @Projects.FCLBase];
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
-    OutputRoot: @Tools.OutputRoot + "/FCLJSONTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLJSONTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -29,13 +29,7 @@ Project FCLJSONTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                @Tools.Native.RTLPath,
-                @FCLJSONTests.SourceRoot + "/tests",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
-            ];
-            IncludePaths: [
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+                @FCLJSONTests.SourceRoot + "/tests"
             ];
         }
     }

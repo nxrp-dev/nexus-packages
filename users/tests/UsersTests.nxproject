@@ -6,9 +6,9 @@ module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project UsersTests {
     Id: "NXRP.Tests.UsersTests";
-    Requires: [@Projects.Users, @Projects.NexusTest];
+    Requires: [@Projects.NexusRTL, @Projects.Users, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/UsersTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/UsersTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     LLVM NativeABI {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: Object;
@@ -25,7 +25,7 @@ Project UsersTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/tests"];
+            UnitPaths: ["packages/nexus-packages/users/tests"];
             IncludePaths: [];
             ObjectPaths: [@UsersTests.NativeABI.OutputPath];
         }

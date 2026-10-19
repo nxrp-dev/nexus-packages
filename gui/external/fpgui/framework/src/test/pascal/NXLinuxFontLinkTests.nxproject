@@ -5,9 +5,9 @@ module Projects "../../../../../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project NXLinuxFontLinkTests {
     Id: "NXRP.Tests.NXLinuxFontLinkTests";
-    Requires: [@Projects.NexusTest, @Projects.FCLImage, @Projects.GUI];
+    Requires: [@Projects.NexusRTL, @Projects.NexusTest, @Projects.FCLImage, @Projects.GUI];
     RootDirectory: "../../../../../../../../..";
-    OutputRoot: @Tools.OutputRoot + "/NXLinuxFontLinkTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NXLinuxFontLinkTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/gui/external/fpgui/framework/src/test/pascal/NXLinuxFontLinkTests.lpr"];
@@ -17,7 +17,6 @@ Project NXLinuxFontLinkTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath];
         }
     }
 }

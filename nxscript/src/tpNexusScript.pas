@@ -30,12 +30,15 @@ type
     EndPosition: TNexusScriptPosition;
   end;
 
+  TNSScalarKind = (nskNone, nskText, nskInteger, nskBoolean);
+
   TNexusScriptValueKind = (
     nsvText,
     nsvArray,
     nsvReference,
     nsvTextComposition,
-    nsvDefinition
+    nsvDefinition,
+    nsvExternalReference
   );
 
   TNexusScriptValueEvaluationState = (
