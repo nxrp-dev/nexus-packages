@@ -43,6 +43,7 @@ uses
   obNexusScriptEmitter,
   obNexusScriptEmitterFactory,
   obNexusScriptJSON,
+  obNexusScriptLive,
   obNexusScriptSQLite,
   obNexusScriptExternalSource,
   obNexusScriptCommand,
@@ -5313,6 +5314,7 @@ var
   lSession: TNexusScriptCompilationSession;
   lEmitter: TNexusScriptJSONEmitter;
   lJSON: TJSONData;
+  lLive: TNexusScriptLiveDocument;
   lBefore, lAfter, lStamp: TDateTime;
   lText: string;
   lIndex: Integer;
@@ -5348,13 +5350,17 @@ begin
     finally
       lJSON.Free;
     end;
-    lJSON := GetJSON(lEmitter.RenderDefinition(lCompiler.CompiledDocument.FindDefinition('First'),
-      lCompiler.CompiledDocument));
+    lLive := TNexusScriptLiveEmitter.Emit(lCompiler.CompiledDocument);
     try
-      AContext.AssertEquals('2026-09-15T12:34:56.789Z', lJSON.FindPath('_nx.CompiledAt').AsString,
-        'Selected-definition context receives its document timestamp');
+      lJSON := GetJSON(lEmitter.RenderDefinition(lLive.FindDefinition('First'), lLive));
+      try
+        AContext.AssertEquals('2026-09-15T12:34:56.789Z', lJSON.FindPath('_nx.CompiledAt').AsString,
+          'Selected-definition context receives its document timestamp');
+      finally
+        lJSON.Free;
+      end;
     finally
-      lJSON.Free;
+      lLive.Free;
     end;
     lText := lEmitter.JSON;
     FreeAndNil(lCompiler);

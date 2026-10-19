@@ -47,6 +47,12 @@ private targets and their retained context. A private module is not promoted
 to a public contribution merely because a reference reaches it. Definition
 list order is copying/navigation order, not dependency execution order.
 
+`Declarations` retains the consumer-visible definitions in collection order;
+`ScopedNames` contains the corresponding qualified keys. These lists exclude
+private targets reached only through references and survive compiler destruction.
+They let renderers preserve public collection membership without reconstructing
+it from the complete navigation graph.
+
 The semantic graph contains full structural arrays. JSON's Mustache projection
 rules do not apply here. Source-loading, composition, and scalar-evaluation
 cycle rules still apply at compilation. External-dependent text retains its
@@ -59,3 +65,12 @@ analysis/session, emits Live, then explicitly maps it into native Setup domain
 classes. The Setup document owns that Live snapshot for provenance. There is
 no arbitrary class mapper, reverse loader, fake `WriteArtifact`, or
 `/format=live` disk format. nxbuild also reads its descriptions through Live.
+Forge owns a Live document during task preparation/execution and releases its
+compilation session before preparing tasks. Command values, file-operation paths,
+and Render source documents all use Live access.
+
+`TNexusScriptJSONEmitter.AddLiveDocument` and `RenderDefinition` consume these
+snapshots and evaluate values through their Live read events. JSON retains its
+bounded projection rules; it does not flatten the underlying graph in place.
+The existing compiled-document `AddDocument` entry point first requires fully
+materialized data, then uses the same renderer through a temporary Live snapshot.

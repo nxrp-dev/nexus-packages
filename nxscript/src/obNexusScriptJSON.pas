@@ -24,7 +24,7 @@ uses
   fpjson,
   tpNexusScript,
   obNexusScriptModel,
-  obNexusScriptDefinitionView,
+  obNexusScriptLive, tpNexusScriptLive,
   obNexusScriptArtifactModel,
   obNexusScriptEmitter;
 
@@ -38,20 +38,20 @@ type
     FRootNames: TStringList;
     FCollectedNames: TStringList;
     FCollections: TJSONObject;
-    FProjectedDefinitions: TList<TNexusScriptCompiledDefinition>;
-    function IsScalarProjection(AValue: TNexusScriptCompiledValue): Boolean;
+    FProjectedDefinitions: TList<TNexusScriptLiveDefinition>;
+    function IsScalarProjection(AValue: TNexusScriptLiveValue): Boolean;
     function DefinitionMetadata(
-      ADefinition: TNexusScriptCompiledDefinition;
-      AReferenceValue: TNexusScriptCompiledValue):
+      ADefinition: TNexusScriptLiveDefinition;
+      AReferenceValue: TNexusScriptLiveValue):
       TNexusScriptArtifactMetadata;
     function DefinitionJSON(
-      ADefinition: TNexusScriptCompiledDefinition;
-      AReferenceValue: TNexusScriptCompiledValue = nil;
+      ADefinition: TNexusScriptLiveDefinition;
+      AReferenceValue: TNexusScriptLiveValue = nil;
       AProjection: Boolean = False): TJSONObject;
-    function ValueJSON(AValue: TNexusScriptCompiledValue;
+    function ValueJSON(AValue: TNexusScriptLiveValue;
       AArrayItem: Boolean): TJSONData;
-    function ArrayJSON(AValue: TNexusScriptCompiledValue): TJSONArray;
-    function ArrayItemJSON(AValue: TNexusScriptCompiledValue): TJSONData;
+    function ArrayJSON(AValue: TNexusScriptLiveValue): TJSONArray;
+    function ArrayItemJSON(AValue: TNexusScriptLiveValue): TJSONData;
     function NamedValueJSON(const AName: string;
       AValue: TJSONData): TJSONObject;
   public
@@ -61,8 +61,9 @@ type
     procedure AddDocument(
       ADocument: TNexusScriptCompiledDocument); override;
     procedure WriteArtifact(AStream: TStream); overload; override;
-    function RenderDefinition(ADefinition: TNexusScriptCompiledDefinition;
-      ADocument: TNexusScriptCompiledDocument): string;
+    function RenderDefinition(ADefinition: TNexusScriptLiveDefinition;
+      ADocument: TNexusScriptLiveDocument): string;
+    procedure AddLiveDocument(ADocument: TNexusScriptLiveDocument);
     function JSON: string;
   end;
 
@@ -87,8 +88,8 @@ begin
 end;
 
 function TNexusScriptJSONEmitter.RenderDefinition(
-  ADefinition: TNexusScriptCompiledDefinition;
-  ADocument: TNexusScriptCompiledDocument): string;
+  ADefinition: TNexusScriptLiveDefinition;
+  ADocument: TNexusScriptLiveDocument): string;
 var
   lData: TJSONObject;
 begin
@@ -102,12 +103,12 @@ begin
 end;
 
 function TNexusScriptJSONEmitter.DefinitionMetadata(
-  ADefinition: TNexusScriptCompiledDefinition;
-  AReferenceValue: TNexusScriptCompiledValue):
+  ADefinition: TNexusScriptLiveDefinition;
+  AReferenceValue: TNexusScriptLiveValue):
   TNexusScriptArtifactMetadata;
 var
   lIsReference: Boolean;
-  lTarget: TNexusScriptTarget;
+  lTarget: TNexusScriptLiveTarget;
   lArtifactTarget: TNexusScriptArtifactTarget;
   lValue: string;
 begin
@@ -116,7 +117,8 @@ begin
     Result.Kind.Value := ADefinition.Kind;
     Result.Name.Value := ADefinition.Name;
     lIsReference := (AReferenceValue <> nil) and
-      (AReferenceValue.Kind = nsvReference);
+      (AReferenceValue.Reference <> nil) and
+      (AReferenceValue.Reference.Kind = nslrInternal);
     Result.IsReference.Value := lIsReference;
     Result.SourceRange.SourceName.Value := ADefinition.SourceRange.SourceName;
     Result.SourceRange.StartPosition.Offset.Value :=
@@ -133,11 +135,11 @@ begin
       ADefinition.SourceRange.EndPosition.Column;
     if lIsReference then
     begin
-      Result.Name.Value := AReferenceValue.EffectiveName;
+      Result.Name.Value := AReferenceValue.Name;
       if AReferenceValue.OriginalDefinitionName = '' then
         raise ENexusScriptJSON.CreateFmt(
           'Structural reference %s has no resolved target name.',
-          [AReferenceValue.SourceText]);
+          [AReferenceValue.Reference.Path]);
       Result.Reference.Kind.Value := ADefinition.Kind;
       Result.Reference.Name.Value := AReferenceValue.OriginalDefinitionName;
     end;
@@ -166,7 +168,7 @@ begin
   FRoot.Add('_nx', FMetadata);
   FCollections := TJSONObject.Create;
   FMetadata.Add('Collections', FCollections);
-  FProjectedDefinitions := TList<TNexusScriptCompiledDefinition>.Create;
+  FProjectedDefinitions := TList<TNexusScriptLiveDefinition>.Create;
 end;
 
 destructor TNexusScriptJSONEmitter.Destroy;
@@ -200,21 +202,21 @@ begin
 end;
 
 function TNexusScriptJSONEmitter.ArrayItemJSON(
-  AValue: TNexusScriptCompiledValue): TJSONData;
+  AValue: TNexusScriptLiveValue): TJSONData;
 var
-  lValue: TNexusScriptCompiledValue;
+  lValue: TNexusScriptLiveValue;
 begin
-  lValue := AValue.ArtifactValue;
+  lValue := AValue;
   Result := ValueJSON(AValue, True);
-  if (AValue.EffectiveName <> '') and
-    (lValue.ArtifactKind in [nsavText, nsavArray]) then
-    Result := NamedValueJSON(AValue.EffectiveName, Result);
+  if (AValue.Name <> '') and
+    (lValue.Kind in [nslvText, nslvArray]) then
+    Result := NamedValueJSON(AValue.Name, Result);
 end;
 
 function TNexusScriptJSONEmitter.ArrayJSON(
-  AValue: TNexusScriptCompiledValue): TJSONArray;
+  AValue: TNexusScriptLiveValue): TJSONArray;
 var
-  lItem: TNexusScriptCompiledValue;
+  lItem: TNexusScriptLiveValue;
 begin
   Result := TJSONArray.Create;
   try
@@ -227,18 +229,18 @@ begin
 end;
 
 function TNexusScriptJSONEmitter.ValueJSON(
-  AValue: TNexusScriptCompiledValue; AArrayItem: Boolean): TJSONData;
+  AValue: TNexusScriptLiveValue; AArrayItem: Boolean): TJSONData;
 var
-  lValue: TNexusScriptCompiledValue;
+  lValue: TNexusScriptLiveValue;
 begin
-  lValue := AValue.ArtifactValue;
-  case lValue.ArtifactKind of
-    nsavText:
-      Result := TJSONString.Create(lValue.EffectiveText);
-    nsavArray:
+  lValue := AValue;
+  case lValue.Kind of
+    nslvText:
+      Result := TJSONString.Create(lValue.AsText);
+    nslvArray:
       Result := ArrayJSON(lValue);
-    nsavDefinition:
-      Result := DefinitionJSON(lValue.DefinitionValue, AValue);
+    nslvDefinition:
+      Result := DefinitionJSON(lValue.AsDefinition, AValue);
   else
     if AArrayItem then
       raise ENexusScriptJSON.Create(
@@ -250,30 +252,31 @@ begin
 end;
 
 function TNexusScriptJSONEmitter.IsScalarProjection(
-  AValue: TNexusScriptCompiledValue): Boolean;
+  AValue: TNexusScriptLiveValue): Boolean;
 var
-  lValue, lItem: TNexusScriptCompiledValue;
+  lValue, lItem: TNexusScriptLiveValue;
 begin
-  lValue := AValue.SemanticValue;
-  if lValue.DefinitionValue <> nil then Exit(False);
-  if lValue.Kind = nsvArray then
+  lValue := AValue;
+  if lValue.Kind = nslvDefinition then Exit(False);
+  if lValue.Kind = nslvArray then
     for lItem in lValue.Items do
       if not IsScalarProjection(lItem) then Exit(False);
   Result := True;
 end;
 
 function TNexusScriptJSONEmitter.DefinitionJSON(
-  ADefinition: TNexusScriptCompiledDefinition;
-  AReferenceValue: TNexusScriptCompiledValue;
+  ADefinition: TNexusScriptLiveDefinition;
+  AReferenceValue: TNexusScriptLiveValue;
   AProjection: Boolean): TJSONObject;
 var
   lMetaData: TNexusScriptArtifactMetadata;
-  lProperty: TNexusScriptCompiledProperty;
-  lChild: TNexusScriptCompiledDefinition;
+  lProperty: TNexusScriptLiveProperty;
+  lChild: TNexusScriptLiveDefinition;
   lProjection: Boolean;
 begin
   lProjection := AProjection or ((AReferenceValue <> nil) and
-    (AReferenceValue.Kind = nsvReference));
+    (AReferenceValue.Reference <> nil) and
+      (AReferenceValue.Reference.Kind = nslrInternal));
   if lProjection then
   begin
     if FProjectedDefinitions.IndexOf(ADefinition) >= 0 then
@@ -296,7 +299,7 @@ begin
       FreeAndNil(lMetaData);
       for lProperty in ADefinition.Properties do
       begin
-        if lProjection and (lProperty.Value.SemanticValue.Kind = nsvArray) and
+        if lProjection and (lProperty.Value.Kind = nslvArray) and
           not IsScalarProjection(lProperty.Value) then Continue;
         Result.Add(lProperty.Name, ValueJSON(lProperty.Value, False));
       end;
@@ -316,28 +319,34 @@ end;
 procedure TNexusScriptJSONEmitter.AddDocument(
   ADocument: TNexusScriptCompiledDocument);
 var
-  lDefinition: TNexusScriptCompiledDefinition;
-  lView: TNexusScriptDefinitionView;
-  lRoots, lDefinitions: TJSONObject;
-  lCollection: TJSONArray;
-  lIndex, lExisting: Integer;
-  lKey, lName: string;
+  lLive: TNexusScriptLiveDocument;
 begin
   try
     RequireMaterializedNexusScriptDocument(ADocument);
   except
     on E: Exception do raise ENexusScriptJSON.Create(E.Message);
   end;
-  lView := TNexusScriptDefinitionView.Create;
+  lLive := TNexusScriptLiveEmitter.Emit(ADocument);
+  try
+    AddLiveDocument(lLive);
+  finally
+    lLive.Free;
+  end;
+end;
+
+procedure TNexusScriptJSONEmitter.AddLiveDocument(
+  ADocument: TNexusScriptLiveDocument);
+var
+  lDefinition: TNexusScriptLiveDefinition;
+  lRoots, lDefinitions: TJSONObject;
+  lCollection: TJSONArray;
+  lIndex, lExisting: Integer;
+  lKey, lName: string;
+begin
   lRoots := TJSONObject.Create;
   lDefinitions := TJSONObject.Create;
   try
-    try
-      lView.AddDocument(ADocument);
-    except
-      on E: Exception do raise ENexusScriptJSON.Create(E.Message);
-    end;
-    for lDefinition in lView.Roots do
+    for lDefinition in ADocument.Roots do
     begin
       if SameText(lDefinition.Name, '_nx') then
         raise ENexusScriptJSON.Create('Artifact root uses reserved name _nx.');
@@ -351,10 +360,10 @@ begin
       end;
       lRoots.Add(lDefinition.Name, DefinitionJSON(lDefinition));
     end;
-    for lIndex := 0 to lView.Definitions.Count - 1 do
+    for lIndex := 0 to ADocument.Declarations.Count - 1 do
     begin
-      lDefinition := lView.Definitions[lIndex];
-      lKey := lView.ScopedNames[lIndex];
+      lDefinition := ADocument.Declarations[lIndex];
+      lKey := ADocument.ScopedNames[lIndex];
       if FCollectedNames.IndexOf(lKey) < 0 then
         lDefinitions.Add(lKey, DefinitionJSON(lDefinition));
     end;
@@ -367,15 +376,15 @@ begin
       lName := lRoots.Names[0];
       FRoot.Add(lName, lRoots.Extract(0));
     end;
-    for lDefinition in lView.Roots do
+    for lDefinition in ADocument.Roots do
       if FRootNames.IndexOfName(lDefinition.Name) < 0 then
         FRootNames.Add(lDefinition.Name + '=' + lDefinition.SourceRange.SourceName);
-    for lIndex := 0 to lView.Definitions.Count - 1 do
+    for lIndex := 0 to ADocument.Declarations.Count - 1 do
     begin
-      lKey := lView.ScopedNames[lIndex];
+      lKey := ADocument.ScopedNames[lIndex];
       lExisting := lDefinitions.IndexOfName(lKey);
       if lExisting < 0 then Continue;
-      lDefinition := lView.Definitions[lIndex];
+      lDefinition := ADocument.Declarations[lIndex];
       if not FCollections.Find(lDefinition.Kind, lCollection) then
       begin
         lCollection := TJSONArray.Create;
@@ -387,7 +396,6 @@ begin
   finally
     lDefinitions.Free;
     lRoots.Free;
-    lView.Free;
   end;
 end;
 

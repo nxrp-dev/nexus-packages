@@ -169,6 +169,8 @@ type
     FNodes: TObjectList<TNexusScriptLiveNode>;
     FRoots: TList<TNexusScriptLiveDefinition>;
     FDefinitions: TList<TNexusScriptLiveDefinition>;
+    FDeclarations: TList<TNexusScriptLiveDefinition>;
+    FScopedNames: TStringList;
     FExternalRoot: TNexusScriptLiveExternal;
     FExternalAssignments: TList<TNexusScriptLiveProperty>;
     FOnReadExternal: TNexusScriptExternalReadEvent;
@@ -190,6 +192,9 @@ type
     property CompiledAt: TDateTime read FCompiledAt;
     property Roots: TList<TNexusScriptLiveDefinition> read FRoots;
     property Definitions: TList<TNexusScriptLiveDefinition> read FDefinitions;
+    { Public declarations in collection order, excluding private reference targets. }
+    property Declarations: TList<TNexusScriptLiveDefinition> read FDeclarations;
+    property ScopedNames: TStringList read FScopedNames;
   end;
 
   { Returns an owned snapshot, not a stream artifact or a borrowed compiler view. }
@@ -425,10 +430,14 @@ begin
   FNodes.Add(FExternalRoot);
   FRoots := TList<TNexusScriptLiveDefinition>.Create;
   FDefinitions := TList<TNexusScriptLiveDefinition>.Create;
+  FDeclarations := TList<TNexusScriptLiveDefinition>.Create;
+  FScopedNames := TStringList.Create;
 end;
 
 destructor TNexusScriptLiveDocument.Destroy;
 begin
+  FScopedNames.Free;
+  FDeclarations.Free;
   FExternalAssignments.Free;
   FDefinitions.Free;
   FRoots.Free;
@@ -700,6 +709,9 @@ begin
     lView.AddDocument(ASource);
     for lRoot in lView.Roots do
       FDocument.FRoots.Add(CopyDefinition(lRoot));
+    for lDefinition in lView.Definitions do
+      FDocument.FDeclarations.Add(CopyDefinition(lDefinition));
+    FDocument.FScopedNames.Assign(lView.ScopedNames);
     { Public contributions only: private module dependencies are not declarations here. }
     for lDefinition in lView.Definitions do
       for lProperty in lDefinition.Properties do
