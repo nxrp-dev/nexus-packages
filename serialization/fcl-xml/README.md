@@ -10,7 +10,7 @@ with the package. `buildfclxml.pas` is retained historical material and is not a
 Nexus build entry point.
 
 [Package.nxscript](Package.nxscript) registers `NXRP.Serialization.FCLXML` in both
-package catalogs. [FCLXML.nxpackage](FCLXML.nxpackage) compiles 20 common runtime
+package catalogs. [FCLXML.nxproject](FCLXML.nxproject) compiles 20 common runtime
 units and the target encoding adapter: `xmliconv` on Linux and
 `xmliconv_windows` on Win64. It uses NexusFPC RTL/RTL-ObjPas and the relocated FCL Base package;
 the Unix adapter additionally uses iconvenc. No runtime-package SDK is required.
@@ -20,7 +20,7 @@ alongside ordinary unit names.
 From the Nexus root:
 
 ```sh
-nxbuild /project=packages/nexus-packages/serialization/fcl-xml/FCLXML.nxpackage /action=build
+nxbuild /project=packages/nexus-packages/serialization/fcl-xml/FCLXML.nxproject /action=build
 nxbuild /project=packages/nexus-packages/serialization/fcl-xml/tests/FCLXMLTests.nxproject /action=build
 output/fcl-xml-tests/x86_64-linux/FCLXMLTests
 ```

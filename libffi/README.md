@@ -55,7 +55,7 @@ capability; compiler bootstrap and the RTL build do not require it.
 Build the package and its direct nxtest regressions from the Nexus root:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/libffi/LibFFI.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/libffi/LibFFI.nxproject
 nxbuild /action=build /project=packages/nexus-packages/libffi/tests/LibFFITests.nxproject
 ../../worktree/libffi-relocation/tests/x86_64-linux/LibFFITests
 ```

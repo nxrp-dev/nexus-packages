@@ -118,11 +118,45 @@ procedure Test12(AContext: TNXTestContext); begin RunProbe(AContext, 12); end;
 procedure Test13(AContext: TNXTestContext); begin RunProbe(AContext, 13); end;
 procedure Test14(AContext: TNXTestContext); begin RunProbe(AContext, 14); end;
 
+procedure TestUnixEmptyArgument(AContext: TNXTestContext);
+{$IFDEF UNIX}
+var
+  lProcess: TProcess;
+  lBuffer: array[0..255] of AnsiChar;
+  lCount: Integer;
+  lOutput: AnsiString;
+begin
+  lProcess := TProcess.Create(nil);
+  try
+    lProcess.Executable := ExeSearch('printf');
+    AContext.AssertTrue(lProcess.Executable <> '', 'Native printf was not found.');
+    lProcess.Parameters.Add('<%s>');
+    lProcess.Parameters.Add('before');
+    lProcess.Parameters.Add('');
+    lProcess.Parameters.Add('after');
+    lProcess.Options := [poWaitOnExit, poUsePipes];
+    lProcess.Execute;
+    AContext.AssertEquals(0, lProcess.ExitStatus);
+    lCount := lProcess.Output.Read(lBuffer, SizeOf(lBuffer));
+    SetString(lOutput, PAnsiChar(@lBuffer[0]), lCount);
+    AContext.AssertEquals('<before><><after>', lOutput,
+      'Empty arguments must not terminate argv or discard later arguments.');
+  finally
+    lProcess.Free;
+  end;
+end;
+{$ELSE}
+begin
+  AContext.Skip('This regression exercises Unix argv construction.');
+end;
+{$ENDIF}
+
 procedure RegisterFCLProcessTests(ARegistry: TNXTestRegistry);
 var
   lSuite: TNXTestSuite;
 begin
   lSuite := ARegistry.AddSuite('FCLProcess.Review');
+  lSuite.AddTest('15UnixEmptyArgument', @TestUnixEmptyArgument);
   lSuite.AddTest('01InactiveProcessSignals', @Test01);
   lSuite.AddTest('02IntegerWireWidths', @Test02);
   lSuite.AddTest('03PipelineOwnership', @Test03);

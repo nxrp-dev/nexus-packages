@@ -95,7 +95,8 @@ begin
     {$ELSE}
     S:=List[i];
     {$ENDIF}
-    Result[i]:=StrNew(PAnsiChar(S));
+    Result[i]:=StrAlloc(Length(S)+1);
+    StrPCopy(Result[i],S);
     end;
 end;
 

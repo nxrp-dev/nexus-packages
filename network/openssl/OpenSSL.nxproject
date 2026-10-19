@@ -10,11 +10,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package OpenSSL {
+Project OpenSSL {
+    Id: "NXRP.Network.OpenSSL.Units";
+    Publishes Directories { Sources: [@OpenSSL.OutputRoot]; }
+    Requires: [@Projects.OpenSSL, @Projects.Synapse, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-openssl/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/OpenSSL/" + @Tools.Native.Name;
     FPC Units {
         BuildKind: Unit;
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -37,25 +41,17 @@ Package OpenSSL {
             UnitPaths: [
                 @OpenSSL.OutputRoot,
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/network/openssl/src",
-                "packages/nexus-packages/network/openssl/synapse",
-                "packages/nexus-packages/network/external/synapse",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/pthreads/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
-                "packages/nexus-packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

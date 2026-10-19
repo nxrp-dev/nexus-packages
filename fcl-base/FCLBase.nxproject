@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLBase {
+Project FCLBase {
+    Id: "NXRP.FCLBase.Units";
+    Publishes Directories { Sources: [@FCLBase.OutputRoot]; }
+    Requires: [@Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-base";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-base/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLBase/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -65,17 +69,11 @@ Package FCLBase {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @FCLBase.SourceRoot + "/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                "packages/nexus-packages/pthreads/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
-                @FCLBase.SourceRoot + "/src",
-                @FCLBase.SourceRoot + "/src/" + @Tools.Native.OS,
-                @FCLBase.SourceRoot + "/src/" + @Tools.Native.PascalPlatform,
-                @FCLBase.SourceRoot + "/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

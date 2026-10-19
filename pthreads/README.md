@@ -10,7 +10,7 @@ this package supplies Pascal bindings.
 From the Nexus checkout:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/pthreads/Pthreads.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/pthreads/Pthreads.nxproject
 nxbuild /action=build /project=packages/nexus-packages/pthreads/tests/PthreadsTests.nxproject
 ```
 

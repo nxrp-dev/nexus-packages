@@ -10,46 +10,28 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Project NexusScriptEditorTests {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "NexusScriptEditorTests.lpr";
-    OutputRoot: "../../../../output/NexusScriptEditorTests/x86_64-win64";
+Project NexusScriptEditorTests TargetOS[win64] {
+    Id: "NXRP.Tests.NexusScriptEditorTests";
+    Requires: [@Projects.GUI, @Projects.NexusScript, @Projects.NexusTest, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.SQLite, @Projects.JSONRPC, @Projects.Core, @Projects.Mustache, @Projects.RegExpr];
+    RootDirectory: "../../../..";
+    OutputRoot: @Tools.OutputRoot + "/NexusScriptEditorTests/" + @Tools.Native.Name;
 
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @NexusScriptEditorTests.OutputRoot + "/NexusScriptEditorTests.exe";
+    FPC Compiler {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/gui/test/NexusScriptEditorTests.lpr"];
+        OutputPath: @NexusScriptEditorTests.OutputRoot;
+        Target Platform { OperatingSystem: "win64"; }
         RawOptions: ["-dGDI", "-gl", "-gh", "-Cr", "-Co", "-Sa", "-Xe"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: @NexusScriptEditorTests.OutputRoot;
-            UnitOutputPath: "../../../../output/NexusScriptEditorTests/x86_64-win64/units";
-            IncludePaths: ["../../../../output/NexusScriptEditorTests/x86_64-win64/units", "../external/fpgui/framework/src/main/pascal/corelib", "../external/fpgui/framework/src/main/pascal/corelib/gdi", "../external/fpgui/framework/src/main/resources"];
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            IncludePaths: [@NexusScriptEditorTests.OutputRoot];
             UnitPaths: [
-                ".",
-                "../src",
-                "../src/vtv",
-                "../../nxscript/src",
-                "../../nxtest/src",
-                "../../serialization/src",
-                "../../serialization/json/src",
-                "../../serialization/fcl-json/src",
-                "../../db/sqlite/src/bindings",
-                "../../network/json-rpc/src",
-                "../../core/src",
-                "../../../../packages/nexus-packages-ext/mustache/external/dmustache",
-                "../../../../packages/nexus-packages-ext/regexpr/external/tregexpr/src",
-                "../external/fpgui/framework/src/main/pascal/corelib",
-                "../external/fpgui/framework/src/main/pascal/corelib/render/software",
-                "../external/fpgui/framework/src/main/pascal/corelib/gdi",
-                "../external/fpgui/framework/src/main/pascal/gui",
-                "../external/fpgui/framework/src/main/resources",
-                "../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+                "packages/nexus-packages/gui/test",
+                @Tools.Native.RTLPath
             ];
         }
     }

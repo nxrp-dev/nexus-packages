@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLProcessBehaviorTests {
+    Id: "NXRP.Tests.FCLProcessBehaviorTests";
+    Requires: [@Projects.FCLProcess, @Projects.FCLBase, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/fcl-process-tests/" + @Tools.Native.Name + "/behavior";
+    OutputRoot: @Tools.OutputRoot + "/FCLProcessBehaviorTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: [
@@ -26,19 +29,12 @@ Project FCLProcessBehaviorTests {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/fcl-process/tests",
-                "packages/nexus-packages/fcl-process/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/nxtest/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.OS,
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy",
-                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

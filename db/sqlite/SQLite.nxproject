@@ -10,12 +10,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package SQLite {
+Project SQLite {
+    Id: "NXRP.SQLite.Units";
+    Publishes Directories { Sources: [@SQLite.OutputRoot]; }
+    Requires: [@Projects.SQLite, @Projects.FCLBase, @Projects.FCLDB];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/sqlite";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-sqlite/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/SQLite/" + @Tools.Native.Name;
 
     LLVM Native {
         CompilerPath: @Tools.Native.LLVMCompiler;
@@ -61,11 +65,7 @@ Package SQLite {
                 @Tools.Native.PackageSDKPath + "/units",
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/db/fcl-db/src/base",
-                @SQLite.SourceRoot + "/src",
-                @SQLite.SourceRoot + "/src/bindings"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",

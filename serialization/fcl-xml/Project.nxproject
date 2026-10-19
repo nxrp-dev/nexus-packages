@@ -1,0 +1,15 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+
+Project FCLXML {
+    Id: "NXRP.Serialization.FCLXML";
+    RootDirectory: "../../../..";
+    Author: "Sebastian Guenther, Sergei Gorelkin and Free Pascal contributors";
+    Description: "XML DOM, readers, writers, XPath, configuration, SAX and HTML support.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Requires: [@Projects.FCLBase, @Projects.Iconv];
+    Publishes Directories { Sources: ["packages/nexus-packages/serialization/fcl-xml/src"]; Headers: ["packages/nexus-packages/serialization/fcl-xml/src"]; }
+}

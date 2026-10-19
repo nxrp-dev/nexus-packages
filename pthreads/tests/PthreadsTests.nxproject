@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project PthreadsTests {
+    Id: "NXRP.Tests.PthreadsTests";
+    Requires: [@Projects.Pthreads, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/pthreads/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/PthreadsTests/" + @Tools.Native.Name;
     LLVM NativeABI {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: Object;
@@ -22,8 +25,8 @@ Project PthreadsTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/pthreads/src", "packages/nexus-packages/pthreads/tests", "packages/nexus-packages/nxtest/src"];
-            IncludePaths: ["packages/nexus-packages/pthreads/src"];
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/pthreads/tests"];
+            IncludePaths: [];
             ObjectPaths: [@PthreadsTests.NativeABI.OutputPath];
         }
     }

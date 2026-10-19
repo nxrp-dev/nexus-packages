@@ -2,25 +2,26 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package Iconv {
+Project Pthreads {
+    Id: "NXRP.Unix.Pthreads.Units";
+    Publishes Directories { Sources: [@Pthreads.OutputRoot]; }
+    Requires: [@Projects.Pthreads];
     RootDirectory: "../../..";
-    OutputRoot: @Tools.OutputRoot + "/unix-bindings/iconvenc/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/Pthreads/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
-        SourceFiles: [
-            "packages/nexus-packages/iconvenc/src/iconvenc.pas",
-            "packages/nexus-packages/iconvenc/src/iconvenc_dyn.pas"
-        ];
-        OutputPath: @Iconv.OutputRoot;
+        SourceFiles: ["packages/nexus-packages/pthreads/src/pthreads.pas"];
+        OutputPath: @Pthreads.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/src"];
-            IncludePaths: ["packages/nexus-packages/iconvenc/src"];
+            UnitPaths: [@Tools.Native.RTLPath];
+            IncludePaths: [];
         }
     }
 }

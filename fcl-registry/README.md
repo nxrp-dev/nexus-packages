@@ -7,7 +7,7 @@ code consume this package. XML emulation remains the portable FCL behavior.
 The descriptor is [Package.nxscript](Package.nxscript). From the Nexus root:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/fcl-registry/FCLRegistry.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/fcl-registry/FCLRegistry.nxproject
 ```
 
 The native recipe uses the configured NexusFPC and its RTL. Consumers add `src`

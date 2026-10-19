@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package Users {
+Project Users {
+    Id: "NXRP.Unix.Users.Units";
+    Publishes Directories { Sources: [@Users.OutputRoot]; }
+    Requires: [@Projects.Users];
     RootDirectory: "../../..";
-    OutputRoot: @Tools.OutputRoot + "/unix-bindings/users/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/Users/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -21,8 +25,8 @@ Package Users {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src"];
-            IncludePaths: ["packages/nexus-packages/users/src"];
+            UnitPaths: [@Tools.Native.RTLPath];
+            IncludePaths: [];
         }
     }
     FPC Shadow TargetOS[linux] {
@@ -34,7 +38,7 @@ Package Users {
         Assembler Native { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src"];
+            UnitPaths: [@Tools.Native.RTLPath];
         }
     }
 }

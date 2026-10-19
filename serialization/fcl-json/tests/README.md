@@ -58,7 +58,7 @@ Verified on x86_64 Linux with NexusFPC 3.3.1:
 - Follow-up generator cases 12 and 13 both fail before their corrections;
   the Boolean replacement already passes.
 - Current complete suite: **14 passed, 0 failed/errors, 0 skipped**.
-- All 13 regular runtime units compile through `FCLJSON.nxpackage`.
+- All 13 regular runtime units compile through `FCLJSON.nxproject`.
 - All retained suites pass: JSON 415 tests (one existing ignore), generator 77,
   configuration 9 and INI 28, with zero failures/errors.
 

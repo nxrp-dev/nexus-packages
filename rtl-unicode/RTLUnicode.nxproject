@@ -1,11 +1,15 @@
 // Copyright (c) 2026 Kevin Collins.
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "RTLUnicode.Build.Config.nxscript";
-Package RTLUnicode {
+Project RTLUnicode {
+    Id: "NXRP.RTLUnicode.Units";
+    Publishes Directories { Sources: [@RTLUnicode.OutputRoot]; }
+    Requires: [@Projects.RTLUnicode];
     RootDirectory: "../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @RTLUnicodeBuild.OutputRoot + "/package";
+    OutputRoot: @Tools.OutputRoot + "/RTLUnicode/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         BuildKind: Unit;
@@ -24,13 +28,8 @@ Package RTLUnicode {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @RTLUnicodeBuild.RTLPath,
-                @RTLUnicode.SourceRoot + "/src/inc",
-                @RTLUnicode.SourceRoot + "/src/collations",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
-            ];
-            IncludePaths: [@RTLUnicode.SourceRoot + "/src/inc", @RTLUnicode.SourceRoot + "/src/collations"];
+            UnitPaths: [@RTLUnicodeBuild.RTLPath, @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"];
+            IncludePaths: [];
         }
     }
 }

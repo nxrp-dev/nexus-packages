@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLRegistryTests {
+    Id: "NXRP.Tests.FCLRegistryTests";
+    Requires: [@Projects.FCLProcess, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase, @Projects.FCLRegistry, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/fcl-registry-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLRegistryTests/" + @Tools.Native.Name;
     FPC Tests TargetOS[linux] {
         RawOptions: ["-Cr", "-dXMLRegfile_in_CurDir"];
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -25,18 +28,10 @@ Project FCLRegistryTests {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/fcl-registry/tests",
-                "packages/nexus-packages/fcl-process/src",
-                "packages/nexus-packages/serialization/fcl-xml/src",
-                "packages/nexus-packages/iconvenc/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-registry/src",
-                "packages/nexus-packages/nxtest/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
-                "packages/nexus-packages/fcl-registry/src",
-                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

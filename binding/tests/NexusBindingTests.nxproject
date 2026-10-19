@@ -10,30 +10,27 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Project NexusBindingTests {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "NexusBindingTests.lpr";
-    OutputRoot: "../../../../output/NexusBindingTests/x86_64-win64";
+Project NexusBindingTests TargetOS[win64] {
+    Id: "NXRP.Tests.NexusBindingTests";
+    Requires: [@Projects.Binding, @Projects.NexusTest];
+    RootDirectory: "../../../..";
+    OutputRoot: @Tools.OutputRoot + "/NexusBindingTests/" + @Tools.Native.Name;
 
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @NexusBindingTests.OutputRoot + "/NexusBindingTests.exe";
+    FPC Compiler {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/binding/tests/NexusBindingTests.lpr"];
+        OutputPath: @NexusBindingTests.OutputRoot;
+        Target Platform { OperatingSystem: "win64"; }
         RawOptions: ["-gh", "-gl", "-Cr", "-Co", "-Sa"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: @NexusBindingTests.OutputRoot;
-            UnitOutputPath: "../../../../output/NexusBindingTests/x86_64-win64/units";
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                ".",
-                "../src",
-                "../../nxtest/src",
-                "../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+                "packages/nexus-packages/binding/tests",
+                @Tools.Native.RTLPath
             ];
         }
     }

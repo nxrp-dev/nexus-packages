@@ -1,0 +1,16 @@
+
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+
+Project OpenSSL {
+    Id: "NXRP.Network.OpenSSL";
+    RootDirectory: "../../../..";
+    Author: "Nexus contributors and upstream authors";
+    Description: "Shared OpenSSL 3 bindings, crypto and certificate wrappers, Nexus Synapse TLS adapter.";
+    Requires: [@Projects.Synapse];
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/network/openssl/src", "packages/nexus-packages/network/openssl/synapse"];
+        Headers: ["packages/nexus-packages/network/openssl/src"];
+    }
+}

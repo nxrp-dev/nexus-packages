@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLRegistry {
+Project FCLRegistry {
+    Id: "NXRP.FCLRegistry.Units";
+    Publishes Directories { Sources: [@FCLRegistry.OutputRoot]; }
+    Requires: [@Projects.FCLRegistry, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-registry";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-registry/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLRegistry/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -24,15 +28,10 @@ Package FCLRegistry {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @FCLRegistry.SourceRoot + "/src",
-                "packages/nexus-packages/serialization/fcl-xml/src",
-                "packages/nexus-packages/iconvenc/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
-                @FCLRegistry.SourceRoot + "/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

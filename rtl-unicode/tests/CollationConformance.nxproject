@@ -1,11 +1,14 @@
 // Copyright (c) 2026 Kevin Collins.
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../RTLUnicode.Build.Config.nxscript";
 Project CollationConformance {
+    Requires: [@Projects.RTLUnicode];
+    Id: "NXRP.Tests.CollationConformance";
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @RTLUnicodeBuild.OutputRoot + "/collation";
+    OutputRoot: @Tools.OutputRoot + "/CollationConformance/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [
@@ -20,13 +23,8 @@ Project CollationConformance {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @RTLUnicodeBuild.RTLPath,
-                @CollationConformance.SourceRoot + "/src/inc",
-                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"
-            ];
-            IncludePaths: [@CollationConformance.SourceRoot + "/src/inc"];
+            UnitPaths: [@RTLUnicodeBuild.RTLPath, @Tools.NexusFPC.SourcePath + "/rtl/objpas", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            IncludePaths: [];
         }
     }
 }

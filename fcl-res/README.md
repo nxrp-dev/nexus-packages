@@ -8,7 +8,7 @@ RTL sources; the Lab resource tool additionally uses fcl-base.
 Build from the Nexus root with the native Nexus tools:
 
 ```sh
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/fcl-res/FCLRes.nxpackage
+output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/fcl-res/FCLRes.nxproject
 output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/fcl-res/tests/FCLResTests.nxproject
 output/fcl-res-tests/x86_64-linux/FCLResTests
 ```

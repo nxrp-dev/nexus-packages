@@ -1,23 +1,23 @@
 # FCL Process regressions
 
 The `FCLProcess.Review` nxtest suite registers one numbered case for each of
-the fourteen findings in [the saved review](../CODE_REVIEW.md). The console
+the fifteen findings in [the saved review](../CODE_REVIEW.md). The console
 runner uses the ordinary nxtest registry, cases, contexts and results.
 
 From the Nexus repository root, with nxbuild available:
 
 ```sh
 nxbuild /project=packages/nexus-packages/fcl-process/test/FCLProcessTests.nxproject /action=build
-output/fcl-process-tests/x86_64-linux/FCLProcessTests
+"$NX_OUT/FCLProcessTests/x86_64-linux/FCLProcessTests"
 ```
 
 The project builds both `FCLProcessTests` and its sibling `FCLProcessFixture`.
 Compiler and platform paths come from
-`projects/nxbuild/nxbuild.environment.nxscript`. Windows executables are in
-`output/fcl-process-tests/x86_64-win64/` with `.exe` suffixes. Passing part of a
+`projects/nxbuild/nxbuild.environment.nxscript`. Set `NX_OUT` to its configured external `Tools.OutputRoot`. Windows executables
+are in `$NX_OUT/FCLProcessTests/x86_64-win64/` with `.exe` suffixes. Passing part of a
 case name runs only matching cases, for example `FCLProcessTests 06Concurrent`.
 
-Every case runs its probe in a child process. The parent enforces a ten-second
+Cases 01–14 run their probe in a child process. The parent enforces a ten-second
 deadline (thirty seconds for Windows service and handle-reuse cases). On Unix,
 each probe starts a new session; the parent kills remaining descendants in
 that process group and removes its temporary files/FIFOs. This contains the
@@ -27,10 +27,15 @@ The FIFO test synchronizes two real writer processes and checks distinct
 128 KiB payloads. The timeout leak test warms the allocator and measures live
 heap bytes across 128 unanswered requests.
 
-On Linux the verified result is **11 passed, 0 failed, 3 skipped**. The same
-tests against the unmodified relocation snapshot produced **11 failed,
-3 skipped**. Local evidence is in `output/fcl-process-tests/baseline/results.txt`
-and `output/fcl-process-tests/x86_64-linux/results.txt`.
+On Linux the current verified result is **12 passed, 0 failed/errors, 3 skipped**.
+The original fourteen cases against the unmodified relocation snapshot produced
+**11 failed, 3 skipped** before their earlier corrections. New case 15 runs native
+printf directly and verifies that an empty argument does not discard later
+arguments. It failed with the original argument allocator and passed after the
+two-line correction; a separate heap-traced run reports zero unfreed blocks.
+Current commands/results are under the external worktree
+`nxproject-unified-wpoyr_f5/process-empty-argument-fix/` and
+`process-fix-suite-1792403795442012886-*`.
 
 Windows cases have been written but have not been compiled or executed on this
 host. Case 07 creates, starts, stops and removes a temporary Windows service;

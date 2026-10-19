@@ -10,7 +10,7 @@ this package supplies Pascal bindings.
 From the Nexus checkout:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/users/Users.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/users/Users.nxproject
 nxbuild /action=build /project=packages/nexus-packages/users/tests/UsersTests.nxproject
 ```
 

@@ -1,0 +1,22 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project FCLProcess {
+    Id: "NXRP.FCLProcess";
+    RootDirectory: "../../..";
+    Author: "Michael van Canneyt and Free Pascal Development team";
+    Description: "External process execution, pipes, local IPC and Windows service support.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Requires: [@Projects.FCLBase];
+    Publishes Directories TargetOS[linux, android, darwin, ios, iphonesim] {
+        Sources: ["packages/nexus-packages/fcl-process/src"];
+        Headers: ["packages/nexus-packages/fcl-process/src/unix"];
+    }
+    Publishes Directories TargetOS[win32, win64] {
+        Sources: ["packages/nexus-packages/fcl-process/src"];
+        Headers: ["packages/nexus-packages/fcl-process/src/win", "packages/nexus-packages/fcl-process/src/winall"];
+    }
+}

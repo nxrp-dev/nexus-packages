@@ -10,32 +10,27 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../projects/nxbuild/Projects.nxscript";
+module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Project NexusNetXMPPLiveTest {
-    BuildTool: FPC;
-    ProjectKind: Program;
-    BuildFile: "NexusNetXMPPLiveTest.lpr";
-    OutputRoot: "../../../../../output/NexusNetXMPPLiveTest/x86_64-win64";
+Project NexusNetXMPPLiveTest TargetOS[win64] {
+    Id: "NXRP.Tests.NexusNetXMPPLiveTest";
+    Requires: [@Projects.XMPP, @Projects.Synapse, @Projects.OpenSSL];
+    RootDirectory: "../../../../..";
+    OutputRoot: @Tools.OutputRoot + "/NexusNetXMPPLiveTest/" + @Tools.Native.Name;
 
-    TargetPlatform Native { TargetCPU: "x86_64"; TargetOS: "win64"; }
-    Toolchain NexusFPC {
-        CompilerPath: "../../../../../../tools/nexus-fpc/compiler/ppcx64.exe";
-    }
-    FPCBuildOptions Compiler {
-        OutputFile: @NexusNetXMPPLiveTest.OutputRoot + "/NexusNetXMPPLiveTest.exe";
+    FPC Compiler {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/network/xmpp/test/NexusNetXMPPLiveTest.lpr"];
+        OutputPath: @NexusNetXMPPLiveTest.OutputRoot;
+        Target Platform { OperatingSystem: "win64"; }
         RawOptions: ["-O1", "-gl", "-Cr", "-Co", "-Ci"];
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
-            ExecutableOutputPath: @NexusNetXMPPLiveTest.OutputRoot;
-            UnitOutputPath: "../../../../../output/NexusNetXMPPLiveTest/x86_64-win64/units";
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                ".",
-                "../src",
-                "../../external/synapse",
-                "../../openssl/src",
-                "../../openssl/synapse",
-                "../../../../../../tools/nexus-fpc/rtl/units/x86_64-win64",
-                "../../../../../../tools/nexus-fpc/packages/*/units/x86_64-win64"
+                "packages/nexus-packages/network/xmpp/test",
+                @Tools.Native.RTLPath
             ];
         }
     }

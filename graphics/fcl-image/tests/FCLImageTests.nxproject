@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLImageTests {
+    Id: "NXRP.Tests.FCLImageTests";
+    Requires: [@Projects.PasJPEG, @Projects.Iconv, @Projects.FCLImage, @Projects.NexusTest, @Projects.FCLProcess, @Projects.FCLBase];
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
-    OutputRoot: @Tools.OutputRoot + "/fcl-image-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLImageTests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -28,18 +31,11 @@ Project FCLImageTests {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/rtl/inc",
-                "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                "packages/nexus-packages/iconvenc/src",
-                @FCLImageTests.SourceRoot + "/src",
                 @FCLImageTests.SourceRoot + "/tests",
-                "packages/nexus-packages/nxtest/src",
-                "packages/nexus-packages/fcl-process/src",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                "packages/nexus-packages/fcl-base/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
             ];
             IncludePaths: [
-                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

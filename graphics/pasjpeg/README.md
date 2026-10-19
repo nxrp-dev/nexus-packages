@@ -18,7 +18,7 @@ JPEG Group.
 `Package.nxscript` registers `NXRP.Graphics.PasJPEG`. From the Nexus root:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/graphics/pasjpeg/PasJPEG.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/graphics/pasjpeg/PasJPEG.nxproject
 nxbuild /action=build /project=packages/nexus-packages/graphics/pasjpeg/tests/PasJPEGTests.nxproject
 output/pasjpeg-tests/x86_64-linux/PasJPEGTests
 nxbuild /action=build /project=../nexus-lab/examples/graphics/jpeg/PasJPEGExamples.nxproject

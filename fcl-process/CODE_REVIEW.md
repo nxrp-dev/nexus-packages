@@ -260,3 +260,38 @@ Useful retained behavior tests now use nxtest directly. The former FPCUnit
 helpers and runners were removed, with their originals preserved in hashed
 archives. The [retirement report](../../../docs/migrations/fpcunit/README.md) records conversions,
 corrected invalid expectations, before/after results and verification limits.
+
+## 15 Unix empty process arguments (corrected)
+
+Discovered and corrected 2026-10-19 during the direct nxbuild Linux engine build.
+The owner approved the two-line allocation/copy correction after reviewing the
+source-level diagnosis. No compiler, RTL, bootstrap or threading change was made.
+
+`src/unix/process.inc`, `StringsToPCharList`, previously called `StrNew` for each
+argument. The retained RTL's `StrNew` returns nil for an empty string. That nil
+entry terminated Unix `argv`, silently dropping the empty argument and every
+argument after it. `FreePCharList` also stopped there, leaking later allocations.
+
+The correction replaces that call with `StrAlloc(Length(S)+1)` and
+`StrPCopy(Result[i],S)`. Every argument now has an allocated, zero-terminated
+buffer, including an empty argument. The existing StrDispose cleanup remains
+correct, and nil occurs only at the list terminator.
+
+The actual NXTest `FCLProcess.Review.15UnixEmptyArgument` is unchanged between
+the failing and corrected runs. It invokes native printf with an empty argument
+between `before` and `after`:
+
+- Before: expected `<before><><after>`, actual `<before>`; one unfreed 10-byte
+  allocation for the later argument.
+- After: passes with `<before><><after>`; heap tracing reports zero unfreed blocks.
+- Full migrated Process regression recipe: **12 passed, 0 failures/errors,
+  3 Windows-only skips** on x86-64 Linux.
+- Rebuilt nxbuild: the independent Python argv probe now preserves
+  `['-c', '', 'tail']`, matching direct execution.
+
+Evidence root: `/media/kcollins/dev/worktree/nxproject-unified-wpoyr_f5`.
+The original failing run remains in `fcl-process-open-finding/regression.log`.
+`process-empty-argument-fix/` contains the original include, before/after hashes,
+unchanged-regression compile command/log, passing heap report and rebuilt CLI
+argv probe. `process-fix-suite-1792403795442012886-*` records the real full-suite
+recipe build/run. Non-Linux Unix targets and native Windows were not run.

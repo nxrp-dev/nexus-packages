@@ -1,11 +1,15 @@
 // Copyright (c) 2026 Kevin Collins.
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
-Package X11 {
+Project X11 {
+    Id: "NXRP.Graphics.X11.Units";
+    Publishes Directories { Sources: [@X11.OutputRoot]; }
+    Requires: [@Projects.X11];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/x11";
-    OutputRoot: "output/nxbuild-x11/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/X11/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -62,8 +66,8 @@ Package X11 {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, @X11.SourceRoot + "/src"];
-            IncludePaths: [@X11.SourceRoot + "/src"];
+            UnitPaths: [@Tools.Native.RTLPath];
+            IncludePaths: [];
         }
     }
 }

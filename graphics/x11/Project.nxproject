@@ -1,0 +1,16 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+
+Project X11 {
+    Id: "NXRP.Graphics.X11";
+    RootDirectory: "../../../..";
+    Author: "Free Pascal and X.Org contributors";
+    Description: "Xlib, XKB, input, rendering, font and X11 extension bindings.";
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/graphics/x11/src"];
+        Headers: ["packages/nexus-packages/graphics/x11/src"];
+    }
+}

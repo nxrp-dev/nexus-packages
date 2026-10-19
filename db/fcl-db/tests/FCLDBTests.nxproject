@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLDBTests {
+    Id: "NXRP.Tests.FCLDBTests";
+    Requires: [@Projects.NexusTest, @Projects.FCLProcess, @Projects.FCLDB, @Projects.FCLJSON, @Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv, @Projects.Pthreads];
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/db/fcl-db";
-    OutputRoot: @Tools.OutputRoot + "/fcl-db-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLDBTests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -25,46 +28,20 @@ Project FCLDBTests {
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
-                // Prefer installed RTL units before the HeapTrc source fallback.
                 @Tools.Native.RTLPath,
                 @FCLDBTests.SourceRoot + "/tests",
-                "packages/nexus-packages/nxtest/src",
-                "packages/nexus-packages/fcl-process/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/inc",
                 @FCLDBTests.OutputRoot,
-                @FCLDBTests.SourceRoot + "/src/base",
-                @FCLDBTests.SourceRoot + "/src/codegen",
-                @FCLDBTests.SourceRoot + "/src/datadict",
-                @FCLDBTests.SourceRoot + "/src/dbase",
-                @FCLDBTests.SourceRoot + "/src/export",
-                @FCLDBTests.SourceRoot + "/src/json",
-                @FCLDBTests.SourceRoot + "/src/memds",
-                @FCLDBTests.SourceRoot + "/src/sdf",
-                @FCLDBTests.SourceRoot + "/src/sql",
-                @FCLDBTests.SourceRoot + "/src/sqldb",
-                "packages/nexus-packages/serialization/fcl-json/src",
-                "packages/nexus-packages/serialization/fcl-xml/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/iconvenc/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                "packages/nexus-packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
-                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
-                @FCLDBTests.SourceRoot + "/src/base",
-                @FCLDBTests.SourceRoot + "/src/dbase",
-                @FCLDBTests.SourceRoot + "/src/memds",
-                @FCLDBTests.SourceRoot + "/src/sdf",
-                @FCLDBTests.SourceRoot + "/src/sqldb",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
             ];
         }

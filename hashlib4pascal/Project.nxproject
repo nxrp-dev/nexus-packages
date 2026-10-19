@@ -1,0 +1,18 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project HashLib4Pascal {
+    Id: "NXRP.HashLib4Pascal";
+    RootDirectory: "../../..";
+    Author: "Ugochukwu Mmaduekwe and contributors";
+    Description: "HashLib4Pascal digest, HMAC, checksum and KDF runtime library.";
+    License: "MIT";
+    Requires: [@Projects.FCLBase];
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Base", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Checksum", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto/Blake2BParams", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Crypto/Blake2SParams", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash128", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash32", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Hash64", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces/IBlake2BParams", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Interfaces/IBlake2SParams", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/KDF", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Misc", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/NullDigest", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Facade", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Utils"];
+        Headers: ["packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Include", "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend"];
+    }
+}

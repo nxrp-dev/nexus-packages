@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLJSON {
+Project FCLJSON {
+    Id: "NXRP.Serialization.FCLJSON.Units";
+    Publishes Directories { Sources: [@FCLJSON.OutputRoot]; }
+    Requires: [@Projects.FCLJSON, @Projects.FCLBase];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-json/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLJSON/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -34,9 +38,7 @@ Package FCLJSON {
         Files Paths {
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                "packages/nexus-packages/fcl-base/src",
-                @FCLJSON.SourceRoot + "/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,

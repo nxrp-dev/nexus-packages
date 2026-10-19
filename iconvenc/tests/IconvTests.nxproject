@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project IconvTests {
+    Id: "NXRP.Tests.IconvTests";
+    Requires: [@Projects.Iconv, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/iconvenc/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/IconvTests/" + @Tools.Native.Name;
     LLVM IncompleteLibrary {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: SharedLibrary;
@@ -24,8 +27,8 @@ Project IconvTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/src", "packages/nexus-packages/iconvenc/tests", "packages/nexus-packages/nxtest/src"];
-            IncludePaths: ["packages/nexus-packages/iconvenc/src"];
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/tests"];
+            IncludePaths: [];
         }
     }
 }

@@ -1,0 +1,17 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project Pthreads {
+    Id: "NXRP.Unix.Pthreads";
+    RootDirectory: "../../..";
+    Author: "Michael van Canneyt, Marco van de Voort, Benjamin Rosseaux and Free Pascal contributors";
+    Description: "POSIX thread and synchronization bindings.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception AND BSD-4-Clause";
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/pthreads/src"];
+        Headers: ["packages/nexus-packages/pthreads/src"];
+    }
+}

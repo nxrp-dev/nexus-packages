@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLResTests {
+    Id: "NXRP.Tests.FCLResTests";
+    Requires: [@Projects.FCLRes, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/fcl-res-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLResTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/fcl-res/tests/FCLResTests.lpr"];
@@ -16,11 +19,11 @@ Project FCLResTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath,
-                "packages/nexus-packages/fcl-res/src",
-                "packages/nexus-packages/fcl-res/tests",
-                "packages/nexus-packages/nxtest/src"];
-            IncludePaths: ["packages/nexus-packages/fcl-res/src"];
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                "packages/nexus-packages/fcl-res/tests"
+            ];
+            IncludePaths: [];
         }
     }
 }

@@ -10,16 +10,17 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project NXSynapseTests {
+    Id: "NXRP.Tests.NXSynapseTests";
+    Requires: [@Projects.Synapse, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../../../..";
     OutputRoot: @Tools.OutputRoot + "/NXSynapseTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
-        SourceFiles: [
-            "packages/nexus-packages/network/external/synapse/tests/NXSynapseTests.lpr"
-        ];
+        SourceFiles: ["packages/nexus-packages/network/external/synapse/tests/NXSynapseTests.lpr"];
         OutputPath: @NXSynapseTests.OutputRoot;
         RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
         Target Platform { OperatingSystem: @Tools.Native.OS; }
@@ -32,24 +33,17 @@ Project NXSynapseTests {
                 @NXSynapseTests.OutputRoot,
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/network/external/synapse/tests",
-                "packages/nexus-packages/network/external/synapse",
-                "packages/nexus-packages/nxtest/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/pthreads/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
-                "packages/nexus-packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

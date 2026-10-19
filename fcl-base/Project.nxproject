@@ -1,0 +1,26 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project FCLBase {
+    Id: "NXRP.FCLBase";
+    RootDirectory: "../../..";
+    Author: "Michael Van Canneyt, Sebastian Guenther and Free Pascal contributors";
+    Description: "FCL streams, containers, configuration, expressions, codecs, observers and platform utilities.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Requires: [@Projects.Pthreads];
+    Publishes Directories TargetOS[linux, android] {
+        Sources: ["packages/nexus-packages/fcl-base/src"];
+        Headers: ["packages/nexus-packages/fcl-base/src", "packages/nexus-packages/fcl-base/src/linux", "packages/nexus-packages/fcl-base/src/unix", "packages/nexus-packages/fcl-base/src/dummy"];
+    }
+    Publishes Directories TargetOS[darwin, ios, iphonesim] {
+        Sources: ["packages/nexus-packages/fcl-base/src"];
+        Headers: ["packages/nexus-packages/fcl-base/src", "packages/nexus-packages/fcl-base/src/unix", "packages/nexus-packages/fcl-base/src/dummy"];
+    }
+    Publishes Directories TargetOS[win32, win64] {
+        Sources: ["packages/nexus-packages/fcl-base/src"];
+        Headers: ["packages/nexus-packages/fcl-base/src", "packages/nexus-packages/fcl-base/src/win", "packages/nexus-packages/fcl-base/src/dummy"];
+    }
+}

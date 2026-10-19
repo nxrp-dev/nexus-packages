@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project LibFFITests {
+    Id: "NXRP.Tests.LibFFITests";
+    Requires: [@Projects.LibFFI, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/libffi-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/LibFFITests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         RawOptions: ["-Cr", "-Co", "-gl"];
@@ -18,11 +21,9 @@ Project LibFFITests {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/libffi/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                "packages/nexus-packages/nxtest/src",
                 "packages/nexus-packages/libffi/tests"
             ];
             IncludePaths: [

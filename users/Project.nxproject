@@ -1,0 +1,17 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project Users {
+    Id: "NXRP.Unix.Users";
+    RootDirectory: "../../..";
+    Author: "Michael van Canneyt, Marco van de Voort and Free Pascal contributors";
+    Description: "Unix account, group and Linux shadow-record bindings.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/users/src"];
+        Headers: ["packages/nexus-packages/users/src"];
+    }
+}

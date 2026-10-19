@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLDB {
+Project FCLDB {
+    Id: "NXRP.Database.FCLDB.Units";
+    Publishes Directories { Sources: [@FCLDB.OutputRoot]; }
+    Requires: [@Projects.FCLDB, @Projects.FCLJSON, @Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/fcl-db";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-db/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLDB/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -90,38 +94,16 @@ Package FCLDB {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @FCLDB.OutputRoot,
-                @FCLDB.SourceRoot + "/src/base",
-                @FCLDB.SourceRoot + "/src/codegen",
-                @FCLDB.SourceRoot + "/src/datadict",
-                @FCLDB.SourceRoot + "/src/dbase",
-                @FCLDB.SourceRoot + "/src/export",
-                @FCLDB.SourceRoot + "/src/json",
-                @FCLDB.SourceRoot + "/src/memds",
-                @FCLDB.SourceRoot + "/src/sdf",
-                @FCLDB.SourceRoot + "/src/sql",
-                @FCLDB.SourceRoot + "/src/sqldb",
-                "packages/nexus-packages/serialization/fcl-json/src",
-                "packages/nexus-packages/serialization/fcl-xml/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/iconvenc/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                "packages/nexus-packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
-                @FCLDB.SourceRoot + "/src/base",
-                @FCLDB.SourceRoot + "/src/dbase",
-                @FCLDB.SourceRoot + "/src/memds",
-                @FCLDB.SourceRoot + "/src/sdf",
-                @FCLDB.SourceRoot + "/src/sqldb",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
             ];
         }

@@ -11,7 +11,7 @@ indicators are maintained in the
 Original notices remain in the inherited sources.
 
 Add `src` to the compiler unit search path. Certificate data and generator
-classes are owned here; FCL Net is no longer required. `OpenSSL.nxpackage` builds
+classes are owned here; FCL Net is no longer required. `OpenSSL.nxproject` builds
 the wrappers and Nexus Synapse adapter with the configured native NexusFPC.
 Native OpenSSL libraries are loaded dynamically and
 are not bundled here. The runtime must be OpenSSL 3 and supply the required

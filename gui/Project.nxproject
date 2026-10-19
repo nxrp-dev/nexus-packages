@@ -1,0 +1,29 @@
+// Copyright (c) 2026 Kevin Collins.
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+// This Source Code Form is "Incompatible With Secondary Licenses",
+// as defined by the Mozilla Public License, v. 2.0.
+//
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project GUI {
+    Id: "NXRP.GUI";
+    RootDirectory: "../../..";
+    Author: "Kevin Collins";
+    Description: "fpGUI controls, skins, rendering and NexusScript editing.";
+    Requires: [@Projects.FCLBase, @Projects.Lua, @Projects.NexusScript, @Projects.RegExpr, @Projects.X11, @Projects.Users];
+    Publishes Directories TargetOS[linux] {
+        Sources: ["packages/nexus-packages/gui/src", "packages/nexus-packages/gui/src/vtv", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/gui", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/x11"];
+        Headers: ["packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/x11"];
+    }
+    Publishes Directories TargetOS[win32, win64] {
+        Sources: ["packages/nexus-packages/gui/src", "packages/nexus-packages/gui/src/vtv", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/gui", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/gdi"];
+        Headers: ["packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/gdi"];
+    }
+}

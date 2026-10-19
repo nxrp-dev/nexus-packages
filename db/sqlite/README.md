@@ -149,7 +149,7 @@ exported variable declarations, loader, and implementation are unchanged.
 
 ## Building the package
 
-`SQLite.nxpackage` is the nxbuild description. It runs two ordered builds:
+`SQLite.nxproject` is the nxbuild description. It runs two ordered builds:
 
 1. LLVM compiles `native/sqlite3.c` into `sqlite3.dll` on Windows or
    `libsqlite3.so.0` on Linux.
@@ -165,8 +165,8 @@ platform Clang configuration in `native` supplies the shared-library filename.
 Run from the Nexus repository root on Windows:
 
 ```powershell
-& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=plan /project=packages/nexus-packages/db/sqlite/SQLite.nxpackage
-& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=build /project=packages/nexus-packages/db/sqlite/SQLite.nxpackage
+& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=plan /project=packages/nexus-packages/db/sqlite/SQLite.nxproject
+& ./output/nxbuild-next/x86_64-win64/nxbuild.exe /action=build /project=packages/nexus-packages/db/sqlite/SQLite.nxproject
 ```
 
 Both libraries and the compiled Pascal units go to

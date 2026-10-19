@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLProcessTests {
+    Id: "NXRP.Tests.FCLProcessTests";
+    Requires: [@Projects.FCLProcess, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/fcl-process";
-    OutputRoot: @Tools.OutputRoot + "/fcl-process-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLProcessTests/" + @Tools.Native.Name;
 
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -24,22 +27,13 @@ Project FCLProcessTests {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @FCLProcessTests.SourceRoot + "/src",
                 @FCLProcessTests.SourceRoot + "/test",
-                "packages/nexus-packages/nxtest/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/pthreads/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];
             IncludePaths: [
-                @FCLProcessTests.SourceRoot + "/src/" + @Tools.Native.PascalPlatform,
-                @FCLProcessTests.SourceRoot + "/src/winall",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];
         }
     }

@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project UsersTests {
+    Id: "NXRP.Tests.UsersTests";
+    Requires: [@Projects.Users, @Projects.NexusTest];
     RootDirectory: "../../../..";
-    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/users/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/UsersTests/" + @Tools.Native.Name;
     LLVM NativeABI {
         CompilerPath: @Tools.Native.LLVMCompiler;
         BuildKind: Object;
@@ -22,8 +25,8 @@ Project UsersTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src", "packages/nexus-packages/users/tests", "packages/nexus-packages/nxtest/src"];
-            IncludePaths: ["packages/nexus-packages/users/src"];
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/tests"];
+            IncludePaths: [];
             ObjectPaths: [@UsersTests.NativeABI.OutputPath];
         }
     }

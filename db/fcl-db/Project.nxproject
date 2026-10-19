@@ -1,0 +1,18 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+
+Project FCLDB {
+    Id: "NXRP.Database.FCLDB";
+    RootDirectory: "../../../..";
+    Author: "Michael Van Canneyt, Joost van der Sluis, TDbf authors and Free Pascal contributors";
+    Description: "Datasets, SQL parsing, SQLDB, DBF files, data dictionaries, generation and exports.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Requires: [@Projects.FCLBase];
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/db/fcl-db/src/base", "packages/nexus-packages/db/fcl-db/src/codegen", "packages/nexus-packages/db/fcl-db/src/datadict", "packages/nexus-packages/db/fcl-db/src/dbase", "packages/nexus-packages/db/fcl-db/src/export", "packages/nexus-packages/db/fcl-db/src/json", "packages/nexus-packages/db/fcl-db/src/memds", "packages/nexus-packages/db/fcl-db/src/sdf", "packages/nexus-packages/db/fcl-db/src/sql", "packages/nexus-packages/db/fcl-db/src/sqldb"];
+        Headers: ["packages/nexus-packages/db/fcl-db/src/base", "packages/nexus-packages/db/fcl-db/src/codegen", "packages/nexus-packages/db/fcl-db/src/datadict", "packages/nexus-packages/db/fcl-db/src/dbase", "packages/nexus-packages/db/fcl-db/src/export", "packages/nexus-packages/db/fcl-db/src/json", "packages/nexus-packages/db/fcl-db/src/memds", "packages/nexus-packages/db/fcl-db/src/sdf", "packages/nexus-packages/db/fcl-db/src/sql", "packages/nexus-packages/db/fcl-db/src/sqldb"];
+    }
+}

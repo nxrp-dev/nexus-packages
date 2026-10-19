@@ -1,11 +1,14 @@
 // Copyright (c) 2026 Kevin Collins.
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../RTLUnicode.Build.Config.nxscript";
 Project RTLUnicodeTests {
+    Id: "NXRP.Tests.RTLUnicodeTests";
+    Requires: [@Projects.RTLUnicode, @Projects.NexusTest];
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
-    OutputRoot: @RTLUnicodeBuild.OutputRoot + "/tests";
+    OutputRoot: @Tools.OutputRoot + "/RTLUnicodeTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [@RTLUnicodeTests.SourceRoot + "/tests/RTLUnicodeTests.lpr"];
@@ -16,17 +19,8 @@ Project RTLUnicodeTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @RTLUnicodeBuild.RTLPath,
-                @RTLUnicodeTests.SourceRoot + "/src/inc",
-                @RTLUnicodeTests.SourceRoot + "/src/collations",
-                @RTLUnicodeTests.SourceRoot + "/tests",
-                "packages/nexus-packages/nxtest/src",
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"
-            ];
-            IncludePaths: [@RTLUnicodeTests.SourceRoot + "/src/inc", @RTLUnicodeTests.SourceRoot + "/src/collations"];
+            UnitPaths: [@RTLUnicodeBuild.RTLPath, @RTLUnicodeTests.SourceRoot + "/tests", @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc", @Tools.NexusFPC.SourcePath + "/rtl/objpas", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            IncludePaths: [];
         }
     }
 }

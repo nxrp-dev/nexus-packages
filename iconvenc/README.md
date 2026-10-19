@@ -10,7 +10,7 @@ this package supplies Pascal bindings.
 From the Nexus checkout:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/iconvenc/Iconv.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/iconvenc/Iconv.nxproject
 nxbuild /action=build /project=packages/nexus-packages/iconvenc/tests/IconvTests.nxproject
 ```
 

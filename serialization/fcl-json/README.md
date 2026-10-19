@@ -6,15 +6,15 @@ tests and the existing code review were preserved unchanged at relocation.
 Subsequent nxtest regressions reproduced and corrected all eleven findings in
 the [saved review](CODE_REVIEW.md).
 
-[FCLJSON.nxpackage](FCLJSON.nxpackage) builds all 13 runtime units as static
+[FCLJSON.nxproject](FCLJSON.nxproject) builds all 13 runtime units as static
 NexusFPC units. It does not require a runtime-package SDK. Namespaced wrappers are retained for separate consumers and
 are not compiled alongside the ordinary unit names.
 
 From the Nexus repository root:
 
 ```sh
-output/nxbuild-next/x86_64-linux/nxbuild /action=plan /project=packages/nexus-packages/serialization/fcl-json/FCLJSON.nxpackage
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/serialization/fcl-json/FCLJSON.nxpackage
+output/nxbuild-next/x86_64-linux/nxbuild /action=plan /project=packages/nexus-packages/serialization/fcl-json/FCLJSON.nxproject
+output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/serialization/fcl-json/FCLJSON.nxproject
 ```
 
 On Windows, use `output/nxbuild-next/x86_64-win64/nxbuild.exe` with the same

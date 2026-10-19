@@ -12,7 +12,7 @@ Provenance, authors and mixed upstream licensing are recorded in the
 The font's original embedded license is also retained as text beside the asset.
 
 `Package.nxscript` registers `NXRP.Graphics.FCLImage` in both catalogs.
-`FCLImage.nxpackage` builds all 56 ordinary runtime units. Namespace wrappers
+`FCLImage.nxproject` builds all 56 ordinary runtime units. Namespace wrappers
 remain available for separate consumers. The recipe uses NexusFPC RTL,
 RTL-ObjPas, relocated FCL Base, the adjacent PasJPEG package, authoritative
 self-contained NexusFPC PasZLib; its CRC32 is private to compression.
@@ -22,7 +22,7 @@ bindings use its ABI name `libfreetype.so.6`. A runtime-package SDK is not requi
 From the Nexus root, with nxbuild available:
 
 ```sh
-nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImage.nxpackage /action=build
+nxbuild /project=packages/nexus-packages/graphics/fcl-image/FCLImage.nxproject /action=build
 nxbuild /project=../nexus-lab/examples/graphics/images/FCLImageExamples.nxproject /action=build
 nxbuild /project=packages/nexus-packages/graphics/fcl-image/tests/FCLImageTests.nxproject /action=build
 output/fcl-image-tests/x86_64-linux/FCLImageTests

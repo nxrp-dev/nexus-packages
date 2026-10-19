@@ -12,7 +12,7 @@ test data, namespace wrappers, translations and notices. Licensing and author
 credits are in the [canonical attribution record](../../../../ATTRIBUTIONS.md#fcl-db).
 
 `Package.nxscript` registers `NXRP.Database.FCLDB` in both catalogs.
-`FCLDB.nxpackage` builds 66 ordinary runtime units from the ten `src` subfolders.
+`FCLDB.nxproject` builds 66 ordinary runtime units from the ten `src` subfolders.
 Two obsolete IDE registration units and six alternative translations declaring
 the same ordinary unit name remain as historical material outside that build.
 Namespace wrappers are preserved for separate consumers.
@@ -20,7 +20,7 @@ Namespace wrappers are preserved for separate consumers.
 From the Nexus root, with nxbuild available:
 
 ```sh
-nxbuild /project=packages/nexus-packages/db/fcl-db/FCLDB.nxpackage /action=build
+nxbuild /project=packages/nexus-packages/db/fcl-db/FCLDB.nxproject /action=build
 nxbuild /project=packages/nexus-packages/db/fcl-db/tests/FCLDBTests.nxproject /action=build
 output/fcl-db-tests/x86_64-linux/FCLDBTests
 nxbuild /action=build /project=packages/nexus-packages/db/fcl-db/tests/FCLDBBehaviorTests.nxproject

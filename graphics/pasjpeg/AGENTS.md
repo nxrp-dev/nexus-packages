@@ -4,5 +4,5 @@
 - Preserve original source headers, `readme.txt`, `README.IJG` and `COPYING.FPC`.
 - Keep examples in sibling Nexus Lab `examples/graphics/jpeg`.
 - Use direct nxtest cases under `tests`; no FPCUnit bridge.
-- Build with `PasJPEG.nxpackage` and the configured NexusFPC toolchain.
+- Build with `PasJPEG.nxproject` and the configured NexusFPC toolchain.
 - Update Nexus root `ATTRIBUTIONS.md` for attribution and provenance.

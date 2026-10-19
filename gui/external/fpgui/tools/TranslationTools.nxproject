@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project TranslationTools {
+    Id: "NXRP.Tests.TranslationTools";
+    Requires: [@Projects.FCLBase, @Projects.NexusTest, @Projects.FCLProcess];
     RootDirectory: "../../../../../..";
-    OutputRoot: "../../worktree/collections-avl/final/tools/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/TranslationTools/" + @Tools.Native.Name;
     FPC UpdatePOFiles {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/gui/external/fpgui/tools/updatepofiles.pas"];
@@ -17,7 +20,6 @@ Project TranslationTools {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
@@ -39,7 +41,6 @@ Project TranslationTools {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
@@ -61,15 +62,11 @@ Project TranslationTools {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/nxtest/src",
-                "packages/nexus-packages/fcl-process/src",
-                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
-                "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"

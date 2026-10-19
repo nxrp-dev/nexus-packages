@@ -13,7 +13,7 @@ From the Nexus root, build the complete 45-unit source package and its direct
 nxtest suites:
 
 ```sh
-output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/graphics/x11/X11.nxpackage
+output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/graphics/x11/X11.nxproject
 output/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/graphics/x11/tests/X11Tests.nxproject
 output/x11-tests/x86_64-linux/X11CoreTests
 output/x11-tests/x86_64-linux/X11BindingTests

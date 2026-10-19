@@ -2,12 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
 Project FCLBaseReviewTests {
+    Id: "NXRP.Tests.FCLBaseReviewTests";
+    Requires: [@Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/fcl-base";
-    OutputRoot: @Tools.OutputRoot + "/fcl-base-review-tests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLBaseReviewTests/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         RawOptions: ["-Cr", "-Co", "-Ci", "-Sa", "-gl"];
@@ -19,19 +22,12 @@ Project FCLBaseReviewTests {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @FCLBaseReviewTests.SourceRoot + "/tests",
-                "packages/nexus-packages/nxtest/src",
                 @Tools.Native.RTLPath,
-                @FCLBaseReviewTests.SourceRoot + "/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                "packages/nexus-packages/pthreads/src"
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
-                @FCLBaseReviewTests.SourceRoot + "/src",
-                @FCLBaseReviewTests.SourceRoot + "/src/" + @Tools.Native.OS,
-                @FCLBaseReviewTests.SourceRoot + "/src/" + @Tools.Native.PascalPlatform,
-                @FCLBaseReviewTests.SourceRoot + "/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

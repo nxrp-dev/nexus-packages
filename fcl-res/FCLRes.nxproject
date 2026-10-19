@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLRes {
+Project FCLRes {
+    Id: "NXRP.FCLRes.Units";
+    Publishes Directories { Sources: [@FCLRes.OutputRoot]; }
+    Requires: [@Projects.FCLRes];
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-res";
-    OutputRoot: "output/nxbuild-fcl-res/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLRes/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -45,8 +49,8 @@ Package FCLRes {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.Native.RTLPath, @FCLRes.SourceRoot + "/src"];
-            IncludePaths: [@FCLRes.SourceRoot + "/src"];
+            UnitPaths: [@Tools.Native.RTLPath];
+            IncludePaths: [];
         }
     }
 }

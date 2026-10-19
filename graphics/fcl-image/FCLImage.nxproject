@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLImage {
+Project FCLImage {
+    Id: "NXRP.Graphics.FCLImage.Units";
+    Publishes Directories { Sources: [@FCLImage.OutputRoot]; }
+    Requires: [@Projects.FCLImage, @Projects.PasJPEG, @Projects.FCLBase, @Projects.Iconv];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-image/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLImage/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -79,20 +83,12 @@ Package FCLImage {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
-                @FCLImage.OutputRoot,
-                @FCLImage.SourceRoot + "/src",
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/iconvenc/src"
+                @FCLImage.OutputRoot
             ];
             IncludePaths: [
-                @FCLImage.SourceRoot + "/src",
-                "packages/nexus-packages/graphics/pasjpeg/src",
-                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

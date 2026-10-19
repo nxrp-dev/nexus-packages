@@ -2,12 +2,16 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package FCLXML {
+Project FCLXML {
+    Id: "NXRP.Serialization.FCLXML.Units";
+    Publishes Directories { Sources: [@FCLXML.OutputRoot]; }
+    Requires: [@Projects.FCLXML, @Projects.FCLBase, @Projects.Iconv];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
-    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-xml/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/FCLXML/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -44,10 +48,7 @@ Package FCLXML {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @FCLXML.OutputRoot,
-                @FCLXML.SourceRoot + "/src",
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/iconvenc/src"
+                @FCLXML.OutputRoot
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
@@ -58,9 +59,7 @@ Package FCLXML {
     FPC UnixEncoding TargetOS[linux] {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
-        SourceFiles: [
-            @FCLXML.SourceRoot + "/src/xmliconv.pas"
-        ];
+        SourceFiles: [@FCLXML.SourceRoot + "/src/xmliconv.pas"];
         OutputPath: @FCLXML.OutputRoot;
         Target Platform { OperatingSystem: @Tools.Native.OS; }
         Config Options { DisableDefaultConfigFiles: True; }
@@ -71,10 +70,7 @@ Package FCLXML {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @FCLXML.OutputRoot,
-                @FCLXML.SourceRoot + "/src",
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/iconvenc/src"
+                @FCLXML.OutputRoot
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
@@ -85,9 +81,7 @@ Package FCLXML {
     FPC WindowsEncoding TargetOS[win64] {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
-        SourceFiles: [
-            @FCLXML.SourceRoot + "/src/xmliconv_windows.pas"
-        ];
+        SourceFiles: [@FCLXML.SourceRoot + "/src/xmliconv_windows.pas"];
         OutputPath: @FCLXML.OutputRoot;
         Target Platform { OperatingSystem: @Tools.Native.OS; }
         Config Options { DisableDefaultConfigFiles: True; }
@@ -98,10 +92,7 @@ Package FCLXML {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @FCLXML.OutputRoot,
-                @FCLXML.SourceRoot + "/src",
-                "packages/nexus-packages/fcl-base/src",
-                "packages/nexus-packages/iconvenc/src"
+                @FCLXML.OutputRoot
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,

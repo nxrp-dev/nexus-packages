@@ -1,10 +1,13 @@
 // Copyright (c) 2026 Kevin Collins.
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 dialect "../../../../../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../../../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project NXLinuxFontLinkTests {
+    Id: "NXRP.Tests.NXLinuxFontLinkTests";
+    Requires: [@Projects.NexusTest, @Projects.FCLImage, @Projects.GUI];
     RootDirectory: "../../../../../../../../..";
-    OutputRoot: "output/fpgui-tests/" + @Tools.Native.Name + "/font-links";
+    OutputRoot: @Tools.OutputRoot + "/NXLinuxFontLinkTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/gui/external/fpgui/framework/src/test/pascal/NXLinuxFontLinkTests.lpr"];
@@ -14,12 +17,7 @@ Project NXLinuxFontLinkTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [
-                @Tools.Native.RTLPath,
-                "packages/nexus-packages/nxtest/src",
-                "packages/nexus-packages/graphics/fcl-image/src",
-                "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software"
-            ];
+            UnitPaths: [@Tools.Native.RTLPath];
         }
     }
 }

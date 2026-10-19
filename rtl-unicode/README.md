@@ -22,7 +22,7 @@ RTLs in isolated output directories rather than modifying an installed SDK.
 From the Nexus root on native Linux:
 
 ```sh
-../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/RTLUnicode.nxpackage
+../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/RTLUnicode.nxproject
 ../../worktree/nexus/nxbuild-next/x86_64-linux/nxbuild /action=build /project=packages/nexus-packages/rtl-unicode/tests/RTLUnicodeTests.nxproject
 cp packages/nexus-packages/rtl-unicode/tests/data/Unicode17.zip ../../worktree/nexus/rtl-unicode/ansi/tests/
 ../../worktree/nexus/rtl-unicode/ansi/tests/RTLUnicodeTests

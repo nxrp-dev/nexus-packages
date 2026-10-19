@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
 module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Package LibFFI {
+Project LibFFI {
+    Id: "NXRP.LibFFI.Units";
+    Publishes Directories { Sources: [@LibFFI.OutputRoot]; }
+    Requires: [@Projects.LibFFI];
     RootDirectory: "../../..";
-    OutputRoot: "../../worktree/libffi-relocation/package/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/LibFFI/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -18,7 +22,6 @@ Package LibFFI {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                "packages/nexus-packages/libffi/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"

@@ -1,0 +1,14 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../projects/nxbuild/Projects.nxscript";
+
+Project Iconv {
+    Id: "NXRP.Unix.Iconv";
+    RootDirectory: "../../..";
+    Author: "Marco van de Voort and Free Pascal contributors";
+    Description: "Static and dynamic native iconv bindings and encoding conversion.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+    Publishes Directories { Sources: ["packages/nexus-packages/iconvenc/src"]; Headers: ["packages/nexus-packages/iconvenc/src"]; }
+}

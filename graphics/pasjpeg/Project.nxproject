@@ -1,0 +1,17 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module Projects "../../../../projects/nxbuild/Projects.nxscript";
+
+Project PasJPEG {
+    Id: "NXRP.Graphics.PasJPEG";
+    RootDirectory: "../../../..";
+    Author: "Jacques Nomssi Nzali, Thomas G. Lane and Free Pascal contributors";
+    Description: "Portable Pascal baseline/progressive JPEG codec and BMP stream conversion.";
+    License: "IJG AND Zlib AND MPL-2.0-no-copyleft-exception";
+    Publishes Directories {
+        Sources: ["packages/nexus-packages/graphics/pasjpeg/src"];
+        Headers: ["packages/nexus-packages/graphics/pasjpeg/src"];
+    }
+}

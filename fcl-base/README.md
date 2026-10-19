@@ -12,7 +12,7 @@ wrappers retain their current selection rules.
 Build from the Nexus root with the configured native NexusFPC/RTL:
 
 ```sh
-nxbuild /action=build /project=packages/nexus-packages/fcl-base/FCLBase.nxpackage
+nxbuild /action=build /project=packages/nexus-packages/fcl-base/FCLBase.nxproject
 nxbuild /action=build /project=packages/nexus-packages/fcl-base/tests/FCLBaseTests.nxproject
 nxbuild /action=build /project=packages/nexus-packages/fcl-base/tests/FCLBaseReviewTests.nxproject
 ```
