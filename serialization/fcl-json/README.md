@@ -23,7 +23,7 @@ arguments. Configure the compiler, RTL and NexusFPC source paths in the shared
 Outputs go to `output/nxbuild-fcl-json/<target>`; consumers add that directory
 to their unit search path. Source consumers use this package's `src` directory.
 
-The runtime units still use NexusFPC's `fcl-base` and `rtl-objpas` sources.
+The runtime units use the relocated `NXRP.FCLBase` package and NexusFPC's `rtl-objpas` sources.
 This move does not migrate those packages. The retained upstream behavior tests now use nxtest directly, alongside the review
 regressions. See [FPCUnit retirement report](../../../../docs/migrations/fpcunit/README.md).
 

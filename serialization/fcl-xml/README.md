@@ -12,7 +12,7 @@ Nexus build entry point.
 [Package.nxscript](Package.nxscript) registers `NXRP.Serialization.FCLXML` in both
 package catalogs. [FCLXML.nxpackage](FCLXML.nxpackage) compiles 20 common runtime
 units and the target encoding adapter: `xmliconv` on Linux and
-`xmliconv_windows` on Win64. It uses NexusFPC RTL, rtl-objpas and fcl-base sources;
+`xmliconv_windows` on Win64. It uses NexusFPC RTL/RTL-ObjPas and the relocated FCL Base package;
 the Unix adapter additionally uses iconvenc. No runtime-package SDK is required.
 The namespaced wrappers are retained for separate consumers and are not built
 alongside ordinary unit names.

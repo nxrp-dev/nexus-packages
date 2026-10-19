@@ -1,0 +1,12 @@
+{
+  "revision": "4f78c6c072c538cb2514a0a8226d53bca982cdf0",
+  "tree": "58e855095d9727570086c1ac78507cf55953f405",
+  "files": {
+    "namespaced/UnixApi.Iconvenc.pas": "864b2b481f0089820fdd196a1aad387d9bafdfcc4e3f9f2232f7d09ffba6279e",
+    "namespaced/UnixApi.Iconvenc_dyn.pas": "709ba0c9b9104bec56731aa298e3fc4a878d335b582cf8a8c05471f22876c1ae",
+    "namespaces.lst": "96da253ddcebfdb79f694619ef02fa4db8bf3aee491c79ab3a3c89d0a17b4cb2",
+    "src/iconvenc.pas": "1e6f93995aa23b6c4aaafe507e65541bb93ac4899aafee26636fa71f47e9a2fb",
+    "src/iconvenc_dyn.pas": "cb182514205bb50fe01fa9628a2cd751117df5eda13102f74748b2f6fc556d6b",
+    "src/iconvert.inc": "4137e7d9267cb22c600f449d2c9b63c52b42e701a98dfc2a838bf6d83475f616"
+  }
+}

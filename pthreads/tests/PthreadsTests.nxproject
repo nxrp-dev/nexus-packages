@@ -1,0 +1,30 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Project PthreadsTests {
+    RootDirectory: "../../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/pthreads/" + @Tools.Native.Name;
+    LLVM NativeABI {
+        CompilerPath: @Tools.Native.LLVMCompiler;
+        BuildKind: Object;
+        Target: @Tools.Native.Triple;
+        SourceFiles: ["packages/nexus-packages/pthreads/tests/pthreads_abi.c"];
+        OutputPath: @PthreadsTests.OutputRoot + "/native";
+    }
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/pthreads/tests/PthreadsTests.lpr"];
+        OutputPath: @PthreadsTests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/pthreads/src", "packages/nexus-packages/pthreads/tests", "packages/nexus-packages/nxtest/src"];
+            IncludePaths: ["packages/nexus-packages/pthreads/src"];
+            ObjectPaths: [@PthreadsTests.NativeABI.OutputPath];
+        }
+    }
+}

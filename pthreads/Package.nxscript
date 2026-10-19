@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package Pthreads {
+    Id: "NXRP.Unix.Pthreads";
+    Author: "Michael van Canneyt, Marco van de Voort, Benjamin Rosseaux and Free Pascal contributors";
+    Description: "POSIX thread and synchronization bindings.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception AND BSD-4-Clause";
+}

@@ -1,0 +1,7 @@
+src/crypth.pas=namespaced/UnixApi.Crypth.pas
+{s*:src/}=namespaced/
+{i+:src/}
+src/pwd.pas=namespaced/UnixApi.Pwd.pas
+src/shadow.pas=namespaced/UnixApi.Shadow.pas
+src/users.pas=namespaced/UnixApi.Users.pas
+src/grp.pas=namespaced/UnixApi.Grp.pas

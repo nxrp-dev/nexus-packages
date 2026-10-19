@@ -1,0 +1,25 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package Pthreads {
+    RootDirectory: "../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings/pthreads/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            "packages/nexus-packages/pthreads/src/pthreads.pas"
+        ];
+        OutputPath: @Pthreads.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/pthreads/src"];
+            IncludePaths: ["packages/nexus-packages/pthreads/src"];
+        }
+    }
+}

@@ -26,7 +26,7 @@ output/fcl-db-tests/x86_64-linux/FCLDBTests
 nxbuild /action=build /project=packages/nexus-packages/db/fcl-db/tests/FCLDBBehaviorTests.nxproject
 ```
 
-The recipes use NexusFPC's installed RTL, fcl-base, rtl-objpas, rtl-extra,
+The recipes use NexusFPC's installed RTL, RTL-ObjPas and RTL-Extra, the relocated FCL Base,
 pthreads and the relocated fcl-json/fcl-xml packages, with their source
 dependencies. A runtime-package SDK is not required for these builds.
 Compiler/host settings come from

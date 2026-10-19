@@ -7,7 +7,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Package FCLImage {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
-    OutputRoot: "output/nxbuild-fcl-image/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-image/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -85,14 +85,14 @@ Package FCLImage {
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @FCLImage.OutputRoot,
                 @FCLImage.SourceRoot + "/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src"
             ];
             IncludePaths: [
                 @FCLImage.SourceRoot + "/src",
                 "packages/nexus-packages/graphics/pasjpeg/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
             ];

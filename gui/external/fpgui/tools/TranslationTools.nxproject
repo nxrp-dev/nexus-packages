@@ -17,7 +17,7 @@ Project TranslationTools {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
@@ -39,7 +39,7 @@ Project TranslationTools {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
@@ -63,7 +63,7 @@ Project TranslationTools {
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/nxtest/src",
                 "packages/nexus-packages/fcl-process/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"

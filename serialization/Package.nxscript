@@ -18,5 +18,5 @@ Package Serialization {
     Author: "Kevin Collins";
     Description: "Object persistence and static string lookup support.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.FCLJSON];
+    Requires: [@NexusPackages.FCLBase, @NexusPackages.FCLJSON];
 }

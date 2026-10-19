@@ -13,7 +13,7 @@ dialect "../../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
 module "../../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project NexusNetTorrentTests {
     RootDirectory: "../../../../..";
-    OutputRoot: "output/NexusNetTorrentTests/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/NexusNetTorrentTests/" + @Tools.Native.Name;
     FPC Tests {
         CompilerPath: @Tools.Native.FPCCompiler;
         SourceFiles: ["packages/nexus-packages/network/torrent/test/NexusNetTorrentTests.lpr"];
@@ -51,8 +51,8 @@ Project NexusNetTorrentTests {
                 "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Utils",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/pthreads/src"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.OS,
@@ -61,10 +61,10 @@ Project NexusNetTorrentTests {
                 "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                "packages/nexus-packages/pthreads/src",
                 "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform
             ];
         }

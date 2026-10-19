@@ -12,7 +12,7 @@ nxbuild /action=build /project=packages/nexus-packages/fcl-registry/FCLRegistry.
 
 The native recipe uses the configured NexusFPC and its RTL. Consumers add `src`
 to their unit/include search paths. Portable XML support also uses relocated
-FCL XML, plus NexusFPC fcl-base, iconvenc and rtl-objpas. Namespace wrappers are
+FCL XML, relocated FCL Base and Iconv, plus NexusFPC RTL-ObjPas. Namespace wrappers are
 retained for separate dotted-unit consumers.
 
 See the [saved review](CODE_REVIEW.md) for findings and verification limits, and

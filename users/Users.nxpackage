@@ -1,0 +1,40 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package Users {
+    RootDirectory: "../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings/users/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            "packages/nexus-packages/users/src/pwd.pas",
+            "packages/nexus-packages/users/src/grp.pas",
+            "packages/nexus-packages/users/src/users.pas",
+            "packages/nexus-packages/users/src/crypth.pas"
+        ];
+        OutputPath: @Users.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src"];
+            IncludePaths: ["packages/nexus-packages/users/src"];
+        }
+    }
+    FPC Shadow TargetOS[linux] {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: ["packages/nexus-packages/users/src/shadow.pas"];
+        OutputPath: @Users.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src"];
+        }
+    }
+}

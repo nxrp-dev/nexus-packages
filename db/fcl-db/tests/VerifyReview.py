@@ -12,10 +12,10 @@ if mode not in ('baseline','baseline-plain','fixed','plain'):
     raise SystemExit('Use baseline, baseline-plain, fixed or plain')
 if len(sys.argv)>2: sdk=pathlib.Path(sys.argv[2]).resolve()
 if len(sys.argv)>3: fpc=pathlib.Path(sys.argv[3]).resolve()
-out = root / 'output/fcl-db-tests' / mode
+out = root.parent.parent / 'worktree/nexus/fcl-db-tests' / mode
 out.mkdir(parents=True, exist_ok=True)
 package = root / 'packages/nexus-packages/db/fcl-db'
-baseline = root / 'output/fcl-db-tests/baseline-package'
+baseline = root.parent.parent / 'worktree/nexus/fcl-db-tests/baseline-package'
 if mode.startswith('baseline'):
     import hashlib, json, tarfile
     inventory = json.loads((package / 'review/baseline-hashes.json').read_text())
@@ -35,13 +35,13 @@ if mode.startswith('baseline'):
                 target.write_bytes(data)
 src = baseline / 'src' if mode.startswith('baseline') else package / 'src'
 paths = [sdk / 'units/x86_64-linux/rtl', *[src / d for d in ['base','codegen','datadict','dbase','export','json','memds','sdf','sql','sqldb']], package / 'tests',
-         root / 'packages/nexus-packages/nxtest/src', fpc / 'packages/iconvenc/src', fpc / 'rtl/inc', fpc / 'packages/pthreads/src',fpc / 'packages/paszlib/src', root / 'packages/nexus-packages/serialization/fcl-json/src', root / 'packages/nexus-packages/serialization/fcl-xml/src', fpc / 'packages/rtl-extra/src/inc', fpc / 'packages/rtl-extra/src/unix', fpc / 'packages/rtl-generics/src',
+         root / 'packages/nexus-packages/nxtest/src', root / 'packages/nexus-packages/iconvenc/src', fpc / 'rtl/inc', root / 'packages/nexus-packages/pthreads/src',fpc / 'packages/paszlib/src', root / 'packages/nexus-packages/serialization/fcl-json/src', root / 'packages/nexus-packages/serialization/fcl-xml/src', fpc / 'packages/rtl-extra/src/inc', fpc / 'packages/rtl-extra/src/unix', fpc / 'packages/rtl-generics/src',
          root / 'packages/nexus-packages/fcl-process/src',
          fpc / 'packages/rtl-objpas/src/inc', fpc / 'packages/rtl-objpas/src/unix',
-         fpc / 'packages/fcl-base/src', fpc / 'packages/fcl-base/src/unix']
+         root / 'packages/nexus-packages/fcl-base/src', root / 'packages/nexus-packages/fcl-base/src/unix']
 includes = [*[src / d for d in ['base','dbase','memds','sdf','sqldb']], fpc / 'packages/rtl-generics/src/inc',root / 'packages/nexus-packages/fcl-process/src/unix',
             fpc / 'packages/rtl-objpas/src/unix', fpc / 'packages/rtl-objpas/src/x86_64',
-            fpc / 'packages/fcl-base/src/unix', fpc / 'packages/fcl-base/src/dummy']
+            root / 'packages/nexus-packages/fcl-base/src/unix', root / 'packages/nexus-packages/fcl-base/src/dummy']
 for name in ['FCLDBFixture', 'FCLDBTests']:
     cmd = [str(sdk / 'bin/ppcx64'), '-n', '-MObjFPC', '-Aas-clang', '-XLL', '-Sc',
            '-FU' + str(out), '-FE' + str(out)]

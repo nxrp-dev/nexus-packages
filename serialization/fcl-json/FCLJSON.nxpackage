@@ -7,7 +7,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Package FCLJSON {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
-    OutputRoot: "output/nxbuild-fcl-json/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-json/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -35,7 +35,7 @@ Package FCLJSON {
             UnitPaths: [
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @FCLJSON.SourceRoot + "/src"
             ];
             IncludePaths: [

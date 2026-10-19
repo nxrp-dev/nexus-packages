@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../Packages.RepositoryIndex.nxscript";
 
-// Requires NexusFPC's fcl-base sources, which have no independent catalog entry.
 // Platform include selection is documented in README.md; service support is Windows-only.
 Package FCLProcess {
     Id: "NXRP.FCLProcess";
+    Requires: [@NexusPackages.FCLBase];
     Author: "Michael van Canneyt and Free Pascal Development team";
     Description: "External process execution, pipes, local IPC and Windows service support.";
     License: "LGPL-2.1-only WITH Independent-modules-exception";

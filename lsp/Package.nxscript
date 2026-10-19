@@ -19,5 +19,5 @@ Package LSP {
     Author: "Kevin Collins";
     Description: "Reusable Language Server Protocol messages and transports.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.Core, @NexusPackages.JSONRPC, @NexusPackages.JSON, @NexusPackages.FCLJSON];
+    Requires: [@NexusPackages.FCLBase, @NexusPackages.Core, @NexusPackages.JSONRPC, @NexusPackages.JSON, @NexusPackages.FCLJSON];
 }

@@ -21,7 +21,7 @@ directories for `process.inc`, `pipes.inc` and `simpleipc.inc`:
   for the IPC implementation.
 
 `processbody.inc` is shared by the process units. Compile Windows service support
-only for Windows. The package's `fcl-base` dependency remains in NexusFPC;
+only for Windows. The package declares its relocated `NXRP.FCLBase` dependency;
 individual units have narrower dependencies. Namespace wrappers are retained
 for separate consumers and are not compiled alongside ordinary unit names.
 

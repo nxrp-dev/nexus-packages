@@ -1,0 +1,18 @@
+{
+  "revision": "4f78c6c072c538cb2514a0a8226d53bca982cdf0",
+  "tree": "82f01255f9d6e3d32da06dc6c63c6dfb5c310cb1",
+  "files": {
+    "README.md": "ec97686035f8e76f163daa5e6e1ec0c17467e4f0b5e308060bf73e644f299480",
+    "namespaced/UnixApi.Crypth.pas": "51b1d0d304e487bdfaf5b6c985e049350ecc07d59c8c6d39e674e39300bec6e1",
+    "namespaced/UnixApi.Grp.pas": "e1e618734785ccbf57fb1997710c72652c4ae426b12ec1c9ff2edaad7af97b42",
+    "namespaced/UnixApi.Pwd.pas": "2044ee1d759cbde56d7f985fdd7c770b30de72120be8b3137cfd0aa19cd910b1",
+    "namespaced/UnixApi.Shadow.pas": "24066c7030d73b9b6fc5b92f01609d6a6dd16cc5add63a5ad04ee0f99b3dff0c",
+    "namespaced/UnixApi.Users.pas": "9d1d6c0481a620147f8d2eb893c1725b9ef0f1db4f0884a21d6bbee193a558cc",
+    "namespaces.lst": "823119fb0bbdf4cec717dc143a6fddd4da8a0e91ea8fa7cc9d6edcba8914af4e",
+    "src/crypth.pas": "85c7e58b8e6f9da4bd8e47afa7dde15e96f56aa31ee5e1931080cbcaa946a480",
+    "src/grp.pas": "6d5f4ed9f3a1f49559431e48a8906ad15f16c83b03e704a2f83b464eae573c45",
+    "src/pwd.pas": "e18a3df4d64b2cfe227342b4b1c37fe31c71b55874519c9cebd2af68805087fb",
+    "src/shadow.pas": "fbf4a472a2f82e2427f406b88b723bbcb45357d500f87382973c605c4411e039",
+    "src/users.pas": "3936e162651ed922a0945c1f9f55ff0362a157157714deec261980519f58eefc"
+  }
+}

@@ -27,13 +27,13 @@ Project FCLXMLTests {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
             UnitPaths: [
                 @Tools.Native.RTLPath,
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                "packages/nexus-packages/iconvenc/src",
                 @FCLXMLTests.SourceRoot + "/src",
                 @FCLXMLTests.SourceRoot + "/tests",
                 "packages/nexus-packages/nxtest/src",
                 "packages/nexus-packages/fcl-process/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src"
+                "packages/nexus-packages/fcl-base/src"
             ];
             IncludePaths: [
                 "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,

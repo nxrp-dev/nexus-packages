@@ -1,0 +1,31 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Project IconvTests {
+    RootDirectory: "../../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/iconvenc/" + @Tools.Native.Name;
+    LLVM IncompleteLibrary {
+        CompilerPath: @Tools.Native.LLVMCompiler;
+        BuildKind: SharedLibrary;
+        ConfigFiles: ["packages/nexus-packages/iconvenc/tests/incomplete-iconv.cfg"];
+        Target: @Tools.Native.Triple;
+        PositionIndependentCode: True;
+        SourceFiles: ["packages/nexus-packages/iconvenc/tests/incomplete_iconv.c"];
+        OutputPath: @IconvTests.OutputRoot + "/native";
+    }
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/iconvenc/tests/IconvTests.lpr"];
+        OutputPath: @IconvTests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/src", "packages/nexus-packages/iconvenc/tests", "packages/nexus-packages/nxtest/src"];
+            IncludePaths: ["packages/nexus-packages/iconvenc/src"];
+        }
+    }
+}

@@ -17,5 +17,5 @@ Package JSONRPC {
     Author: "Kevin Collins";
     Description: "Typed JSON-RPC messages, values and command dispatch.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@NexusPackages.Core, @NexusPackages.JSON, @NexusPackages.FCLJSON];
+    Requires: [@NexusPackages.FCLBase, @NexusPackages.Core, @NexusPackages.JSON, @NexusPackages.FCLJSON];
 }

@@ -30,13 +30,13 @@ Project FCLImageTests {
                 @Tools.NexusFPC.SourcePath + "/rtl/inc",
                 "packages/nexus-packages/graphics/pasjpeg/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                "packages/nexus-packages/iconvenc/src",
                 @FCLImageTests.SourceRoot + "/src",
                 @FCLImageTests.SourceRoot + "/tests",
                 "packages/nexus-packages/nxtest/src",
                 "packages/nexus-packages/fcl-process/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src"
+                "packages/nexus-packages/fcl-base/src"
             ];
             IncludePaths: [
                 "packages/nexus-packages/fcl-process/src/" + @Tools.Native.PascalPlatform,

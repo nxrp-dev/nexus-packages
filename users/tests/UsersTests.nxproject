@@ -1,0 +1,30 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
+Project UsersTests {
+    RootDirectory: "../../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings-tests/users/" + @Tools.Native.Name;
+    LLVM NativeABI {
+        CompilerPath: @Tools.Native.LLVMCompiler;
+        BuildKind: Object;
+        Target: @Tools.Native.Triple;
+        SourceFiles: ["packages/nexus-packages/users/tests/users_abi.c"];
+        OutputPath: @UsersTests.OutputRoot + "/native";
+    }
+    FPC Tests {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        SourceFiles: ["packages/nexus-packages/users/tests/UsersTests.lpr"];
+        OutputPath: @UsersTests.OutputRoot;
+        RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/users/src", "packages/nexus-packages/users/tests", "packages/nexus-packages/nxtest/src"];
+            IncludePaths: ["packages/nexus-packages/users/src"];
+            ObjectPaths: [@UsersTests.NativeABI.OutputPath];
+        }
+    }
+}

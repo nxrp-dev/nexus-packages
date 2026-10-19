@@ -22,8 +22,8 @@ Project FCLXMLBehaviorTests {
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/serialization/fcl-xml/tests",
                 "packages/nexus-packages/serialization/fcl-xml/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 "packages/nexus-packages/nxtest/src"

@@ -38,8 +38,8 @@ Project HashLib4PascalTests {
                 "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Utils",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/pthreads/src"
             ];
             IncludePaths: [
                 "packages/nexus-packages/hashlib4pascal/external/hashlib4pascal/HashLib/src/Simd/Backend",
@@ -47,9 +47,9 @@ Project HashLib4PascalTests {
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
-                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src"
+                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/fcl-base/src/dummy",
+                "packages/nexus-packages/pthreads/src"
             ];
         }
     }

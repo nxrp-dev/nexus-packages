@@ -22,7 +22,7 @@ Project FCLJSONBehaviorTests {
                 @Tools.Native.RTLPath,
                 "packages/nexus-packages/serialization/fcl-json/tests",
                 "packages/nexus-packages/serialization/fcl-json/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 "packages/nexus-packages/nxtest/src"

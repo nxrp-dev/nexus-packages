@@ -10,12 +10,14 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
 // Source prerequisites: network/external/synapse, network/openssl/src and network/openssl/synapse.
 // TLS and crypto share the Nexus OpenSSL 3 runtime loader.
 // These external components are not independently described in this catalog.
 Package XMPP {
     Id: "NXRP.Network.XMPP";
+    Requires: [@NexusPackages.FCLBase];
     Author: "Kevin Collins";
     Description: "XMPP client protocol, negotiation and messaging modules.";
     License: "MPL-2.0-no-copyleft-exception";

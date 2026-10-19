@@ -44,14 +44,14 @@ Project FCLDBTests {
                 @FCLDBTests.SourceRoot + "/src/sqldb",
                 "packages/nexus-packages/serialization/fcl-json/src",
                 "packages/nexus-packages/serialization/fcl-xml/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-extra/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
+                "packages/nexus-packages/iconvenc/src",
                 @Tools.NexusFPC.SourcePath + "/rtl/objpas",
-                @Tools.NexusFPC.SourcePath + "/packages/pthreads/src",
+                "packages/nexus-packages/pthreads/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src"
             ];
             IncludePaths: [
@@ -63,8 +63,8 @@ Project FCLDBTests {
                 @FCLDBTests.SourceRoot + "/src/sqldb",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src/dummy",
+                "packages/nexus-packages/fcl-base/src/" + @Tools.Native.PascalPlatform,
+                "packages/nexus-packages/fcl-base/src/dummy",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src/inc"
             ];
         }

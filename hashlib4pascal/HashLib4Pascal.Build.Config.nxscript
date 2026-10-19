@@ -28,8 +28,8 @@ Environment HashLibLinux {
         "external/hashlib4pascal/HashLib/src/Utils",
         @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/inc",
         @HashLibLinux.FPCSourceRoot + "/packages/rtl-generics/src",
-        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src",
-        @HashLibLinux.FPCSourceRoot + "/packages/pthreads/src"
+        "../fcl-base/src",
+        "../pthreads/src"
     ];
     ProviderIncludePaths: [
         "external/hashlib4pascal/HashLib/src/Include",
@@ -37,9 +37,9 @@ Environment HashLibLinux {
         @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/" + @HashLibLinux.Platform,
         @HashLibLinux.FPCSourceRoot + "/packages/rtl-objpas/src/x86_64",
         @HashLibLinux.FPCSourceRoot + "/packages/rtl-generics/src/inc",
-        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src/" + @HashLibLinux.Platform,
-        @HashLibLinux.FPCSourceRoot + "/packages/fcl-base/src/dummy",
-        @HashLibLinux.FPCSourceRoot + "/packages/pthreads/src"
+        "../fcl-base/src/" + @HashLibLinux.Platform,
+        "../fcl-base/src/dummy",
+        "../pthreads/src"
     ];
 }
 Environment HashLibWindows {
@@ -67,8 +67,8 @@ Environment HashLibWindows {
         "external/hashlib4pascal/HashLib/src/Utils",
         @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/inc",
         @HashLibWindows.FPCSourceRoot + "/packages/rtl-generics/src",
-        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src",
-        @HashLibWindows.FPCSourceRoot + "/packages/pthreads/src"
+        "../fcl-base/src",
+        "../pthreads/src"
     ];
     ProviderIncludePaths: [
         "external/hashlib4pascal/HashLib/src/Include",
@@ -76,9 +76,9 @@ Environment HashLibWindows {
         @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/" + @HashLibWindows.Platform,
         @HashLibWindows.FPCSourceRoot + "/packages/rtl-objpas/src/x86_64",
         @HashLibWindows.FPCSourceRoot + "/packages/rtl-generics/src/inc",
-        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src/" + @HashLibWindows.Platform,
-        @HashLibWindows.FPCSourceRoot + "/packages/fcl-base/src/dummy",
-        @HashLibWindows.FPCSourceRoot + "/packages/pthreads/src"
+        "../fcl-base/src/" + @HashLibWindows.Platform,
+        "../fcl-base/src/dummy",
+        "../pthreads/src"
     ];
 }
 Environment HashLibBuild {

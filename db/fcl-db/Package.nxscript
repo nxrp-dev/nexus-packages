@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
 Package FCLDB {
     Id: "NXRP.Database.FCLDB";
+    Requires: [@NexusPackages.FCLBase];
     Author: "Michael Van Canneyt, Joost van der Sluis, TDbf authors and Free Pascal contributors";
     Description: "Datasets, SQL parsing, SQLDB, DBF files, data dictionaries, generation and exports.";
     License: "LGPL-2.1-only WITH Independent-modules-exception";

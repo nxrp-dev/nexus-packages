@@ -7,7 +7,7 @@ module "../../../projects/nxbuild/nxbuild.environment.nxscript";
 Package FCLRegistry {
     RootDirectory: "../../..";
     SourceRoot: "packages/nexus-packages/fcl-registry";
-    OutputRoot: "output/nxbuild-fcl-registry/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-registry/" + @Tools.Native.Name;
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
         BuildKind: Unit;
@@ -26,8 +26,8 @@ Package FCLRegistry {
                 @Tools.Native.RTLPath,
                 @FCLRegistry.SourceRoot + "/src",
                 "packages/nexus-packages/serialization/fcl-xml/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src",
+                "packages/nexus-packages/fcl-base/src",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform
             ];

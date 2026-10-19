@@ -1,0 +1,13 @@
+{
+  "revision": "4f78c6c072c538cb2514a0a8226d53bca982cdf0",
+  "tree": "3c3cf80eb217998e6238612af731d7bef81fc843",
+  "files": {
+    "namespaced/UnixApi.Pthreads.pas": "b6cefe5c38abe094b0925a087cf58c5a7475b689c406400b8b2f45af447f54f1",
+    "namespaces.lst": "8dd9727244cf99019b9da3993429fd77b1c6743d0a94c2a725e6b21117ab7adb",
+    "src/pthraix.inc": "d6ef378e23151544691b4c0d937c5fa0f30a9b90ce33e74864f31f8edf991acf",
+    "src/pthrandroid.inc": "01e164e350bf17c33c01a9554bfbadb32c6601737ece910c04f356afaa13de5c",
+    "src/pthrbsd.inc": "199476a6e7affd38d05a206e6e588f11603596040efd63cbb617d7cb8d08814f",
+    "src/pthreads.pas": "19b47b685c7f914d22a157f0bd75bd7a242905d63e7c44953c45f64785ec2a1d",
+    "src/pthrlinux.inc": "88d113c46b4a1b072aca03e4065cc4bfe59f2c59e2029c635f33d46969a0fb96"
+  }
+}

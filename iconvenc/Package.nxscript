@@ -1,0 +1,11 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "nxpackage.Language.nxscript";
+
+Package Iconv {
+    Id: "NXRP.Unix.Iconv";
+    Author: "Marco van de Voort and Free Pascal contributors";
+    Description: "Static and dynamic native iconv bindings and encoding conversion.";
+    License: "LGPL-2.1-only WITH Independent-modules-exception";
+}

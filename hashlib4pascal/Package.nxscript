@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../Packages.RepositoryIndex.nxscript";
 
 Package HashLib4Pascal {
     Id: "NXRP.HashLib4Pascal";
+    Requires: [@NexusPackages.FCLBase];
     Author: "Ugochukwu Mmaduekwe and contributors";
     Description: "HashLib4Pascal digest, HMAC, checksum and KDF runtime library.";
     License: "MIT";

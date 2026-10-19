@@ -1,0 +1,26 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package Iconv {
+    RootDirectory: "../../..";
+    OutputRoot: @Tools.OutputRoot + "/unix-bindings/iconvenc/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            "packages/nexus-packages/iconvenc/src/iconvenc.pas",
+            "packages/nexus-packages/iconvenc/src/iconvenc_dyn.pas"
+        ];
+        OutputPath: @Iconv.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [@Tools.Native.RTLPath, "packages/nexus-packages/iconvenc/src"];
+            IncludePaths: ["packages/nexus-packages/iconvenc/src"];
+        }
+    }
+}

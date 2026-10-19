@@ -15,7 +15,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Package SQLite {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/sqlite";
-    OutputRoot: "output/nxbuild-sqlite/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-sqlite/" + @Tools.Native.Name;
 
     LLVM Native {
         CompilerPath: @Tools.Native.LLVMCompiler;
@@ -62,7 +62,7 @@ Package SQLite {
                 @Tools.Native.RTLPath,
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
+                "packages/nexus-packages/fcl-base/src",
                 "packages/nexus-packages/db/fcl-db/src/base",
                 @SQLite.SourceRoot + "/src",
                 @SQLite.SourceRoot + "/src/bindings"

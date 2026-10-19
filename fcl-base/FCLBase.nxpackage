@@ -1,0 +1,84 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+module "../../../projects/nxbuild/nxbuild.environment.nxscript";
+
+Package FCLBase {
+    RootDirectory: "../../..";
+    SourceRoot: "packages/nexus-packages/fcl-base";
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-base/" + @Tools.Native.Name;
+    FPC Units {
+        CompilerPath: @Tools.Native.FPCCompiler;
+        BuildKind: Unit;
+        SourceFiles: [
+            @FCLBase.SourceRoot + "/src/advancedipc.pas",
+            @FCLBase.SourceRoot + "/src/advancedsingleinstance.pas",
+            @FCLBase.SourceRoot + "/src/ascii85.pas",
+            @FCLBase.SourceRoot + "/src/base64.pas",
+            @FCLBase.SourceRoot + "/src/basenenc.pas",
+            @FCLBase.SourceRoot + "/src/blowfish.pas",
+            @FCLBase.SourceRoot + "/src/blowfish2.pas",
+            @FCLBase.SourceRoot + "/src/bufstream.pas",
+            @FCLBase.SourceRoot + "/src/cachecls.pas",
+            @FCLBase.SourceRoot + "/src/chainstream.pas",
+            @FCLBase.SourceRoot + "/src/contnrs.pas",
+            @FCLBase.SourceRoot + "/src/csvdocument.pas",
+            @FCLBase.SourceRoot + "/src/csvreadwrite.pas",
+            @FCLBase.SourceRoot + "/src/custapp.pas",
+            @FCLBase.SourceRoot + "/src/dirwatch.pas",
+            @FCLBase.SourceRoot + "/src/eventlog.pas",
+            @FCLBase.SourceRoot + "/src/fpexprpars.pas",
+            @FCLBase.SourceRoot + "/src/fpobserver.pas",
+            @FCLBase.SourceRoot + "/src/fppromise.pas",
+            @FCLBase.SourceRoot + "/src/fptemplate.pas",
+            @FCLBase.SourceRoot + "/src/fpthreadpool.pas",
+            @FCLBase.SourceRoot + "/src/fptimer.pas",
+            @FCLBase.SourceRoot + "/src/gettext.pas",
+            @FCLBase.SourceRoot + "/src/idea.pas",
+            @FCLBase.SourceRoot + "/src/inicol.pas",
+            @FCLBase.SourceRoot + "/src/inifiles.pas",
+            @FCLBase.SourceRoot + "/src/iostream.pas",
+            @FCLBase.SourceRoot + "/src/lzwstream.pas",
+            @FCLBase.SourceRoot + "/src/maskutils.pas",
+            @FCLBase.SourceRoot + "/src/nullstream.pas",
+            @FCLBase.SourceRoot + "/src/pascodegen.pas",
+            @FCLBase.SourceRoot + "/src/pooledmm.pas",
+            @FCLBase.SourceRoot + "/src/rtfpars.pas",
+            @FCLBase.SourceRoot + "/src/rttiutils.pas",
+            @FCLBase.SourceRoot + "/src/singleinstance.pas",
+            @FCLBase.SourceRoot + "/src/streamcoll.pas",
+            @FCLBase.SourceRoot + "/src/streamex.pas",
+            @FCLBase.SourceRoot + "/src/streamio.pas",
+            @FCLBase.SourceRoot + "/src/syncobjs.pas",
+            @FCLBase.SourceRoot + "/src/uriparser.pas",
+            @FCLBase.SourceRoot + "/src/wformat.pas",
+            @FCLBase.SourceRoot + "/src/whtml.pas",
+            @FCLBase.SourceRoot + "/src/wmarkdown.pas",
+            @FCLBase.SourceRoot + "/src/wtex.pas",
+            @FCLBase.SourceRoot + "/src/wtext.pas"
+        ];
+        OutputPath: @FCLBase.OutputRoot;
+        Config Options { DisableDefaultConfigFiles: True; }
+        Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
+        Files Paths {
+            CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
+            UnitPaths: [
+                @Tools.Native.RTLPath,
+                @FCLBase.SourceRoot + "/src",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-generics/src",
+                "packages/nexus-packages/pthreads/src"
+            ];
+            IncludePaths: [
+                @FCLBase.SourceRoot + "/src",
+                @FCLBase.SourceRoot + "/src/" + @Tools.Native.OS,
+                @FCLBase.SourceRoot + "/src/" + @Tools.Native.PascalPlatform,
+                @FCLBase.SourceRoot + "/src/dummy",
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
+                @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/x86_64"
+            ];
+        }
+    }
+}

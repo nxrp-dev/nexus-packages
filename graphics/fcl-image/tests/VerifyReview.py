@@ -14,10 +14,10 @@ if len(sys.argv) > 2:
     sdk = pathlib.Path(sys.argv[2]).resolve()
 if len(sys.argv) > 3:
     fpc = pathlib.Path(sys.argv[3]).resolve()
-out = root / 'output/fcl-image-tests' / mode
+out = root.parent.parent / 'worktree/nexus/fcl-image-tests' / mode
 out.mkdir(parents=True, exist_ok=True)
 package = root / 'packages/nexus-packages/graphics/fcl-image'
-baseline = root / 'output/fcl-image-tests/baseline-package'
+baseline = root.parent.parent / 'worktree/nexus/fcl-image-tests/baseline-package'
 if mode.startswith('baseline'):
     import hashlib, json, tarfile
     inventory = json.loads((package / 'review/baseline-hashes.json').read_text())
@@ -37,13 +37,13 @@ if mode.startswith('baseline'):
                 target.write_bytes(data)
 src = baseline / 'src' if mode.startswith('baseline') else package / 'src'
 paths = [sdk / 'units/x86_64-linux/rtl', src, package / 'tests',
-         root / 'packages/nexus-packages/nxtest/src', fpc / 'packages/iconvenc/src', fpc / 'rtl/inc', fpc / 'packages/paszlib/src',
+         root / 'packages/nexus-packages/nxtest/src', root / 'packages/nexus-packages/iconvenc/src', fpc / 'rtl/inc', fpc / 'packages/paszlib/src',
          root / 'packages/nexus-packages/fcl-process/src',
          fpc / 'packages/rtl-objpas/src/inc', fpc / 'packages/rtl-objpas/src/unix',
-         fpc / 'packages/fcl-base/src', fpc / 'packages/fcl-base/src/unix']
+         root / 'packages/nexus-packages/fcl-base/src', root / 'packages/nexus-packages/fcl-base/src/unix']
 includes = [root / 'packages/nexus-packages/fcl-process/src/unix',
             fpc / 'packages/rtl-objpas/src/unix', fpc / 'packages/rtl-objpas/src/x86_64',
-            fpc / 'packages/fcl-base/src/unix', fpc / 'packages/fcl-base/src/dummy']
+            root / 'packages/nexus-packages/fcl-base/src/unix', root / 'packages/nexus-packages/fcl-base/src/dummy']
 for name in ['FCLImageFixture', 'FCLImageTests']:
     cmd = [str(sdk / 'bin/ppcx64'), '-n', '-MObjFPC', '-Aas-clang', '-XLL', '-Sc',
            '-FU' + str(out), '-FE' + str(out)]

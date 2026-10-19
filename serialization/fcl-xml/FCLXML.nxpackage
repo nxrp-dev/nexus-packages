@@ -7,7 +7,7 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Package FCLXML {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
-    OutputRoot: "output/nxbuild-fcl-xml/" + @Tools.Native.Name;
+    OutputRoot: @Tools.OutputRoot + "/nxbuild-fcl-xml/" + @Tools.Native.Name;
 
     FPC Units {
         CompilerPath: @Tools.Native.FPCCompiler;
@@ -46,8 +46,8 @@ Package FCLXML {
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot,
                 @FCLXML.SourceRoot + "/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
@@ -73,8 +73,8 @@ Package FCLXML {
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot,
                 @FCLXML.SourceRoot + "/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,
@@ -100,8 +100,8 @@ Package FCLXML {
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/inc",
                 @FCLXML.OutputRoot,
                 @FCLXML.SourceRoot + "/src",
-                @Tools.NexusFPC.SourcePath + "/packages/fcl-base/src",
-                @Tools.NexusFPC.SourcePath + "/packages/iconvenc/src"
+                "packages/nexus-packages/fcl-base/src",
+                "packages/nexus-packages/iconvenc/src"
             ];
             IncludePaths: [
                 @Tools.NexusFPC.SourcePath + "/packages/rtl-objpas/src/" + @Tools.Native.PascalPlatform,

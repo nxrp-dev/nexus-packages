@@ -40,6 +40,11 @@ RepositoryIndex NexusPackages {
     }
 
     // Explicit repository catalog; Descriptor is relative to this index file.
+    LocalPackage FCLBase {
+        Id: "NXRP.FCLBase";
+        Descriptor: "fcl-base/Package.nxscript";
+        Description: "FCL streams, containers, configuration, expressions, codecs and platform utilities.";
+    }
     LocalPackage Core {
         Id: "NXRP.Core";
         Descriptor: "core/Package.nxscript";
@@ -174,5 +179,20 @@ RepositoryIndex NexusPackages {
         Id: "NXRP.HashLib4Pascal";
         Descriptor: "hashlib4pascal/Package.nxscript";
         Description: "HashLib4Pascal hashing, checksums, HMAC and KDFs.";
+    }
+    LocalPackage Users {
+        Id: "NXRP.Unix.Users";
+        Descriptor: "users/Package.nxscript";
+        Description: "Unix account, group and Linux shadow-record bindings.";
+    }
+    LocalPackage Iconv {
+        Id: "NXRP.Unix.Iconv";
+        Descriptor: "iconvenc/Package.nxscript";
+        Description: "Static and dynamic native iconv bindings and encoding conversion.";
+    }
+    LocalPackage Pthreads {
+        Id: "NXRP.Unix.Pthreads";
+        Descriptor: "pthreads/Package.nxscript";
+        Description: "POSIX thread and synchronization bindings.";
     }
 }

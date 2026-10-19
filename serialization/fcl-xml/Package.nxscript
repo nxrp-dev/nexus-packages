@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
 
 dialect "nxpackage.Language.nxscript";
+module NexusPackages "../../Packages.RepositoryIndex.nxscript";
 
-// Uses NexusFPC fcl-base; the Unix encoding adapter also uses iconvenc.
+// The Unix encoding adapter uses the Iconv package.
 Package FCLXML {
     Id: "NXRP.Serialization.FCLXML";
+    Requires: [@NexusPackages.FCLBase, @NexusPackages.Iconv];
     Author: "Sebastian Guenther, Sergei Gorelkin and Free Pascal contributors";
     Description: "XML DOM, readers, writers, XPath, configuration, SAX and HTML support.";
     License: "LGPL-2.1-only WITH Independent-modules-exception";
