@@ -9,9 +9,10 @@ conversion, validation and lifetime rules.
 
 From the Nexus repository root:
 
-```powershell
-lazbuild packages/nexus-packages/binding/tests/NexusBindingTests.lpi
-& ./output/NexusBindingTests/x86_64-win64/NexusBindingTests.exe
+```sh
+nxbuild /action=build /project=packages/nexus-packages/binding/tests/NexusBindingTests.nxproject
 ```
+
+Run the generated programs from the output directories resolved by their projects.
 
 Only the tests depend on NexusTest; production units use the Free Pascal runtime.

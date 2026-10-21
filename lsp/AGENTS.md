@@ -1,5 +1,7 @@
 # Shared LSP Library Instructions
 
+Follow the Nexus root [AGENTS.md](../../../AGENTS.md), including its rules on instruction sources.
+
 These rules apply to `packages/nexus-packages/lsp`.
 
 - Follow `../../../.ai/standards/pascal.md` for Object Pascal code.

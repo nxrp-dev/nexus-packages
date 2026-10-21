@@ -10,8 +10,8 @@ Project FCLImageBehaviorTests {
     Requires: [@Projects.NexusRTL, @Projects.FCLImage, @Projects.NexusTest];
     RootDirectory: "../../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLImageBehaviorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/graphics/fcl-image/tests/FCLImageBehaviorTests.lpr"];
         OutputPath: @FCLImageBehaviorTests.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }

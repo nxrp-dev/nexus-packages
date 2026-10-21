@@ -101,10 +101,11 @@ dialect or introduce a discovery registry.
 
 ## Verification
 
-```powershell
-lazbuild -B packages\nexus-packages\nxscript\test\NexusScriptTests.lpi
-& .\output\NexusScript\console-tests\x86_64-win64\NexusScriptTests.exe
+```sh
+nxbuild /action=build /project=packages/nexus-packages/nxscript/test/NexusScriptTests.nxproject
 ```
+
+Run the generated programs from the output directories resolved by their projects.
 
 The console runner executes the existing NexusScript cases plus include
 collection, mixed module/include, and included-language regressions. Fixtures

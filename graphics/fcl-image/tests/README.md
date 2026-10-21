@@ -8,8 +8,7 @@ arithmetic explicitly. The Linux FreeType case skips only if the runtime itself
 cannot be loaded independently; it passes on the verified Linux host.
 
 The retained barcode suite now registers 17 native nxtest cases. All pass.
-Its old FPCUnit runner was retired and archived; see the
-[FPCUnit retirement report](../../../../../docs/migrations/fpcunit/README.md).
+Its old FPCUnit runner was retired and archived.
 Retained and review suites use separate output directories.
 
 From the Nexus root on Linux:

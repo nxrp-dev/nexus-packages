@@ -11,8 +11,8 @@ Project Users {
     Requires: [@Projects.NexusRTL, @Projects.Users];
     RootDirectory: "../../..";
     OutputRoot: @Tools.OutputRoot + "/Users/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             "packages/nexus-packages/users/src/pwd.pas",
@@ -28,8 +28,8 @@ Project Users {
             IncludePaths: [];
         }
     }
-    FPC Shadow TargetOS[linux] {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Shadow TargetOS[linux] {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: ["packages/nexus-packages/users/src/shadow.pas"];
         OutputPath: @Users.OutputRoot;

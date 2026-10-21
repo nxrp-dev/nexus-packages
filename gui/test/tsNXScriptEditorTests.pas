@@ -529,11 +529,35 @@ begin
   end;
 end;
 
+procedure TestExternalReferenceSourceForms(AContext: TNXTestContext);
+var
+  lEditor: TTestEditor;
+  lChoices: TStringList;
+begin
+  lEditor := TTestEditor.Create(nil);
+  lChoices := TStringList.Create;
+  try
+    lEditor.LoadSource(cSampleFile, 'dialect ' +
+      TNexusScriptEditDocument.QuoteText(ExpandFileName(
+      'packages/nexus-packages/gui/test/fixtures/ExternalReference.Language.nxscript')) +
+      '; Sample Current { Value: "initial"; }');
+    AContext.AssertTrue(lEditor.Document.Valid, lEditor.Document.Diagnostics.Text);
+    lEditor.GetSourceForms(FindNode(lEditor, 'Value'), lChoices);
+    AContext.AssertEquals(2, lChoices.Count);
+    AContext.AssertEquals('Literal', lChoices[0]);
+    AContext.AssertEquals('External reference', lChoices[1]);
+  finally
+    lChoices.Free;
+    lEditor.Free;
+  end;
+end;
+
 procedure RegisterNXScriptEditorTests(ARegistry: TNXTestRegistry);
 var
   lSuite: TNXTestSuite;
 begin
   lSuite := ARegistry.AddSuite('NXScriptEditor');
+  lSuite.AddTest('ExternalReferenceSourceForms', @TestExternalReferenceSourceForms);
   lSuite.AddTest('Construction', @TestConstruction);
   lSuite.AddTest('SourcePreservationAndUndoRedo', @TestSourcePreservation);
   lSuite.AddTest('RejectedEditsAreAtomic', @TestRejectedEdits);

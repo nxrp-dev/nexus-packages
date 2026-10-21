@@ -1,5 +1,7 @@
 # RTL Unicode package
 
+Follow the Nexus root [AGENTS.md](../../../AGENTS.md), including its rules on instruction sources.
+
 Follow `../../../.ai/standards/pascal.md` for Pascal changes. Preserve original
 source/data notices and central provenance in `../../../ATTRIBUTIONS.md`.
 Byte-oriented UTF-8 buffers use explicit AnsiChar/AnsiString in both compiler

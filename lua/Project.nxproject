@@ -17,7 +17,7 @@ Project Lua {
     RootDirectory: "../../..";
     Author: "Kevin Collins";
     Description: "Lua API bindings and the generic Pascal RTTI plugin bridge.";
-    Requires: [@Projects.LibFFI];
+    Requires: [@Projects.LibFFI, @Projects.NativeLibraries];
     Publishes Directories {
         Sources: ["packages/nexus-packages/lua/src", "packages/nexus-packages/lua/src/bindings"];
         Headers: ["packages/nexus-packages/lua/src"];

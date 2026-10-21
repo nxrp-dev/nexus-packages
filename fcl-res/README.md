@@ -17,6 +17,5 @@ The package catalog ID is `NXRP.FCLRes`. Namespace wrappers accompany the flat
 units. Test fixtures are generated in memory or temporary files and cleaned up.
 Examples live in `nexus-lab/examples/system/resources`.
 
-See [CODE_REVIEW.md](CODE_REVIEW.md) for baseline proofs and verification, and
-[Nexus ATTRIBUTIONS.md](../../../ATTRIBUTIONS.md#fcl-res) for provenance/license
+See [Nexus ATTRIBUTIONS.md](../../../ATTRIBUTIONS.md#fcl-res) for provenance/license
 attribution. Original source headers and FPC notices remain authoritative.

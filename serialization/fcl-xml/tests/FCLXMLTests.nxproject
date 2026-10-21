@@ -12,8 +12,8 @@ Project FCLXMLTests {
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
     OutputRoot: @Tools.OutputRoot + "/FCLXMLTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @FCLXMLTests.SourceRoot + "/tests/FCLXMLFixture.lpr",
             @FCLXMLTests.SourceRoot + "/tests/FCLXMLTests.lpr"

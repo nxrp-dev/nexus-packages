@@ -7,7 +7,6 @@ this package. Compiler bootstrap is unchanged and does not depend on X11.
 Original notices, namespace wrappers/maps and license texts remain beside the
 source. Authors, upstream revision and import evidence are recorded in
 [Nexus ATTRIBUTIONS.md](../../../../ATTRIBUTIONS.md#x11).
-[CODE_REVIEW.md](CODE_REVIEW.md) records reproduced findings and verification.
 
 From the Nexus root, build the complete 45-unit source package and its direct
 nxtest suites:

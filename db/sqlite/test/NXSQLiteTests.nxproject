@@ -20,8 +20,8 @@ Project NXSQLiteTests {
     SourceRoot: "packages/nexus-packages/db/sqlite";
     OutputRoot: @Tools.OutputRoot + "/NXSQLiteTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [@NXSQLiteTests.SourceRoot + "/test/NXSQLiteTests.lpr"];
         OutputPath: @NXSQLiteTests.OutputRoot;
         PackageSDKIdentity: @Tools.Native.PackageSDKIdentity;

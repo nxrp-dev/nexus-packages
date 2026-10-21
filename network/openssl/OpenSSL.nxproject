@@ -19,9 +19,9 @@ Project OpenSSL {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLExtra, @Projects.OpenSSL, @Projects.Synapse, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/OpenSSL/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
+    NXPC Units {
         BuildKind: Unit;
-        CompilerPath: @Tools.Native.FPCCompiler;
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/network/openssl/src/tpNXOpenSSLTypes.pas",
             "packages/nexus-packages/network/openssl/src/obNXOpenSSLCertificates.pas",

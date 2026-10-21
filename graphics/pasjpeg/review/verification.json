@@ -45,6 +45,5 @@
     "Historical VCL and platform prototype sources not supported build inputs",
     "No exhaustive JPEG conformance or fuzzing claim"
   ],
-  "local_evidence": "Nexus output/pasjpeg-review (ignored)",
-  "follow_up": "Nexus docs/reviews/linux-shared-libraries.md"
+  "local_evidence": "Nexus output/pasjpeg-review (ignored)"
 }

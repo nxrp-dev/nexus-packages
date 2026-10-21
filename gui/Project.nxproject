@@ -17,7 +17,7 @@ Project GUI {
     RootDirectory: "../../..";
     Author: "Kevin Collins";
     Description: "fpGUI controls, skins, rendering and NexusScript editing.";
-    Requires: [@Projects.FCLBase, @Projects.Lua, @Projects.NexusScript, @Projects.RegExpr, @Projects.X11, @Projects.Users];
+    Requires: [@Projects.RTLGenerics, @Projects.FCLImage, @Projects.FCLBase, @Projects.Lua, @Projects.NexusScript, @Projects.RegExpr, @Projects.X11, @Projects.Users];
     Publishes Directories TargetOS[linux] {
         Sources: ["packages/nexus-packages/gui/src", "packages/nexus-packages/gui/src/vtv", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/gui", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/x11"];
         Headers: ["packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/render/software", "packages/nexus-packages/gui/external/fpgui/framework/src/main/resources", "packages/nexus-packages/gui/external/fpgui/framework/src/main/pascal/corelib/x11"];

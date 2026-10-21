@@ -13,18 +13,21 @@ dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
 module Projects "../../../../projects/nxbuild/Projects.nxscript";
 module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 
-Project NexusScriptEditorTests TargetOS[win64] {
+Project NexusScriptEditorTests TargetOS[linux, win64] {
     Id: "NXRP.Tests.NexusScriptEditorTests";
-    Requires: [@Projects.NexusRTL, @Projects.GUI, @Projects.NexusScript, @Projects.NexusTest, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.SQLite, @Projects.JSONRPC, @Projects.Core, @Projects.Mustache, @Projects.RegExpr];
+    Requires: [@Projects.NexusRTL, @Projects.RTLSystem, @Projects.GUI, @Projects.NexusScript, @Projects.NexusTest, @Projects.Serialization, @Projects.JSON, @Projects.FCLJSON, @Projects.SQLite, @Projects.JSONRPC, @Projects.Core, @Projects.Mustache, @Projects.RegExpr];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/NexusScriptEditorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Compiler {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Compiler {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/gui/test/NexusScriptEditorTests.lpr"];
         OutputPath: @NexusScriptEditorTests.OutputRoot;
-        Target Platform { OperatingSystem: "win64"; }
-        RawOptions: ["-dGDI", "-gl", "-gh", "-Cr", "-Co", "-Sa", "-Xe"];
+        Target Platform { OperatingSystem: @Tools.Native.OS; }
+        RawOptions: ["-gl", "-gh", "-Cr", "-Co", "-Sa"];
+        Definitions Windows TargetOS[win64] { Defines: [GDI]; }
+        Linking Windows TargetOS[win64] { ExternalLinker: Enabled; }
+        Assembler LLVM TargetOS[linux] { OutputFormat: "as-clang"; }
         Config Options { DisableDefaultConfigFiles: True; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;

@@ -7,6 +7,6 @@ module Projects "../../../projects/nxbuild/Projects.nxscript";
 Project Synapse {
     Id: "NXRP.Network.Synapse";
     RootDirectory: "../../..";
-    Requires: [@Projects.FCLBase];
+    Requires: [@Projects.FCLBase, @Projects.RTLExtra];
     Publishes Directories { Sources: ["packages/nexus-packages/network/external/synapse"]; }
 }

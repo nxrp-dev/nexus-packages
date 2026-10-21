@@ -9,7 +9,7 @@ Project RTLUnicodeTests {
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
     OutputRoot: @Tools.OutputRoot + "/RTLUnicodeTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
+    NXPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [@RTLUnicodeTests.SourceRoot + "/tests/RTLUnicodeTests.lpr"];
         OutputPath: @RTLUnicodeTests.OutputRoot;
@@ -19,7 +19,7 @@ Project RTLUnicodeTests {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@RTLUnicodeTests.SourceRoot + "/tests", @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            UnitPaths: [@RTLUnicodeTests.SourceRoot + "/tests", @Tools.NXPC.SourcePath + "/tests/test/units/fpwidestring"];
             IncludePaths: [];
         }
     }

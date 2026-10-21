@@ -11,8 +11,8 @@ Project Iconv {
     Requires: [@Projects.NexusRTL, @Projects.Iconv];
     RootDirectory: "../../..";
     OutputRoot: @Tools.OutputRoot + "/Iconv/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             "packages/nexus-packages/iconvenc/src/iconvenc.pas",

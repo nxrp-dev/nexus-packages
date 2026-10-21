@@ -134,5 +134,3 @@ nxbuild already consumes Live values. Its publication paths can therefore use
 `$TargetOS`, `$TargetCPU` and any other selection the caller supplies. This
 mechanism does not introduce new product command-line flags or register product
 read/write handlers.
-
-See [validation evidence](external-references-validation.md).

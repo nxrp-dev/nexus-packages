@@ -9,8 +9,8 @@ Project X11Tests {
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/graphics/x11";
     OutputRoot: @Tools.OutputRoot + "/X11Tests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @X11Tests.SourceRoot + "/tests/X11CoreTests.lpr",
             @X11Tests.SourceRoot + "/tests/X11BindingTests.lpr"

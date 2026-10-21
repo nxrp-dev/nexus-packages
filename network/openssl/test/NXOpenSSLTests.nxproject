@@ -18,8 +18,8 @@ Project NXOpenSSLTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLExtra, @Projects.OpenSSL, @Projects.Synapse, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../../..";
     OutputRoot: @Tools.OutputRoot + "/NXOpenSSLTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/network/openssl/src/fpopenssl.pp",
             "packages/nexus-packages/network/openssl/test/NXOpenSSLTests.lpr"

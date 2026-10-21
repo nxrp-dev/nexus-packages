@@ -31,7 +31,7 @@ unit builds; no compiler bootstrap stage or runtime-package SDK is introduced.
 
 Examples and demonstrations remain centralized in Nexus Lab
 `examples/runtime/base`. Test-only fixtures remain in `tests`. See
-[the relocation review](CODE_REVIEW.md), [the tests](tests/NXTEST.md), and
+[the tests](tests/NXTEST.md) and
 [central attribution and provenance](../../../ATTRIBUTIONS.md#fcl-base).
 Original notices, the FPC linking exception, and the LGPL license text accompany
 the source. Individual broader license grants and the original ASCII85 public

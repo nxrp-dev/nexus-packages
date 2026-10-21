@@ -13,8 +13,8 @@ Project FCLImage {
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
     OutputRoot: @Tools.OutputRoot + "/FCLImage/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             @FCLImage.SourceRoot + "/src/bmpcomn.pas",

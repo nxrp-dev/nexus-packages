@@ -18,8 +18,8 @@ Project IconvTests {
         SourceFiles: ["packages/nexus-packages/iconvenc/tests/incomplete_iconv.c"];
         OutputPath: @IconvTests.OutputRoot + "/native";
     }
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/iconvenc/tests/IconvTests.lpr"];
         OutputPath: @IconvTests.OutputRoot;
         RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];

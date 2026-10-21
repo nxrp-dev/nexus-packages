@@ -5,8 +5,7 @@ datasets, DBF, exporters, SQL parsing/generation, data dictionaries and SQLDB
 base/pool helpers. Relocated from NexusFPC `packages/fcl-db` on 2026-10-16.
 Previously removed SQLDB drivers are not restored.
 
-The [saved review](CODE_REVIEW.md) records 15 reproduced bugs and fixes, plus
-one disproved candidate retained as a control. All 199 original files are
+All 199 original files are
 preserved in the review archive and hash inventory, including original examples,
 test data, namespace wrappers, translations and notices. Licensing and author
 credits are in the [canonical attribution record](../../../../ATTRIBUTIONS.md#fcl-db).

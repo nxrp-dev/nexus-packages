@@ -17,8 +17,7 @@ IPv4/IPv6 loopback peers. Defining `NX_RESOLVER_LIBC` selects the retained libc
 resolver for verification with the matching native socket/RTL build and adds
 three direct resolver cases.
 
-See [the consolidation record](../../FCL-NET-CONSOLIDATION.md) for proof,
-consumer checks and limits. Upstream credits, extraction evidence and separate
+Upstream credits, extraction evidence and separate
 Synapse/FCL/libc licensing are recorded in the
 [central attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#fcl-net).
 Original headers, `COPYING.FPC` and the full LGPL text in `COPYING.txt` remain

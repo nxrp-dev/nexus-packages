@@ -6,12 +6,12 @@ they do not replace reviewing an intentional contract change.
 
 From the repository root:
 
-```powershell
-lazbuild -B packages\nexus-packages\nxscript\test\NexusScriptTests.lpi
-& .\output\NexusScript\console-tests\x86_64-win64\NexusScriptTests.exe
-lazbuild -B projects\ls\nxscript\test\NexusScriptLSTests.lpi
-& .\output\NexusScriptLS\console-tests\x86_64-win64\NexusScriptLSTests.exe
+```sh
+nxbuild /action=build /project=packages/nexus-packages/nxscript/test/NexusScriptTests.nxproject
+nxbuild /action=build /project=projects/ls/nxscript/test/NexusScriptLSTests.nxproject
 ```
+
+Run the generated programs from the output directories resolved by their projects.
 
 Both runners use the existing NexusTest cases, fail on errors or unexpected
 skips, and enable heap and debug-line checks. The compiler suite is required for

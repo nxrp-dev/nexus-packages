@@ -32,7 +32,7 @@ sessions must be released before explicitly unloading the native libraries.
 XMPP and BotHost now use this binding and runtime loader for both TLS and
 cryptography. XMPP's independent loader has been removed. Synapse's vendored
 OpenSSL adapters and bindings remain untouched and are no longer selected by
-these consumers. See [the binding review](BINDING-REVIEW.md).
+these consumers.
 
 For Synapse integration, add this package's `src` and `synapse` folders and
 `network/external/synapse` to the unit search path. Include `obNXSynapseOpenSSL`
@@ -72,6 +72,57 @@ of equal-length inputs. SHA-1 remains for the XEP-0115 protocol digest. Helpers
 use the shared binding and caller-owned output buffers; there is no second loader.
 Shared crypto errors use `ESSL`; protocol validation errors remain owned by XMPP.
 
+## Prebuilt native dependency
+
+`Native.nxproject` is the shared, target-aware native OpenSSL dependency,
+registered as `Projects.OpenSSLNative`. The Pascal source project and Nexus2D
+engine require it. It publishes headers and library directories and has no
+compilation or source-fetch steps. OpenSSL is not built by Nexus.
+
+Install the prebuilt developer files outside source, relative to the development
+root:
+
+```text
+toolchain/openssl/<TargetCPU>-<TargetOS>/
+    include/openssl/        matching target headers, including configuration.h
+    lib/                   link libraries
+    bin/                   shared runtime libraries, when supplied separately
+    licenses/              original supplier and OpenSSL notices
+```
+
+For example, `x86_64-win64`, `x86_64-linux`, `aarch64-android`, and
+`aarch64-ios` select different installations automatically. Debug and Release
+use the same prebuilt dependency. All 13 compiler targets use this layout;
+publication does not download or install missing artifacts. Keep platform and
+CPU configuration headers with the libraries they describe.
+
+On Windows, use the full OpenSSL 3 developer package from
+[Shining Light Productions](https://slproweb.com/products/Win32OpenSSL.html),
+not the Light runtime-only edition. Check its download against the supplier's
+[published hashes](https://github.com/slproweb/opensslhashes). The x64 engine's
+LiveServer and libevent use the release static C runtime (`/MT`) in both system
+staging modes. Copy the matching `lib/VC/x64/MT/libcrypto_static.lib` and
+`libssl_static.lib` to the installation's `lib/libcrypto.lib` and
+`lib/libssl.lib`, retaining the engine's static link input names. The supplier's
+unsuffixed `.lib` files are DLL import libraries; keep those separately in
+`lib/import` if needed. Copy its headers unchanged, runtime DLLs into `bin`, and
+original license into `licenses`. The existing Windows dependency helper accepts
+`-OpenSSLRoot` and consumes these files without Perl, Configure or NMake.
+
+On Linux, use the matching distribution's prebuilt developer/runtime packages.
+When preparing the installation above, merge its generic and target-specific
+`openssl` header directories (for example `/usr/include/openssl` and
+`/usr/include/x86_64-linux-gnu/openssl`), preserve library SONAMEs and linker
+symlinks, and retain the distribution copyright notice. Cross targets require
+their own prebuilt libraries; the host's libraries cannot satisfy them.
+
+Shining Light supplies Windows binaries. Apple and Android installations need
+prebuilt packages for those platforms. Runtime staging must carry the selected
+shared libraries and any provider modules/configuration needed by the product;
+folder publication itself does not copy runtime files. See the
+[attribution record](https://github.com/nxrp-dev/nexus/blob/main/ATTRIBUTIONS.md#openssl-and-fpc-bindings)
+for supplier provenance and terms.
+
 ## FCL Net removal — 2026-10-17
 
 The FCL socket handler was removed. The live `TSSLType` and `TCertAndKey`
@@ -85,7 +136,7 @@ Configuration rejection remains covered at the shared context and Synapse
 boundaries. Synapse tests retain the partial-record read deadline and distinction
 between timeout and session closure; the obsolete FCL stream-handler timeout
 case was removed. The stable certificate default-version regression now runs
-here directly. See [consolidation review and results](../FCL-NET-CONSOLIDATION.md).
+here directly.
 
 ## Native ALPN verification — 2026-10-17
 

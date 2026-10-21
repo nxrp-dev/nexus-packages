@@ -1,0 +1,13 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+dialect "../../../nxscript/language/Language.nxscript";
+Language ExternalReferenceEditor {
+    UnknownDefinitions: Reject;
+    Definitions: [Definition Sample {
+        Root: True;
+        UnknownProperties: Reject;
+        Properties: [Property Value {
+            Value Value { SourceForms: [Text, ExternalReference]; Scalar: Text; }
+        }];
+    }];
+}

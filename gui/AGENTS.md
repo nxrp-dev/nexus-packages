@@ -1,5 +1,7 @@
 # Nexus GUI Package Agent Instructions
 
+Follow the Nexus root [AGENTS.md](../../../AGENTS.md), including its rules on instruction sources.
+
 These rules apply to `packages/nexus-packages/gui`.
 
 ## Standards
@@ -9,7 +11,7 @@ These rules apply to `packages/nexus-packages/gui`.
 
 ## Attributions
 
-Maintain upstream attribution, import evidence, and SPDX indicators in Nexus root
+Maintain upstream attribution, verified import details, and SPDX indicators in Nexus root
 `ATTRIBUTIONS.md`; link there instead of creating a separate GUI attribution page.
 Preserve original source and license notices.
 

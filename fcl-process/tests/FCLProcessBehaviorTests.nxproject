@@ -10,8 +10,8 @@ Project FCLProcessBehaviorTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLProcess, @Projects.FCLBase, @Projects.NexusTest];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLProcessBehaviorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/fcl-process/tests/tdotouch.pas",
             "packages/nexus-packages/fcl-process/tests/tdocat.pas",

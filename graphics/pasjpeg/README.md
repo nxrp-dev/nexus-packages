@@ -5,8 +5,7 @@ transcoding, scaling and color quantization. The `PasJPEG` unit additionally
 converts between BMP and JPEG streams. Relocated from NexusFPC
 `packages/pasjpeg` on 2026-10-17; the runtime now has one source owner here.
 
-[Review and verification](CODE_REVIEW.md) records the original hashes,
-compilation proof, runtime regressions and corrections. Authors, source revision
+Authors, source revision
 and mixed licensing are recorded in
 [Nexus attributions](../../../../ATTRIBUTIONS.md#pasjpeg).
 `readme.txt` retains the Pascal translation's original notice; `README.IJG`

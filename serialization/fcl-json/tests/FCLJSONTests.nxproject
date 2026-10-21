@@ -12,8 +12,8 @@ Project FCLJSONTests {
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
     OutputRoot: @Tools.OutputRoot + "/FCLJSONTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @FCLJSONTests.SourceRoot + "/tests/FCLJSONFixture.lpr",
             @FCLJSONTests.SourceRoot + "/tests/FCLJSONTests.lpr"

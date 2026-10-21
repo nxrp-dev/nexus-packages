@@ -1,5 +1,7 @@
 # NexusXMPP Agent Instructions
 
+Follow the Nexus root [AGENTS.md](../../../../AGENTS.md), including its rules on instruction sources.
+
 These rules apply to `packages/nexus-packages/network/xmpp`.
 
 ## Standards

@@ -1,5 +1,7 @@
 # Native Virtual TreeView Port
 
+Follow the Nexus root [AGENTS.md](../../../../../AGENTS.md), including its rules on instruction sources.
+
 - Follow `../../../../../.ai/standards/pascal.md` for Nexus-authored code.
 - This is a native fpGUI adaptation of the pinned Lazarus Virtual TreeView source
   under `../../external/vtv`. Retain upstream attribution and license notices in

@@ -211,10 +211,11 @@ core uses no reference counting, worker thread, or event-loop queue.
 
 From repository root:
 
-```powershell
-lazbuild packages\nexus-packages\binding\tests\NexusBindingTests.lpi
-& .\output\NexusBindingTests\x86_64-win64\NexusBindingTests.exe
+```sh
+nxbuild /action=build /project=packages/nexus-packages/binding/tests/NexusBindingTests.nxproject
 ```
+
+Run the generated programs from the output directories resolved by their projects.
 
 The console project executes NexusTest cases directly, with range, overflow,
 assertion, debug-line, and heap checking enabled. Tests cover capability discovery,

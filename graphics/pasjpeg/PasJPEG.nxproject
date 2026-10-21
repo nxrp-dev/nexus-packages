@@ -10,8 +10,8 @@ Project PasJPEG {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/pasjpeg";
     OutputRoot: @Tools.OutputRoot + "/PasJPEG/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             @PasJPEG.SourceRoot + "/src/buildpasjpeg.pas",

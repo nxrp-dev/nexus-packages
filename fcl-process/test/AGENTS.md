@@ -1,5 +1,7 @@
 # FCL Process regression tests
 
+Follow the Nexus root [AGENTS.md](../../../../AGENTS.md), including its rules on instruction sources.
+
 - Follow the Nexus repository `AGENTS.md` and `../../../../.ai/standards/pascal.md`.
 - Register regression cases with nxtest. Keep destructive and blocking probes
   in the separate fixture process, with bounded parent waits and cleanup.

@@ -18,7 +18,6 @@ or external discovery. The ASCII85 constants come from Python's standard-library
 encoder. Test-only runtime files use the host temporary directory (override
 `TMPDIR` when desired) and are removed in `finally` blocks.
 
-The package's source, infrastructure, regression proofs, provenance links and
-verification limits are described in [the review](../CODE_REVIEW.md). NexusFPC's
+NexusFPC's
 [central nxtest guide](../../../../../nexus-fpc/tests/NXTEST.md) links this suite
 as an external owner.

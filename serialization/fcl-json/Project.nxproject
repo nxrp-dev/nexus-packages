@@ -10,7 +10,7 @@ Project FCLJSON {
     Author: "Michael van Canneyt";
     Description: "Free Pascal JSON values, parsing, writing, configuration and RTTI conversion.";
     License: "LGPL-2.1-only WITH Independent-modules-exception";
-    Requires: [@Projects.FCLBase];
+    Requires: [@Projects.FCLBase, @Projects.RTLObjPas];
     Publishes Directories {
         Sources: ["packages/nexus-packages/serialization/fcl-json/src"];
     }

@@ -10,7 +10,7 @@ Project FCLBase {
     Author: "Michael Van Canneyt, Sebastian Guenther and Free Pascal contributors";
     Description: "FCL streams, containers, configuration, expressions, codecs, observers and platform utilities.";
     License: "LGPL-2.1-only WITH Independent-modules-exception";
-    Requires: [@Projects.Pthreads];
+    Requires: [@Projects.Pthreads, @Projects.RTLObjPas];
     Publishes Directories TargetOS[linux, android] {
         Sources: ["packages/nexus-packages/fcl-base/src"];
         Headers: ["packages/nexus-packages/fcl-base/src", "packages/nexus-packages/fcl-base/src/linux", "packages/nexus-packages/fcl-base/src/unix", "packages/nexus-packages/fcl-base/src/dummy"];

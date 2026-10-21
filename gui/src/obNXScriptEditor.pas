@@ -111,7 +111,7 @@ type
 
 const
   cSourceForms: array[TNSSourceForm] of string =
-    ('Literal', 'Array', 'Reference', 'Text composition', 'Inline definition');
+    ('Literal', 'Array', 'Reference', 'Text composition', 'Inline definition', 'External reference');
 
 constructor TNXScriptEditor.Create(AOwner: TComponent);
 begin

@@ -19,8 +19,8 @@ Project NexusLSPTestModule TargetOS[win64] {
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/NexusLSPTestModule/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Compiler {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Compiler {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/lsp/test/NexusLSPTestModule.lpr"];
         OutputPath: @NexusLSPTestModule.OutputRoot;
         Target Platform { OperatingSystem: "win64"; }

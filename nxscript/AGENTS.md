@@ -1,5 +1,7 @@
 # NexusScript Package Instructions
 
+Follow the Nexus root [AGENTS.md](../../../AGENTS.md), including its rules on instruction sources.
+
 These rules apply to `packages/nexus-packages/nxscript`.
 
 - This package owns the reusable NexusScript language model, compiler, source/dependency session, analysis, validation, artifact model, JSON serialization, external-data handling, and manifest processing.

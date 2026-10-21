@@ -2,8 +2,7 @@
 
 Image storage, canvases and drawing helpers; image readers/writers; barcode and
 QR generation; FreeType adapters. Relocated from NexusFPC `packages/fcl-image`
-on 2026-10-16. The [saved review](CODE_REVIEW.md) records 18 reproduced findings,
-regressions and fixes. All 148 original files are preserved in the review archive
+on 2026-10-16. All 148 original files are preserved in the review archive
 and hash inventory. The existing examples, font asset, notices, wrappers and
 17 barcode tests remain intact.
 

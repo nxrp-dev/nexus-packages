@@ -17,6 +17,7 @@ Project SQLite {
     RootDirectory: "../../../..";
     Author: "Kevin Collins";
     Description: "SQLite bindings, connections and write-through datasets.";
+    Requires: [@Projects.SQLiteNative, @Projects.FCLDB, @Projects.RTLGenerics];
     Publishes Directories {
         Sources: ["packages/nexus-packages/db/sqlite/src/bindings", "packages/nexus-packages/db/sqlite/src"];
     }

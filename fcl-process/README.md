@@ -5,8 +5,7 @@ Free Pascal's external-process, pipe and local IPC support, moved from NexusFPC
 All 53 original files, including source, platform backends, namespace wrappers,
 examples, assets and upstream tests, were preserved byte for byte at relocation.
 
-The [code review](CODE_REVIEW.md) was saved alongside the original package
-before relocation. Subsequent nxtest regressions reproduced and fixed eleven
+Direct nxtest regressions reproduced and fixed eleven
 findings on Linux. Three Windows findings remain open pending execution of
 their Windows cases. See the [regression instructions](test/README.md) for
 build commands and verification limits.

@@ -14,7 +14,6 @@ upstream SIMD defaults intact and PPL disabled. The original MIT license and
 README remain under `external/hashlib4pascal`. Authors, revision, import evidence
 and support-unit licensing are in the
 [central attribution record](../../../ATTRIBUTIONS.md#hashlib4pascal).
-See [the source/integration review](CODE_REVIEW.md) for verified results and limits.
 
 From Nexus on native Linux, build and run the source comparison suite:
 

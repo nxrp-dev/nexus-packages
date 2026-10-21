@@ -10,8 +10,8 @@ Project LibFFITests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.LibFFI, @Projects.NexusTest];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/LibFFITests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         RawOptions: ["-Cr", "-Co", "-gl"];
         SourceFiles: ["packages/nexus-packages/libffi/tests/LibFFITests.lpr"];
         OutputPath: @LibFFITests.OutputRoot;

@@ -1,0 +1,17 @@
+// Copyright (c) 2026 Kevin Collins.
+// SPDX-License-Identifier: MPL-2.0-no-copyleft-exception
+
+dialect "../../../../projects/nxbuild/language/nxbuild.Language.nxscript";
+
+// Prebuilt installations live outside source. See README.md for the layout.
+Project OpenSSLNative {
+    Id: "NXRP.Network.OpenSSL.Native";
+    RootDirectory: "../../../..";
+    SourceRoot: "../../toolchain/openssl/" + $TargetCPU + "-" + $TargetOS;
+    Description: "Prebuilt OpenSSL 3 headers and native libraries for the selected target.";
+    License: "Apache-2.0";
+    Publishes Directories {
+        Headers: [@OpenSSLNative.SourceRoot + "/include"];
+        Libraries: [@OpenSSLNative.SourceRoot + "/lib"];
+    }
+}

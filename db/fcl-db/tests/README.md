@@ -16,8 +16,7 @@ nxbuild /action=build /project=packages/nexus-packages/db/fcl-db/tests/FCLDBBeha
 
 The retained scanner, parser, SQL generator, SQL script and dictionary-diff
 suites now register 943 native nxtest cases. The old FPCUnit runners were
-removed; their originals remain in the hashed retirement archive. See the
-[FPCUnit retirement report](../../../../../docs/migrations/fpcunit/README.md).
+removed; their originals remain in the hashed retirement archive.
 
 ## Compare with the untouched source
 
@@ -40,8 +39,7 @@ root. Defaults are the sibling NexusFPC tree and
 
 The helper refuses to overwrite a differing baseline file. Its outputs are
 under `output/fcl-db-tests/<mode>`. Tracked comparison outputs and summaries
-are in [review/evidence](../review/evidence); the full conclusions and limits
-are in [CODE_REVIEW.md](../CODE_REVIEW.md).
+are in [review/evidence](../review/evidence).
 
 Probe 112 separately isolates the buffered blob implementation. After building
 the fixtures, supply an existing empty directory and an absolute result path:

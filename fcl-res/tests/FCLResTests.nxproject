@@ -10,8 +10,8 @@ Project FCLResTests {
     Requires: [@Projects.NexusRTL, @Projects.FCLRes, @Projects.NexusTest];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLResTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/fcl-res/tests/FCLResTests.lpr"];
         OutputPath: @FCLResTests.OutputRoot;
         RawOptions: ["-Cr", "-Co", "-gl"];

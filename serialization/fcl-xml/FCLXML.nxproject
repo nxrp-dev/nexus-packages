@@ -13,8 +13,8 @@ Project FCLXML {
     SourceRoot: "packages/nexus-packages/serialization/fcl-xml";
     OutputRoot: @Tools.OutputRoot + "/FCLXML/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             @FCLXML.SourceRoot + "/src/dom.pas",
@@ -50,8 +50,8 @@ Project FCLXML {
             ];
         }
     }
-    FPC UnixEncoding TargetOS[linux] {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC UnixEncoding TargetOS[linux] {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [@FCLXML.SourceRoot + "/src/xmliconv.pas"];
         OutputPath: @FCLXML.OutputRoot;
@@ -66,8 +66,8 @@ Project FCLXML {
             ];
         }
     }
-    FPC WindowsEncoding TargetOS[win64] {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC WindowsEncoding TargetOS[win64] {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [@FCLXML.SourceRoot + "/src/xmliconv_windows.pas"];
         OutputPath: @FCLXML.OutputRoot;

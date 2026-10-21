@@ -10,8 +10,8 @@ Project FCLXMLBehaviorTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase, @Projects.NexusTest];
     RootDirectory: "../../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLXMLBehaviorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/serialization/fcl-xml/tests/FCLXMLBehaviorTests.lpr"];
         OutputPath: @FCLXMLBehaviorTests.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }

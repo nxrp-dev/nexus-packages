@@ -3,8 +3,7 @@
 Free Pascal's JSON package, moved from NexusFPC `packages/fcl-json` into
 `nexus-packages` on 2026-10-15. Source, namespaced wrappers, examples, upstream
 tests and the existing code review were preserved unchanged at relocation.
-Subsequent nxtest regressions reproduced and corrected all eleven findings in
-the [saved review](CODE_REVIEW.md).
+Subsequent nxtest regressions reproduced and corrected eleven findings.
 
 [FCLJSON.nxproject](FCLJSON.nxproject) builds all 13 runtime units as static
 NexusFPC units. It does not require a runtime-package SDK. Namespaced wrappers are retained for separate consumers and
@@ -25,7 +24,7 @@ to their unit search path. Source consumers use this package's `src` directory.
 
 The runtime units use the relocated `NXRP.FCLBase` package and NexusFPC's `rtl-objpas` sources.
 This move does not migrate those packages. The retained upstream behavior tests now use nxtest directly, alongside the review
-regressions. See [FPCUnit retirement report](../../../../docs/migrations/fpcunit/README.md).
+regressions.
 
 Upstream authorship, source revision, relocation evidence and licensing are
 recorded in the canonical [Nexus attributions](../../../../ATTRIBUTIONS.md#fcl-json).

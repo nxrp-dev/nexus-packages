@@ -1,8 +1,7 @@
 # FCL Process regressions
 
-The `FCLProcess.Review` nxtest suite registers one numbered case for each of
-the fifteen findings in [the saved review](../CODE_REVIEW.md). The console
-runner uses the ordinary nxtest registry, cases, contexts and results.
+The `FCLProcess.Review` nxtest suite registers numbered regression cases.
+The console runner uses the ordinary nxtest registry, cases, contexts and results.
 
 From the Nexus repository root, with nxbuild available:
 

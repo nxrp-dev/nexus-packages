@@ -16,8 +16,7 @@ child cases use generated output directories for registry XML, including cleanup
 no test deletes the user's normal application registry configuration. The
 production package recipe does not enable that test-only define.
 
-The saved [review](../CODE_REVIEW.md) records untouched-source proof, retained
-coverage and platform limits. The nine existing direct nxtest cases are retained;
+The nine existing direct nxtest cases are retained;
 24 focused cases cover the ten fixes plus the selected-key deletion control.
 Native Windows registry execution requires a Windows toolchain/host and is not
 claimed by the Linux checks.

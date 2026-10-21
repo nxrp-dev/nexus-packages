@@ -15,8 +15,7 @@ to their unit/include search paths. Portable XML support also uses relocated
 FCL XML, relocated FCL Base and Iconv, plus NexusFPC RTL-ObjPas. Namespace wrappers are
 retained for separate dotted-unit consumers.
 
-See the [saved review](CODE_REVIEW.md) for findings and verification limits, and
-[tests](tests/NXTEST.md) for direct nxtest instructions. Examples live in Nexus Lab
+See [tests](tests/NXTEST.md) for direct nxtest instructions. Examples live in Nexus Lab
 `examples/system/registry` and `examples/runtime/base`.
 
 Authorship, source revision, relocation evidence and licensing are recorded in

@@ -16,45 +16,15 @@ module "../../../../projects/nxbuild/nxbuild.environment.nxscript";
 Project SQLite {
     Id: "NXRP.SQLite.Units";
     Publishes Directories { Sources: [@SQLite.OutputRoot]; }
-    Requires: [@Projects.PackageSDK, @Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NativeLibraries, @Projects.SQLite, @Projects.FCLBase, @Projects.FCLDB];
+    Requires: [@Projects.SQLiteNative, @Projects.PackageSDK, @Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLGenerics, @Projects.NativeLibraries, @Projects.SQLite, @Projects.FCLBase, @Projects.FCLDB];
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/db/sqlite";
     OutputRoot: @Tools.OutputRoot + "/SQLite/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    LLVM Native {
-        CompilerPath: @Tools.Native.LLVMCompiler;
-        BuildKind: SharedLibrary;
-        PositionIndependentCode: @Tools.Native.PositionIndependentCode;
-        Target: @Tools.Native.Triple;
-        SourceFiles: [@SQLite.SourceRoot + "/native/sqlite3.c"];
-        ConfigFiles: [@SQLite.SourceRoot + "/native/sqlite3-" + @Tools.Native.OS + ".cfg"];
-        // Preserve the feature set supplied by the previous Win64 runtime.
-        Defines: [
-            "SQLITE_THREADSAFE=1",
-            "SQLITE_MAX_TRIGGER_DEPTH=100",
-            "SQLITE_ENABLE_BYTECODE_VTAB",
-            "SQLITE_ENABLE_CARRAY",
-            "SQLITE_ENABLE_COLUMN_METADATA",
-            "SQLITE_ENABLE_DBPAGE_VTAB",
-            "SQLITE_ENABLE_DBSTAT_VTAB",
-            "SQLITE_ENABLE_FTS3",
-            "SQLITE_ENABLE_FTS5",
-            "SQLITE_ENABLE_GEOPOLY",
-            "SQLITE_ENABLE_MATH_FUNCTIONS",
-            "SQLITE_ENABLE_PERCENTILE",
-            "SQLITE_ENABLE_PREUPDATE_HOOK",
-            "SQLITE_ENABLE_RBU",
-            "SQLITE_ENABLE_RTREE",
-            "SQLITE_ENABLE_SESSION",
-            "SQLITE_ENABLE_STMTVTAB"
-        ];
-        SystemIncludePaths: @Tools.Native.SystemIncludePaths;
-        OutputPath: @SQLite.OutputRoot;
-    }
-    FPC Runtime {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Runtime {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [@SQLite.SourceRoot + "/SQLite.nxpk"];
-        OutputPath: @SQLite.Native.OutputPath;
+        OutputPath: @SQLite.OutputRoot;
         PackageSDKIdentity: @Tools.Native.PackageSDKIdentity;
         Target Platform { OperatingSystem: @Tools.Native.OS; }
         Config Options { DisableDefaultConfigFiles: True; }

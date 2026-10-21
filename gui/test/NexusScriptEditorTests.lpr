@@ -16,7 +16,7 @@ program NexusScriptEditorTests;
 {$mode objfpc}{$H+}
 
 uses fpg_main, obNXTestRegistry, obNXTestResult, tsNXScriptEditorTests,
-  tsNXPopupTests, tsNXDirectoryDialogTests;
+  {$IFDEF Windows}tsNXPopupTests,{$ENDIF} tsNXDirectoryDialogTests;
 
 var
   lRegistry: TNXTestRegistry;
@@ -30,7 +30,7 @@ begin
   lCount := 0;
   try
     RegisterNXScriptEditorTests(lRegistry);
-    RegisterNXPopupTests(lRegistry);
+    {$IFDEF Windows}RegisterNXPopupTests(lRegistry);{$ENDIF}
     RegisterNXDirectoryDialogTests(lRegistry);
     for lSuite := 0 to lRegistry.SuiteCount - 1 do
       for lTest := 0 to lRegistry.Suites[lSuite].TestCount - 1 do

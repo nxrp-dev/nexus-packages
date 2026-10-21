@@ -1,7 +1,7 @@
 # FCL XML review regressions
 
-`FCLXML.Review` registers one nxtest case per finding in the
-[saved review](../CODE_REVIEW.md). Build with Nexus nxbuild and NexusFPC:
+`FCLXML.Review` registers XML regressions with nxtest. Build with Nexus nxbuild
+and NexusFPC:
 
 ```sh
 nxbuild /project=packages/nexus-packages/serialization/fcl-xml/tests/FCLXMLTests.nxproject /action=build

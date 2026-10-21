@@ -9,12 +9,12 @@ Project CollationConformance {
     RootDirectory: "../../../..";
     SourceRoot: @RTLUnicodeBuild.SourceRoot;
     OutputRoot: @Tools.OutputRoot + "/CollationConformance/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
+    NXPC Tests {
         CompilerPath: @RTLUnicodeBuild.Compiler;
         SourceFiles: [
-            @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring/tuca1.pas",
-            @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring/tuca2.pas",
-            @Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring/tucawsm.pas"
+            @Tools.NXPC.SourcePath + "/tests/test/units/fpwidestring/tuca1.pas",
+            @Tools.NXPC.SourcePath + "/tests/test/units/fpwidestring/tuca2.pas",
+            @Tools.NXPC.SourcePath + "/tests/test/units/fpwidestring/tucawsm.pas"
         ];
         OutputPath: @CollationConformance.OutputRoot;
         RawOptions: ["-M" + @RTLUnicodeBuild.TextMode, "-gl"];
@@ -23,7 +23,7 @@ Project CollationConformance {
         Assembler Native TargetOS[linux] { OutputFormat: "as-clang"; }
         Files Paths {
             CompilerUtilitiesPath: @Tools.Native.CompilerUtilitiesPath;
-            UnitPaths: [@Tools.NexusFPC.SourcePath + "/tests/test/units/fpwidestring"];
+            UnitPaths: [@Tools.NXPC.SourcePath + "/tests/test/units/fpwidestring"];
             IncludePaths: [];
         }
     }

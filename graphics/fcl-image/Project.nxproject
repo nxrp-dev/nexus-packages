@@ -10,7 +10,7 @@ Project FCLImage {
     Author: "Michael Van Canneyt and Free Pascal contributors";
     Description: "Image storage, drawing, image codecs, barcodes, QR codes and FreeType adapters.";
     License: "(LGPL-2.1-only WITH Independent-modules-exception) AND LGPL-2.0-or-later AND MIT AND X11 AND Bitstream-Vera";
-    Requires: [@Projects.PasJPEG, @Projects.FCLBase];
+    Requires: [@Projects.RTLSystem, @Projects.PasJPEG, @Projects.FCLBase];
     Publishes Directories {
         Sources: ["packages/nexus-packages/graphics/fcl-image/src"];
         Headers: ["packages/nexus-packages/graphics/fcl-image/src"];

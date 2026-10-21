@@ -72,8 +72,7 @@ runtime was not executed. The C and Pascal ABI probes agreed on all 16 reported
 values. This relocation did not rerun other target ABIs or the inherited Windows
 probe described above.
 
-See [the saved review](CODE_REVIEW.md) for baseline proofs, fixes and verification
-limits. Original examples remain centralized in Nexus Lab under
+Original examples remain centralized in Nexus Lab under
 `examples/runtime/ffi` and `examples/runtime/object-pascal`; their recipes are
 registered in `NexusLab.Forge.nxscript`. Original notices and the independent-module
 license exception are preserved in `COPYING.FPC`, `COPYING.txt` and source headers.

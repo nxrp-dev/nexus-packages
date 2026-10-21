@@ -13,8 +13,8 @@ Project FCLJSON {
     SourceRoot: "packages/nexus-packages/serialization/fcl-json";
     OutputRoot: @Tools.OutputRoot + "/FCLJSON/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             @FCLJSON.SourceRoot + "/src/fpjson.pas",

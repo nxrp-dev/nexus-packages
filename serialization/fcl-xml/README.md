@@ -2,7 +2,6 @@
 
 Free Pascal XML/DOM components relocated from NexusFPC `packages/fcl-xml` on
 2026-10-16. All 71 original files were preserved before local corrections.
-The [saved review](CODE_REVIEW.md) records 14 reproduced findings and fixes.
 Upstream authorship, source revisions, licenses and relocation evidence are in
 [the canonical Nexus attributions](../../../../ATTRIBUTIONS.md#fcl-xml).
 Original headers, notices, namespace wrappers, examples and license texts remain

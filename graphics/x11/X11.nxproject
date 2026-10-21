@@ -10,8 +10,8 @@ Project X11 {
     RootDirectory: "../../../..";
     SourceRoot: "packages/nexus-packages/graphics/x11";
     OutputRoot: @Tools.OutputRoot + "/X11/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: [
             @X11.SourceRoot + "/src/cursorfont.pas",

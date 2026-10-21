@@ -10,9 +10,9 @@ Project FCLRegistryTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLProcess, @Projects.FCLXML, @Projects.Iconv, @Projects.FCLBase, @Projects.FCLRegistry, @Projects.NexusTest];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLRegistryTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests TargetOS[linux] {
+    NXPC Tests TargetOS[linux] {
         RawOptions: ["-Cr", "-dXMLRegfile_in_CurDir"];
-        CompilerPath: @Tools.Native.FPCCompiler;
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/fcl-registry/tests/FCLRegistryFixture.lpr",
             "packages/nexus-packages/fcl-registry/tests/FCLRegistryTests.lpr",

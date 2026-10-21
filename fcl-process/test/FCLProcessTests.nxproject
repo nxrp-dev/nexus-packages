@@ -12,8 +12,8 @@ Project FCLProcessTests {
     SourceRoot: "packages/nexus-packages/fcl-process";
     OutputRoot: @Tools.OutputRoot + "/FCLProcessTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @FCLProcessTests.SourceRoot + "/test/FCLProcessFixture.lpr",
             @FCLProcessTests.SourceRoot + "/test/FCLProcessTests.lpr"

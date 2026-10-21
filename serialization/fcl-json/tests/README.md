@@ -1,8 +1,7 @@
 # FCL JSON review regressions
 
-`FCLJSON.Review` registers one nxtest case per finding in the
-[saved review](../CODE_REVIEW.md). Three follow-up cases replace obsolete
-retained-suite snapshots and cover two additional proven generator bugs.
+`FCLJSON.Review` registers regression cases with nxtest. Three follow-up cases
+replace obsolete retained-suite snapshots and cover two additional proven generator bugs.
 
 From the Nexus root, build with nxbuild:
 

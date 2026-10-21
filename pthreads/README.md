@@ -20,7 +20,6 @@ The Linux test recipe builds its independent C fixture before the Pascal tests.
 Run `PthreadsTests` there; an optional case name runs one native case in isolation.
 Tests create no worker threads or changes to system account databases.
 
-[Saved review](CODE_REVIEW.md) records untouched-source proofs and verification.
 [Attribution and provenance](../../../ATTRIBUTIONS.md#unix-pthreads) are maintained
 centrally. Original `COPYING.FPC`, `COPYING.txt` and embedded notices accompany
 this package. Namespace support is retained; no dotted-unit migration is included.

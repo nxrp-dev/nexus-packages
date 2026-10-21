@@ -10,8 +10,8 @@ Project FCLBaseTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLBase, @Projects.Pthreads, @Projects.NexusTest];
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLBaseTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/fcl-base/tests/FCLBaseTests.lpr"];
         OutputPath: @FCLBaseTests.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }

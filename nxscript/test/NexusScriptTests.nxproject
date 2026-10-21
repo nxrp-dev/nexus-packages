@@ -19,8 +19,8 @@ Project NexusScriptTests {
     RootDirectory: "../../../..";
     OutputRoot: @Tools.OutputRoot + "/NexusScriptTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Compiler {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Compiler {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/nxscript/test/NexusScriptTests.lpr"];
         OutputPath: @NexusScriptTests.OutputRoot;
         Target Platform { OperatingSystem: @Tools.Native.OS; }

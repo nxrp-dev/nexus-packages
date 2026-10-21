@@ -18,8 +18,8 @@ Project NexusNetXMPPTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.RTLExtra, @Projects.XMPP, @Projects.FCLXML, @Projects.Iconv, @Projects.OpenSSL, @Projects.Synapse, @Projects.NexusTest, @Projects.FCLBase, @Projects.Pthreads];
     RootDirectory: "../../../../..";
     OutputRoot: @Tools.OutputRoot + "/NexusNetXMPPTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             "packages/nexus-packages/network/openssl/src/fpopenssl.pp",
             "packages/nexus-packages/network/xmpp/test/NexusNetXMPPTests.lpr",

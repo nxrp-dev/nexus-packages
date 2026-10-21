@@ -12,8 +12,8 @@ Project FCLImageTests {
     SourceRoot: "packages/nexus-packages/graphics/fcl-image";
     OutputRoot: @Tools.OutputRoot + "/FCLImageTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @FCLImageTests.SourceRoot + "/tests/FCLImageFixture.lpr",
             @FCLImageTests.SourceRoot + "/tests/FCLImageTests.lpr"

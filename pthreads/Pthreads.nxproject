@@ -11,8 +11,8 @@ Project Pthreads {
     Requires: [@Projects.NexusRTL, @Projects.Pthreads];
     RootDirectory: "../../..";
     OutputRoot: @Tools.OutputRoot + "/Pthreads/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Units {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Units {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         BuildKind: Unit;
         SourceFiles: ["packages/nexus-packages/pthreads/src/pthreads.pas"];
         OutputPath: @Pthreads.OutputRoot;

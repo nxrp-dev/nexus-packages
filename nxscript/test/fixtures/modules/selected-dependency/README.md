@@ -57,10 +57,11 @@ again so it is independent of the compiler's import inputs.
 
 From the repository root:
 
-```powershell
-lazbuild packages/nexus-packages/nxscript/test/NexusScriptTests.lpi
-& ./output/NexusScript/console-tests/x86_64-win64/NexusScriptTests.exe
+```sh
+nxbuild /action=build /project=packages/nexus-packages/nxscript/test/NexusScriptTests.nxproject
 ```
+
+Run the generated programs from the output directories resolved by their projects.
 
 The minimal input can also be compiled independently with the existing CLI:
 

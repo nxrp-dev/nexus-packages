@@ -10,8 +10,8 @@ Project FCLJSONBehaviorTests {
     Requires: [@Projects.NexusRTL, @Projects.RTLObjPas, @Projects.FCLJSON, @Projects.FCLBase, @Projects.NexusTest];
     RootDirectory: "../../../../..";
     OutputRoot: @Tools.OutputRoot + "/FCLJSONBehaviorTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/serialization/fcl-json/tests/FCLJSONBehaviorTests.lpr"];
         OutputPath: @FCLJSONBehaviorTests.OutputRoot;
         Config Options { DisableDefaultConfigFiles: True; }

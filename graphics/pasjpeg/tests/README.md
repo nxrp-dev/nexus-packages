@@ -27,5 +27,3 @@ Nexus `output/pasjpeg-review/untouched`. Core-only tests run against that snapsh
 The public convenience unit cannot compile unchanged, so its runtime cases run
 against a separately documented compilation-only repair, before the callback
 and bitmap-offset fixes are applied. The same cases run against the final source.
-
-See [the review](../CODE_REVIEW.md) for exact before/after results and limits.

@@ -4,7 +4,6 @@
 grapheme enumeration, East Asian width properties and code-page maps. This is
 the sole maintained source tree. Authors, original revision, source hashes and
 licenses are recorded in the [central attribution](../../../ATTRIBUTIONS.md#rtl-unicode).
-The [review](CODE_REVIEW.md) records reproduced failures and final verification.
 
 ANSI remains the compiler default. Explicit `UnicodeString` and `WideString`
 work in that mode. Unicode-default builds use the same package source with

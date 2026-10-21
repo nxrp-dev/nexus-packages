@@ -18,7 +18,7 @@ Project XMPP {
     Author: "Kevin Collins";
     Description: "XMPP client protocol, negotiation and messaging modules.";
     License: "MPL-2.0-no-copyleft-exception";
-    Requires: [@Projects.FCLBase, @Projects.Synapse, @Projects.OpenSSL];
+    Requires: [@Projects.FCLXML, @Projects.FCLBase, @Projects.Synapse, @Projects.OpenSSL];
     Publishes Directories {
         Sources: ["packages/nexus-packages/network/xmpp/src"];
         Headers: ["packages/nexus-packages/network/xmpp/src"];

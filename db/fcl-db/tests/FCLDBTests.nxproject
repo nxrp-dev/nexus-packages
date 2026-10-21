@@ -12,8 +12,8 @@ Project FCLDBTests {
     SourceRoot: "packages/nexus-packages/db/fcl-db";
     OutputRoot: @Tools.OutputRoot + "/FCLDBTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
 
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: [
             @FCLDBTests.SourceRoot + "/tests/FCLDBFixture.lpr",
             @FCLDBTests.SourceRoot + "/tests/FCLDBTests.lpr"

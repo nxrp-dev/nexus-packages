@@ -16,8 +16,8 @@ Project UsersTests {
         SourceFiles: ["packages/nexus-packages/users/tests/users_abi.c"];
         OutputPath: @UsersTests.OutputRoot + "/native";
     }
-    FPC Tests {
-        CompilerPath: @Tools.Native.FPCCompiler;
+    NXPC Tests {
+        CompilerPath: @Tools.Native.NXPCCompiler;
         SourceFiles: ["packages/nexus-packages/users/tests/UsersTests.lpr"];
         OutputPath: @UsersTests.OutputRoot;
         RawOptions: ["-Cr", "-Co", "-Ci", "-gl"];

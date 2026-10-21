@@ -9,8 +9,8 @@ Project PasJPEGTests {
     RootDirectory: "../../../../..";
     SourceRoot: "packages/nexus-packages/graphics/pasjpeg";
     OutputRoot: @Tools.OutputRoot + "/PasJPEGTests/" + @Tools.Native.Name + "/" + $BuildConfiguration;
- FPC Tests {
-  CompilerPath: @Tools.Native.FPCCompiler;
+ NXPC Tests {
+  CompilerPath: @Tools.Native.NXPCCompiler;
   SourceFiles: [
       @PasJPEGTests.SourceRoot + "/tests/PasJPEGTests.lpr",
       @PasJPEGTests.SourceRoot + "/tests/PasJPEGFixture.lpr"
